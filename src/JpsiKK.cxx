@@ -76,18 +76,19 @@ inline double sq(double x) { return x*x; }
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
 {
+  declareProperty("MAX_CHARGED_TRACKS", MIN_CHARGED_TRACKS=4); //maximum number of charged tracks in selection
+  declareProperty("MIN_CHARGED_TRACKS", MIN_CHARGED_TRACKS=4); //minimum number of charged tracks in selection
+  declareProperty("IP_MAX_Z", IP_MAX_Z = 10.0); //cm?
+  declareProperty("IP_MAX_RHO", IP_MAX_RHO = 1.0); //cm?
+  declareProperty("MAX_COS_THETA", MAX_COS_THETA = 0.93); //cm?
   declareProperty("CHECK_TOF", CHECK_TOF=1);
   declareProperty("CHECK_DEDX", CHECK_DEDX = 1);
   declareProperty("CHECK_MUC", CHECK_MUC = 1);
   declareProperty("CHECK_MC", CHECK_MC = 1);
   declareProperty("MC_DP", MC_DP = 0.01);
-  declareProperty("DELTA_X", DELTA_X = 1.0); //cm?
-  declareProperty("DELTA_Y", DELTA_Y = 1.0); //cm?
-  declareProperty("DELTA_Z", DELTA_Z = 10.0); //cm?
   declareProperty("USE_IPCUT", USE_IPCUT=1); //to use interection point cut.
   declareProperty("IPR", IPR=1); //Interaction point cut distance.
   declareProperty("IPTRACKS", IPTRACKS=4); //number of tracks from interection point
-  declareProperty("MIN_CHARGED_TRACKS", MIN_CHARGED_TRACKS=4); //minimum number of charged tracks in selection
   declareProperty("MAX_TRACK_NUMBER", MAX_TRACK_NUMBER=4); //maximum number of charged tracks
   declareProperty("STRICT_TAU_CUT", STRICT_TAU_CUT=1); //maximum number of charged tracks
 
@@ -711,7 +712,7 @@ StatusCode JpsiKK::execute()
 
   if(evtRecEvent->totalCharged()  >= MIN_CHARGED_TRACKS)
   {
-    double  hP[2]={0,0}; //to save maximum momentum
+    double  hP[4]={0,0}; //to save maximum momentum
     Hep3Vector hPp[2];//Two high momentum
     double  hE[2]={0, 0};
     Hep3Vector hEp[2];//Two high momentum
@@ -720,6 +721,8 @@ StatusCode JpsiKK::execute()
     mdc.ntrack=0;
 
     //look thru the charged tracks and sort them on energy
+    //count good charged tracks wich come from interaction point
+    //and has cos(theta) < 0.93
     for(unsigned idx = 0; idx < evtRecEvent->totalCharged(); idx++)
     {
       EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + idx;
@@ -730,8 +733,8 @@ StatusCode JpsiKK::execute()
 
       double rvxy=-9999,rvz=-9999,rvphi=-9999;
       calculate_vertex(mdcTrk,rvxy,rvz,rvphi); //find distance to interaction point
-      bool is_fromIP = fabs(rvz)<20 && fabs(rvxy)<2.0;  //tracks begin near interaction point
-      bool is_good_track = is_fromIP && fabs(cos(mdcTrk->theta()))<0.93; //track is good
+      bool is_fromIP = fabs(rvz)< IP_MAX_Z && fabs(rvxy)<IP_MAX_RHO;  //tracks begin near interaction point
+      bool is_good_track = is_fromIP && fabs(cos(mdcTrk->theta()))<MAX_COS_THETA; //track is good
       if(!is_good_track) continue;
       double E = emcTrk->energy();
       double p = mdcTrk->p();
@@ -739,10 +742,8 @@ StatusCode JpsiKK::execute()
       Emap.insert(pair_t(E,idx));
     }
     /* Two or more charged tracks witch signal in EMC */
-    // save only 2,3,4 charged tracks
-    // 4th track is to test systematics
     good_charged_tracks=Emap.size();
-    if(Emap.size()<MIN_CHARGED_TRACKS || MAX_TRACK_NUMBER < Emap.size()) goto SKIP_CHARGED;
+    if(Emap.size()<MIN_CHARGED_TRACKS || MAX_CHARGED_TRACKS < Emap.size()) goto SKIP_CHARGED;
 
     //now fill the arrayes using indexes sorted by energy
     mdc.ntrack=Emap.size(); //save number of good charged tracks

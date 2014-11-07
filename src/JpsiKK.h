@@ -39,6 +39,10 @@ class JpsiKK : public Algorithm
   StatusCode finalize();  
 
 	private:
+	int MIN_CHARGED_TRACKS; //minimum charged tracks in selection
+	int MAX_CHARGED_TRACKS; //minimum charged tracks in selection
+	double IP_MAX_RHO, IP_MAX_Z; //interection point cut
+  double MAX_COS_THETA; //maximum  cos(theta) for good charged track
   int STRICT_TAU_CUT;
 	int USE_IPCUT; //use interection point cut
 	int CHECK_TOF; //use toff.
@@ -48,10 +52,7 @@ class JpsiKK : public Algorithm
   double MC_DP; //momentum difference to identify particles
 	double IPR;
 	int IPTRACKS; //tracks number from interection point
-	int MIN_CHARGED_TRACKS; //minimum charged tracks in selection
-	int MAX_CHARGED_TRACKS; //minimum charged tracks in selection
 	int MAX_TRACK_NUMBER; //minimum charged tracks in selection
-	double DELTA_X, DELTA_Y, DELTA_Z; //interection point cut
 	long int event_proceed;
 	long int event_write;
   long int tau_events; //number of mu ivents for track #1
