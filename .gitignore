@@ -26,3 +26,11 @@
 *.exe
 *.out
 *.app
+
+*~
+*.*.sw*
+# BOSS infrastructure
+cmt*  
+*.make*
+Makefile
+x86_64-slc5-gcc43-opt
