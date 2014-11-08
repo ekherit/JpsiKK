@@ -178,6 +178,9 @@ StatusCode JpsiKK::initialize(void)
 
       /*  sphericity part */
       status = mdc_tuple->addItem("Mrec", mdc.Mrec);
+      status = mdc_tuple->addItem("MKK", mdc.MKK);
+      status = mdc_tuple->addItem("Mmumu", mdc.Mmumu);
+      status = mdc_tuple->addItem("Mmiss", mdc.Mmiss);
       status = mdc_tuple->addItem("S", mdc.S);
       status = mdc_tuple->addItem("ccos", mdc.ccos);
       status = mdc_tuple->addItem("atheta", mdc.atheta);
@@ -518,6 +521,9 @@ void JpsiKK::InitData(long nchtrack, long nneutrack)
   //mdc track informaion init
   mdc.nip=0;
   mdc.Mrec=-1000;
+  mdc.MKK=-1000;
+  mdc.Mmumu=-1000;
+  mdc.Mmiss=-1000;
   mdc.Eemc=0;
   mdc.Emdc=0;
   mdc.S=0;
@@ -762,8 +768,14 @@ StatusCode JpsiKK::execute()
     int gidx=0; //good charged track idx
     int npip=0; //number of positive pions
     int npin=0; //number of negative pions
+    int nKp=0; //number of found positive kaons
+    int nKm=0; //number of found negative kaons
+    int nmup=0; //number of found positive muons
+    int nmum=0; //number of found negative muons
     int pip_idx=-999; //pion index
     int pin_idx=-999; //pion index
+    int Kmup_idx=-999;
+    int Kmum_idx=-999;
     for(mmap_t::reverse_iterator ri=Emap.rbegin(); ri!=Emap.rend(); ++ri)
     {
       EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + ri->second;
@@ -795,6 +807,26 @@ StatusCode JpsiKK::execute()
       mdc.y[i]     =  mdcTrk->y();
       mdc.z[i]     =  mdcTrk->z();
 
+      /*  Particle identification game */
+      pid->init();
+      pid->setMethod(pid->methodProbability());
+      pid->setChiMinCut(4);
+
+      pid->setRecTrack(*itTrk);
+      //pid->usePidSys((pid->useMuc() | pid->useEmc()) | pid->useDedx()); // use PID sub-system
+      pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useEmc() | pid->useMuc());
+      //pid->identify(pid->onlyMuon() | pid->onlyElectron()); 
+      pid->identify(pid->all()); 
+      pid->calculate();
+      if(pid->IsPidInfoValid())
+      {
+        mdc.probe[i] =  pid->probElectron();
+        mdc.probmu[i] = pid->probMuon();
+        mdc.probpi[i] = pid->probPion();
+        mdc.probK[i] =  pid->probKaon();
+        mdc.probp[i] =  pid->probProton();
+      }
+
       //if momentum below 0.5 GeV it could be pions
       if(mdc.p[i] < 0.5)
       {
@@ -810,6 +842,50 @@ StatusCode JpsiKK::execute()
           npin++;
         }
       }
+
+      //check for pions or muons
+      if(mdc.p[i]>1.0)
+      {
+        if (
+            mdc.probmu[i] > mdc.probe[i] &&
+            mdc.probmu[i] > mdc.probpi[i] &&
+            mdc.probmu[i] > mdc.probK[i] &&
+            mdc.probmu[i] > mdc.probp[i]
+           )
+        {
+          mdc.M[i]=0.105658389;
+          if(mdc.q[i]>0) 
+          {
+            nmup++;
+            Kmup_idx = i;
+          }
+          else
+          {
+            nmum++;
+            Kmum_idx = i;
+          }
+        }
+        if (
+            mdc.probK[i] > mdc.probe[i] &&
+            mdc.probK[i] > mdc.probpi[i] &&
+            mdc.probK[i] > mdc.probmu[i] &&
+            mdc.probK[i] > mdc.probp[i]
+           )
+        {
+          mdc.M[i]=0.493677;
+          if(mdc.q[i]>0) 
+          {
+            nKp++;
+            Kmup_idx = i;
+          }
+          else
+          {
+            nKm++;
+            Kmum_idx = i;
+          }
+        }
+      }
+
 
       mdc.Emdc+=sqrt(mdc.p[i]*mdc.p[i]+PI_MESON_MASS*PI_MESON_MASS);
 
@@ -850,25 +926,6 @@ StatusCode JpsiKK::execute()
         muc.eclast[i] = mucTrk->ecLastLayer();
       }
 
-      /*  Particle identification game */
-      pid->init();
-      pid->setMethod(pid->methodProbability());
-      pid->setChiMinCut(4);
-
-      pid->setRecTrack(*itTrk);
-      //pid->usePidSys((pid->useMuc() | pid->useEmc()) | pid->useDedx()); // use PID sub-system
-      pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useEmc() | pid->useMuc());
-      //pid->identify(pid->onlyMuon() | pid->onlyElectron()); 
-      pid->identify(pid->all()); 
-      pid->calculate();
-      if(pid->IsPidInfoValid())
-      {
-        mdc.probe[i] =  pid->probElectron();
-        mdc.probmu[i] = pid->probMuon();
-        mdc.probpi[i] = pid->probPion();
-        mdc.probK[i] =  pid->probKaon();
-        mdc.probp[i] =  pid->probProton();
-      }
 
       /* dEdx information */
       if(CHECK_DEDX == 1 && (*itTrk)->isMdcDedxValid())
@@ -992,15 +1049,30 @@ StatusCode JpsiKK::execute()
     
     //we always should have pions
     if(npip!=1 || npin!=1)  goto SKIP_CHARGED;
+    //and other must be Kaons or muons
+    if( (nKp!=1 || nKm!=1) && (nmup!=1 || nmum!=1)) goto SKIP_CHARGED;
     //calculate pion energy 
     double Epin = sqrt(mdc.p[pin_idx]*mdc.p[pin_idx] + mdc.M[pin_idx]*mdc.M[pin_idx]);
     double Epip = sqrt(mdc.p[pip_idx]*mdc.p[pip_idx] + mdc.M[pip_idx]*mdc.M[pip_idx]);
+    double Em = sqrt(mdc.p[Kmum_idx]*mdc.p[Kmum_idx] + mdc.M[Kmum_idx]*mdc.M[Kmum_idx]);
+    double Ep = sqrt(mdc.p[Kmup_idx]*mdc.p[Kmup_idx] + mdc.M[Kmup_idx]*mdc.M[Kmup_idx]);
     //calculate the for momentum
     HepLorentzVector P_psip(0.040546,0,0,3.686); //initial vector of psip
     HepLorentzVector P_pip(mdc.px[pip_idx],mdc.py[pip_idx],mdc.pz[pip_idx], Epip); //pion vector
     HepLorentzVector P_pin(mdc.px[pin_idx],mdc.py[pin_idx],mdc.pz[pin_idx], Epin); //pion vector
     HepLorentzVector P_recoil = P_psip  - P_pip - P_pin;
     mdc.Mrec = P_recoil.m(); //recoil mass of two pions
+
+    if(mdc.Mrec < 3.0 || 3.2 < mdc.Mrec) goto SKIP_CHARGED;
+
+    HepLorentzVector Pp(mdc.px[Kmup_idx],mdc.py[Kmup_idx],mdc.pz[Kmup_idx], Ep);
+    HepLorentzVector Pm(mdc.px[Kmum_idx],mdc.py[Kmum_idx],mdc.pz[Kmum_idx], Em);
+    HepLorentzVector P = Pp + Pm;
+    HepLorentzVector Pmis = P_psip - P_pip - P_pin - Pp - Pm;
+    mdc.Mmiss = Pmis.m2();
+
+    if(nKp==1) mdc.MKK = P.m();
+    if(nmup==1) mdc.Mmumu = P.m();
 
 
 
