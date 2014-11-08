@@ -1000,7 +1000,7 @@ StatusCode JpsiKK::execute()
     HepLorentzVector P_pip(mdc.px[pip_idx],mdc.py[pip_idx],mdc.pz[pip_idx], Epip); //pion vector
     HepLorentzVector P_pin(mdc.px[pin_idx],mdc.py[pin_idx],mdc.pz[pin_idx], Epin); //pion vector
     HepLorentzVector P_recoil = P_psip  - P_pip - P_pin;
-    double mdc.Mrec = P_recoil.m(); //recoil mass of two pions
+    mdc.Mrec = P_recoil.m(); //recoil mass of two pions
 
 
 
