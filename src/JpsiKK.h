@@ -79,7 +79,7 @@ class JpsiKK : public Algorithm
     NTuple::Array<double> rvxy, rvz, rvphi; //poca coordinate of track
     NTuple::Array<double> theta,phi;
     NTuple::Array<double> q; //charge of the track
-    NTuple::Array<long> isemc; //has emc information
+    NTuple::Array<long>   isemc; //has emc information
     /*  EMC section for this charged track */
     NTuple::Array<double> ncrstl;
     NTuple::Array<double> cellId;

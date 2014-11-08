@@ -743,7 +743,8 @@ StatusCode JpsiKK::execute()
     }
     /* Two or more charged tracks witch signal in EMC */
     good_charged_tracks=Emap.size();
-    if(Emap.size()<MIN_CHARGED_TRACKS || MAX_CHARGED_TRACKS < Emap.size()) goto SKIP_CHARGED;
+    //if no valid charged tracks
+    if(MIN_CHARGED_TRACKS <  Emap.size() || Emap.size() < MAX_CHARGED_TRACKS) goto SKIP_CHARGED;
 
     //now fill the arrayes using indexes sorted by energy
     mdc.ntrack=Emap.size(); //save number of good charged tracks
@@ -1017,8 +1018,8 @@ StatusCode JpsiKK::execute()
 
 
     //оставим два трека только для электронов и мюонов
-    if(emc.ntrack>0) goto SKIP_CHARGED;
-    if(mdc.ntrack<2 || mdc.ntrack>2) goto SKIP_CHARGED;
+    //if(emc.ntrack>0) goto SKIP_CHARGED;
+    //if(mdc.ntrack<2 || mdc.ntrack>2) goto SKIP_CHARGED;
 
     vector <bool> ise(2);
     vector <bool> ismu(2);
@@ -1037,11 +1038,11 @@ StatusCode JpsiKK::execute()
     if(bhabha_sig) bhabha_events++;
     if(tau_sig) tau_events++;
 
-    if(!charge) goto SKIP_CHARGED;
+    //if(!charge) goto SKIP_CHARGED;
 
     //if(!tau_sig && !bhabha_sig) goto SKIP_CHARGED;  
     //if(!tau_sig && STRICT_TAU_CUT == 1) goto SKIP_CHARGED;  
-    if(! (ise[0] || ise[1] || ismu[0] || ismu[1]) && STRICT_TAU_CUT == 1) goto SKIP_CHARGED;  
+    //if(! (ise[0] || ise[1] || ismu[0] || ismu[1]) && STRICT_TAU_CUT == 1) goto SKIP_CHARGED;  
 
     /* now fill the data */
     main_tuple->write();
