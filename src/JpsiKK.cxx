@@ -857,7 +857,7 @@ StatusCode JpsiKK::execute()
 
       pid->setRecTrack(*itTrk);
       //pid->usePidSys((pid->useMuc() | pid->useEmc()) | pid->useDedx()); // use PID sub-system
-      pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useEmc() | pid->useMuc())
+      pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useEmc() | pid->useMuc());
       //pid->identify(pid->onlyMuon() | pid->onlyElectron()); 
       pid->identify(pid->all()); 
       pid->calculate();
@@ -993,12 +993,12 @@ StatusCode JpsiKK::execute()
     //we always should have pions
     if(npip!=1 || npin!=1)  goto SKIP_CHARGED;
     //calculate pion energy 
-    double Epim = sqrt(mdc.p[pim_idx]*mdc.p[pim_idx] + mdc.M[pim_idx]*mdc.M[pim_idx]);
+    double Epin = sqrt(mdc.p[pin_idx]*mdc.p[pin_idx] + mdc.M[pin_idx]*mdc.M[pin_idx]);
     double Epip = sqrt(mdc.p[pip_idx]*mdc.p[pip_idx] + mdc.M[pip_idx]*mdc.M[pip_idx]);
     //calculate the for momentum
     HepLorentzVector P_psip(0.040546,0,0,3.686); //initial vector of psip
     HepLorentzVector P_pip(mdc.px[pip_idx],mdc.py[pip_idx],mdc.pz[pip_idx], Epip); //pion vector
-    HepLorentzVector P_pim(mdc.px[pim_idx],mdc.py[pim_idx],mdc.pz[pim_idx], Epim); //pion vector
+    HepLorentzVector P_pin(mdc.px[pin_idx],mdc.py[pin_idx],mdc.pz[pin_idx], Epin); //pion vector
     HepLorentzVector P_recoil = P_psip  - P_pip - P_pim;
     double mdc.Mrec = P_recoil.m(); //recoil mass of two pions
 
