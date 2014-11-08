@@ -796,7 +796,7 @@ StatusCode JpsiKK::execute()
       mdc.z[i]     =  mdcTrk->z();
 
       //if momentum below 0.5 GeV it could be pions
-      if(mdc.p < 0.5)
+      if(mdc.p[i] < 0.5)
       {
         mdc.M[i]=0.13956995;
         if(mdc.q[i]>0) 
