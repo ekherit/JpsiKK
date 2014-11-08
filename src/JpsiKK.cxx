@@ -670,7 +670,7 @@ StatusCode JpsiKK::execute()
 
   SmartDataPtr<Event::EventHeader> eventHeader(eventSvc(),"/Event/EventHeader");
   int runNo=eventHeader->runNumber();
-  if(runNo<0) CHECK_MC = true;
+  //if(runNo<0) CHECK_MC = true;
   int event=eventHeader->eventNumber();
   head_event_number=event;
   head_run=runNo;
