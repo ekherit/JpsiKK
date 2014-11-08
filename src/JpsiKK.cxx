@@ -177,6 +177,7 @@ StatusCode JpsiKK::initialize(void)
       status = mdc_tuple->addIndexedItem ("Z", mdc.ntrack, mdc.Z);
 
       /*  sphericity part */
+      status = mdc_tuple->addItem("Mrec", mdc.Mrec);
       status = mdc_tuple->addItem("S", mdc.S);
       status = mdc_tuple->addItem("ccos", mdc.ccos);
       status = mdc_tuple->addItem("atheta", mdc.atheta);
@@ -516,6 +517,7 @@ void JpsiKK::InitData(long nchtrack, long nneutrack)
   m_Eemc=0;
   //mdc track informaion init
   mdc.nip=0;
+  mdc.Mrec=-1000;
   mdc.Eemc=0;
   mdc.Emdc=0;
   mdc.S=0;
@@ -758,6 +760,10 @@ StatusCode JpsiKK::execute()
     ParticleID *pid = ParticleID::instance();
     //loop over tracks oredered by energy
     int gidx=0; //good charged track idx
+    int npip=0; //number of positive pions
+    int npin=0; //number of negative pions
+    int pip_idx=-999; //pion index
+    int pin_idx=-999; //pion index
     for(mmap_t::reverse_iterator ri=Emap.rbegin(); ri!=Emap.rend(); ++ri)
     {
       EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + ri->second;
@@ -789,6 +795,22 @@ StatusCode JpsiKK::execute()
       mdc.y[i]     =  mdcTrk->y();
       mdc.z[i]     =  mdcTrk->z();
 
+      //if momentum below 0.5 GeV it could be pions
+      if(mdc.p < 0.5)
+      {
+        mdc.M[i]=0.13956995;
+        if(mdc.q[i]>0) 
+        {
+          npip++;
+          pip_idx = i;
+        }
+        else
+        { 
+          pin_idx = i;
+          npin++;
+        }
+      }
+
       mdc.Emdc+=sqrt(mdc.p[i]*mdc.p[i]+PI_MESON_MASS*PI_MESON_MASS);
 
 
@@ -807,7 +829,7 @@ StatusCode JpsiKK::execute()
       mdc.Eemc+=mdc.E[i]; //Accumulate energy deposition
 
       HepLorentzVector P(mdc.px[i], mdc.py[i], mdc.pz[i], mdc.E[i]);
-      mdc.M[i]=P.m();
+      //mdc.M[i]=P.m();
 
       /* Check muon system information for this track */
       mdc.ismu[i]=(*itTrk)->isMucTrackValid();
@@ -834,8 +856,10 @@ StatusCode JpsiKK::execute()
       pid->setChiMinCut(4);
 
       pid->setRecTrack(*itTrk);
-      pid->usePidSys((pid->useMuc() | pid->useEmc()) | pid->useDedx()); // use PID sub-system
-      pid->identify(pid->onlyMuon() | pid->onlyElectron()); 
+      //pid->usePidSys((pid->useMuc() | pid->useEmc()) | pid->useDedx()); // use PID sub-system
+      pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useEmc() | pid->useMuc())
+      //pid->identify(pid->onlyMuon() | pid->onlyElectron()); 
+      pid->identify(pid->all()); 
       pid->calculate();
       if(pid->IsPidInfoValid())
       {
@@ -955,16 +979,29 @@ StatusCode JpsiKK::execute()
     if(CHECK_MC) mc.ntrack=gidx;
 
     /* Calculate acolinearity  for two tracks with big enrgies */
-    Hep3Vector p0(mdc.px[0], mdc.py[0],mdc.pz[0]);
-    Hep3Vector p1(mdc.px[1], mdc.py[1],mdc.pz[1]);
-    mdc.ccos = p0.dot(p1)/(p0.mag()*p1.mag());
-    mdc.atheta = mdc.theta[0]+mdc.theta[1] - M_PI;
-    mdc.aphi =  fabs(mdc.phi[0]-mdc.phi[1]) - M_PI;
-    mdc.acompl = (mdc.px[0]*mdc.py[1]-mdc.py[0]*mdc.px[1])/(mdc.p[0]*mdc.p[1]);
-    //normalize sphericity tensor
-    S.norm();
-    /* fill sphericity */
-    mdc.S = S();
+    //Hep3Vector p0(mdc.px[0], mdc.py[0],mdc.pz[0]);
+    //Hep3Vector p1(mdc.px[1], mdc.py[1],mdc.pz[1]);
+    //mdc.ccos = p0.dot(p1)/(p0.mag()*p1.mag());
+    //mdc.atheta = mdc.theta[0]+mdc.theta[1] - M_PI;
+    //mdc.aphi =  fabs(mdc.phi[0]-mdc.phi[1]) - M_PI;
+    //mdc.acompl = (mdc.px[0]*mdc.py[1]-mdc.py[0]*mdc.px[1])/(mdc.p[0]*mdc.p[1]);
+    ////normalize sphericity tensor
+    //S.norm();
+    ///* fill sphericity */
+    //mdc.S = S();
+    
+    //we always should have pions
+    if(npip!=1 || npin!=1)  goto SKIP_CHARGED;
+    //calculate pion energy 
+    double Epim = sqrt(mdc.p[pim_idx]*mdc.p[pim_idx] + mdc.M[pim_idx]*mdc.M[pim_idx]);
+    double Epip = sqrt(mdc.p[pip_idx]*mdc.p[pip_idx] + mdc.M[pip_idx]*mdc.M[pip_idx]);
+    //calculate the for momentum
+    HepLorentzVector P_psip(0.040546,0,0,3.686); //initial vector of psip
+    HepLorentzVector P_pip(mdc.px[pip_idx],mdc.py[pip_idx],mdc.pz[pip_idx], Epip); //pion vector
+    HepLorentzVector P_pim(mdc.px[pim_idx],mdc.py[pim_idx],mdc.pz[pim_idx], Epim); //pion vector
+    HepLorentzVector P_recoil = P_psip  - P_pip - P_pim;
+    double mdc.Mrec = P_recoil.m(); //recoil mass of two pions
+
 
 
     /* ================================================================================= */

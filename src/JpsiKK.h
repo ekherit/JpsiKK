@@ -93,6 +93,7 @@ class JpsiKK : public Algorithm
     /*  Additional section */
     NTuple::Array<double> X, Y, Z; //pivot 
     NTuple::Item<long>   nip; //Track number from interaction point (same condition as for highest track)
+    NTuple::Item<double> Mrec; //Recoil mass of the pions
     NTuple::Item<double> Eemc; //total energy using emc
     NTuple::Item<double> Emdc; //total energy using only mdc
     NTuple::Item<double> S; //Sphericity
