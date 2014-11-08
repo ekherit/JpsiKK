@@ -670,6 +670,7 @@ StatusCode JpsiKK::execute()
 
   SmartDataPtr<Event::EventHeader> eventHeader(eventSvc(),"/Event/EventHeader");
   int runNo=eventHeader->runNumber();
+  log << MSG::INFO << " runNo = " << runNo << endreq;
   int event=eventHeader->eventNumber();
   head_event_number=event;
   head_run=runNo;
