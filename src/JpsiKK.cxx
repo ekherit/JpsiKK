@@ -1087,9 +1087,9 @@ StatusCode JpsiKK::execute()
     }
 
     //tag KK decay channel. We could register only 1 kaon
-    if(  0 < (nKp + nKm) && (nKp + nKm) < 3 && (nmup + nmum) = 0 ) mdc.jpsi_decay_channel = 0;
+    if(  0 < (nKp + nKm) && (nKp + nKm) < 3 && (nmup + nmum) == 0 ) mdc.jpsi_decay_channel = 0;
     //tag mumu decay channel. We could register only one muon
-    if(  0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) = 0 ) mdc.jpsi_decay_channel = 1;
+    if(  0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) mdc.jpsi_decay_channel = 1;
     //could not find required configuration
     if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
     
