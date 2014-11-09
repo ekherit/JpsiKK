@@ -756,7 +756,8 @@ StatusCode JpsiKK::execute()
     /* Two or more charged tracks witch signal in EMC */
     good_charged_tracks=Emap.size();
     //if no valid charged tracks
-    if(MIN_CHARGED_TRACKS <  Emap.size() || Emap.size() < MAX_CHARGED_TRACKS) goto SKIP_CHARGED;
+    //if(MIN_CHARGED_TRACKS <  Emap.size() || Emap.size() < MAX_CHARGED_TRACKS) goto SKIP_CHARGED;
+    if(Emap.size() < MIN_CHARGED_TRACKS   || MAX_CHARGED_TRACKS > Emap.size()) goto SKIP_CHARGED;
 
     //now fill the arrayes using indexes sorted by energy
     mdc.ntrack=Emap.size(); //save number of good charged tracks
