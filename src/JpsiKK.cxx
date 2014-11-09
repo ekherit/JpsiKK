@@ -822,7 +822,8 @@ StatusCode JpsiKK::execute()
       pid->setRecTrack(*itTrk);
       //pid->usePidSys((pid->useMuc() | pid->useEmc()) | pid->useDedx()); // use PID sub-system
       //pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useEmc() | pid->useMuc());
-      pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useMuc());
+      //pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useMuc());
+      pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
       //pid->identify(pid->onlyMuon() | pid->onlyElectron()); 
       pid->identify(pid->all()); 
       pid->calculate();
