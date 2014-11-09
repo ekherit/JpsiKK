@@ -1073,12 +1073,12 @@ StatusCode JpsiKK::execute()
     //if( (nKp!=1 || nKm!=1) && (nmup!=1 || nmum!=1)) goto SKIP_CHARGED;
     HepLorentzVector Pp(0,0,0,0);
     HepLorentzVector Pm(0,0,0,0);
-    if(nKp!=1 || nmup!=1)
+    if(nKp>0 || nmup>0)
     {
       double Ep = sqrt(mdc.p[Kmup_idx]*mdc.p[Kmup_idx] + mdc.M[Kmup_idx]*mdc.M[Kmup_idx]);
       Pp=HepLorentzVector(mdc.px[Kmup_idx],mdc.py[Kmup_idx],mdc.pz[Kmup_idx], Ep);
     }
-    if(nKm!=1 || nmum!=1)
+    if(nKm>0 || nmum>0)
     {
       double Em = sqrt(mdc.p[Kmum_idx]*mdc.p[Kmum_idx] + mdc.M[Kmum_idx]*mdc.M[Kmum_idx]);
       Pm=HepLorentzVector(mdc.px[Kmum_idx],mdc.py[Kmum_idx],mdc.pz[Kmum_idx], Em);
@@ -1094,11 +1094,11 @@ StatusCode JpsiKK::execute()
     }
 
     //tag KK decay channel. We could register only 1 kaon
-    if(  0 < (nKp + nKm) && (nKp + nKm) < 3 && (nmup + nmum) == 0 ) mdc.jpsi_decay_channel = 0;
+    if( nKp < 2 && nKm < 2 && 0 < (nKp + nKm) && (nKp + nKm) < 3 && (nmup + nmum) == 0 ) mdc.jpsi_decay_channel = 0;
     //tag mumu decay channel. We could register only one muon
-    if(  0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) mdc.jpsi_decay_channel = 1;
+    if( nmup <2 && num < 2 && 0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) mdc.jpsi_decay_channel = 1;
     //could not find required configuration
-    //if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
+    if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
     
 
     /* ================================================================================= */
