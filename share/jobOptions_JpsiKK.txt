@@ -1,7 +1,7 @@
 ApplicationMgr.DLLs += {"JpsiKK"};
 ApplicationMgr.TopAlg += {"JpsiKK"};
-JpsiKK.MIN_CHARGED_TRACKS=4;
-JpsiKK.MAX_CHARGED_TRACKS=4;
+JpsiKK.MIN_CHARGED_TRACKS=3;
+JpsiKK.MAX_CHARGED_TRACKS=10;
 JpsiKK.IP_MAX_Z=10.0;
 JpsiKK.IP_MAX_RHO=1.0;
 JpsiKK.MAX_COS_THETA=0.93;

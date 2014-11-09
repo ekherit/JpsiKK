@@ -104,6 +104,7 @@ class JpsiKK : public Algorithm
     NTuple::Item<double> atheta, aphi; //acolinearity 
     NTuple::Item<double> acompl; //acomplanarity
     /*  particle identificaiton */
+    NTuple::Item<int> jpsi_decay_channel;  //0 - KK channel, 1 -- mumu channel
     NTuple::Array<double>   probe; //probability of electron
     NTuple::Array<double>   probmu; //probability for track to be muon
     NTuple::Array<double>   probK; //probability for track to be Kaon

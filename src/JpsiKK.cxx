@@ -188,6 +188,8 @@ StatusCode JpsiKK::initialize(void)
       status = mdc_tuple->addItem("acompl", mdc.acompl);
 
       /*  particle identification part */
+      status = mdc_tuple->addItem("chan", mdc.jpsi_decay_channel);
+
       status = mdc_tuple->addIndexedItem ("probe", mdc.ntrack, mdc.probe);
       status = mdc_tuple->addIndexedItem ("probmu", mdc.ntrack, mdc.probmu);
       status = mdc_tuple->addIndexedItem ("probpi", mdc.ntrack, mdc.probpi);
@@ -531,6 +533,7 @@ void JpsiKK::InitData(long nchtrack, long nneutrack)
   mdc.atheta=-1000;
   mdc.aphi=-1000;
   mdc.acompl=-1000;
+  mdc.jpsi_decay_channel = -1000;
   mdc.ntrack=0;
   mdc.ngood_track=0; //number of good tracks
   for(int i=0;i<MAX_TRACK_NUMBER; i++)
@@ -1047,34 +1050,49 @@ StatusCode JpsiKK::execute()
     ///* fill sphericity */
     //mdc.S = S();
     
-    //we always should have pions
+    //we always should have two pions.This is taging of J/psi particle
     if(npip!=1 || npin!=1)  goto SKIP_CHARGED;
-    //and other must be Kaons or muons
-    if( (nKp!=1 || nKm!=1) && (nmup!=1 || nmum!=1)) goto SKIP_CHARGED;
     //calculate pion energy 
     double Epin = sqrt(mdc.p[pin_idx]*mdc.p[pin_idx] + mdc.M[pin_idx]*mdc.M[pin_idx]);
     double Epip = sqrt(mdc.p[pip_idx]*mdc.p[pip_idx] + mdc.M[pip_idx]*mdc.M[pip_idx]);
-    double Em = sqrt(mdc.p[Kmum_idx]*mdc.p[Kmum_idx] + mdc.M[Kmum_idx]*mdc.M[Kmum_idx]);
-    double Ep = sqrt(mdc.p[Kmup_idx]*mdc.p[Kmup_idx] + mdc.M[Kmup_idx]*mdc.M[Kmup_idx]);
-    //calculate the for momentum
     HepLorentzVector P_psip(0.040546,0,0,3.686); //initial vector of psip
     HepLorentzVector P_pip(mdc.px[pip_idx],mdc.py[pip_idx],mdc.pz[pip_idx], Epip); //pion vector
     HepLorentzVector P_pin(mdc.px[pin_idx],mdc.py[pin_idx],mdc.pz[pin_idx], Epin); //pion vector
     HepLorentzVector P_recoil = P_psip  - P_pip - P_pin;
     mdc.Mrec = P_recoil.m(); //recoil mass of two pions
-
     if(mdc.Mrec < 3.0 || 3.2 < mdc.Mrec) goto SKIP_CHARGED;
 
-    HepLorentzVector Pp(mdc.px[Kmup_idx],mdc.py[Kmup_idx],mdc.pz[Kmup_idx], Ep);
-    HepLorentzVector Pm(mdc.px[Kmum_idx],mdc.py[Kmum_idx],mdc.pz[Kmum_idx], Em);
+    //and other must be Kaons or muons
+    //if( (nKp!=1 || nKm!=1) && (nmup!=1 || nmum!=1)) goto SKIP_CHARGED;
+    HepLorentzVector Pp(0,0,0,0);
+    HepLorentzVector Pm(0,0,0,0);
+    if(nKp!=1 || nmup!=1)
+    {
+      double Ep = sqrt(mdc.p[Kmup_idx]*mdc.p[Kmup_idx] + mdc.M[Kmup_idx]*mdc.M[Kmup_idx]);
+      Pp=HepLorentzVector(mdc.px[Kmup_idx],mdc.py[Kmup_idx],mdc.pz[Kmup_idx], Ep);
+    }
+    if(nKp!=1 || nmup!=1)
+    {
+      double Em = sqrt(mdc.p[Kmum_idx]*mdc.p[Kmum_idx] + mdc.M[Kmum_idx]*mdc.M[Kmum_idx]);
+      Pm=HepLorentzVector(mdc.px[Kmum_idx],mdc.py[Kmum_idx],mdc.pz[Kmum_idx], Em);
+    }
     HepLorentzVector P = Pp + Pm;
     HepLorentzVector Pmis = P_psip - P_pip - P_pin - Pp - Pm;
     mdc.Mmiss = Pmis.m2();
+    if( (nKp!=1 && nKm!=1) || (nmup!=1 && nmum!=1))
+    {
+    //calculate the for momentum
+      if(nKp==1) mdc.MKK = P.m();
+      if(nmup==1) mdc.Mmumu = P.m();
+    }
 
-    if(nKp==1) mdc.MKK = P.m();
-    if(nmup==1) mdc.Mmumu = P.m();
-
-
+    //tag KK decay channel. We could register only 1 kaon
+    if(  0 < (nKp + nKm) && (nKp + nKm) < 3 && (nmup + nmum) = 0 ) mdc.jpsi_decay_channel = 0;
+    //tag mumu decay channel. We could register only one muon
+    if(  0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) = 0 ) mdc.jpsi_decay_channel = 1;
+    //could not find required configuration
+    if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
+    
 
     /* ================================================================================= */
     /*  fill data for neutral tracks */
