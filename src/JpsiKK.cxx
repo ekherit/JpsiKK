@@ -821,7 +821,8 @@ StatusCode JpsiKK::execute()
 
       pid->setRecTrack(*itTrk);
       //pid->usePidSys((pid->useMuc() | pid->useEmc()) | pid->useDedx()); // use PID sub-system
-      pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useEmc() | pid->useMuc());
+      //pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useEmc() | pid->useMuc());
+      pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useMuc());
       //pid->identify(pid->onlyMuon() | pid->onlyElectron()); 
       pid->identify(pid->all()); 
       pid->calculate();
@@ -1096,7 +1097,7 @@ StatusCode JpsiKK::execute()
     //tag KK decay channel. We could register only 1 kaon
     if( nKp < 2 && nKm < 2 && 0 < (nKp + nKm) && (nKp + nKm) < 3 && (nmup + nmum) == 0 ) mdc.jpsi_decay_channel = 0;
     //tag mumu decay channel. We could register only one muon
-    if( nmup <2 && num < 2 && 0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) mdc.jpsi_decay_channel = 1;
+    if( nmup <2 && nmum < 2 && 0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) mdc.jpsi_decay_channel = 1;
     //could not find required configuration
     if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
     
