@@ -775,6 +775,9 @@ StatusCode JpsiKK::execute()
     int nKm=0; //number of found negative kaons
     int nmup=0; //number of found positive muons
     int nmum=0; //number of found negative muons
+    int nK=0; //total number of kaons
+    int nmu=0; //total number of muons
+    int npi=0; //total number of pions
     int pip_idx=-999; //pion index
     int pin_idx=-999; //pion index
     int Kmup_idx=-999;
@@ -833,6 +836,7 @@ StatusCode JpsiKK::execute()
       //if momentum below 0.5 GeV it could be pions
       if(mdc.p[i] < 0.5)
       {
+        npi++;
         mdc.M[i]=0.13956995;
         if(mdc.q[i]>0) 
         {
@@ -856,6 +860,7 @@ StatusCode JpsiKK::execute()
             mdc.probmu[i] > mdc.probp[i]
            )
         {
+          nmu++;
           mdc.M[i]=0.105658389;
           if(mdc.q[i]>0) 
           {
@@ -875,6 +880,7 @@ StatusCode JpsiKK::execute()
             mdc.probK[i] > mdc.probp[i]
            )
         {
+          nK++;
           mdc.M[i]=0.493677;
           if(mdc.q[i]>0) 
           {
@@ -1071,7 +1077,7 @@ StatusCode JpsiKK::execute()
       double Ep = sqrt(mdc.p[Kmup_idx]*mdc.p[Kmup_idx] + mdc.M[Kmup_idx]*mdc.M[Kmup_idx]);
       Pp=HepLorentzVector(mdc.px[Kmup_idx],mdc.py[Kmup_idx],mdc.pz[Kmup_idx], Ep);
     }
-    if(nKp!=1 || nmup!=1)
+    if(nKm!=1 || nmum!=1)
     {
       double Em = sqrt(mdc.p[Kmum_idx]*mdc.p[Kmum_idx] + mdc.M[Kmum_idx]*mdc.M[Kmum_idx]);
       Pm=HepLorentzVector(mdc.px[Kmum_idx],mdc.py[Kmum_idx],mdc.pz[Kmum_idx], Em);
@@ -1091,7 +1097,7 @@ StatusCode JpsiKK::execute()
     //tag mumu decay channel. We could register only one muon
     if(  0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) mdc.jpsi_decay_channel = 1;
     //could not find required configuration
-    if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
+    //if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
     
 
     /* ================================================================================= */
