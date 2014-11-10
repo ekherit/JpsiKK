@@ -73,6 +73,14 @@ const double EMC_BARREL_THRESHOLD=0.025;
 
 inline double sq(double x) { return x*x; }
 
+struct PionPair_t
+{
+  int plus_index;
+  int minus_index;
+  double recoil_mass;
+  double pid_pion_probability;
+};
+
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
 {
@@ -1078,13 +1086,6 @@ StatusCode JpsiKK::execute()
     //we must have at least to opposite charge pions
     if(pions_plus.size()==0 || pions_minus.size()==0)  goto SKIP_CHARGED;
     //find pairs
-    struct PionPair_t
-    {
-      int plus_index;
-      int minus_index;
-      double recoil_mass;
-      double pid_pion_probability;
-    };
     std::list<PionPair_t> pion_pairs;
     HepLorentzVector P_psip(0.040546,0,0,3.686); //initial vector of psip
     for(std::list<int>::iterator it_minus=pions_minus.begin(); it_minus!=pions_minus.end(); it_minus++)
