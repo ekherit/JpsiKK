@@ -83,6 +83,10 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("MAX_COS_THETA", MAX_COS_THETA = 0.93); //cm?
 
   declareProperty("MAX_PION_MOMENTUM", MAX_PION_MOMENTUM = 0.45); //GeV
+  declareProperty("MIN_KAON_MOMENTUM", MAX_KAON_MOMENTUM = 1.0); //GeV
+  declareProperty("MAX_KAON_MOMENTUM", MAX_KAON_MOMENTUM = 2.0); //GeV
+  declareProperty("MIN_MUON_MOMENTUM", MAX_MUON_MOMENTUM = 1.0); //GeV
+  declareProperty("MAX_MUON_MOMENTUM", MAX_MUON_MOMENTUM = 2.0); //GeV
 
   declareProperty("MIN_RECOIL_MASS", MIN_RECOIL_MASS = 3.0); //GeV
   declareProperty("MAX_RECOIL_MASS", MAX_RECOIL_MASS = 3.2); //GeV
@@ -772,6 +776,8 @@ StatusCode JpsiKK::execute()
     ParticleID *pid = ParticleID::instance();
     //loop over tracks oredered by energy
     int gidx=0; //good charged track idx
+    std::list<int> pions_plus; //positive pion candidate index
+    std::list<int> pions_minus; //negative pion candidate index
     int npip=0; //number of positive pions
     int npin=0; //number of negative pions
     int nKp=0; //number of found positive kaons
@@ -781,8 +787,8 @@ StatusCode JpsiKK::execute()
     int nK=0; //total number of kaons
     int nmu=0; //total number of muons
     int npi=0; //total number of pions
-    int pip_idx=-999; //pion index
-    int pin_idx=-999; //pion index
+    //int pip_idx=-999; //pion index
+    //int pin_idx=-999; //pion index
     int Kmup_idx=-999;
     int Kmum_idx=-999;
     for(mmap_t::reverse_iterator ri=pmap.rbegin(); ri!=pmap.rend(); ++ri)
@@ -816,11 +822,11 @@ StatusCode JpsiKK::execute()
       mdc.y[i]     =  mdcTrk->y();
       mdc.z[i]     =  mdcTrk->z();
 
+
       /*  Particle identification game */
       pid->init();
       pid->setMethod(pid->methodProbability());
       pid->setChiMinCut(4);
-
       pid->setRecTrack(*itTrk);
       //pid->usePidSys((pid->useMuc() | pid->useEmc()) | pid->useDedx()); // use PID sub-system
       //pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useEmc() | pid->useMuc());
@@ -846,17 +852,17 @@ StatusCode JpsiKK::execute()
         if(mdc.q[i]>0) 
         {
           npip++;
-          pip_idx = i;
+          pions_plus.push_back(i);
         }
-        else
+        if(mdc.q[i]<0) 
         { 
-          pin_idx = i;
           npin++;
+          pions_minus.push_back(i);
         }
       }
 
-      //check for pions or muons
-      if(mdc.p[i]>1.0)
+      //check for KAONS or muons
+      if(mdc.p[i]>std::min(MIN_KAON_MOMENTUM, MIN_MUON_MOMENTUM))
       {
         if (
             mdc.probmu[i] > mdc.probe[i] &&
@@ -1069,17 +1075,69 @@ StatusCode JpsiKK::execute()
     ///* fill sphericity */
     //mdc.S = S();
     
-    //we always should have two pions.This is taging of J/psi particle
-    if(npip!=1 || npin!=1)  goto SKIP_CHARGED;
-    //calculate pion energy 
-    double Epin = sqrt(mdc.p[pin_idx]*mdc.p[pin_idx] + mdc.M[pin_idx]*mdc.M[pin_idx]);
-    double Epip = sqrt(mdc.p[pip_idx]*mdc.p[pip_idx] + mdc.M[pip_idx]*mdc.M[pip_idx]);
+    //we must have at least to opposite charge pions
+    if(pions_plus.size()==0 || pions_minus.size()==0)  goto SKIP_CHARGED;
+    //find pairs
+    struct PionPair_t
+    {
+      int plus_index;
+      int minus_index;
+      double recoil_mass;
+      double pid_pion_probability;
+    }
+    std::list<PionPair_t> pion_pairs;
     HepLorentzVector P_psip(0.040546,0,0,3.686); //initial vector of psip
-    HepLorentzVector P_pip(mdc.px[pip_idx],mdc.py[pip_idx],mdc.pz[pip_idx], Epip); //pion vector
-    HepLorentzVector P_pin(mdc.px[pin_idx],mdc.py[pin_idx],mdc.pz[pin_idx], Epin); //pion vector
-    HepLorentzVector P_recoil = P_psip  - P_pip - P_pin;
-    mdc.Mrec = P_recoil.m(); //recoil mass of two pions
-    if(mdc.Mrec < MIN_RECOIL_MASS || MAX_RECOIL_MASS < mdc.Mrec) goto SKIP_CHARGED;
+    for(std::list<int>::iterator it_minus=pions_minus.begin(); it_minus!=pions_minus.end(); it_minus++)
+      for(std::list<int>::iterator it_plus=pions_plus.begin(); it_plus!=pions_plus.end(); it_plus++)
+      {
+        EvtRecTrackIterator itTrk_minus = evtRecTrkCol->begin() + *it_minus;
+        EvtRecTrackIterator itTrk_plus = evtRecTrkCol->begin() + *it_plus;
+        RecMdcTrack * pion_minus = (*itTrk_minus)-> mdcTrack();
+        RecMdcTrack * pion_plus  = (*itTrk_plus) -> mdcTrack();
+        HepLorentzVector P_minus = pion_minus->p4(PI_MESON_MASS); //pion vector
+        HepLorentzVector P_plus =  pion_plus->p4(PI_MESON_MASS); //pion vector
+        HepLorentzVector P_recoil = P_psip  - P_minus - P_plus;
+        double Mrec = P_recoil.m(); //calculate recoil mass
+        pid->setRecTrack(*itTrk_minus);
+        pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
+        pid->identify(pid->onlyPion()); 
+        pid->calculate();
+        double pion_minus_prob = pid->probPion();
+        pid->setRecTrack(*itTrk_plus);
+        pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
+        pid->identify(pid->onlyPion()); 
+        pid->calculate();
+        double pion_plus_prob = pid->probPion();
+        if(MIN_RECOIL_MASS < Mrec && Mrec < MAX_RECOIL_MASS) 
+        {
+          PionPair_t pair;
+          pair.plus_index = *it_plus;
+          pair.minus_index = *it_minus;
+          pair.pid_pion_probability = pion_minus_prob*pion_plus_prob;
+          pair.recoil_mass = Mrec;
+          pion_pairs.push_back(pair);
+        }
+      }
+    //no pion pairs with appropriate recoil mass
+    if(pions_pairs.empty()) goto SKIP_CHARGED;
+    //find best pion pairs
+    std::list<PionPair_t>::iterator best_pion_pair_iterator=pions_pairs.begin();
+    for(std::list<PionPair_t>::iterator pair=pions_pairs.begin(); pair!=pions_pairs.end(); pair++)
+    {
+      if(pair->pid_pion_probability > best_pion_pair_iterator->pid_pion_probability) best_pion_pair_iterator = pair;
+    }
+    mdc.Mrec = best_pion_pair_iterator->recoil_mass;
+    
+
+    //calculate pion energy 
+    //double Epin = sqrt(mdc.p[pin_idx]*mdc.p[pin_idx] + mdc.M[pin_idx]*mdc.M[pin_idx]);
+    //double Epip = sqrt(mdc.p[pip_idx]*mdc.p[pip_idx] + mdc.M[pip_idx]*mdc.M[pip_idx]);
+    //HepLorentzVector P_psip(0.040546,0,0,3.686); //initial vector of psip
+    //HepLorentzVector P_pip(mdc.px[pip_idx],mdc.py[pip_idx],mdc.pz[pip_idx], Epip); //pion vector
+    //HepLorentzVector P_pin(mdc.px[pin_idx],mdc.py[pin_idx],mdc.pz[pin_idx], Epin); //pion vector
+    //HepLorentzVector P_recoil = P_psip  - P_pip - P_pin;
+    //mdc.Mrec = P_recoil.m(); //recoil mass of two pions
+    //if(mdc.Mrec < MIN_RECOIL_MASS || MAX_RECOIL_MASS < mdc.Mrec) goto SKIP_CHARGED;
 
     //and other must be Kaons or muons
     //if( (nKp!=1 || nKm!=1) && (nmup!=1 || nmum!=1)) goto SKIP_CHARGED;
