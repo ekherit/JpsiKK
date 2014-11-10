@@ -718,7 +718,6 @@ StatusCode JpsiKK::execute()
   typedef std::multimap <double, unsigned> mmap_t;
   typedef std::pair <double, unsigned> pair_t;
   mmap_t pmap;
-  mmap_t Emap; //multi map to sort good tracks by energy order
   unsigned good_charged_tracks = 0;
 
 
@@ -746,16 +745,16 @@ StatusCode JpsiKK::execute()
       {
         RecEmcShower *emcTrk = (*itTrk)->emcShower();
         double E = emcTrk->energy();
-        Emap.insert(pair_t(E,idx));
+        //Emap.insert(pair_t(E,idx));
       }
       double p = mdcTrk->p();
       pmap.insert(pair_t(p,idx));
     }
     /* Two or more charged tracks witch signal in EMC */
-    good_charged_tracks=Emap.size();
+    good_charged_tracks=pmap.size();
     //if no valid charged tracks
     //if(MIN_CHARGED_TRACKS <  Emap.size() || Emap.size() < MAX_CHARGED_TRACKS) goto SKIP_CHARGED;
-    if(Emap.size() < MIN_CHARGED_TRACKS   || MAX_CHARGED_TRACKS > Emap.size()) goto SKIP_CHARGED;
+    if(good_charged_tracks < MIN_CHARGED_TRACKS   || MAX_CHARGED_TRACKS > good_charged_tracks) goto SKIP_CHARGED;
 
     //now fill the arrayes using indexes sorted by energy
     mdc.ntrack =pmap.size(); //save number of good charged tracks
@@ -1023,7 +1022,6 @@ StatusCode JpsiKK::execute()
           tof.errE[i]  = (*tofTrk)->errenergy();
         }
       }
-      gidx++;
 
       if(CHECK_MC)
       {
@@ -1048,6 +1046,7 @@ StatusCode JpsiKK::execute()
           }
         }
       }
+      gidx++;
     }
     mdc.ntrack=gidx;
     mdc.ngood_track = gidx;
@@ -1114,6 +1113,7 @@ StatusCode JpsiKK::execute()
     int track=0; //index for neutral tracks
     emc.Etotal=0;
     emc.ngood_charged_track=good_charged_tracks;
+    mmap_t Emap; //multi map to sort good tracks by energy order
     Emap.clear();
     pmap.clear();
     //calculate good tracks
