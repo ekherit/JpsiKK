@@ -1233,48 +1233,44 @@ StatusCode JpsiKK::execute()
     if(charged_pairs.empty()) goto SKIP_CHARGED;
     good_high_mom_pairs_number++;
 
-    std::cout << "1 pion pairs: " << good_pion_pairs_number << ",    high momentum pairs: " << good_high_mom_pairs_number << std::endl;
+    //std::cout << "1 pion pairs: " << good_pion_pairs_number << ",    high momentum pairs: " << good_high_mom_pairs_number << std::endl;
 
 
     //now analize pairs
     //find best pairs with most probable pid in each category
     list<ChargedPair_t>::iterator best_pair[5];
-    for(int i=0;i<5;i++) best_pair[i] = charged_pairs.begin();
-    double prob[5]={0,0,0,0,0};
+    //for(int i=0;i<5;i++) best_pair[i] = charged_pairs.begin();
+    double best_prob[5]={0,0,0,0,0};
     for(list<ChargedPair_t>::iterator it= charged_pairs.begin(); it!=charged_pairs.end(); it++)
     {
       for(int pid=0; pid<5; pid++)
       {
         if( pid == it->pid)
         {
-          if(it->probability[pid] >= prob[pid]) 
+          if(it->probability[pid] >= best_prob[pid]) 
           {
             best_pair[pid] = it;
-            prob[pid] = it->probability[pid];
+            best_prob[pid] = it->probability[pid];
           }
         }
       }
     }
-    std::cout << " 2 pion pairs: " << good_pion_pairs_number << ",    high momentum pairs: " << good_high_mom_pairs_number << std::endl;
 
     PairID_t channel = PID_KAON; //allways found somebody
     for(int pid=0; pid<5;pid++)
     {
       cout << pid << " " << best_pair[pid]->pid << " " << endl;
       cout << best_pair[pid]->probability[pid] << endl;
-      if( best_pair[pid]->probability[pid] > best_pair[channel]->probability[pid]) channel= (PairID_t)pid;
+      if( prob[pid] > prob[channel]) channel= (PairID_t)pid;
     }
-    std::cout << " 3pion pairs: " << good_pion_pairs_number << ",    high momentum pairs: " << good_high_mom_pairs_number << std::endl;
     HepLorentzVector P_charged_minus = best_pair[channel]->P_minus;
     HepLorentzVector P_charged_plus = best_pair[channel]->P_plus;
     HepLorentzVector P_sum = P_charged_minus + P_charged_plus;
     HepLorentzVector P_mis = P_psip - P_pion_minus - P_pion_plus  - P_charged_minus - P_charged_plus;
     mdc.Mmiss = P_mis.m2();
 
-    std::cout << " 4 pion pairs: " << good_pion_pairs_number << ",    high momentum pairs: " << good_high_mom_pairs_number << std::endl;
     //select only if no missing mass here
     if(mdc.Mmiss < MIN_MISSING_MASS || MAX_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
-    std::cout << " 5 pion pairs: " << good_pion_pairs_number << ",    high momentum pairs: " << good_high_mom_pairs_number << std::endl;
 
 
     mdc.jpsi_decay_channel = channel;
