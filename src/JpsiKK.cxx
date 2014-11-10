@@ -753,7 +753,7 @@ StatusCode JpsiKK::execute()
     good_charged_tracks=pmap.size();
     //if no valid charged tracks
     //if(MIN_CHARGED_TRACKS <  Emap.size() || Emap.size() < MAX_CHARGED_TRACKS) goto SKIP_CHARGED;
-    if(good_charged_tracks < MIN_CHARGED_TRACKS   || MAX_CHARGED_TRACKS > good_charged_tracks) goto SKIP_CHARGED;
+    if(good_charged_tracks < MIN_CHARGED_TRACKS   || MAX_CHARGED_TRACKS < good_charged_tracks) goto SKIP_CHARGED;
     std::cout << "Number of good charged tracks: " << MIN_CHARGED_TRACKS << " < " << good_charged_tracks << " < " << MAX_CHARGED_TRACKS  << std::endl;
 
     //now fill the arrayes using indexes sorted by energy
