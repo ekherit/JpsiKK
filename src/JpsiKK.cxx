@@ -173,6 +173,7 @@ StatusCode JpsiKK::initialize(void)
   bhabha_events=0;
   gg_event_writed=0;
   good_pion_pairs_number=0;
+  good_high_mom_pairs_number=0;
 
   StatusCode status;
   NTuplePtr my_nt(ntupleSvc(), "FILE1/mhadr");
@@ -821,7 +822,6 @@ StatusCode JpsiKK::execute()
     muc.ntrack =good_charged_tracks;
     dedx.ntrack=good_charged_tracks;
     tof.ntrack =good_charged_tracks;
-    Sphericity S;
 
     //particle id 
     ParticleID *pid = ParticleID::instance();
@@ -831,19 +831,6 @@ StatusCode JpsiKK::execute()
     std::list<int> pions_minus; //negative pion candidate index list 
     std::list<int> high_mom_plus; //positive particles with high momentum
     std::list<int> high_mom_minus; //negative particles with high momentum
-    std::list<int> kaons_plus; //positive kaon candidate index list
-    std::list<int> muons_minus; //positive kaon candidate index list
-    std::list<int> muons_plus; //positive kaon candidate index list
-    //int nKp=0; //number of found positive kaons
-    //int nKm=0; //number of found negative kaons
-    //int nmup=0; //number of found positive muons
-    //int nmum=0; //number of found negative muons
-    //int nK=0; //total number of kaons
-    //int nmu=0; //total number of muons
-    //int pip_idx=-999; //pion index
-    //int pin_idx=-999; //pion index
-    //int Kmup_idx=-999;
-    //int Kmum_idx=-999;
     for(mmap_t::reverse_iterator ri=pmap.rbegin(); ri!=pmap.rend(); ++ri)
     {
       EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + ri->second;
@@ -852,9 +839,6 @@ StatusCode JpsiKK::execute()
       double rvxy=-9999,rvz=-9999,rvphi=-9999;
       calculate_vertex(mdcTrk,rvxy,rvz,rvphi); //find distance to interaction point
       //select good tracks before
-      //bool is_fromIP = fabs(rvz)<10 && fabs(rvxy)<1.0;  //tracks begin near interaction point
-      //bool is_good_track = is_fromIP && fabs(cos(mdcTrk->theta()))<0.93; //track is good
-      //if(!is_good_track) continue;
       int i = gidx; //now fill
 
       //fill vertex information
@@ -877,25 +861,25 @@ StatusCode JpsiKK::execute()
 
 
       /*  Particle identification game */
-      pid->init();
-      pid->setMethod(pid->methodProbability());
-      pid->setChiMinCut(4);
-      pid->setRecTrack(*itTrk);
-      //pid->usePidSys((pid->useMuc() | pid->useEmc()) | pid->useDedx()); // use PID sub-system
-      //pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useEmc() | pid->useMuc());
-      //pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useMuc());
-      pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
-      //pid->identify(pid->onlyMuon() | pid->onlyElectron()); 
-      pid->identify(pid->all()); 
-      pid->calculate();
-      if(pid->IsPidInfoValid())
-      {
-        mdc.probe[i] =  pid->probElectron();
-        mdc.probmu[i] = pid->probMuon();
-        mdc.probpi[i] = pid->probPion();
-        mdc.probK[i] =  pid->probKaon();
-        mdc.probp[i] =  pid->probProton();
-      }
+      //pid->init();
+      //pid->setMethod(pid->methodProbability());
+      //pid->setChiMinCut(4);
+      //pid->setRecTrack(*itTrk);
+      ////pid->usePidSys((pid->useMuc() | pid->useEmc()) | pid->useDedx()); // use PID sub-system
+      ////pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useEmc() | pid->useMuc());
+      ////pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useMuc());
+      //pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
+      ////pid->identify(pid->onlyMuon() | pid->onlyElectron()); 
+      //pid->identify(pid->all()); 
+      //pid->calculate();
+      //if(pid->IsPidInfoValid())
+      //{
+      //  mdc.probe[i] =  pid->probElectron();
+      //  mdc.probmu[i] = pid->probMuon();
+      //  mdc.probpi[i] = pid->probPion();
+      //  mdc.probK[i] =  pid->probKaon();
+      //  mdc.probp[i] =  pid->probProton();
+      //}
 
       //if momentum below 0.5 GeV it could be pions
       if(mdc.p[i] < MAX_PION_MOMENTUM)
@@ -976,10 +960,6 @@ StatusCode JpsiKK::execute()
 
       mdc.Emdc+=sqrt(mdc.p[i]*mdc.p[i]+sq(PION_MASS));
 
-
-      /* Calculate sphericity tensor */
-      S.add(mdcTrk->p3());
-
       if((*itTrk)->isEmcShowerValid())
       {
         mdc.isemc[i] = 1;
@@ -999,7 +979,7 @@ StatusCode JpsiKK::execute()
         mdc.isemc[i]=0;
       }
 
-      HepLorentzVector P(mdc.px[i], mdc.py[i], mdc.pz[i], mdc.E[i]);
+      //HepLorentzVector P(mdc.px[i], mdc.py[i], mdc.pz[i], mdc.E[i]);
       //mdc.M[i]=P.m();
 
       /* Check muon system information for this track */
@@ -1130,18 +1110,6 @@ StatusCode JpsiKK::execute()
     mdc.ngood_track = gidx;
     if(CHECK_MC) mc.ntrack=gidx;
 
-    /* Calculate acolinearity  for two tracks with big enrgies */
-    //Hep3Vector p0(mdc.px[0], mdc.py[0],mdc.pz[0]);
-    //Hep3Vector p1(mdc.px[1], mdc.py[1],mdc.pz[1]);
-    //mdc.ccos = p0.dot(p1)/(p0.mag()*p1.mag());
-    //mdc.atheta = mdc.theta[0]+mdc.theta[1] - M_PI;
-    //mdc.aphi =  fabs(mdc.phi[0]-mdc.phi[1]) - M_PI;
-    //mdc.acompl = (mdc.px[0]*mdc.py[1]-mdc.py[0]*mdc.px[1])/(mdc.p[0]*mdc.p[1]);
-    ////normalize sphericity tensor
-    //S.norm();
-    ///* fill sphericity */
-    //mdc.S = S();
-    
     //we must have at least two opposite charge pions
     if(pions_plus.size()==0 || pions_minus.size()==0)  goto SKIP_CHARGED;
     //find pairs
@@ -1260,8 +1228,12 @@ StatusCode JpsiKK::execute()
           }
         }
       }
+
     //no charged pairs with high momentum with appropriate invariant mass found
     if(charged_pairs.empty()) goto SKIP_CHARGED;
+    good_high_mom_pairs_number++;
+
+    std::cout << "pion pairs: " << good_pion_pairs_number << ",    high momentum pairs: " << good_high_mom_pairs_number << std::endl;
 
 
     //now analize pairs
@@ -1402,33 +1374,6 @@ StatusCode JpsiKK::execute()
     m_time = eventHeader->time();
 
 
-    //оставим два трека только для электронов и мюонов
-    //if(emc.ntrack>0) goto SKIP_CHARGED;
-    //if(mdc.ntrack<2 || mdc.ntrack>2) goto SKIP_CHARGED;
-
-    vector <bool> ise(2);
-    vector <bool> ismu(2);
-    for(int i=0;i<ise.size();++i)
-    { 
-      double evp = mdc.E[i] /mdc.p[i];
-      //ise[i] = mdc.ismu[i] == 0 && evp > 0.9 && evp < 1.05;
-      ise[i] =  evp > 0.8 && evp < 1.2;
-      //ismu[i] = mdc.ismu[i] == 1 && mdc.E[i] > 0.1 && mdc.E[i]<0.4;
-      ismu[i] =  mdc.E[i] > 0.1 && mdc.E[i]<0.4 && evp < 0.8;
-    }
-    bool charge = (mdc.q[0]*mdc.q[1]) <  0;
-    bool kinem = mdc.p[0] < 1.5 && mdc.p[1] < 1.5;
-    bool tau_sig  = ( (ise[0] && ismu[1]) || (ise[1] && ismu[0]) ) && charge && kinem;
-    bool bhabha_sig = ( (ise[0] && ise[1]) ) && charge;
-    if(bhabha_sig) bhabha_events++;
-    if(tau_sig) tau_events++;
-
-    //if(!charge) goto SKIP_CHARGED;
-
-    //if(!tau_sig && !bhabha_sig) goto SKIP_CHARGED;  
-    //if(!tau_sig && STRICT_TAU_CUT == 1) goto SKIP_CHARGED;  
-    //if(! (ise[0] || ise[1] || ismu[0] || ismu[1]) && STRICT_TAU_CUT == 1) goto SKIP_CHARGED;  
-
     /* now fill the data */
     main_tuple->write();
     mdc_tuple->write();
@@ -1518,6 +1463,7 @@ StatusCode JpsiKK::finalize()
   std::cout << "Event proceed: " << event_proceed << std::endl;
   std::cout << "Event selected: " << event_write << std::endl;
   std::cout << "Good pion pairs selected: " << good_pion_pairs_number << endl;
+  std::cout << "Good high momentum pairs selected: " << good_high_mom_pairs_number << endl;
   std::cout << "Bhabha candidates: " << bhabha_events << endl;
   std::cout << "Gamma-Gamma candidates: " << gg_event_writed << endl;
   std::cout << "Selection efficiency: " << event_write/double(event_proceed) << std::endl;
