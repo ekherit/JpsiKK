@@ -748,7 +748,7 @@ StatusCode JpsiKK::execute()
       }
       pmap.insert(pair_t(mdcTrk->p(),idx));
     }
-    std::cout << "Number of good charged tracks: " << pmap.size() << std::endl;
+    std::cout << "Number of good charged tracks: " << pmap.size() << " MIN_CHARGED_TRACKS = " << MIN_CHARGED_TRACKS << ", MAX_CHARGED_TRACKS = " << MAX_CHARGED_TRACKS << std::endl;
     /* Two or more charged tracks witch signal in EMC */
     good_charged_tracks=pmap.size();
     //if no valid charged tracks
