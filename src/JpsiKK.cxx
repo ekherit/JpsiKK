@@ -77,6 +77,8 @@ struct PionPair_t
 {
   int plus_index;
   int minus_index;
+  HepLorentzVector P_minus;
+  HepLorentzVector P_plus;
   double recoil_mass;
   double pid_pion_probability;
 };
@@ -1116,6 +1118,8 @@ StatusCode JpsiKK::execute()
           pair.minus_index = *it_minus;
           pair.pid_pion_probability = pion_minus_prob*pion_plus_prob;
           pair.recoil_mass = Mrec;
+          pair.P_minus = P_minus;
+          pair.P_plus = P_plus;
           pion_pairs.push_back(pair);
         }
       }
@@ -1128,8 +1132,8 @@ StatusCode JpsiKK::execute()
       if(pair->pid_pion_probability > best_pion_pair_iterator->pid_pion_probability) best_pion_pair_iterator = pair;
     }
     mdc.Mrec = best_pion_pair_iterator->recoil_mass;
-    
-
+    HepLorentzVector P_pip = best_pion_pair_iterator->P_plus;
+    HepLorentzVector P_pin = best_pion_pair_iterator->P_minus;
     //calculate pion energy 
     //double Epin = sqrt(mdc.p[pin_idx]*mdc.p[pin_idx] + mdc.M[pin_idx]*mdc.M[pin_idx]);
     //double Epip = sqrt(mdc.p[pip_idx]*mdc.p[pip_idx] + mdc.M[pip_idx]*mdc.M[pip_idx]);
