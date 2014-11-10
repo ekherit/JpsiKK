@@ -1120,10 +1120,10 @@ StatusCode JpsiKK::execute()
         }
       }
     //no pion pairs with appropriate recoil mass
-    if(pions_pairs.empty()) goto SKIP_CHARGED;
+    if(pion_pairs.empty()) goto SKIP_CHARGED;
     //find best pion pairs
-    std::list<PionPair_t>::iterator best_pion_pair_iterator=pions_pairs.begin();
-    for(std::list<PionPair_t>::iterator pair=pions_pairs.begin(); pair!=pions_pairs.end(); pair++)
+    std::list<PionPair_t>::iterator best_pion_pair_iterator=pion_pairs.begin();
+    for(std::list<PionPair_t>::iterator pair=pion_pairs.begin(); pair!=pion_pairs.end(); pair++)
     {
       if(pair->pid_pion_probability > best_pion_pair_iterator->pid_pion_probability) best_pion_pair_iterator = pair;
     }
