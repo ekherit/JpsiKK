@@ -1105,21 +1105,22 @@ StatusCode JpsiKK::execute()
       if(nmup==1) mdc.Mmumu = P.m();
     }
 
-    //check missing particles by invariant mass
     //tag KK decay channel. One kaon is missing
     if( nKp < 2 && nKm < 2 && 0 < (nKp + nKm) && (nKp + nKm) < 3 && (nmup + nmum) == 0 ) 
     {
       mdc.jpsi_decay_channel = 0;
-      if(mdc.Mmiss < MIN_KAON_MISSING_MASS || MAX_KAON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
     }
     //tag mumu decay channel. One muon is missing
     if( nmup <2 && nmum < 2 && 0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) 
     {
       mdc.jpsi_decay_channel = 1;
-      if(mdc.Mmiss < MIN_MUON_MISSING_MASS || MAX_MUON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
     }
     //could not find required configuration
     if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
+
+    //select event with missing particle using invariant mass
+    if((nKp+nKm) == 1 && mdc.Mmiss < MIN_KAON_MISSING_MASS || MAX_KAON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
+    if((nmup+nmum) == 1 && mdc.Mmiss < MIN_MUON_MISSING_MASS || MAX_MUON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
     
 
     /* ================================================================================= */
