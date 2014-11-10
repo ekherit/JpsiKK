@@ -1199,6 +1199,7 @@ StatusCode JpsiKK::execute()
   }
 //selection of gamma-gamma events
 SKIP_CHARGED:
+  mmap_t Emap;
   gg.ngood_charged_track = good_charged_tracks;
   if(good_charged_tracks==0)
   {
