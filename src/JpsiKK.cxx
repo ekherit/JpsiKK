@@ -865,7 +865,8 @@ StatusCode JpsiKK::execute()
           npip++;
           pions_plus.push_back(i);
         }
-        if(mdc.q[i]<0) 
+        else
+        //if(mdc.q[i]<0) 
         { 
           npin++;
           pions_minus.push_back(i);
