@@ -1105,28 +1105,21 @@ StatusCode JpsiKK::execute()
       if(nmup==1) mdc.Mmumu = P.m();
     }
 
-    //tag KK decay channel. We could register only 1 kaon
-    if( nKp < 2 && nKm < 2 && 0 < (nKp + nKm) && (nKp + nKm) < 3 && (nmup + nmum) == 0 ) mdc.jpsi_decay_channel = 0;
-    //tag mumu decay channel. We could register only one muon
-    if( nmup <2 && nmum < 2 && 0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) mdc.jpsi_decay_channel = 1;
+    //check missing particles by invariant mass
+    //tag KK decay channel. One kaon is missing
+    if( nKp < 2 && nKm < 2 && 0 < (nKp + nKm) && (nKp + nKm) < 3 && (nmup + nmum) == 0 ) 
+    {
+      mdc.jpsi_decay_channel = 0;
+      if(mdc.Mmiss < MIN_KAON_MISSING_MASS || MAX_KAON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
+    }
+    //tag mumu decay channel. One muon is missing
+    if( nmup <2 && nmum < 2 && 0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) 
+    {
+      mdc.jpsi_decay_channel = 1;
+      if(mdc.Mmiss < MIN_MUON_MISSING_MASS || MAX_MUON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
+    }
     //could not find required configuration
     if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
-
-
-    //missing mass should correspond mu or K
-    if(good_charged_tracks == 3)
-    {
-      //kaon is missing
-      if(mdc.jpsi_decay_channel == 0)
-      {
-        if(mdc.Mmiss < MIN_KAON_MISSING_MASS || MAX_KAON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
-      }
-      //muon is missing
-      if(mdc.jpsi_decay_channel == 1)
-      {
-        if(mdc.Mmiss < MIN_MUON_MISSING_MASS || MAX_MUON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
-      }
-    }
     
 
     /* ================================================================================= */
