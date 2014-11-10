@@ -746,8 +746,7 @@ StatusCode JpsiKK::execute()
         double E = emcTrk->energy();
         //Emap.insert(pair_t(E,idx));
       }
-      double p = mdcTrk->p();
-      pmap.insert(pair_t(p,idx));
+      pmap.insert(pair_t(mdcTrk->p(),idx));
     }
     std::cout << "Number of good charged tracks: " << pmap.size() << std::endl;
     /* Two or more charged tracks witch signal in EMC */
