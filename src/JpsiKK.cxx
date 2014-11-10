@@ -1239,6 +1239,7 @@ StatusCode JpsiKK::execute()
     //now analize pairs
     //find best pairs with most probable pid in each category
     list<ChargedPair_t>::iterator best_pair[5];
+    for(int i=0;i<5;i++) best_pair[5] = charged_pairs.begin();
     double prob[5]={0,0,0,0,0};
     for(list<ChargedPair_t>::iterator it= charged_pairs.begin(); it!=charged_pairs.end(); it++)
     {
