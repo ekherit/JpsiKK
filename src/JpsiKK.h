@@ -73,6 +73,7 @@ class JpsiKK : public Algorithm
   long int tau_events; //number of mu ivents for track #1
   long int bhabha_events; 
   long int gg_events; 
+  long int good_pion_pairs_number;
 
 	NTuple::Tuple * main_tuple;//main tuple 
 	NTuple::Item<long> m_time; //time when events is writed (unixtime)
@@ -302,7 +303,7 @@ class JpsiKK : public Algorithm
   NTuple::Item<double> head_nneutral_tracks_rms;
   NTuple::Item<double> head_ntotal_tracks;
   NTuple::Item<double> head_ntotal_tracks_rms;
-  NTuple::Item<long>   ngood_pion_pairs;
+  //NTuple::Item<long>   ngood_pion_pairs;
   
   ibn::averager <double> nchtr_a; //averager for number of charged tracks
   ibn::averager <double> nntr_a; //averager for number of neutral tracks
