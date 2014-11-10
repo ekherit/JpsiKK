@@ -739,7 +739,8 @@ StatusCode JpsiKK::execute()
       calculate_vertex(mdcTrk,rvxy,rvz,rvphi); //find distance to interaction point
       bool is_fromIP = fabs(rvz)< IP_MAX_Z && fabs(rvxy)<IP_MAX_RHO;  //tracks begin near interaction point
       bool is_good_track = is_fromIP && fabs(cos(mdcTrk->theta()))<MAX_COS_THETA; //track is good
-      if(!is_good_track || !is_fromIP) continue;
+      //if(!is_good_track || !is_fromIP) continue;
+      if(!is_good_track) continue;
       //if(!(*itTrk)->isEmcShowerValid()) continue; //charged track must have energy deposition in EMC
       if((*itTrk)->isEmcShowerValid()) 
       {
