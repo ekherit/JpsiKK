@@ -1259,9 +1259,9 @@ StatusCode JpsiKK::execute()
     PairID_t channel = PID_KAON; //allways found somebody
     for(int pid=0; pid<5;pid++)
     {
-      cout << pid << " " << best_pair[pid]->pid << " " << endl;
-      cout << best_pair[pid]->probability[pid] << endl;
-      if( prob[pid] > prob[channel]) channel= (PairID_t)pid;
+      //cout << pid << " " << best_pair[pid]->pid << " " << endl;
+      //cout << best_pair[pid]->probability[pid] << endl;
+      if( best_prob[pid] > best_prob[channel]) channel= (PairID_t)pid;
     }
     HepLorentzVector P_charged_minus = best_pair[channel]->P_minus;
     HepLorentzVector P_charged_plus = best_pair[channel]->P_plus;
