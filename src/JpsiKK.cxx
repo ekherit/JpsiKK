@@ -1084,7 +1084,7 @@ StatusCode JpsiKK::execute()
       int minus_index;
       double recoil_mass;
       double pid_pion_probability;
-    }
+    };
     std::list<PionPair_t> pion_pairs;
     HepLorentzVector P_psip(0.040546,0,0,3.686); //initial vector of psip
     for(std::list<int>::iterator it_minus=pions_minus.begin(); it_minus!=pions_minus.end(); it_minus++)
