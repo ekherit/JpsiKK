@@ -45,17 +45,26 @@ class JpsiKK : public Algorithm
   double MAX_COS_THETA; //maximum  cos(theta) for good charged track
 
   double MAX_PION_MOMENTUM; //maximum pion momentum
-  double MIN_KAON_MOMENTUM; //minimum kaon momentum
-  double MAX_KAON_MOMENTUM; //maximum pion momentum
-  double MIN_MUON_MOMENTUM; //minimum kaon momentum
-  double MAX_MUON_MOMENTUM; //maximum pion momentum
 
   double MIN_RECOIL_MASS; //minimum recoil mass cut
   double MAX_RECOIL_MASS; //minimum recoil mass cut
+
+  double MIN_KAON_MOMENTUM; //minimum kaon momentum
+  double MAX_KAON_MOMENTUM; //maximum pion momentum
+
+  double MIN_MUON_MOMENTUM; //minimum kaon momentum
+  double MAX_MUON_MOMENTUM; //maximum pion momentum
+
+  double MIN_INVARIANT_MASS; //minimum recoil mass cut
+  double MAX_INVARIANT_MASS; //minimum recoil mass cut
+
   double MIN_KAON_MISSING_MASS;   //minimum kaon missing mass
   double MAX_KAON_MISSING_MASS;   //minimum kaon missing mass
   double MIN_MUON_MISSING_MASS;   //minimum muon missing mass
   double MAX_MUON_MISSING_MASS;   //minimum muon missing mass
+
+  double MIN_MISSING_MASS; 
+  double MAX_MISSING_MASS; 
 
 
   int STRICT_TAU_CUT;

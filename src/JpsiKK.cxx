@@ -62,8 +62,12 @@ typedef HepGeom::Point3D<double> HepPoint3D;
 #include "ParticleID/ParticleID.h"
 
 
-const double PI_MESON_MASS=0.13957018; //GeV
-
+const double PI_MESON_MASS =0.13957018; //GeV
+const double PION_MASS =0.13957018; //GeV
+const double MUON_MASS = 0.105658389; //GeV
+const double KAON_MASS = 0.493677; //GeV
+const double ELECTRON_MASS = 0.000510999;//GeV
+const double PROTON_MASS = 0.93827231;//GeV
 
 const double EMS_THRESHOLD = 0.05; //GeV
 const double MAX_MOMENTUM  = 2.5; //GeV
@@ -83,6 +87,37 @@ struct PionPair_t
   double pid_pion_probability;
 };
 
+enum PairID_t
+{
+  PID_KAON=0,
+  PID_MUON=1,
+  PID_ELECTRON=2,
+  PID_PION=3,
+  PID_PROTON=4
+};
+double XMASS[5] = {KAON_MASS, MUON_MASS, ELECTRON_MASS, PION_MASS, PROTON_MASS};
+
+struct ChargedPair_t
+{
+  int plus_index;
+  int minus_index;
+  HepLorentzVector P_minus;
+  HepLorentzVector P_plus;
+  double invariant_mass;
+  double recoil_mass;
+  double missing_mass2; //square of missing invariant mass
+  double probability[5];
+  //double kaon_probability;
+  //double muon_probability;
+  //double electron_probability;
+  //double pion_probability;
+  //double proton_probability;
+  double particle_mass;
+  PairID_t pid;
+};
+
+
+
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
 {
@@ -100,10 +135,15 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
 
   declareProperty("MIN_RECOIL_MASS", MIN_RECOIL_MASS = 3.0); //GeV
   declareProperty("MAX_RECOIL_MASS", MAX_RECOIL_MASS = 3.2); //GeV
+  declareProperty("MIN_INVARIANT_MASS", MIN_INVARIANT_MASS = 3.0); //GeV
+  declareProperty("MAX_INVARIANT_MASS", MAX_INVARIANT_MASS = 3.2); //GeV
   declareProperty("MIN_KAON_MISSING_MASS", MIN_KAON_MISSING_MASS = 0.1); //GeV^2
   declareProperty("MAX_KAON_MISSING_MASS", MAX_KAON_MISSING_MASS = 0.6); //GeV^2
   declareProperty("MIN_MUON_MISSING_MASS", MIN_MUON_MISSING_MASS = 0); //GeV^2
   declareProperty("MAX_MUON_MISSING_MASS", MAX_MUON_MISSING_MASS = 0.1); //GeV^2
+
+  declareProperty("MIN_MISSING_MASS", MIN_MISSING_MASS = -0.1); //GeV^2
+  declareProperty("MAX_MISSING_MASS", MAX_MISSING_MASS = +0.1); //GeV^2
 
   declareProperty("CHECK_TOF", CHECK_TOF=1);
   declareProperty("CHECK_DEDX", CHECK_DEDX = 1);
@@ -787,21 +827,23 @@ StatusCode JpsiKK::execute()
     ParticleID *pid = ParticleID::instance();
     //loop over tracks oredered by energy
     int gidx=0; //good charged track idx
-    std::list<int> pions_plus; //positive pion candidate index
-    std::list<int> pions_minus; //negative pion candidate index
-    int npip=0; //number of positive pions
-    int npin=0; //number of negative pions
-    int nKp=0; //number of found positive kaons
-    int nKm=0; //number of found negative kaons
-    int nmup=0; //number of found positive muons
-    int nmum=0; //number of found negative muons
-    int nK=0; //total number of kaons
-    int nmu=0; //total number of muons
-    int npi=0; //total number of pions
+    std::list<int> pions_plus; //positive pion candidate index list
+    std::list<int> pions_minus; //negative pion candidate index list 
+    std::list<int> high_mom_plus; //positive particles with high momentum
+    std::list<int> high_mom_minus; //negative particles with high momentum
+    std::list<int> kaons_plus; //positive kaon candidate index list
+    std::list<int> muons_minus; //positive kaon candidate index list
+    std::list<int> muons_plus; //positive kaon candidate index list
+    //int nKp=0; //number of found positive kaons
+    //int nKm=0; //number of found negative kaons
+    //int nmup=0; //number of found positive muons
+    //int nmum=0; //number of found negative muons
+    //int nK=0; //total number of kaons
+    //int nmu=0; //total number of muons
     //int pip_idx=-999; //pion index
     //int pin_idx=-999; //pion index
-    int Kmup_idx=-999;
-    int Kmum_idx=-999;
+    //int Kmup_idx=-999;
+    //int Kmum_idx=-999;
     for(mmap_t::reverse_iterator ri=pmap.rbegin(); ri!=pmap.rend(); ++ri)
     {
       EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + ri->second;
@@ -858,68 +900,81 @@ StatusCode JpsiKK::execute()
       //if momentum below 0.5 GeV it could be pions
       if(mdc.p[i] < MAX_PION_MOMENTUM)
       {
-        npi++;
-        mdc.M[i]=0.13956995;
+        mdc.M[i]=PION_MASS;
         if(mdc.q[i]>0) 
         {
-          npip++;
           pions_plus.push_back(i);
         }
-        else
-        //if(mdc.q[i]<0) 
+        if(mdc.q[i]<0) 
         { 
-          npin++;
           pions_minus.push_back(i);
         }
       }
 
-      //check for KAONS or muons
+      //particles with high momentum could be kaons, muons, electrons, protons???, pions
       if(mdc.p[i]>std::min(MIN_KAON_MOMENTUM, MIN_MUON_MOMENTUM))
       {
-        if (
-            mdc.probmu[i] > mdc.probe[i] &&
-            mdc.probmu[i] > mdc.probpi[i] &&
-            mdc.probmu[i] > mdc.probK[i] &&
-            mdc.probmu[i] > mdc.probp[i]
-           )
+        if(mdc.q[i]<0) 
         {
-          nmu++;
-          mdc.M[i]=0.105658389;
-          if(mdc.q[i]>0) 
-          {
-            nmup++;
-            Kmup_idx = i;
-          }
-          else
-          {
-            nmum++;
-            Kmum_idx = i;
-          }
+          high_mom_minus.push_back(i);
         }
-        if (
-            mdc.probK[i] > mdc.probe[i] &&
-            mdc.probK[i] > mdc.probpi[i] &&
-            mdc.probK[i] > mdc.probmu[i] &&
-            mdc.probK[i] > mdc.probp[i]
-           )
+        if(mdc.q[i]>0) 
         {
-          nK++;
-          mdc.M[i]=0.493677;
-          if(mdc.q[i]>0) 
-          {
-            nKp++;
-            Kmup_idx = i;
-          }
-          else
-          {
-            nKm++;
-            Kmum_idx = i;
-          }
+          high_mom_plus.push_back(i);
         }
       }
 
+      //check for KAONS or muons
+      //if(mdc.p[i]>std::min(MIN_KAON_MOMENTUM, MIN_MUON_MOMENTUM))
+      //{
+      //  if (
+      //      mdc.probmu[i] > mdc.probe[i] &&
+      //      mdc.probmu[i] > mdc.probpi[i] &&
+      //      mdc.probmu[i] > mdc.probK[i] &&
+      //      mdc.probmu[i] > mdc.probp[i]
+      //     )
+      //  {
+      //    //nmu++;
+      //    mdc.M[i]=MUON_MASS;
+      //    if(mdc.q[i]>0) 
+      //    {
+      //      //nmup++;
+      //      //Kmup_idx = i;
+      //      muons_plus.push_back(i);
+      //    }
+      //    if(mdc.q[i]<0) 
+      //    {
+      //      //nmum++;
+      //      //Kmum_idx = i;
+      //      muons_minus.push_back(i);
+      //    }
+      //  }
+      //  if (
+      //      mdc.probK[i] > mdc.probe[i] &&
+      //      mdc.probK[i] > mdc.probpi[i] &&
+      //      mdc.probK[i] > mdc.probmu[i] &&
+      //      mdc.probK[i] > mdc.probp[i]
+      //     )
+      //  {
+      //    //nK++;
+      //    mdc.M[i]=KAON_MASS;
+      //    if(mdc.q[i]>0) 
+      //    {
+      //      //nKp++;
+      //      //Kmup_idx = i;
+      //      kaons_plus.push_back(i);
+      //    }
+      //    if(mdc.q[i]<0) 
+      //    {
+      //      //nKm++;
+      //      //Kmum_idx = i;
+      //      kaons_minus.push_back(i);
+      //    }
+      //  }
+      //}
 
-      mdc.Emdc+=sqrt(mdc.p[i]*mdc.p[i]+PI_MESON_MASS*PI_MESON_MASS);
+
+      mdc.Emdc+=sqrt(mdc.p[i]*mdc.p[i]+sq(PION_MASS));
 
 
       /* Calculate sphericity tensor */
@@ -1087,7 +1142,7 @@ StatusCode JpsiKK::execute()
     ///* fill sphericity */
     //mdc.S = S();
     
-    //we must have at least to opposite charge pions
+    //we must have at least two opposite charge pions
     if(pions_plus.size()==0 || pions_minus.size()==0)  goto SKIP_CHARGED;
     //find pairs
     std::list<PionPair_t> pion_pairs;
@@ -1099,8 +1154,8 @@ StatusCode JpsiKK::execute()
         EvtRecTrackIterator itTrk_plus = evtRecTrkCol->begin() + *it_plus;
         RecMdcTrack * pion_minus = (*itTrk_minus)-> mdcTrack();
         RecMdcTrack * pion_plus  = (*itTrk_plus) -> mdcTrack();
-        HepLorentzVector P_minus = pion_minus->p4(PI_MESON_MASS); //pion vector
-        HepLorentzVector P_plus =  pion_plus->p4(PI_MESON_MASS); //pion vector
+        HepLorentzVector P_minus = pion_minus->p4(PION_MASS); //pion vector
+        HepLorentzVector P_plus =  pion_plus->p4(PION_MASS); //pion vector
         HepLorentzVector P_recoil = P_psip  - P_minus - P_plus;
         double Mrec = P_recoil.m(); //calculate recoil mass
         pid->setRecTrack(*itTrk_minus);
@@ -1118,8 +1173,8 @@ StatusCode JpsiKK::execute()
           PionPair_t pair;
           pair.plus_index = *it_plus;
           pair.minus_index = *it_minus;
-          //pair.pid_pion_probability = pion_minus_prob*pion_plus_prob;
-          pair.pid_pion_probability = 1;
+          pair.pid_pion_probability = pion_minus_prob*pion_plus_prob;
+          //pair.pid_pion_probability = 1;
           pair.recoil_mass = Mrec;
           pair.P_minus = P_minus;
           pair.P_plus = P_plus;
@@ -1135,9 +1190,113 @@ StatusCode JpsiKK::execute()
       if(pair->pid_pion_probability > best_pion_pair_iterator->pid_pion_probability) best_pion_pair_iterator = pair;
     }
     mdc.Mrec = best_pion_pair_iterator->recoil_mass;
-    HepLorentzVector P_pip = best_pion_pair_iterator->P_plus;
-    HepLorentzVector P_pin = best_pion_pair_iterator->P_minus;
+    HepLorentzVector P_pion_minus = best_pion_pair_iterator->P_minus;
+    HepLorentzVector P_pion_plus = best_pion_pair_iterator->P_plus;
     good_pion_pairs_number++;
+
+    //skip event if no high energy particles 
+    if(high_mom_plus.empty() && high_mom_minus.empty())  goto SKIP_CHARGED;
+
+    //create all pairs with  invariant mass close to J/psi
+    std::list<ChargedPair_t> charged_pairs;
+    //std::list<ChargedPair_t> charged_pairs[5];
+    for(std::list<int>::iterator it_minus=high_mom_minus.begin(); it_minus!=high_mom_minus.end(); it_minus++)
+      for(std::list<int>::iterator it_plus=high_mom_plus.begin(); it_plus!=high_mom_plus.end(); it_plus++)
+      {
+        EvtRecTrackIterator itTrk_minus = evtRecTrkCol->begin() + *it_minus;
+        EvtRecTrackIterator itTrk_plus = evtRecTrkCol->begin() + *it_plus;
+        RecMdcTrack * mdcTrk_minus = (*itTrk_minus)-> mdcTrack();
+        RecMdcTrack * mdcTrk_plus  = (*itTrk_plus) -> mdcTrack();
+        for(int i=0;i<5; i++)
+        {
+          HepLorentzVector P_minus = mdcTrk_minus->p4(XMASS[i]); //pion vector
+          HepLorentzVector P_plus =  mdcTrk_plus->p4(XMASS[i]); //pion vector
+          HepLorentzVector P_sum = P_minus + P_plus;
+          HepLorentzVector P_recoil = P_psip  - P_sum;
+          double Mrec = P_recoil.m(); //calculate recoil mass
+          double Minv =  P_sum.m();
+          if(MIN_INVARIANT_MASS < Minv && Minv < MAX_INVARIANT_MASS)
+          {
+            pid->setRecTrack(*itTrk_minus);
+            pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
+            pid->identify(pid->all()); 
+            pid->calculate();
+            double probKaon_minus = pid->probKaon();
+            double probMuon_minus = pid->probMuon();
+            double probElectron_minus = pid->probElectron();
+            double probPion_minus = pid->probPion();
+            double probProton_minus = pid->probProton();
+
+            pid->setRecTrack(*itTrk_plus);
+            pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
+            pid->identify(pid->all()); 
+            pid->calculate();
+            double probKaon_plus = pid->probKaon();
+            double probMuon_plus = pid->probMuon();
+            double probElectron_plus = pid->probElectron();
+            double probPion_plus = pid->probPion();
+            double probProton_plus = pid->probProton();
+
+            ChargedPair_t pair;
+            pair.minus_index = *it_minus;
+            pair.plus_index = *it_plus;
+            pair.P_minus = P_minus;
+            pair.P_plus = P_plus;
+            pair.recoil_mass = Mrec;
+            pair.invariant_mass = Minv;
+            //pair.kaon_probability = probKaon_minus*probKaon_plus;
+            //pair.muon_probability = probMuon_minus*probMuon_plus;
+            //pair.electron_probability = probElectron_minus*probElectron_plus;
+            //pair.pion_probability = probPion_minus*probPion_plus;
+            //pair.proton_probability = probProton_minus*probProton_plus;
+            pair.probability[PID_KAON] = probKaon_minus*probKaon_plus;
+            pair.probability[PID_MUON] = probMuon_minus*probMuon_plus;
+            pair.probability[PID_ELECTRON] = probElectron_minus*probElectron_plus;
+            pair.probability[PID_PION] = probPion_minus*probPion_plus;
+            pair.probability[PID_PROTON] = probProton_minus*probProton_plus;
+            pair.particle_mass = XMASS[i];
+            pair.pid = i;
+            charged_pairs.push_back(pair);
+          }
+        }
+      }
+    //no charged pairs with high momentum with appropriate invariant mass found
+    if(charged_pairs.empty()) goto SKIP_CHARGED;
+
+
+    //now analize pairs
+    //find best pairs with most probable pid in each category
+    list<ChargedPair_t>::iterator best_pair[5];
+    for(list<ChargedPair_t>::iterator it= charged_pairs.begin(); it!=charged_pairs.end(); i++)
+    {
+      for(int pid=0; pid<5; pid++)
+      {
+        if( pid == it->pid)
+        {
+          if(it->probability[pid] >= best_pair[pid]->probability[pid])  best_pair[pid] = it;
+        }
+      }
+    }
+
+    int channel = 0;
+    for(int pid=0; pid<5;pid++)
+    {
+      if( best_pair[pid]->probability[pid] > best_pair[channel]->probability[pid]) channel=pid;
+    }
+    HepLorentzVector P_charged_minus = best_pair[channel]->P_minus;
+    HepLorentzVector P_charged_plus = best_pair[channel]->P_plus;
+    HepLorentzVector P_sum = P_charged_minus + P_charged_plus;
+    HepLorentzVector P_mis = P_psip - P_pion_minus - P_pion_plus  - P_charged_minus - P_charged_plus;
+    mdc.Mmiss = P_mis.m2();
+
+    //select only if no missing mass here
+    if(mdc.Mmiss < MIN_MISSING_MASS || MAX_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
+
+
+    mdc.jpsi_decay_channel = channel;
+
+    
+
     //calculate pion energy 
     //double Epin = sqrt(mdc.p[pin_idx]*mdc.p[pin_idx] + mdc.M[pin_idx]*mdc.M[pin_idx]);
     //double Epip = sqrt(mdc.p[pip_idx]*mdc.p[pip_idx] + mdc.M[pip_idx]*mdc.M[pip_idx]);
@@ -1150,44 +1309,45 @@ StatusCode JpsiKK::execute()
 
     //and other must be Kaons or muons
     //if( (nKp!=1 || nKm!=1) && (nmup!=1 || nmum!=1)) goto SKIP_CHARGED;
-    HepLorentzVector Pp(0,0,0,0);
-    HepLorentzVector Pm(0,0,0,0);
-    if(nKp>0 || nmup>0)
-    {
-      double Ep = sqrt(mdc.p[Kmup_idx]*mdc.p[Kmup_idx] + mdc.M[Kmup_idx]*mdc.M[Kmup_idx]);
-      Pp=HepLorentzVector(mdc.px[Kmup_idx],mdc.py[Kmup_idx],mdc.pz[Kmup_idx], Ep);
-    }
-    if(nKm>0 || nmum>0)
-    {
-      double Em = sqrt(mdc.p[Kmum_idx]*mdc.p[Kmum_idx] + mdc.M[Kmum_idx]*mdc.M[Kmum_idx]);
-      Pm=HepLorentzVector(mdc.px[Kmum_idx],mdc.py[Kmum_idx],mdc.pz[Kmum_idx], Em);
-    }
-    HepLorentzVector P = Pp + Pm;
-    HepLorentzVector Pmis = P_psip - P_pip - P_pin - Pp - Pm;
-    mdc.Mmiss = Pmis.m2();
-    if( (nKp!=1 && nKm!=1) || (nmup!=1 && nmum!=1))
-    {
-    //calculate the for momentum
-      if(nKp==1) mdc.MKK = P.m();
-      if(nmup==1) mdc.Mmumu = P.m();
-    }
+    //HepLorentzVector Pp(0,0,0,0);
+    //HepLorentzVector Pm(0,0,0,0);
+    //if(nKp>0 || nmup>0)
+    //{
+    //  double Ep = sqrt(mdc.p[Kmup_idx]*mdc.p[Kmup_idx] + mdc.M[Kmup_idx]*mdc.M[Kmup_idx]);
+    //  Pp=HepLorentzVector(mdc.px[Kmup_idx],mdc.py[Kmup_idx],mdc.pz[Kmup_idx], Ep);
+    //}
+    //if(nKm>0 || nmum>0)
+    //{
+    //  double Em = sqrt(mdc.p[Kmum_idx]*mdc.p[Kmum_idx] + mdc.M[Kmum_idx]*mdc.M[Kmum_idx]);
+    //  Pm=HepLorentzVector(mdc.px[Kmum_idx],mdc.py[Kmum_idx],mdc.pz[Kmum_idx], Em);
+    //}
+    //HepLorentzVector P = Pp + Pm;
+    //HepLorentzVector Pmis = P_psip - P_pip - P_pin - Pp - Pm;
+    //mdc.Mmiss = Pmis.m2();
+    //if( (nKp!=1 && nKm!=1) || (nmup!=1 && nmum!=1))
+    //{
+    ////calculate the for momentum
+    //  if(nKp==1) mdc.MKK = P.m();
+    //  if(nmup==1) mdc.Mmumu = P.m();
+    //}
 
-    //tag KK decay channel. One kaon is missing
-    if( nKp < 2 && nKm < 2 && 0 < (nKp + nKm) && (nKp + nKm) < 3 && (nmup + nmum) == 0 ) 
-    {
-      mdc.jpsi_decay_channel = 0;
-    }
-    //tag mumu decay channel. One muon is missing
-    if( nmup <2 && nmum < 2 && 0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) 
-    {
-      mdc.jpsi_decay_channel = 1;
-    }
+    ////tag KK decay channel. One kaon is missing
+    //if( nKp < 2 && nKm < 2 && 0 < (nKp + nKm) && (nKp + nKm) < 3 && (nmup + nmum) == 0 ) 
+    //{
+    //  mdc.jpsi_decay_channel = 0;
+    //}
+    ////tag mumu decay channel. One muon is missing
+    //if( nmup <2 && nmum < 2 && 0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) 
+    //{
+    //  mdc.jpsi_decay_channel = 1;
+    //}
     //could not find required configuration
-    if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
 
-    //select event with missing particle using invariant mass
-    if((nKp+nKm) == 1 && mdc.Mmiss < MIN_KAON_MISSING_MASS || MAX_KAON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
-    if((nmup+nmum) == 1 && mdc.Mmiss < MIN_MUON_MISSING_MASS || MAX_MUON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
+    //if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
+
+    ////select event with missing particle using invariant mass
+    //if((nKp+nKm) == 1 && mdc.Mmiss < MIN_KAON_MISSING_MASS || MAX_KAON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
+    //if((nmup+nmum) == 1 && mdc.Mmiss < MIN_MUON_MISSING_MASS || MAX_MUON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
     
 
     /* ================================================================================= */
