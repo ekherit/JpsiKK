@@ -553,7 +553,7 @@ void JpsiKK::InitData(long nchtrack, long nneutrack)
     mdc.theta[i]=-1000;
     mdc.phi[i]=-1000;
     mdc.q[i]=-1000;
-    mdc.isemc[i]=0;
+    mdc.isemc[i]=-1000;
     mdc.temc[i]=-1000;
     mdc.ncrstl[i]=-1000;
     mdc.cellId[i]=-1000;
@@ -904,7 +904,7 @@ StatusCode JpsiKK::execute()
 
       if((*itTrk)->isEmcShowerValid())
       {
-        mdc.isemc = true;
+        mdc.isemc[i] = 1;
         RecEmcShower *emcTrk = (*itTrk)->emcShower(); //Electro Magnet Calorimeer
         // Add EMC information
         mdc.E[i]     =  emcTrk->energy();
@@ -915,6 +915,10 @@ StatusCode JpsiKK::execute()
         mdc.module[i] = emcTrk->module();
         mdc.temc[i] = emcTrk->time();
         mdc.Eemc+=mdc.E[i]; //Accumulate energy deposition
+      }
+      else
+      {
+        mdc.isemc[i]=0;
       }
 
       HepLorentzVector P(mdc.px[i], mdc.py[i], mdc.pz[i], mdc.E[i]);
