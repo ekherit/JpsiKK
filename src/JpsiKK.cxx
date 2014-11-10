@@ -1255,7 +1255,7 @@ StatusCode JpsiKK::execute()
             pair.probability[PID_PION] = probPion_minus*probPion_plus;
             pair.probability[PID_PROTON] = probProton_minus*probProton_plus;
             pair.particle_mass = XMASS[i];
-            pair.pid = i;
+            pair.pid = (PairID_t)i;
             charged_pairs.push_back(pair);
           }
         }
