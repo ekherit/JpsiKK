@@ -132,6 +132,7 @@ StatusCode JpsiKK::initialize(void)
   tau_events=0;
   bhabha_events=0;
   gg_event_writed=0;
+  ngood_pion_pairs = 0;
 
   StatusCode status;
   NTuplePtr my_nt(ntupleSvc(), "FILE1/mhadr");
@@ -396,6 +397,7 @@ StatusCode JpsiKK::initialize(void)
       status = head_tuple->addItem ("nntr_rms", head_nneutral_tracks_rms);
       status = head_tuple->addItem ("nttr", head_ntotal_tracks);
       status = head_tuple->addItem ("nttr_rms", head_ntotal_tracks_rms);
+      status = head_tuple->addItem ("ngood_pion_pairs",ngood_pion_pairs);
     }
     else
     {
@@ -1134,6 +1136,7 @@ StatusCode JpsiKK::execute()
     mdc.Mrec = best_pion_pair_iterator->recoil_mass;
     HepLorentzVector P_pip = best_pion_pair_iterator->P_plus;
     HepLorentzVector P_pin = best_pion_pair_iterator->P_minus;
+    ngood_pion_pairs++;
     //calculate pion energy 
     //double Epin = sqrt(mdc.p[pin_idx]*mdc.p[pin_idx] + mdc.M[pin_idx]*mdc.M[pin_idx]);
     //double Epip = sqrt(mdc.p[pip_idx]*mdc.p[pip_idx] + mdc.M[pip_idx]*mdc.M[pip_idx]);
@@ -1353,7 +1356,7 @@ StatusCode JpsiKK::finalize()
 {
   std::cout << "Event proceed: " << event_proceed << std::endl;
   std::cout << "Event selected: " << event_write << std::endl;
-  std::cout << "Tau candidates: " << tau_events << endl;
+  std::cout << "Good pion pairs selected: " << ngood_pion_pairs << endl;
   std::cout << "Bhabha candidates: " << bhabha_events << endl;
   std::cout << "Gamma-Gamma candidates: " << gg_event_writed << endl;
   std::cout << "Selection efficiency: " << event_write/double(event_proceed) << std::endl;

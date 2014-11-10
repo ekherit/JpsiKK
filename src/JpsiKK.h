@@ -302,6 +302,7 @@ class JpsiKK : public Algorithm
   NTuple::Item<double> head_nneutral_tracks_rms;
   NTuple::Item<double> head_ntotal_tracks;
   NTuple::Item<double> head_ntotal_tracks_rms;
+  NTuple::Item<long>   ngood_pion_pairs;
   
   ibn::averager <double> nchtr_a; //averager for number of charged tracks
   ibn::averager <double> nntr_a; //averager for number of neutral tracks
