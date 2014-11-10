@@ -43,6 +43,16 @@ class JpsiKK : public Algorithm
 	int MAX_CHARGED_TRACKS; //minimum charged tracks in selection
 	double IP_MAX_RHO, IP_MAX_Z; //interection point cut
   double MAX_COS_THETA; //maximum  cos(theta) for good charged track
+
+  double MIN_RECOIL_MASS; //minimum recoil mass cut
+  double MAX_RECOIL_MASS; //minimum recoil mass cut
+  double MIN_KAON_MISSING_MASS;   //minimum kaon missing mass
+  double MAX_KAON_MISSING_MASS;   //minimum kaon missing mass
+  double MIN_MUON_MISSING_MASS;   //minimum muon missing mass
+  double MAX_MUON_MISSING_MASS;   //minimum muon missing mass
+
+  double MAX_PION_MOMENTUM; //maximum pion momentum
+
   int STRICT_TAU_CUT;
 	int USE_IPCUT; //use interection point cut
 	int CHECK_TOF; //use toff.

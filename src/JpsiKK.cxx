@@ -81,6 +81,16 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("IP_MAX_Z", IP_MAX_Z = 10.0); //cm?
   declareProperty("IP_MAX_RHO", IP_MAX_RHO = 1.0); //cm?
   declareProperty("MAX_COS_THETA", MAX_COS_THETA = 0.93); //cm?
+
+  declareProperty("MAX_PION_MOMENTUM", MAX_PION_MOMENTUM = 0.45); //GeV
+
+  declareProperty("MIN_RECOIL_MASS", MIN_RECOIL_MASS = 3.0); //GeV
+  declareProperty("MAX_RECOIL_MASS", MAX_RECOIL_MASS = 3.2); //GeV
+  declareProperty("MIN_KAON_MISSING_MASS", MIN_KAON_MISSING_MASS = 0.1); //GeV^2
+  declareProperty("MAX_KAON_MISSING_MASS", MAX_KAON_MISSING_MASS = 0.6); //GeV^2
+  declareProperty("MIN_MUON_MISSING_MASS", MIN_MUON_MISSING_MASS = 0); //GeV^2
+  declareProperty("MAX_MUON_MISSING_MASS", MAX_MUON_MISSING_MASS = 0.1); //GeV^2
+
   declareProperty("CHECK_TOF", CHECK_TOF=1);
   declareProperty("CHECK_DEDX", CHECK_DEDX = 1);
   declareProperty("CHECK_MUC", CHECK_MUC = 1);
@@ -725,7 +735,7 @@ StatusCode JpsiKK::execute()
   {
     /*  loop over charged track */
     mdc.ntrack=0;
-    //look thru the charged tracks and sort them on energy
+    //look thru the charged tracks and sort them on momentum
     //count good charged tracks wich come from interaction point
     //and has cos(theta) < 0.93
     for(unsigned idx = 0; idx < evtRecEvent->totalCharged(); idx++)
@@ -748,19 +758,14 @@ StatusCode JpsiKK::execute()
       }
       pmap.insert(pair_t(mdcTrk->p(),idx));
     }
-    std::cout << "Number of good charged tracks: " << pmap.size() << " MIN_CHARGED_TRACKS = " << MIN_CHARGED_TRACKS << ", MAX_CHARGED_TRACKS = " << MAX_CHARGED_TRACKS << std::endl;
-    /* Two or more charged tracks witch signal in EMC */
     good_charged_tracks=pmap.size();
-    //if no valid charged tracks
-    //if(MIN_CHARGED_TRACKS <  Emap.size() || Emap.size() < MAX_CHARGED_TRACKS) goto SKIP_CHARGED;
     if(good_charged_tracks < MIN_CHARGED_TRACKS   || MAX_CHARGED_TRACKS < good_charged_tracks) goto SKIP_CHARGED;
-    std::cout << "Number of good charged tracks: " << MIN_CHARGED_TRACKS << " < " << good_charged_tracks << " < " << MAX_CHARGED_TRACKS  << std::endl;
 
     //now fill the arrayes using indexes sorted by energy
-    mdc.ntrack =pmap.size(); //save number of good charged tracks
-    muc.ntrack =pmap.size();
-    dedx.ntrack=pmap.size();
-    tof.ntrack =pmap.size();
+    mdc.ntrack =good_charged_tracks; //save number of good charged tracks
+    muc.ntrack =good_charged_tracks;
+    dedx.ntrack=good_charged_tracks;
+    tof.ntrack =good_charged_tracks;
     Sphericity S;
 
     //particle id 
@@ -834,7 +839,7 @@ StatusCode JpsiKK::execute()
       }
 
       //if momentum below 0.5 GeV it could be pions
-      if(mdc.p[i] < 0.5)
+      if(mdc.p[i] < MAX_PION_MOMENTUM)
       {
         npi++;
         mdc.M[i]=0.13956995;
@@ -1074,7 +1079,7 @@ StatusCode JpsiKK::execute()
     HepLorentzVector P_pin(mdc.px[pin_idx],mdc.py[pin_idx],mdc.pz[pin_idx], Epin); //pion vector
     HepLorentzVector P_recoil = P_psip  - P_pip - P_pin;
     mdc.Mrec = P_recoil.m(); //recoil mass of two pions
-    if(mdc.Mrec < 3.0 || 3.2 < mdc.Mrec) goto SKIP_CHARGED;
+    if(mdc.Mrec < MIN_RECOIL_MASS || MAX_RECOIL_MASS < mdc.Mrec) goto SKIP_CHARGED;
 
     //and other must be Kaons or muons
     //if( (nKp!=1 || nKm!=1) && (nmup!=1 || nmum!=1)) goto SKIP_CHARGED;
@@ -1106,6 +1111,22 @@ StatusCode JpsiKK::execute()
     if( nmup <2 && nmum < 2 && 0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) mdc.jpsi_decay_channel = 1;
     //could not find required configuration
     if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
+
+
+    //missing mass should correspond mu or K
+    if(good_charged_tracks == 3)
+    {
+      //kaon is missing
+      if(mdc.jpsi_decay_channel == 0)
+      {
+        if(mdc.Mmiss < MIN_KAON_MISSING_MASS || MAX_KAON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
+      }
+      //muon is missing
+      if(mdc.jpsi_decay_channel == 1)
+      {
+        if(mdc.Mmiss < MIN_MUON_MISSING_MASS || MAX_MUON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
+      }
+    }
     
 
     /* ================================================================================= */
