@@ -76,8 +76,8 @@ inline double sq(double x) { return x*x; }
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
 {
-  declareProperty("MAX_CHARGED_TRACKS", MIN_CHARGED_TRACKS=4); //maximum number of charged tracks in selection
-  declareProperty("MIN_CHARGED_TRACKS", MIN_CHARGED_TRACKS=4); //minimum number of charged tracks in selection
+  declareProperty("MAX_CHARGED_TRACKS", MAX_CHARGED_TRACKS=10); //maximum number of charged tracks in selection
+  declareProperty("MIN_CHARGED_TRACKS", MIN_CHARGED_TRACKS=3); //minimum number of charged tracks in selection
   declareProperty("IP_MAX_Z", IP_MAX_Z = 10.0); //cm?
   declareProperty("IP_MAX_RHO", IP_MAX_RHO = 1.0); //cm?
   declareProperty("MAX_COS_THETA", MAX_COS_THETA = 0.93); //cm?
@@ -553,7 +553,7 @@ void JpsiKK::InitData(long nchtrack, long nneutrack)
     mdc.theta[i]=-1000;
     mdc.phi[i]=-1000;
     mdc.q[i]=-1000;
-    mdc.isemc[i]=-1000;
+    mdc.isemc[i]=0;
     mdc.temc[i]=-1000;
     mdc.ncrstl[i]=-1000;
     mdc.cellId[i]=-1000;
@@ -724,14 +724,8 @@ StatusCode JpsiKK::execute()
 
   if(evtRecEvent->totalCharged()  >= MIN_CHARGED_TRACKS)
   {
-    double  hP[4]={0,0}; //to save maximum momentum
-    Hep3Vector hPp[2];//Two high momentum
-    double  hE[2]={0, 0};
-    Hep3Vector hEp[2];//Two high momentum
     /*  loop over charged track */
-    //mdc.ntrack=evtRecEvent->totalCharged();
     mdc.ntrack=0;
-
     //look thru the charged tracks and sort them on energy
     //count good charged tracks wich come from interaction point
     //and has cos(theta) < 0.93
@@ -739,19 +733,22 @@ StatusCode JpsiKK::execute()
     {
       EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + idx;
       if(!(*itTrk)->isMdcTrackValid()) continue;  //use only valid charged tracks
-      if(!(*itTrk)->isEmcShowerValid()) continue; //charged track must have energy deposition in EMC
       RecMdcTrack *mdcTrk = (*itTrk)->mdcTrack();  //main drift chambe
-      RecEmcShower *emcTrk = (*itTrk)->emcShower(); //Electro Magnet Calorimeer
-
+      //calculate interaction point distance
       double rvxy=-9999,rvz=-9999,rvphi=-9999;
       calculate_vertex(mdcTrk,rvxy,rvz,rvphi); //find distance to interaction point
       bool is_fromIP = fabs(rvz)< IP_MAX_Z && fabs(rvxy)<IP_MAX_RHO;  //tracks begin near interaction point
       bool is_good_track = is_fromIP && fabs(cos(mdcTrk->theta()))<MAX_COS_THETA; //track is good
-      if(!is_good_track) continue;
-      double E = emcTrk->energy();
+      if(!is_good_track || !is_fromIP) continue;
+      //if(!(*itTrk)->isEmcShowerValid()) continue; //charged track must have energy deposition in EMC
+      if((*itTrk)->isMdcTrackValid()) 
+      {
+        RecEmcShower *emcTrk = (*itTrk)->emcShower();
+        double E = emcTrk->energy();
+        Emap.insert(pair_t(E,idx));
+      }
       double p = mdcTrk->p();
       pmap.insert(pair_t(p,idx));
-      Emap.insert(pair_t(E,idx));
     }
     /* Two or more charged tracks witch signal in EMC */
     good_charged_tracks=Emap.size();
@@ -760,10 +757,10 @@ StatusCode JpsiKK::execute()
     if(Emap.size() < MIN_CHARGED_TRACKS   || MAX_CHARGED_TRACKS > Emap.size()) goto SKIP_CHARGED;
 
     //now fill the arrayes using indexes sorted by energy
-    mdc.ntrack=Emap.size(); //save number of good charged tracks
-    muc.ntrack=Emap.size();
-    dedx.ntrack=Emap.size();
-    tof.ntrack=Emap.size();
+    mdc.ntrack =pmap.size(); //save number of good charged tracks
+    muc.ntrack =pmap.size();
+    dedx.ntrack=pmap.size();
+    tof.ntrack =pmap.size();
     Sphericity S;
 
     //particle id 
@@ -783,11 +780,11 @@ StatusCode JpsiKK::execute()
     int pin_idx=-999; //pion index
     int Kmup_idx=-999;
     int Kmum_idx=-999;
-    for(mmap_t::reverse_iterator ri=Emap.rbegin(); ri!=Emap.rend(); ++ri)
+    for(mmap_t::reverse_iterator ri=pmap.rbegin(); ri!=pmap.rend(); ++ri)
     {
       EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + ri->second;
       RecMdcTrack *mdcTrk = (*itTrk)->mdcTrack();  //main drift chambe
-      RecEmcShower *emcTrk = (*itTrk)->emcShower(); //Electro Magnet Calorimeer
+      //RecEmcShower *emcTrk = (*itTrk)->emcShower(); //Electro Magnet Calorimeer
       double rvxy=-9999,rvz=-9999,rvphi=-9999;
       calculate_vertex(mdcTrk,rvxy,rvz,rvphi); //find distance to interaction point
       //select good tracks before
@@ -905,16 +902,20 @@ StatusCode JpsiKK::execute()
       /* Calculate sphericity tensor */
       S.add(mdcTrk->p3());
 
-      // Add EMC information
-      mdc.E[i]     =  emcTrk->energy();
-      mdc.dE[i]    =  emcTrk->dE();
-      mdc.ncrstl[i] = emcTrk->numHits();
-      mdc.status[i] = emcTrk->status();
-      mdc.cellId[i] = emcTrk->cellId();
-      mdc.module[i] = emcTrk->module();
-      mdc.temc[i] = emcTrk->time();
-
-      mdc.Eemc+=mdc.E[i]; //Accumulate energy deposition
+      if((*itTrk)->isEmcShowerValid())
+      {
+        mdc.isemc = true;
+        RecEmcShower *emcTrk = (*itTrk)->emcShower(); //Electro Magnet Calorimeer
+        // Add EMC information
+        mdc.E[i]     =  emcTrk->energy();
+        mdc.dE[i]    =  emcTrk->dE();
+        mdc.ncrstl[i] = emcTrk->numHits();
+        mdc.status[i] = emcTrk->status();
+        mdc.cellId[i] = emcTrk->cellId();
+        mdc.module[i] = emcTrk->module();
+        mdc.temc[i] = emcTrk->time();
+        mdc.Eemc+=mdc.E[i]; //Accumulate energy deposition
+      }
 
       HepLorentzVector P(mdc.px[i], mdc.py[i], mdc.pz[i], mdc.E[i]);
       //mdc.M[i]=P.m();
