@@ -1279,7 +1279,7 @@ StatusCode JpsiKK::execute()
     }
 
     PairID_t channel = PID_KAON; //allways found somebody
-    for(int pid=0; pid<5;pid++)
+    for(PairID_t pid=0; pid<5;pid++)
     {
       if( best_pair[pid]->probability[pid] > best_pair[channel]->probability[pid]) channel=pid;
     }
