@@ -1267,7 +1267,7 @@ StatusCode JpsiKK::execute()
     //now analize pairs
     //find best pairs with most probable pid in each category
     list<ChargedPair_t>::iterator best_pair[5];
-    for(list<ChargedPair_t>::iterator it= charged_pairs.begin(); it!=charged_pairs.end(); i++)
+    for(list<ChargedPair_t>::iterator it= charged_pairs.begin(); it!=charged_pairs.end(); it++)
     {
       for(int pid=0; pid<5; pid++)
       {
@@ -1278,7 +1278,7 @@ StatusCode JpsiKK::execute()
       }
     }
 
-    int channel = 0;
+    PairID_t channel = PID_KAON; //allways found somebody
     for(int pid=0; pid<5;pid++)
     {
       if( best_pair[pid]->probability[pid] > best_pair[channel]->probability[pid]) channel=pid;
