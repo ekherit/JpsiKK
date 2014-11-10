@@ -1117,7 +1117,8 @@ StatusCode JpsiKK::execute()
           PionPair_t pair;
           pair.plus_index = *it_plus;
           pair.minus_index = *it_minus;
-          pair.pid_pion_probability = pion_minus_prob*pion_plus_prob;
+          //pair.pid_pion_probability = pion_minus_prob*pion_plus_prob;
+          pair.pid_pion_probability = 1;
           pair.recoil_mass = Mrec;
           pair.P_minus = P_minus;
           pair.P_plus = P_plus;
