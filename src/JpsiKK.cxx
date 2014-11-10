@@ -1163,7 +1163,7 @@ StatusCode JpsiKK::execute()
     good_pion_pairs_number++;
 
     //skip event if no high energy particles 
-    if(high_mom_plus.empty() && high_mom_minus.empty())  goto SKIP_CHARGED;
+    if(high_mom_plus.empty() || high_mom_minus.empty())  goto SKIP_CHARGED;
 
     //create all pairs with  invariant mass close to J/psi
     std::list<ChargedPair_t> charged_pairs;
