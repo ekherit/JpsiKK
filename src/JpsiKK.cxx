@@ -1239,13 +1239,18 @@ StatusCode JpsiKK::execute()
     //now analize pairs
     //find best pairs with most probable pid in each category
     list<ChargedPair_t>::iterator best_pair[5];
+    double prob[5]={0,0,0,0,0};
     for(list<ChargedPair_t>::iterator it= charged_pairs.begin(); it!=charged_pairs.end(); it++)
     {
       for(int pid=0; pid<5; pid++)
       {
         if( pid == it->pid)
         {
-          if(it->probability[pid] >= best_pair[pid]->probability[pid])  best_pair[pid] = it;
+          if(it->probability[pid] >= prob[pid]) 
+          {
+            best_pair[pid] = it;
+            prob[pid] = it->probability[pid];
+          }
         }
       }
     }
