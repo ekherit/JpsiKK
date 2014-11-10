@@ -1260,6 +1260,8 @@ StatusCode JpsiKK::execute()
     PairID_t channel = PID_KAON; //allways found somebody
     for(int pid=0; pid<5;pid++)
     {
+      cout << pid << " " << best_pair[pid]->pid << " " << endl;
+      cout << best_pair[pid]->probability[pid] << endl;
       if( best_pair[pid]->probability[pid] > best_pair[channel]->probability[pid]) channel= (PairID_t)pid;
     }
     std::cout << " 3pion pairs: " << good_pion_pairs_number << ",    high momentum pairs: " << good_high_mom_pairs_number << std::endl;
