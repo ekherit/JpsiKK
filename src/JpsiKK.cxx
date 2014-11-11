@@ -1111,7 +1111,7 @@ StatusCode JpsiKK::execute()
     if(CHECK_MC) mc.ntrack=gidx;
 
     //we must have at least two opposite charge pions
-    if(pions_plus.size()==0 || pions_minus.size()==0)  goto SKIP_CHARGED;
+    if(pions_plus.empty() || pions_minus.empty())  goto SKIP_CHARGED;
     //find pairs
     std::list<PionPair_t> pion_pairs;
     HepLorentzVector P_psip(0.040546,0,0,3.686); //initial vector of psip
@@ -1142,7 +1142,6 @@ StatusCode JpsiKK::execute()
           pair.plus_index = *it_plus;
           pair.minus_index = *it_minus;
           pair.pid_pion_probability = pion_minus_prob*pion_plus_prob;
-          //pair.pid_pion_probability = 1;
           pair.recoil_mass = Mrec;
           pair.P_minus = P_minus;
           pair.P_plus = P_plus;
@@ -1212,11 +1211,6 @@ StatusCode JpsiKK::execute()
             pair.P_plus = P_plus;
             pair.recoil_mass = Mrec;
             pair.invariant_mass = Minv;
-            //pair.kaon_probability = probKaon_minus*probKaon_plus;
-            //pair.muon_probability = probMuon_minus*probMuon_plus;
-            //pair.electron_probability = probElectron_minus*probElectron_plus;
-            //pair.pion_probability = probPion_minus*probPion_plus;
-            //pair.proton_probability = probProton_minus*probProton_plus;
             pair.probability[PID_KAON] = probKaon_minus*probKaon_plus;
             pair.probability[PID_MUON] = probMuon_minus*probMuon_plus;
             pair.probability[PID_ELECTRON] = probElectron_minus*probElectron_plus;
@@ -1233,13 +1227,9 @@ StatusCode JpsiKK::execute()
     if(charged_pairs.empty()) goto SKIP_CHARGED;
     good_high_mom_pairs_number++;
 
-    //std::cout << "1 pion pairs: " << good_pion_pairs_number << ",    high momentum pairs: " << good_high_mom_pairs_number << std::endl;
-
-
-    //now analize pairs
+    //now analize high energy pairs
     //find best pairs with most probable pid in each category
     list<ChargedPair_t>::iterator best_pair[5];
-    //for(int i=0;i<5;i++) best_pair[i] = charged_pairs.begin();
     double best_prob[5]={0,0,0,0,0};
     for(list<ChargedPair_t>::iterator it= charged_pairs.begin(); it!=charged_pairs.end(); it++)
     {
@@ -1255,14 +1245,14 @@ StatusCode JpsiKK::execute()
         }
       }
     }
+    cout << "Before channel" << endl;
 
     PairID_t channel = PID_KAON; //allways found somebody
     for(int pid=0; pid<5;pid++)
     {
-      //cout << pid << " " << best_pair[pid]->pid << " " << endl;
-      //cout << best_pair[pid]->probability[pid] << endl;
       if( best_prob[pid] > best_prob[channel]) channel= (PairID_t)pid;
     }
+    cout << "After finding best prob" << endl;
     HepLorentzVector P_charged_minus = best_pair[channel]->P_minus;
     HepLorentzVector P_charged_plus = best_pair[channel]->P_plus;
     HepLorentzVector P_sum = P_charged_minus + P_charged_plus;
@@ -1273,6 +1263,7 @@ StatusCode JpsiKK::execute()
     if(mdc.Mmiss < MIN_MISSING_MASS || MAX_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
 
 
+    cout << "Before  mdc.jpsi_decay_channel" << endl;
     mdc.jpsi_decay_channel = channel;
 
     
