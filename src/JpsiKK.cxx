@@ -1236,6 +1236,7 @@ StatusCode JpsiKK::execute()
     if(charged_pairs.empty()) goto SKIP_CHARGED;
     good_high_mom_pairs_number++;
 
+    int channel=-1;
     /* temporary suppresed 
     //now analize high energy pairs
     //find best pairs with most probable pid in each category
@@ -1258,7 +1259,6 @@ StatusCode JpsiKK::execute()
     }
     cout << "Before channel" << endl;
 
-    PairID_t channel = PID_KAON; //allways found somebody
     for(int pid=0; pid<5;pid++)
     {
       cout << "best_prob[" << pid << "] = " << best_prob[pid] << endl;
@@ -1275,7 +1275,8 @@ StatusCode JpsiKK::execute()
       }
     }
 
-    cout << "After finding best prob" << endl;
+    channel = best_pair.pid;
+
     HepLorentzVector P_charged_minus = best_pair.P_minus;
     HepLorentzVector P_charged_plus = best_pair.P_plus;
     HepLorentzVector P_sum = P_charged_minus + P_charged_plus;
@@ -1286,7 +1287,6 @@ StatusCode JpsiKK::execute()
     if(mdc.Mmiss < MIN_MISSING_MASS || MAX_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
 
 
-    cout << "Before  mdc.jpsi_decay_channel" << endl;
     mdc.jpsi_decay_channel = channel;
 
     
