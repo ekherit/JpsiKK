@@ -1250,7 +1250,7 @@ StatusCode JpsiKK::execute()
     PairID_t channel = PID_KAON; //allways found somebody
     for(int pid=0; pid<5;pid++)
     {
-      cout << "best_prob[" << i << "] = " << best_prob[pid] << endl;
+      cout << "best_prob[" << pid << "] = " << best_prob[pid] << endl;
       if( best_prob[pid] > best_prob[channel]) channel= (PairID_t)pid;
     }
     cout << "After finding best prob" << endl;
