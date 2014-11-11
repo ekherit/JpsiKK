@@ -1185,7 +1185,7 @@ StatusCode JpsiKK::execute()
           if(MIN_INVARIANT_MASS < Minv && Minv < MAX_INVARIANT_MASS)
           {
             pid->setRecTrack(*itTrk_minus);
-            pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
+            pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useEmc());
             pid->identify(pid->all()); 
             pid->calculate();
             double probKaon_minus = pid->probKaon();
