@@ -806,6 +806,7 @@ StatusCode JpsiKK::execute()
       bool is_good_track = is_fromIP && fabs(cos(mdcTrk->theta()))<MAX_COS_THETA; //track is good
       if(!is_good_track) continue;
       //if(!(*itTrk)->isEmcShowerValid()) continue; //charged track must have energy deposition in EMC
+      if(!(*itTrk)->isEmcShowerValid()) continue; 
       if((*itTrk)->isEmcShowerValid()) 
       {
         RecEmcShower *emcTrk = (*itTrk)->emcShower();
