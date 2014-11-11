@@ -69,6 +69,9 @@ const double KAON_MASS = 0.493677; //GeV
 const double ELECTRON_MASS = 0.000510999;//GeV
 const double PROTON_MASS = 0.93827231;//GeV
 
+const double JPSI_MASS = 3.096916; //GeV
+const double PSIP_MASS = 3.686093; //GeV
+
 const double EMS_THRESHOLD = 0.05; //GeV
 const double MAX_MOMENTUM  = 2.5; //GeV
 
@@ -1115,7 +1118,7 @@ StatusCode JpsiKK::execute()
     if(pions_plus.empty() || pions_minus.empty())  goto SKIP_CHARGED;
     //find pairs
     std::list<PionPair_t> pion_pairs;
-    HepLorentzVector P_psip(0.040546,0,0,3.686); //initial vector of psip
+    HepLorentzVector P_psip(0.040546,0,0,PSIP_MASS); //initial vector of psip
     for(std::list<int>::iterator it_minus=pions_minus.begin(); it_minus!=pions_minus.end(); it_minus++)
       for(std::list<int>::iterator it_plus=pions_plus.begin(); it_plus!=pions_plus.end(); it_plus++)
       {
@@ -1233,6 +1236,7 @@ StatusCode JpsiKK::execute()
     if(charged_pairs.empty()) goto SKIP_CHARGED;
     good_high_mom_pairs_number++;
 
+    /* temporary suppresed 
     //now analize high energy pairs
     //find best pairs with most probable pid in each category
     list<ChargedPair_t>::iterator best_pair[5];
@@ -1260,9 +1264,20 @@ StatusCode JpsiKK::execute()
       cout << "best_prob[" << pid << "] = " << best_prob[pid] << endl;
       if( best_prob[pid] > best_prob[channel]) channel= (PairID_t)pid;
     }
+    */
+    ChargedPair_t best_pair=charged_pairs.front();
+    for(list<ChargedPair_t>::iterator it= charged_pairs.begin(); it!=charged_pairs.end(); it++)
+    {
+      double minv = it->invariant_mass;
+      if(  fabs(minv - JPSI_MASS)  <  fabs(best_pair.invariant_mass - JPSI_MASS))
+      {
+        best_pair = *it;
+      }
+    }
+
     cout << "After finding best prob" << endl;
-    HepLorentzVector P_charged_minus = best_pair[channel]->P_minus;
-    HepLorentzVector P_charged_plus = best_pair[channel]->P_plus;
+    HepLorentzVector P_charged_minus = best_pair.P_minus;
+    HepLorentzVector P_charged_plus = best_pair.P_plus;
     HepLorentzVector P_sum = P_charged_minus + P_charged_plus;
     HepLorentzVector P_mis = P_psip - P_pion_minus - P_pion_plus  - P_charged_minus - P_charged_plus;
     mdc.Mmiss = P_mis.m2();
