@@ -1216,6 +1216,11 @@ StatusCode JpsiKK::execute()
             pair.probability[PID_ELECTRON] = probElectron_minus*probElectron_plus;
             pair.probability[PID_PION] = probPion_minus*probPion_plus;
             pair.probability[PID_PROTON] = probProton_minus*probProton_plus;
+            for(int j=0;j<5;j++)
+            {
+              cout << pair.probability[j] <<  " " ;
+            }
+            cout << endl;
             pair.particle_mass = XMASS[i];
             pair.pid = (PairID_t)i;
             charged_pairs.push_back(pair);
