@@ -1195,7 +1195,7 @@ StatusCode JpsiKK::execute()
             double probProton_minus = pid->probProton();
 
             pid->setRecTrack(*itTrk_plus);
-            pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
+            pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useEmc());
             pid->identify(pid->all()); 
             pid->calculate();
             double probKaon_plus = pid->probKaon();
