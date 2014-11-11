@@ -1235,7 +1235,7 @@ StatusCode JpsiKK::execute()
     {
       for(int pid=0; pid<5; pid++)
       {
-        //cout << pid << " " << it->probability[pid] << endl;
+        cout << pid << " " << it->probability[pid] << endl;
         if( pid == it->pid)
         {
           if(it->probability[pid] >= best_prob[pid]) 
