@@ -374,7 +374,7 @@ StatusCode JpsiKK::execute()
 
 
   //number of good neutral tracks must be 0
-  if(!good_neutral_tracks.empty()) return StatusCode::SUCCESS;
+  //if(!good_neutral_tracks.empty()) return StatusCode::SUCCESS;
 
   
   std::list<EvtRecTrackIterator> charged_tracks; //selected tracks for specific cut
@@ -443,6 +443,9 @@ StatusCode JpsiKK::execute()
 
   if(pion_pairs.empty()) return StatusCode::SUCCESS;
 
+  //the best pion pair
+  std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pion_pair = pion_pairs.empty();
+
 
   //now fill the pion information
   fEvent.ntrack = good_charged_tracks.size();
@@ -454,9 +457,9 @@ StatusCode JpsiKK::execute()
   fEvent.ngood_pions = 2;
   fEvent.channel = -1; //yet not identify other particles
 
-  fEvent.Mrecoil = get_recoil__mass(pion_pairs.front(), PION_MASS);
+  fEvent.Mrecoil = get_recoil__mass(pion_pair, PION_MASS);
 
-  fEvent.pions.fill(pion_pairs.front());
+  fEvent.pions.fill(pion_pair);
   //kmuons.fill(pion_pairs.pions());
 
   //fill pion information for pos and negative pion pairs
