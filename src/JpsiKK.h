@@ -30,6 +30,7 @@
 
 #include "ibn/averager.h"
 
+#include "EvtRecEvent/EvtRecTrack.h"
 class JpsiKK : public Algorithm 
 {
 	public:
