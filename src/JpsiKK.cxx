@@ -165,6 +165,8 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("Mrec", Mrecoil); 
   status = tuple->addItem ("Minv", Minv); 
   status = tuple->addItem ("M2mis", M2missing); 
+  status = tuple->addItem ("pM2", pions.M2); 
+  status = tuple->addItem ("kM2", kmouns.M2); 
   //pions information
   status = tuple->addIndexedItem ("pidx", ngood_pions, pions.index);
   status = tuple->addIndexedItem ("pq", ngood_pions, pions.q);
@@ -183,7 +185,6 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addIndexedItem ("pvxy", ngood_pions, pions.vxy);
   status = tuple->addIndexedItem ("pvz", ngood_pions, pions.vz);
   status = tuple->addIndexedItem ("pvphi", ngood_pions, pions.vphi);
-  status = tuple->addIndexedItem ("pM2", ngood_pions, pions.M2);
   //kaons or muons information
   status = tuple->addIndexedItem ("kidx", ngood_pions, kmuons.index);
   status = tuple->addIndexedItem ("kq", ngood_pions, kmuons.q);
@@ -202,7 +203,6 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addIndexedItem ("kvxy", ngood_pions, kmuons.vxy);
   status = tuple->addIndexedItem ("kvz", ngood_pions, kmuons.vz);
   status = tuple->addIndexedItem ("kvphi", ngood_pions, kmuons.vphi);
-  status = tuple->addIndexedItem ("kM2", ngood_pions, kmuons.M2);
   return status;
 }
 
