@@ -202,7 +202,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addIndexedItem ("kvxy", ngood_pions, kmuons.vxy);
   status = tuple->addIndexedItem ("kvz", ngood_pions, kmuons.vz);
   status = tuple->addIndexedItem ("kvphi", ngood_pions, kmuons.vphi);
-  status = tuple->addIndexedItem ("kM2", ngood_pions, kmuons.kM2);
+  status = tuple->addIndexedItem ("kM2", ngood_pions, kmuons.M2);
   return status;
 }
 
