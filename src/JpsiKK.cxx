@@ -515,7 +515,7 @@ StatusCode JpsiKK::execute()
         //{
         //}
       }
-      double M_inv=get_invariant__mass(itTrk[0],itTrk[1],KAON_MASS);
+      double M_inv=get_invariant__mass2(itTrk[0],itTrk[1],KAON_MASS);
     }
 
 
