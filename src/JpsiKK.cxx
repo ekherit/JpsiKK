@@ -207,10 +207,10 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
 void JpsiKK::RootEvent::init(void)
 {
   ngood_pions=2;
-  for(int i=0;i<2;i++)
-  {
-    pions.p[i]=-999;
-  }
+  //for(int i=0;i<2;i++)
+  //{
+  //  pions.p[i]=-999;
+  //}
 }
 
 void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
@@ -301,7 +301,6 @@ void JpsiKK::RootPair::fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> p
     vz[i]  = rvz; 
     vphi[i] = rvphi; 
   }
-  cout << "pion momentum: " << p[0] << " " << p[1] << endl;
 }
 
 StatusCode JpsiKK::execute()
@@ -458,7 +457,6 @@ StatusCode JpsiKK::execute()
   fEvent.Mrecoil = get_recoil__mass(pion_pairs.front(), PION_MASS);
 
   fEvent.pions.fill(pion_pairs.front());
-  cout << "pion momentum2: " << fEvent.pions.p[0] << " " << fEvent.pions.p[1] << endl;
   //kmuons.fill(pion_pairs.pions());
 
   //fill pion information for pos and negative pion pairs
