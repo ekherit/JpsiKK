@@ -449,10 +449,12 @@ StatusCode JpsiKK::execute()
         if(p<MAX_PION_MOMENTUM) 
         {
           positive_pion_tracks.push_back(itTrk);
+          cout << "pi+track" << " = "   << itTrk - evtRecTrkCol->begin() << ", p = " << p << endl;
         }
         if(p>MIN_KAON_MOMENTUM)
         {
           other_positive_tracks.push_back(itTrk);
+          cout << "K+track" << " = "   << itTrk - evtRecTrkCol->begin() << ", p = " << p << endl;
         }
       }
       if(q<0) 
@@ -461,10 +463,12 @@ StatusCode JpsiKK::execute()
         if(p<MAX_PION_MOMENTUM) 
         {
           negative_pion_tracks.push_back(itTrk);
+          cout << "pi-track" << " = "   << itTrk - evtRecTrkCol->begin() << ", p = " << p << endl;
         }
         if(p>MIN_KAON_MOMENTUM)
         {
           other_negative_tracks.push_back(itTrk);
+          cout << "K-track" << " = "   << itTrk - evtRecTrkCol->begin() << ", p = " << p << endl;
         }
       }
       charged_tracks.push_back(itTrk);
@@ -513,7 +517,8 @@ StatusCode JpsiKK::execute()
         RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
         double E = emcTrk->energy();
         double p = mdcTrk->p();
-        cout << k << ": " << p << " " << E << endl;
+        cout << "track"<< k << " = "   << itTrk[k] - evtRecTrkCol->begin() << ", p = " << p << endl;
+        //cout << k << ": " << p << " " << E << endl;
         //if(E/p < MAX_EP_RATIO) //it could be kaon or muon
         //{
         //}
