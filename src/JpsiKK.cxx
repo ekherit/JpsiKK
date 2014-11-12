@@ -559,7 +559,7 @@ StatusCode JpsiKK::execute()
   fEvent.M2missing = get_missing_mass(pion_pair,kaon_pair);
 
   fEvent.pions.fill(pion_pair, evtRecTrkCol->begin());
-  fEvent.kmuons.fill(kaon_pair, evtRecTrackCol->begin());
+  fEvent.kmuons.fill(kaon_pair, evtRecTrkCol->begin());
   if(fEvent.kmuons.p[0]<1.0 || fEvent.kmuons.p[1]<1.0 )
   {
     cout << "p0=" <<fEvent.kmuons.p[0]<< "   p1=" << fEvent.kmuons.p[1] << endl;
