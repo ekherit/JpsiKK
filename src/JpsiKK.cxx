@@ -920,7 +920,7 @@ StatusCode JpsiKK::execute()
 
 
   //number of good neutral tracks must be 0
-  if(!good_neutral_tracks.empty()) goto SKIP_CHARGED;
+  if(!good_neutral_tracks.empty()) return StatusCode::SUCCESS;
 
   
   std::list<EvtRecTrackIterator> charged_tracks; //selected tracks for specific cut
@@ -964,10 +964,9 @@ StatusCode JpsiKK::execute()
   }
 
   //keep only specific signature
-  if(positive_charged_tracks.size()!=2 || negative_charged_tracks.size()!=2) goto SKIP_CHARGED;
+  if(positive_charged_tracks.size()!=2 || negative_charged_tracks.size()!=2) return StatusCode::SUCCESS;
 
-  if(negative_pion_tracks.empty() || positive_pion_tracks.empty()) goto SKIP_CHARGED;
-
+  if(negative_pion_tracks.empty() || positive_pion_tracks.empty()) return StatusCode::SUCCESS;
   std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > pion_pairs;
   //create pion pairs
   for(list<EvtRecTrackIterator>::iterator i=negative_pion_tracks.begin(); i!=positive_pion_tracks.end(); ++i)
@@ -995,7 +994,7 @@ StatusCode JpsiKK::execute()
 
   fEvent.Mrec = get_recoil__mass(pion_pairs.front(), PION_MASS);
 
-  fEvent.tuple.write();
+  fEvent.tuple->write();
   event_write++;
   return StatusCode::SUCCESS;
 
