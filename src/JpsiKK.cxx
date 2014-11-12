@@ -558,8 +558,8 @@ StatusCode JpsiKK::execute()
   fEvent.Minv    = sqrt(get_invariant__mass2(kaon_pair,KAON_MASS));
   fEvent.M2missing = get_missing_mass(pion_pair,kaon_pair);
 
-  fEvent.pions.fill(pion_pair, EvtRecTrackCol->begin());
-  fEvent.kmuons.fill(kaon_pair, EvtRecTrackCol->begin());
+  fEvent.pions.fill(pion_pair, evtRecTrkCol->begin());
+  fEvent.kmuons.fill(kaon_pair, evtRecTrackCol->begin());
   if(fEvent.kmuons.p[0]<1.0 || fEvent.kmuons.p[1]<1.0 )
   {
     cout << "p0=" <<fEvent.kmuons.p[0]<< "   p1=" << fEvent.kmuons.p[1] << endl;
