@@ -559,6 +559,11 @@ StatusCode JpsiKK::execute()
 
   fEvent.pions.fill(pion_pair);
   fEvent.kmuons.fill(kaon_pair);
+  if(fEvent.kmuons.p[0]<1.0 || fEvent.kmuons.p[1]<1.0 )
+  {
+    cout << "p0=" <<fEvent.kmuons.p[0]<< "   p1=" << fEvent.kmuons.p[1] << endl;
+    cout << "Wrong kaon momentum: exiting" << endl;
+  }
 
   //fill pion information for pos and negative pion pairs
 
