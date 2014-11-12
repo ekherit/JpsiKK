@@ -395,7 +395,7 @@ StatusCode JpsiKK::execute()
     {
       std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
       double M_recoil = get_recoil__mass(pair, PION_MASS);
-      //cout << "Mrecoil = " << M_recoil << endl;
+      cout << "Mrecoil = " << M_recoil << endl;
       if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
       {
         pion_pairs.push_back(pair);
@@ -417,9 +417,13 @@ StatusCode JpsiKK::execute()
   fEvent.ngood_pions = 2;
   fEvent.channel = -1; //yet not identify other particles
 
+  cout << "Before recoil mass calculation" << endl;
   fEvent.Mrec = get_recoil__mass(pion_pairs.front(), PION_MASS);
+  cout << "After recoil mass calculation" << endl;
 
+  cout << "Before tuple write" << endl;
   fEvent.tuple->write();
+  cout << "After tuple write" << endl;
   event_write++;
   return StatusCode::SUCCESS;
 }
