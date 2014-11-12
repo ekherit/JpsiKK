@@ -206,6 +206,11 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
 
 void JpsiKK::RootEvent::init(void)
 {
+  ngood_pions=2;
+  for(int i=0;i<2;i++)
+  {
+    pions.p[i]=-999;
+  }
 }
 
 void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
@@ -331,6 +336,7 @@ StatusCode JpsiKK::execute()
 
 
   //InitData2(evtRecEvent->totalCharged(), evtRecEvent->totalNeutral());
+  fEvent.init()
 
   //typedef std::multimap <double, unsigned> mmap_t;
   //typedef std::pair <double, unsigned> pair_t;
