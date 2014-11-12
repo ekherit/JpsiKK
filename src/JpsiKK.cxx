@@ -252,6 +252,20 @@ void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
 }
 
 
+double get_invariant__mass2(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, double mass)
+{
+  EvtRecTrackIterator  itTrk[2] = {trk1, trk2};
+  HepLorentzVector  P[2];
+  for(int k=0;k<2;k++)
+  {
+    if(!(*itTrk[k])->isMdcTrackValid()) break; 
+    RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
+    P[k] = mdcTrk->p4(mass);
+  }
+  HepLorentzVector P_sum = P[0]+P[1];
+  return P_sum.m2();
+}
+
 double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, double mass)
 {
   EvtRecTrackIterator  itTrk[2] = {trk1, trk2};
@@ -271,6 +285,32 @@ double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, 
 double get_recoil__mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> p, double mass)
 {
   return get_recoil__mass(p.first, p.second, mass);
+}
+
+
+double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pions, std::pair<EvtRecTrackIterator, EvtRecTrackIterator> kaons)
+{
+  EvtRecTrackIterator  PionTrk[2] = {pions.first, pions.second};
+  EvtRecTrackIterator  KaonTrk[2] = {kaons.first, kaons.second};
+  HepLorentzVector P_psip(0.040546,0,0,PSIP_MASS); //initial vector of psip
+  HepLorentzVector  pionP[2];
+  HepLorentzVector  kaonP[2];
+  for(int k=0;k<2;k++)
+  {
+    pionP[k] = HepLorentzVector(0,0,0,0);
+    if(!(*PionTrk[k])->isMdcTrackValid()) break; 
+    RecMdcTrack *mdcTrk = (*PionTrk[k])->mdcTrack();
+    pionP[k] = mdcTrk->p4(PION_MASS);
+  }
+  for(int k=0;k<2;k++)
+  {
+    kaonP[k] = HepLorentzVector(0,0,0,0);
+    if(!(*KaonTrk[k])->isMdcTrackValid()) break; 
+    RecMdcTrack *mdcTrk = (*KaonTrk[k])->mdcTrack();
+    kaonP[k] = mdcTrk->p4(KAON_MASS);
+  }
+  HepLorentzVector Pmis = P_psip - pionP[0] - pionP[1] - kaonP[0] - kaonP[1];
+  return Pmis.m2();
 }
 
 
@@ -301,6 +341,7 @@ void JpsiKK::RootPair::fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> p
     vz[i]  = rvz; 
     vphi[i] = rvphi; 
   }
+  M2 = get_invariant__mass2(pair,KAON_MASS);
 }
 
 StatusCode JpsiKK::execute()
@@ -382,6 +423,8 @@ StatusCode JpsiKK::execute()
   std::list<EvtRecTrackIterator> negative_charged_tracks; //selected tracks for specific cut
   std::list<EvtRecTrackIterator> positive_pion_tracks; //selected pion tracks for specific cut
   std::list<EvtRecTrackIterator> negative_pion_tracks; //selected pion tracks for specific cut
+  std::list<EvtRecTrackIterator> other_positive_tracks; //selected pion tracks for specific cut
+  std::list<EvtRecTrackIterator> other_negative_tracks; //selected pion tracks for specific cut
   for(std::list<EvtRecTrackIterator>::iterator track=good_charged_tracks.begin(); track!=good_charged_tracks.end(); track++)
   {
     EvtRecTrackIterator & itTrk = *track;
@@ -405,6 +448,10 @@ StatusCode JpsiKK::execute()
         {
           positive_pion_tracks.push_back(itTrk);
         }
+        if(p>MIN_KAON_MOMENTUM)
+        {
+          other_positive_tracks.push_back(itTrk);
+        }
       }
       if(q<0) 
       {
@@ -412,6 +459,10 @@ StatusCode JpsiKK::execute()
         if(p<MAX_PION_MOMENTUM) 
         {
           negative_pion_tracks.push_back(itTrk);
+        }
+        if(p>MIN_KAON_MOMENTUM)
+        {
+          other_negative_tracks.push_back(itTrk);
         }
       }
       charged_tracks.push_back(itTrk);
@@ -440,11 +491,36 @@ StatusCode JpsiKK::execute()
       }
     }
 
-
   if(pion_pairs.empty()) return StatusCode::SUCCESS;
 
   //the best pion pair
   std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pion_pair = pion_pairs.front();
+
+  //make kaon or muon pairs
+  std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > kumon_pairs;
+  for(list<EvtRecTrackIterator>::iterator i=other_negative_tracks.begin(); i!=other_negative_tracks.end(); ++i)
+    for(list<EvtRecTrackIterator>::iterator j=other_positive_tracks.begin(); j!=other_positive_tracks.end(); ++j)
+    {
+      std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
+      EvtRecTrackIterator & itTrk[2] = {*i,*j};
+      for(int k=0;k<2;k++)
+      {
+        if(!(*itTrk[k])->isMdcTrackValid()) continue; 
+        if(!(*itTrk[k])->isEmcShowerValid()) continue; 
+        RecMdcTrack *mdcTrk = (*itTrk)->mdcTrack();
+        RecEmcShower *emcTrk = (*itTrk)->emcShower();
+        double E = emcTrk->energy();
+        double p = mdcTrk->p();
+        //if(E/p < MAX_EP_RATIO) //it could be kaon or muon
+        //{
+        //}
+      }
+      double M_inv=get_invariant__mass(itTrk[0],itTrk[1],KAON_MASS);
+    }
+
+
+  //the best kaon pair
+  std::pair<EvtRecTrackIterator,EvtRecTrackIterator> kaon_pair = kaon_pairs.front();
 
 
   //now fill the pion information
@@ -458,9 +534,11 @@ StatusCode JpsiKK::execute()
   fEvent.channel = -1; //yet not identify other particles
 
   fEvent.Mrecoil = get_recoil__mass(pion_pair, PION_MASS);
+  fEvent.Minv    = sqrt(get_invariant__mass2(kaon_pair,KAON_MASS));
+  fEvent.M2missing = get_missing_mass(pion_pair,kaon_pair);
 
   fEvent.pions.fill(pion_pair);
-  //kmuons.fill(pion_pairs.pions());
+  fEvent.kmuons.fill(kaon_pair);
 
   //fill pion information for pos and negative pion pairs
 
