@@ -443,7 +443,7 @@ StatusCode JpsiKK::execute()
     bool not_electron=true;
     if(barrel & not_electron) 
     {
-      cout << "charged_track: " << itTrk - evtRecTrkCol->begin()  << " MIN_KAON_MOMENTUM = " << MIN_KAON_MOMENTUM << endl;
+      //cout << "charged_track: " << itTrk - evtRecTrkCol->begin()  << " MIN_KAON_MOMENTUM = " << MIN_KAON_MOMENTUM << endl;
 
       if(q>0) 
       {
