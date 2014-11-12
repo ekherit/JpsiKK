@@ -316,7 +316,7 @@ double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pion
 }
 
 
-void JpsiKK::RootPair::fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair)
+void JpsiKK::RootPair::fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair, EvtRecTrackIterator begin)
 {
   EvtRecTrackIterator itTrk[2] = {pair.first, pair.second};
   for(int i=0;i<2;i++)
@@ -325,6 +325,7 @@ void JpsiKK::RootPair::fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> p
     if(!(*itTrk[i])->isEmcShowerValid()) continue; //keep only valid neutral tracks
     RecMdcTrack  *mdcTrk = (*itTrk[i])->mdcTrack();
     RecEmcShower *emcTrk = (*itTrk[i])->emcShower();
+    index[i] = itTrk[i]-begin;
     q[i] = mdcTrk->charge(); //charge of the track
     E[i] = emcTrk->energy();
     p[i] = mdcTrk->p();
@@ -557,12 +558,13 @@ StatusCode JpsiKK::execute()
   fEvent.Minv    = sqrt(get_invariant__mass2(kaon_pair,KAON_MASS));
   fEvent.M2missing = get_missing_mass(pion_pair,kaon_pair);
 
-  fEvent.pions.fill(pion_pair);
-  fEvent.kmuons.fill(kaon_pair);
+  fEvent.pions.fill(pion_pair, EvtRecTrackCol->begin());
+  fEvent.kmuons.fill(kaon_pair, EvtRecTrackCol->begin());
   if(fEvent.kmuons.p[0]<1.0 || fEvent.kmuons.p[1]<1.0 )
   {
     cout << "p0=" <<fEvent.kmuons.p[0]<< "   p1=" << fEvent.kmuons.p[1] << endl;
     cout << "Wrong kaon momentum: exiting" << endl;
+    exit(1);
   }
 
   //fill pion information for pos and negative pion pairs
