@@ -258,7 +258,7 @@ void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
 }
 
 
-double get_invariant__mass2(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> & pair, double mass)
+double get_invariant_mass2(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> & pair, double mass)
 {
   EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
   HepLorentzVector  P[2];
@@ -350,7 +350,7 @@ void JpsiKK::RootPair::fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> p
   }
   for(int i=0;i<5;i++)
   {
-    M2[i] = sqrt(get_invariant__mass2(pair,XMASS[i]));
+    M2[i] = sqrt(get_invariant_mass2(pair,XMASS[i]));
   }
 }
 
@@ -540,7 +540,7 @@ StatusCode JpsiKK::execute()
         //{
         //}
       }
-      double M_inv=get_invariant__mass2(pair,KAON_MASS);
+      double M_inv=get_invariant_mass2(pair,KAON_MASS);
       kmuon_pairs.push_back(pair);
     }
 
@@ -562,7 +562,7 @@ StatusCode JpsiKK::execute()
   fEvent.channel = -1; //yet not identify other particles
 
   fEvent.Mrecoil = get_recoil__mass(pion_pair, PION_MASS);
-  fEvent.Minv    = sqrt(get_invariant__mass2(kaon_pair,KAON_MASS));
+  fEvent.Minv    = sqrt(get_invariant_mass2(kaon_pair,KAON_MASS));
   fEvent.M2missing = get_missing_mass(pion_pair,kaon_pair);
 
   fEvent.pions.fill(pion_pair, evtRecTrkCol->begin());
