@@ -905,7 +905,7 @@ StatusCode JpsiKK::execute()
     if(good_track) good_charged_tracks.push_back(itTrk);
   }
   //now count good neutral track
-  for(int i = evtRecEvent->totalCharged(); idx<evtRecEvent->totalTracks(); ++i)
+  for(int i = evtRecEvent->totalCharged(); i<evtRecEvent->totalTracks(); ++i)
   {
     EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + i;
     if(!(*itTrk)->isEmcShowerValid()) continue; //keep only valid neutral tracks
@@ -955,7 +955,7 @@ StatusCode JpsiKK::execute()
       {
         if(p<MAX_PION_MOMENTUM) 
         {
-          netative_pion_tracks.push_back(itTrk);
+          negative_pion_tracks.push_back(itTrk);
         }
         negative_charged_tracks.push_back(itTrk);
       }
@@ -968,7 +968,7 @@ StatusCode JpsiKK::execute()
 
   if(negative_pion_tracks.empty() || positive_pion_tracks.empty()) goto SKIP_CHARGED;
 
-  std::list< pair_t<EvtRecTrackIterator, EvtRecTrackIterator> > pion_pairs;
+  std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > pion_pairs;
   //create pion pairs
   for(list<EvtRecTrackIterator>::iterator i=negative_pion_tracks.begin(); i!=positive_pion_tracks.end(); ++i)
     for(list<EvtRecTrackIterator>::iterator j=negative_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
