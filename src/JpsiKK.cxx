@@ -183,6 +183,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addIndexedItem ("pvxy", ngood_pions, pions.vxy);
   status = tuple->addIndexedItem ("pvz", ngood_pions, pions.vz);
   status = tuple->addIndexedItem ("pvphi", ngood_pions, pions.vphi);
+  status = tuple->addIndexedItem ("pM2", ngood_pions, pions.M2);
   //kaons or muons information
   status = tuple->addIndexedItem ("kidx", ngood_pions, kmuons.index);
   status = tuple->addIndexedItem ("kq", ngood_pions, kmuons.q);
@@ -201,6 +202,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addIndexedItem ("kvxy", ngood_pions, kmuons.vxy);
   status = tuple->addIndexedItem ("kvz", ngood_pions, kmuons.vz);
   status = tuple->addIndexedItem ("kvphi", ngood_pions, kmuons.vphi);
+  status = tuple->addIndexedItem ("kM2", ngood_pions, kmuons.kM2);
   return status;
 }
 
