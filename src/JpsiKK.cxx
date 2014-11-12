@@ -268,6 +268,36 @@ double get_recoil__mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> p, d
   return get_recoil__mass(p.first, p.second, mass);
 }
 
+
+void JpsiKK::RootPair::fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair)
+{
+  EvtRecTrackIterator itTrk[2] = {pion_pair.front().first, pion_pair.front().second};
+  for(int i=0;i<2;i++)
+  {
+    if(!(*itTrk[i])->isMdcTrackValid()) continue; 
+    if(!(*itTrk[i])->isEmcShowerValid()) continue; //keep only valid neutral tracks
+    RecMdcTrack  *mdcTrk = (*itTrk[i])->mdcTrack();
+    RecEmcShower *emcTrk = (*itTrk[i])->emcShower();
+    q = mdcTrk->charge(); //charge of the track
+    E = emcTrk->energy();
+    p = mdcTrk->p();
+    px= mdcTrk->px();
+    py= mdcTrk->py();
+    pz= mdcTrk->pz();
+    pt= mdcTrk->pt();
+    theta= mdcTrk->theta();
+    phi = mdcTrk->phi();
+    x  = mdcTrk->x();
+    y  = mdcTrk->y();
+    z  = mdcTrk->z();
+    double rvxy,rvz,rvphi;
+    calculate_vertex(mdcTrk,rvxy,rvz,rvphi); 
+    vxy = rvxy;
+    vz  = rvz; 
+    vphi = rvphi; 
+  }
+}
+
 StatusCode JpsiKK::execute()
 {
   MsgStream log(msgSvc(), name());
@@ -420,11 +450,10 @@ StatusCode JpsiKK::execute()
 
   fEvent.Mrecoil = get_recoil__mass(pion_pairs.front(), PION_MASS);
 
+  pions.fill(pion_pairs.pions());
+  //kmuons.fill(pion_pairs.pions());
+
   //fill pion information for pos and negative pion pairs
-  //EvtRecTrackIterator pair[2] = {pion_pair.front().first, pion_pair.front().second};
-  //for(int i=0;i<2;i++)
-  //{
-  //}
 
 
   fEvent.tuple->write();

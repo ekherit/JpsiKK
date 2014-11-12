@@ -95,9 +95,7 @@ class JpsiKK : public Algorithm
     NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
     NTuple::Item<double>  M2;     //square invariant mass of the two tracks
 
-    void fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair)
-    {
-    }
+    void fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair);
   };
 
   struct RootEvent
