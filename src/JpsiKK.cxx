@@ -332,6 +332,8 @@ StatusCode JpsiKK::execute()
     if(good_track) good_neutral_tracks.push_back(itTrk);
   }
 
+  cout << "Number of charged and neutral tracks: " << good_charged_tracks.size() << "    " <<  good_neutral_tracks.size() << std::endl;
+
 
   //number of good neutral tracks must be 0
   if(!good_neutral_tracks.empty()) return StatusCode::SUCCESS;
@@ -376,6 +378,10 @@ StatusCode JpsiKK::execute()
       charged_tracks.push_back(itTrk);
     }
   }
+  cout << "pions plus and minus " << positive_pion_tracks.size() << "    " <<  negative_pion_tracks.size() << std::endl;
+  cout << "positive negative " << positive_charged_tracks.size() << "    " <<  negative_charged_tracks.size() << std::endl;
+
+  
 
   //keep only specific signature
   if(positive_charged_tracks.size()!=2 || negative_charged_tracks.size()!=2) return StatusCode::SUCCESS;
@@ -388,11 +394,14 @@ StatusCode JpsiKK::execute()
     {
       std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
       double M_recoil = get_recoil__mass(pair, PION_MASS);
+      cout << "Mrecoil = " << M_recoil << endl;
       if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
       {
         pion_pairs.push_back(pair);
       }
     }
+
+  cout << "pion pairs number: " << pion_pairs.size() << endl;
 
   if(pion_pairs.empty()) return StatusCode::SUCCESS;
 
