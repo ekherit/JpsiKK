@@ -390,12 +390,12 @@ StatusCode JpsiKK::execute()
   if(negative_pion_tracks.empty() || positive_pion_tracks.empty()) return StatusCode::SUCCESS;
   std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > pion_pairs;
   //create pion pairs
-  for(list<EvtRecTrackIterator>::iterator i=negative_pion_tracks.begin(); i!=positive_pion_tracks.end(); ++i)
-    for(list<EvtRecTrackIterator>::iterator j=negative_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
+  for(list<EvtRecTrackIterator>::iterator i=negative_pion_tracks.begin(); i!=negative_pion_tracks.end(); ++i)
+    for(list<EvtRecTrackIterator>::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
     {
       std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
       double M_recoil = get_recoil__mass(pair, PION_MASS);
-      cout << "Mrecoil = " << M_recoil << endl;
+      //cout << "Mrecoil = " << M_recoil << endl;
       if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
       {
         pion_pairs.push_back(pair);
