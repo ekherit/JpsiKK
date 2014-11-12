@@ -444,7 +444,7 @@ StatusCode JpsiKK::execute()
   if(pion_pairs.empty()) return StatusCode::SUCCESS;
 
   //the best pion pair
-  std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pion_pair = pion_pairs.empty();
+  std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pion_pair = pion_pairs.front();
 
 
   //now fill the pion information
