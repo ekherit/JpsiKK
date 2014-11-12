@@ -502,7 +502,7 @@ StatusCode JpsiKK::execute()
     for(list<EvtRecTrackIterator>::iterator j=other_positive_tracks.begin(); j!=other_positive_tracks.end(); ++j)
     {
       std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
-      EvtRecTrackIterator & itTrk[2] = {*i,*j};
+      EvtRecTrackIterator  itTrk[2] = {*i,*j};
       for(int k=0;k<2;k++)
       {
         if(!(*itTrk[k])->isMdcTrackValid()) continue; 
