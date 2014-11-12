@@ -75,8 +75,8 @@ const double PSIP_MASS = 3.686093; //GeV
 const double EMS_THRESHOLD = 0.05; //GeV
 const double MAX_MOMENTUM  = 2.5; //GeV
 
-const double EMC_ENDCUP_THRESHOLD=0.05;
-const double EMC_BARREL_THRESHOLD=0.025;
+//const double EMC_ENDCUP_THRESHOLD=0.05;
+//const double EMC_BARREL_THRESHOLD=0.025;
 
 inline double sq(double x) { return x*x; }
 
@@ -126,9 +126,23 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
 {
   declareProperty("MAX_CHARGED_TRACKS", MAX_CHARGED_TRACKS=10); //maximum number of charged tracks in selection
   declareProperty("MIN_CHARGED_TRACKS", MIN_CHARGED_TRACKS=3); //minimum number of charged tracks in selection
+
+  //good charged track configuration
   declareProperty("IP_MAX_Z", IP_MAX_Z = 10.0); //cm?
   declareProperty("IP_MAX_RHO", IP_MAX_RHO = 1.0); //cm?
-  declareProperty("MAX_COS_THETA", MAX_COS_THETA = 0.93); //cm?
+  declareProperty("MAX_COS_THETA", MAX_COS_THETA = 0.93);
+
+  //good neutral track configuration
+  //endcup calorimeter
+  declareProperty("EMC_ENDCUP_MIN_COS_THETA", EMC_ENDCUP_MIN_COS_THETA = 0.86);
+  declareProperty("EMC_ENDCUP_MAX_COS_THETA", EMC_ENDCUP_MAX_COS_THETA = 0.92);
+  declareProperty("EMC_ENDCUP_MIN_ENERGY", EMC_ENDCUP_MIN_ENERGY = 0.05);
+  //barrel calorimeter
+  declareProperty("EMC_BARREL_MAX_COS_THETA", EMC_BARREL_MAX_COS_THETA = 0.8);
+  declareProperty("EMC_BARREL_MIN_ENERGY", EMC_BARREL_MIN_ENERGY = 0.025);
+
+  //not electron
+  declareProperty("MAX_EP_RATIO", MAX_EP_RATIO = 0.26);
 
   declareProperty("MAX_PION_MOMENTUM", MAX_PION_MOMENTUM = 0.45); //GeV
   declareProperty("MIN_KAON_MOMENTUM", MAX_KAON_MOMENTUM = 1.0); //GeV
@@ -172,13 +186,27 @@ StatusCode JpsiKK::initialize(void)
   log << MSG::INFO << "in initialize()" << endmsg;
   event_proceed=0;
   event_write = 0;
-  tau_events=0;
-  bhabha_events=0;
-  gg_event_writed=0;
   good_pion_pairs_number=0;
   good_high_mom_pairs_number=0;
 
   StatusCode status;
+
+  NTuplePtr nt_event(ntupleSvc(), "FILE1/event");
+  if(nt_event) fEvent.tuple = nt_event;
+  else
+  {
+    fEvent.tuple = ntupleSvc()->book("FILE1/event", CLID_ColumnWiseTuple, "Signal events pi+pi- K+K-, or pi+pi- mu+mu-");
+    if(fEvent.tuple)
+    {
+      status = fEvent.init_tuple(muc_tuple);
+    }
+    else
+    {
+      log << MSG::ERROR << "    Cannot book N-tuple:" << long(fEvent.tuple) << endmsg;
+      return StatusCode::FAILURE;
+    }
+  }
+
   NTuplePtr my_nt(ntupleSvc(), "FILE1/mhadr");
   if(my_nt) main_tuple=my_nt;
   else
@@ -456,6 +484,60 @@ StatusCode JpsiKK::initialize(void)
   return StatusCode::SUCCESS;
 }
 
+
+void JpsiKK::RootEvent::init_tuple(NTuple::Tuple * tuple)
+{
+  StatusCode status;
+  status = tuple->addItem ("ntrack", ntrack); //good charged track in event
+  status = tuple->addItem ("nptrack", npositive_track); //good positive charged track in event
+  status = tuple->addItem ("nntrack", nnegative_track); //good negative charged track in event
+  status = tuple->addItem ("nppions", npositve_pions); //good poitive pion tracks in event
+  status = tuple->addItem ("nnpions", nnegative_pions); //good negative pion track in event
+  status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
+  status = tuple->addItem ("channel", channel); //decay channel of the J/psi
+  //pions information
+  status = tuple->addIndexedItem ("pidx", 2, pions.index);
+  status = tuple->addIndexedItem ("pq", 2, pions.q);
+  status = tuple->addIndexedItem ("pE", 2, pions.E);
+  status = tuple->addIndexedItem ("pp", 2, pions.p);
+  status = tuple->addIndexedItem ("ppx", 2, pions.px);
+  status = tuple->addIndexedItem ("ppy", 2, pions.py);
+  status = tuple->addIndexedItem ("ppz", 2, pions.pz);
+  status = tuple->addIndexedItem ("ppt", 2, pions.pt);
+  status = tuple->addIndexedItem ("ptheta", 2, pions.theta);
+  status = tuple->addIndexedItem ("pphi", 2, pions.phi);
+  status = tuple->addIndexedItem ("px", 2, pions.x);
+  status = tuple->addIndexedItem ("py", 2, pions.y);
+  status = tuple->addIndexedItem ("pz", 2, pions.z);
+  status = tuple->addIndexedItem ("pr", 2, pions.r);
+  status = tuple->addIndexedItem ("pvxy", 2, pions.vxy);
+  status = tuple->addIndexedItem ("pvz", 2, pions.vz);
+  status = tuple->addIndexedItem ("pvphi", 2, pions.vphi);
+  //kaons or muons information
+  status = tuple->addIndexedItem ("kidx", 2, kmuons.index);
+  status = tuple->addIndexedItem ("kq", 2, kmuons.q);
+  status = tuple->addIndexedItem ("kE", 2, kmuons.E);
+  status = tuple->addIndexedItem ("kp", 2, kmuons.p);
+  status = tuple->addIndexedItem ("kpx", 2, kmuons.px);
+  status = tuple->addIndexedItem ("kpy", 2, kmuons.py);
+  status = tuple->addIndexedItem ("kpz", 2, kmuons.pz);
+  status = tuple->addIndexedItem ("kpt", 2, kmuons.pt);
+  status = tuple->addIndexedItem ("ktheta", 2, kmuons.theta);
+  status = tuple->addIndexedItem ("kphi", 2, kmuons.phi);
+  status = tuple->addIndexedItem ("kx", 2, kmuons.x);
+  status = tuple->addIndexedItem ("ky", 2, kmuons.y);
+  status = tuple->addIndexedItem ("kz", 2, kmuons.z);
+  status = tuple->addIndexedItem ("kr", 2, kmuons.r);
+  status = tuple->addIndexedItem ("kvxy", 2, kmuons.vxy);
+  status = tuple->addIndexedItem ("kvz", 2, kmuons.vz);
+  status = tuple->addIndexedItem ("kvphi", 2, kmuons.vphi);
+  return status;
+}
+
+void JpsiKK::RootEvent::init(void)
+{
+}
+
 void JpsiKK::EMC_t::init(void)
 {
   // emc information init.
@@ -710,6 +792,9 @@ void JpsiKK::InitData(long nchtrack, long nneutrack)
 
 void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
 {
+  ro = -9999;
+  z = -9999;
+  phi = -9999;
   /*  Reconstruct the vertex */
   Hep3Vector xorigin(0,0,0);
   IVertexDbSvc*  vtxsvc;
@@ -743,6 +828,28 @@ void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
   phi=Rvphi0;
 }
 
+
+double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, double mass)
+{
+  EvtRecTrackIterator & itTrk[2] = {trk1, trk2};
+  HepLorentzVector  P[2];
+  for(int k=0;k<2;k++)
+  {
+    if(!(*itTrk[k])->isMdcTrackValid()) break; 
+    RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
+    P[k] = mdcTrk->p4(mass);
+  }
+  HepLorentzVector P_psip(0.040546,0,0,PSIP_MASS); //initial vector of psip
+  HepLorentzVector Psum = P[0]+P[1];
+  HepLorentzVector P_recoil = P_psip - P_sum;
+  return P_recoil.m();
+};
+
+double get_recoil__mass(pair_t<EvtRecTrackIterator, EvtRecTrackIterator> pair, double mass)
+{
+  return get_recoil__mass(pair->first, pair->second, mass);
+};
+
 StatusCode JpsiKK::execute()
 {
   MsgStream log(msgSvc(), name());
@@ -764,9 +871,6 @@ StatusCode JpsiKK::execute()
   if(isprint)
   {
     std::cout << "proceed event: " << setw(15) << event_proceed;
-    std::cout << "  tau-mu:" << setw(15) << tau_events;
-    std::cout << "  ee:" << setw(15) << bhabha_events;
-    std::cout << "  gg:" << setw(15) << gg_event_writed;
     std::cout << std::endl;
   }
   event_proceed++;
@@ -779,704 +883,741 @@ StatusCode JpsiKK::execute()
 
   InitData(evtRecEvent->totalCharged(), evtRecEvent->totalNeutral());
 
-  nchtr_a.add(evtRecEvent->totalCharged());
-  nntr_a.add(evtRecEvent->totalNeutral());
-  nttr_a.add(evtRecEvent->totalTracks());
+  //typedef std::multimap <double, unsigned> mmap_t;
+  //typedef std::pair <double, unsigned> pair_t;
+  //mmap_t pmap;
 
+  std::list<EvtRecTrackIterator> good_charged_tracks;
+  std::list<EvtRecTrackIterator> good_neutral_tracks;
 
-  typedef std::multimap <double, unsigned> mmap_t;
-  typedef std::pair <double, unsigned> pair_t;
-  mmap_t pmap;
-  unsigned good_charged_tracks = 0;
-
-
-  if(evtRecEvent->totalCharged()  >= MIN_CHARGED_TRACKS)
+  //now count good charged track
+  for(unsigned i = 0; i < evtRecEvent->totalCharged(); ++i)
   {
-    /*  loop over charged track */
-    mdc.ntrack=0;
-    //look thru the charged tracks and sort them on momentum
-    //count good charged tracks wich come from interaction point
-    //and has cos(theta) < 0.93
-    for(unsigned idx = 0; idx < evtRecEvent->totalCharged(); idx++)
+    EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + i;
+    if(!(*itTrk)->isMdcTrackValid()) continue;  //use only valid charged tracks
+    RecMdcTrack *mdcTrk = (*itTrk)->mdcTrack();  //main drift chambe
+    //calculate interaction point distance
+    double rvxy,rvz,rvphi;
+    calculate_vertex(mdcTrk,rvxy,rvz,rvphi); //find distance to interaction point
+    bool IP_track = fabs(rvz)< IP_MAX_Z && fabs(rvxy)<IP_MAX_RHO;  //tracks begin near interaction point
+    bool good_track = IP_track && fabs(cos(mdcTrk->theta()))<MAX_COS_THETA; //track is good
+    if(good_track) good_charged_tracks.push_back(itTrk);
+  }
+  //now count good neutral track
+  for(int i = evtRecEvent->totalCharged(); idx<evtRecEvent->totalTracks(); ++i)
+  {
+    EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + i;
+    if(!(*itTrk)->isEmcShowerValid()) continue; //keep only valid neutral tracks
+    RecEmcShower *emcTrk = (*itTrk)->emcShower();
+    double c =  fabs(cos(emcTrk->theta())); //abs cos theta
+    double E  =  emcTrk->energy();
+    bool barrel = (c <= EMC_BARREL_MAX_COS_THETA);
+    bool endcup = (EMC_ENDCUP_MIN_COS_THETA <=c) && (c <= EMC_ENDCUP_MAX_COS_THETA);
+    bool good_track = ( barrel && E > EMC_BARREL_MIN_ENERGY) || (endcup && EMC_ENDCUP_MIN_ENERGY);
+    if(good_track) good_neutral_tracks.push_back(itTrk);
+  }
+
+
+  //number of good neutral tracks must be 0
+  if(!good_neutral_tracks.empty()) goto SKIP_CHARGED;
+
+  
+  std::list<EvtRecTrackIterator> charged_tracks; //selected tracks for specific cut
+  std::list<EvtRecTrackIterator> positive_charged_tracks; //selected tracks for specific cut
+  std::list<EvtRecTrackIterator> negative_charged_tracks; //selected tracks for specific cut
+  std::list<EvtRecTrackIterator> positive_pion_tracks; //selected pion tracks for specific cut
+  std::list<EvtRecTrackIterator> negative_pion_tracks; //selected pion tracks for specific cut
+  for(std::list<EvtRecTrackIterator>::iterator track=good_charged_tracks.begin(); track!=good_charged_tracks.end(); track++)
+  {
+    EvtRecTrackIterator & itTrk = *track;
+    if(!(*itTrk)->isMdcTrackValid()) continue; 
+    if(!(*itTrk)->isEmcShowerValid()) continue; 
+    RecMdcTrack *mdcTrk = (*itTrk)->mdcTrack();
+    RecEmcShower *emcTrk = (*itTrk)->emcShower();
+    double c = fabs(cos(mdcTrk->theta()));
+    double E = emcTrk->energy();
+    double p = emcTrk->p();
+    double q = emcTrk->charge();
+    bool barrel = c < EMC_BARREL_MAX_COS_THETA;
+    bool not_electron = E/p < MAX_EP_RATIO; 
+    if(barrel & not_electron) 
     {
-      EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + idx;
-      if(!(*itTrk)->isMdcTrackValid()) continue;  //use only valid charged tracks
-      RecMdcTrack *mdcTrk = (*itTrk)->mdcTrack();  //main drift chambe
-      //calculate interaction point distance
-      double rvxy=-9999,rvz=-9999,rvphi=-9999;
-      calculate_vertex(mdcTrk,rvxy,rvz,rvphi); //find distance to interaction point
-      bool is_fromIP = fabs(rvz)< IP_MAX_Z && fabs(rvxy)<IP_MAX_RHO;  //tracks begin near interaction point
-      bool is_good_track = is_fromIP && fabs(cos(mdcTrk->theta()))<MAX_COS_THETA; //track is good
-      if(!is_good_track) continue;
-      //if(!(*itTrk)->isEmcShowerValid()) continue; //charged track must have energy deposition in EMC
-      if(!(*itTrk)->isEmcShowerValid()) continue; 
-      if((*itTrk)->isEmcShowerValid()) 
+      if(q>0) 
       {
-        RecEmcShower *emcTrk = (*itTrk)->emcShower();
-        double E = emcTrk->energy();
-        //Emap.insert(pair_t(E,idx));
+        positive_charged_tracks.push_back(itTrk);
+        if(p<MAX_PION_MOMENTUM) 
+        {
+          positive_pion_tracks.push_back(itTrk);
+        }
       }
-      pmap.insert(pair_t(mdcTrk->p(),idx));
+      if(q<0) 
+      {
+        if(p<MAX_PION_MOMENTUM) 
+        {
+          netative_pion_tracks.push_back(itTrk);
+        }
+        negative_charged_tracks.push_back(itTrk);
+      }
+      charged_tracks.push_back(itTrk);
     }
-    good_charged_tracks=pmap.size();
-    if(good_charged_tracks < MIN_CHARGED_TRACKS   || MAX_CHARGED_TRACKS < good_charged_tracks) goto SKIP_CHARGED;
+  }
 
-    //now fill the arrayes using indexes sorted by energy
-    mdc.ntrack =good_charged_tracks; //save number of good charged tracks
-    muc.ntrack =good_charged_tracks;
-    dedx.ntrack=good_charged_tracks;
-    tof.ntrack =good_charged_tracks;
+  //keep only specific signature
+  if(positive_charged_tracks.size()!=2 || negative_charged_tracks.size()!=2) goto SKIP_CHARGED;
 
-    //particle id 
-    ParticleID *pid = ParticleID::instance();
-    //loop over tracks oredered by energy
-    int gidx=0; //good charged track idx
-    std::list<int> pions_plus; //positive pion candidate index list
-    std::list<int> pions_minus; //negative pion candidate index list 
-    std::list<int> high_mom_plus; //positive particles with high momentum
-    std::list<int> high_mom_minus; //negative particles with high momentum
-    for(mmap_t::reverse_iterator ri=pmap.rbegin(); ri!=pmap.rend(); ++ri)
+  if(negative_pion_tracks.empty() || positive_pion_tracks.empty()) goto SKIP_CHARGED;
+
+  std::list< pair_t<EvtRecTrackIterator, EvtRecTrackIterator> > pion_pairs;
+  //create pion pairs
+  for(list<EvtRecTrackIterator>::iterator i=negative_pion_tracks.begin(); i!=positive_pion_tracks.end(); ++i)
+    for(list<EvtRecTrackIterator>::iterator j=negative_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
     {
-      EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + ri->second;
-      RecMdcTrack *mdcTrk = (*itTrk)->mdcTrack();  //main drift chambe
-      //RecEmcShower *emcTrk = (*itTrk)->emcShower(); //Electro Magnet Calorimeer
-      double rvxy=-9999,rvz=-9999,rvphi=-9999;
-      calculate_vertex(mdcTrk,rvxy,rvz,rvphi); //find distance to interaction point
-      //select good tracks before
-      int i = gidx; //now fill
-
-      //fill vertex information
-      mdc.rvxy[i]=rvxy;
-      mdc.rvz[i]=rvz;
-      mdc.rvphi[i]=rvphi;
-
-      //fil track information
-      mdc.p[i]     =  mdcTrk->p();
-      mdc.pt[i]    =  mdcTrk->p()*sin(mdcTrk->theta());
-      mdc.px[i]    =  mdcTrk->px();
-      mdc.py[i]    =  mdcTrk->py();
-      mdc.pz[i]    =  mdcTrk->pz();
-      mdc.theta[i] =  mdcTrk->theta();
-      mdc.phi[i]   =  mdcTrk->phi();
-      mdc.q[i]     =  mdcTrk->charge();
-      mdc.x[i]     =  mdcTrk->x();
-      mdc.y[i]     =  mdcTrk->y();
-      mdc.z[i]     =  mdcTrk->z();
-
-
-      /*  Particle identification game */
-      //pid->init();
-      //pid->setMethod(pid->methodProbability());
-      //pid->setChiMinCut(4);
-      //pid->setRecTrack(*itTrk);
-      ////pid->usePidSys((pid->useMuc() | pid->useEmc()) | pid->useDedx()); // use PID sub-system
-      ////pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useEmc() | pid->useMuc());
-      ////pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useMuc());
-      //pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
-      ////pid->identify(pid->onlyMuon() | pid->onlyElectron()); 
-      //pid->identify(pid->all()); 
-      //pid->calculate();
-      //if(pid->IsPidInfoValid())
-      //{
-      //  mdc.probe[i] =  pid->probElectron();
-      //  mdc.probmu[i] = pid->probMuon();
-      //  mdc.probpi[i] = pid->probPion();
-      //  mdc.probK[i] =  pid->probKaon();
-      //  mdc.probp[i] =  pid->probProton();
-      //}
-
-      //if momentum below 0.5 GeV it could be pions
-      if(mdc.p[i] < MAX_PION_MOMENTUM)
+      double M_recoil = get_recoil__mass(*i,*j);
+      if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
       {
-        mdc.M[i]=PION_MASS;
-        if(mdc.q[i]>0) 
-        {
-          pions_plus.push_back(i);
-        }
-        if(mdc.q[i]<0) 
-        { 
-          pions_minus.push_back(i);
-        }
-      }
-
-      //particles with high momentum could be kaons, muons, electrons, protons???, pions
-      if(mdc.p[i]>std::min(MIN_KAON_MOMENTUM, MIN_MUON_MOMENTUM))
-      {
-        if(mdc.q[i]<0) 
-        {
-          high_mom_minus.push_back(i);
-        }
-        if(mdc.q[i]>0) 
-        {
-          high_mom_plus.push_back(i);
-        }
-      }
-
-      //check for KAONS or muons
-      //if(mdc.p[i]>std::min(MIN_KAON_MOMENTUM, MIN_MUON_MOMENTUM))
-      //{
-      //  if (
-      //      mdc.probmu[i] > mdc.probe[i] &&
-      //      mdc.probmu[i] > mdc.probpi[i] &&
-      //      mdc.probmu[i] > mdc.probK[i] &&
-      //      mdc.probmu[i] > mdc.probp[i]
-      //     )
-      //  {
-      //    //nmu++;
-      //    mdc.M[i]=MUON_MASS;
-      //    if(mdc.q[i]>0) 
-      //    {
-      //      //nmup++;
-      //      //Kmup_idx = i;
-      //      muons_plus.push_back(i);
-      //    }
-      //    if(mdc.q[i]<0) 
-      //    {
-      //      //nmum++;
-      //      //Kmum_idx = i;
-      //      muons_minus.push_back(i);
-      //    }
-      //  }
-      //  if (
-      //      mdc.probK[i] > mdc.probe[i] &&
-      //      mdc.probK[i] > mdc.probpi[i] &&
-      //      mdc.probK[i] > mdc.probmu[i] &&
-      //      mdc.probK[i] > mdc.probp[i]
-      //     )
-      //  {
-      //    //nK++;
-      //    mdc.M[i]=KAON_MASS;
-      //    if(mdc.q[i]>0) 
-      //    {
-      //      //nKp++;
-      //      //Kmup_idx = i;
-      //      kaons_plus.push_back(i);
-      //    }
-      //    if(mdc.q[i]<0) 
-      //    {
-      //      //nKm++;
-      //      //Kmum_idx = i;
-      //      kaons_minus.push_back(i);
-      //    }
-      //  }
-      //}
-
-
-      mdc.Emdc+=sqrt(mdc.p[i]*mdc.p[i]+sq(PION_MASS));
-
-      if((*itTrk)->isEmcShowerValid())
-      {
-        mdc.isemc[i] = 1;
-        RecEmcShower *emcTrk = (*itTrk)->emcShower(); //Electro Magnet Calorimeer
-        // Add EMC information
-        mdc.E[i]     =  emcTrk->energy();
-        mdc.dE[i]    =  emcTrk->dE();
-        mdc.ncrstl[i] = emcTrk->numHits();
-        mdc.status[i] = emcTrk->status();
-        mdc.cellId[i] = emcTrk->cellId();
-        mdc.module[i] = emcTrk->module();
-        mdc.temc[i] = emcTrk->time();
-        mdc.Eemc+=mdc.E[i]; //Accumulate energy deposition
-      }
-      else
-      {
-        mdc.isemc[i]=0;
-      }
-
-      //HepLorentzVector P(mdc.px[i], mdc.py[i], mdc.pz[i], mdc.E[i]);
-      //mdc.M[i]=P.m();
-
-      /* Check muon system information for this track */
-      mdc.ismu[i]=(*itTrk)->isMucTrackValid();
-      if((*itTrk)->isMucTrackValid() && CHECK_MUC==1)
-      {
-        RecMucTrack *mucTrk = (*itTrk)->mucTrack();  //main drift chambe
-        muc.status[i]= mucTrk->status();
-        muc.type[i]= mucTrk->type();
-        muc.depth[i]= mucTrk->depth();
-        muc.chi2[i]= mucTrk->chi2();
-        muc.ndf[i]= mucTrk->dof();
-        muc.distance[i]= mucTrk->distance();
-        muc.phi[i]= mucTrk->deltaPhi();
-        muc.nhit[i] = mucTrk->numHits();
-        muc.nlayer[i] = mucTrk->numLayers();
-        muc.nhitmax[i] = mucTrk->maxHitsInLayer();
-        muc.brlast[i] = mucTrk->brLastLayer();
-        muc.eclast[i] = mucTrk->ecLastLayer();
-      }
-
-
-      /* dEdx information */
-      if(CHECK_DEDX == 1 && (*itTrk)->isMdcDedxValid())
-      {
-        RecMdcDedx* dedxTrk = (*itTrk)->mdcDedx();
-        dedx.chie[i] = dedxTrk->chiE();
-        dedx.chimu[i] = dedxTrk->chiMu();
-        dedx.chipi[i] = dedxTrk->chiPi();
-        dedx.chik[i] = dedxTrk->chiK();
-        dedx.chip[i] = dedxTrk->chiP();
-        dedx.ghit[i] = dedxTrk->numGoodHits();
-        dedx.thit[i] = dedxTrk->numTotalHits();
-        dedx.probPH[i] = dedxTrk->probPH();
-        dedx.normPH[i] = dedxTrk->normPH();
-        dedx.e[i] = dedxTrk->getDedxExpect(0);
-        dedx.mu[i] = dedxTrk->getDedxExpect(1);
-        dedx.pi[i] = dedxTrk->getDedxExpect(2);
-        dedx.K[i] = dedxTrk->getDedxExpect(3);
-        dedx.p[i] = dedxTrk->getDedxExpect(4);
-        dedx.pid[i]=dedxTrk->particleId();
-      }
-
-      /* check TOF information */
-      mdc.istof[i]=(*itTrk)->isTofTrackValid();
-      if(CHECK_TOF && mdc.istof[i])
-      {
-        SmartRefVector<RecTofTrack> tofTrkCol = (*itTrk)->tofTrack();
-        SmartRefVector<RecTofTrack>::iterator tofTrk = tofTrkCol.begin();
-        TofHitStatus *hitst = new TofHitStatus;
-        std::vector<int> tofecount;
-        int goodtofetrk=0;
-        for(tofTrk = tofTrkCol.begin(); tofTrk!=tofTrkCol.end(); tofTrk++,goodtofetrk++)
-        {
-          unsigned int st = (*tofTrk)->status();
-          hitst->setStatus(st);
-          //if(  (hitst->is_barrel()) ) continue;
-          //if( !(hitst->is_counter()) ) continue;
-          tofecount.push_back(goodtofetrk);
-        }
-        delete hitst;
-        if(tofecount.size()>0) //not tof2 track or more than 1 tracks
-        {
-          tofTrk = tofTrkCol.begin()+tofecount[0];
-
-          tof.trackID[i]=(*tofTrk)->trackID();
-          tof.tofID[i]=(*tofTrk)->tofID();
-          tof.tofTrackID[i]=(*tofTrk)->tofTrackID();
-          tof.status[i] = (*tofTrk)->status();
-          tof.path[i]  = (*tofTrk)->path();
-          tof.zrhit[i]  = (*tofTrk)->zrhit();
-          tof.ph[i]  = (*tofTrk)->ph();
-          tof.tof[i]  = (*tofTrk)->tof();
-          tof.errtof[i]  = (*tofTrk)->errtof();
-          tof.beta[i]  = (*tofTrk)->beta();
-          tof.texpe[i]  = (*tofTrk)->texpElectron();
-          tof.texpmu[i]  = (*tofTrk)->texpMuon();
-          tof.texppi[i]  = (*tofTrk)->texpPion();
-          tof.texpK[i]  = (*tofTrk)->texpKaon();
-          tof.texpp[i]  = (*tofTrk)->texpProton();
-          tof.toffsete[i]  = (*tofTrk)->toffsetElectron();
-          tof.toffsetmu[i]  = (*tofTrk)->toffsetMuon();
-          tof.toffsetpi[i]  = (*tofTrk)->toffsetPion();
-          tof.toffsetK[i]  = (*tofTrk)->toffsetKaon();
-          tof.toffsetp[i]  = (*tofTrk)->toffsetProton();
-          tof.toffsetap[i]  = (*tofTrk)->toffsetAntiProton();
-          tof.sigmae[i]  = (*tofTrk)->sigmaElectron();
-          tof.sigmamu[i]  = (*tofTrk)->sigmaMuon();
-          tof.sigmapi[i]  = (*tofTrk)->sigmaPion();
-          tof.sigmaK[i]  = (*tofTrk)->sigmaKaon();
-          tof.sigmap[i]  = (*tofTrk)->sigmaProton();
-          tof.sigmaap[i]  = (*tofTrk)->sigmaAntiProton();
-          tof.t0[i]  = (*tofTrk)->t0();
-          tof.errt0[i]  = (*tofTrk)->errt0();
-          tof.errz[i]  = (*tofTrk)->errz();
-          tof.phi[i]  = (*tofTrk)->phi();
-          tof.E[i]  = (*tofTrk)->energy();
-          tof.errE[i]  = (*tofTrk)->errenergy();
-        }
-      }
-
-      if(CHECK_MC)
-      {
-        for(Event::McParticleCol::iterator ip=mcParticleCol->begin(); ip!=mcParticleCol->end(); ++ip)
-        {
-          Event::McParticle * p = *ip;
-          int mc_track_id = p->trackIndex();
-          int pid = p->particleProperty();
-          HepLorentzVector P4 = p->initialFourMomentum();
-          Hep3Vector P3 = P4.vect();
-          double angle = P3.angle(mdcTrk->p3());
-//          Hep3Vector dP = P3 - mdcTrk->p3();
-          if(angle<MC_DP)
-          {
-            mc.px[i] = P3.x();
-            mc.py[i] = P3.y();
-            mc.pz[i] = P3.z();
-            mc.p[i] = P3.mag();
-            mc.E[i] = P4.e();
-            mc.id[i] = pid;
-            //cout << "mc track=" << mdcTrk->trackId() <<   " mc track=" << mc_track_id << " pid=" << pid <<endl;
-          }
-        }
-      }
-      gidx++;
-    }
-    mdc.ntrack=gidx;
-    mdc.ngood_track = gidx;
-    if(CHECK_MC) mc.ntrack=gidx;
-
-    //we must have at least two opposite charge pions
-    if(pions_plus.empty() || pions_minus.empty())  goto SKIP_CHARGED;
-    //find pairs
-    std::list<PionPair_t> pion_pairs;
-    HepLorentzVector P_psip(0.040546,0,0,PSIP_MASS); //initial vector of psip
-    for(std::list<int>::iterator it_minus=pions_minus.begin(); it_minus!=pions_minus.end(); it_minus++)
-      for(std::list<int>::iterator it_plus=pions_plus.begin(); it_plus!=pions_plus.end(); it_plus++)
-      {
-        EvtRecTrackIterator itTrk_minus = evtRecTrkCol->begin() + *it_minus;
-        EvtRecTrackIterator itTrk_plus = evtRecTrkCol->begin() + *it_plus;
-        RecMdcTrack * pion_minus = (*itTrk_minus)-> mdcTrack();
-        RecMdcTrack * pion_plus  = (*itTrk_plus) -> mdcTrack();
-        HepLorentzVector P_minus = pion_minus->p4(PION_MASS); //pion vector
-        HepLorentzVector P_plus =  pion_plus->p4(PION_MASS); //pion vector
-        HepLorentzVector P_recoil = P_psip  - P_minus - P_plus;
-        double Mrec = P_recoil.m(); //calculate recoil mass
-        pid->setRecTrack(*itTrk_minus);
-        pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
-        pid->identify(pid->onlyPion()); 
-        pid->calculate();
-        double pion_minus_prob = pid->probPion();
-        pid->setRecTrack(*itTrk_plus);
-        pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
-        pid->identify(pid->onlyPion()); 
-        pid->calculate();
-        double pion_plus_prob = pid->probPion();
-        if(MIN_RECOIL_MASS < Mrec && Mrec < MAX_RECOIL_MASS) 
-        {
-          PionPair_t pair;
-          pair.plus_index = *it_plus;
-          pair.minus_index = *it_minus;
-          pair.pid_pion_probability = pion_minus_prob*pion_plus_prob;
-          pair.recoil_mass = Mrec;
-          pair.P_minus = P_minus;
-          pair.P_plus = P_plus;
-          pion_pairs.push_back(pair);
-        }
-      }
-    //no pion pairs with appropriate recoil mass
-    if(pion_pairs.empty()) goto SKIP_CHARGED;
-    //find best pion pairs
-    std::list<PionPair_t>::iterator best_pion_pair_iterator=pion_pairs.begin();
-    for(std::list<PionPair_t>::iterator pair=pion_pairs.begin(); pair!=pion_pairs.end(); pair++)
-    {
-      if(pair->pid_pion_probability > best_pion_pair_iterator->pid_pion_probability) best_pion_pair_iterator = pair;
-    }
-    mdc.Mrec = best_pion_pair_iterator->recoil_mass;
-    HepLorentzVector P_pion_minus = best_pion_pair_iterator->P_minus;
-    HepLorentzVector P_pion_plus = best_pion_pair_iterator->P_plus;
-    good_pion_pairs_number++;
-
-    //skip event if no high energy particles 
-    if(high_mom_plus.empty() || high_mom_minus.empty())  goto SKIP_CHARGED;
-
-    //create all pairs with  invariant mass close to J/psi
-    std::list<ChargedPair_t> charged_pairs;
-    //std::list<ChargedPair_t> charged_pairs[5];
-    for(std::list<int>::iterator it_minus=high_mom_minus.begin(); it_minus!=high_mom_minus.end(); it_minus++)
-      for(std::list<int>::iterator it_plus=high_mom_plus.begin(); it_plus!=high_mom_plus.end(); it_plus++)
-      {
-        EvtRecTrackIterator itTrk_minus = evtRecTrkCol->begin() + *it_minus;
-        EvtRecTrackIterator itTrk_plus = evtRecTrkCol->begin() + *it_plus;
-        RecMdcTrack * mdcTrk_minus = (*itTrk_minus)-> mdcTrack();
-        RecMdcTrack * mdcTrk_plus  = (*itTrk_plus) -> mdcTrack();
-        for(int i=0;i<5; i++)
-        {
-          HepLorentzVector P_minus = mdcTrk_minus->p4(XMASS[i]); //pion vector
-          HepLorentzVector P_plus =  mdcTrk_plus->p4(XMASS[i]); //pion vector
-          HepLorentzVector P_sum = P_minus + P_plus;
-          HepLorentzVector P_recoil = P_psip  - P_sum;
-          double Mrec = P_recoil.m(); //calculate recoil mass
-          double Minv =  P_sum.m();
-          if(MIN_INVARIANT_MASS < Minv && Minv < MAX_INVARIANT_MASS)
-          {
-            pid->setRecTrack(*itTrk_minus);
-            pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useEmc());
-            pid->identify(pid->all()); 
-            pid->calculate();
-            double probKaon_minus = pid->probKaon();
-            double probMuon_minus = pid->probMuon();
-            double probElectron_minus = pid->probElectron();
-            double probPion_minus = pid->probPion();
-            double probProton_minus = pid->probProton();
-
-            pid->setRecTrack(*itTrk_plus);
-            pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useEmc());
-            pid->identify(pid->all()); 
-            pid->calculate();
-            double probKaon_plus = pid->probKaon();
-            double probMuon_plus = pid->probMuon();
-            double probElectron_plus = pid->probElectron();
-            double probPion_plus = pid->probPion();
-            double probProton_plus = pid->probProton();
-
-            ChargedPair_t pair;
-            pair.minus_index = *it_minus;
-            pair.plus_index = *it_plus;
-            pair.P_minus = P_minus;
-            pair.P_plus = P_plus;
-            pair.recoil_mass = Mrec;
-            pair.invariant_mass = Minv;
-            pair.probability[PID_KAON] = probKaon_minus*probKaon_plus;
-            pair.probability[PID_MUON] = probMuon_minus*probMuon_plus;
-            pair.probability[PID_ELECTRON] = probElectron_minus*probElectron_plus;
-            pair.probability[PID_PION] = probPion_minus*probPion_plus;
-            pair.probability[PID_PROTON] = probProton_minus*probProton_plus;
-            for(int j=0;j<5;j++)
-            {
-              cout << pair.probability[j] <<  " " ;
-            }
-            cout << endl;
-            pair.particle_mass = XMASS[i];
-            pair.pid = (PairID_t)i;
-            charged_pairs.push_back(pair);
-          }
-        }
-      }
-
-    //no charged pairs with high momentum with appropriate invariant mass found
-    if(charged_pairs.empty()) goto SKIP_CHARGED;
-    good_high_mom_pairs_number++;
-
-    int channel=-1;
-    /* temporary suppresed 
-    //now analize high energy pairs
-    //find best pairs with most probable pid in each category
-    list<ChargedPair_t>::iterator best_pair[5];
-    double best_prob[5]={0,0,0,0,0};
-    for(list<ChargedPair_t>::iterator it= charged_pairs.begin(); it!=charged_pairs.end(); it++)
-    {
-      for(int pid=0; pid<5; pid++)
-      {
-        cout << pid << " " << it->probability[pid] << endl;
-        if( pid == it->pid)
-        {
-          if(it->probability[pid] >= best_prob[pid]) 
-          {
-            best_pair[pid] = it;
-            best_prob[pid] = it->probability[pid];
-          }
-        }
-      }
-    }
-    cout << "Before channel" << endl;
-
-    for(int pid=0; pid<5;pid++)
-    {
-      cout << "best_prob[" << pid << "] = " << best_prob[pid] << endl;
-      if( best_prob[pid] > best_prob[channel]) channel= (PairID_t)pid;
-    }
-    */
-    ChargedPair_t best_pair=charged_pairs.front();
-    for(list<ChargedPair_t>::iterator it= charged_pairs.begin(); it!=charged_pairs.end(); it++)
-    {
-      double minv = it->invariant_mass;
-      if(  fabs(minv - JPSI_MASS)  <  fabs(best_pair.invariant_mass - JPSI_MASS))
-      {
-        best_pair = *it;
+        pion_pairs.push_back(make_pair(*i, *j));
       }
     }
 
-    channel = best_pair.pid;
-
-    HepLorentzVector P_charged_minus = best_pair.P_minus;
-    HepLorentzVector P_charged_plus = best_pair.P_plus;
-    HepLorentzVector P_sum = P_charged_minus + P_charged_plus;
-    HepLorentzVector P_mis = P_psip - P_pion_minus - P_pion_plus  - P_charged_minus - P_charged_plus;
-    mdc.Mmiss = P_mis.m2();
-
-    //select only if no missing mass here
-    if(mdc.Mmiss < MIN_MISSING_MASS || MAX_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
+  if(pion_pairs.empty()) return StatusCode::SUCCESS;
 
 
-    mdc.jpsi_decay_channel = channel;
+  //now fill the pion information
+  fEvent.ntrack = good_charged_tracks.size();
+  fEvent.npositive_track = positive_charged_tracks.size();
+  fEvent.nnegative_track = negative_charged_tracks.size();
+  fEvent.npositive_pions = positive_pion_tracks.size();
+  fEvent.nnegative_track = negative_pion_tracks.size();
+  fEvent.npion_pairs = pion_pairs.size();
+  fEvent.channel = -1; //yet not identify other particles
 
-    
+  fEvent.Mrec = get_recoil__mass(pion_pairs.front(), PION_MASS);
 
-    //calculate pion energy 
-    //double Epin = sqrt(mdc.p[pin_idx]*mdc.p[pin_idx] + mdc.M[pin_idx]*mdc.M[pin_idx]);
-    //double Epip = sqrt(mdc.p[pip_idx]*mdc.p[pip_idx] + mdc.M[pip_idx]*mdc.M[pip_idx]);
-    //HepLorentzVector P_psip(0.040546,0,0,3.686); //initial vector of psip
-    //HepLorentzVector P_pip(mdc.px[pip_idx],mdc.py[pip_idx],mdc.pz[pip_idx], Epip); //pion vector
-    //HepLorentzVector P_pin(mdc.px[pin_idx],mdc.py[pin_idx],mdc.pz[pin_idx], Epin); //pion vector
-    //HepLorentzVector P_recoil = P_psip  - P_pip - P_pin;
-    //mdc.Mrec = P_recoil.m(); //recoil mass of two pions
-    //if(mdc.Mrec < MIN_RECOIL_MASS || MAX_RECOIL_MASS < mdc.Mrec) goto SKIP_CHARGED;
-
-    //and other must be Kaons or muons
-    //if( (nKp!=1 || nKm!=1) && (nmup!=1 || nmum!=1)) goto SKIP_CHARGED;
-    //HepLorentzVector Pp(0,0,0,0);
-    //HepLorentzVector Pm(0,0,0,0);
-    //if(nKp>0 || nmup>0)
-    //{
-    //  double Ep = sqrt(mdc.p[Kmup_idx]*mdc.p[Kmup_idx] + mdc.M[Kmup_idx]*mdc.M[Kmup_idx]);
-    //  Pp=HepLorentzVector(mdc.px[Kmup_idx],mdc.py[Kmup_idx],mdc.pz[Kmup_idx], Ep);
-    //}
-    //if(nKm>0 || nmum>0)
-    //{
-    //  double Em = sqrt(mdc.p[Kmum_idx]*mdc.p[Kmum_idx] + mdc.M[Kmum_idx]*mdc.M[Kmum_idx]);
-    //  Pm=HepLorentzVector(mdc.px[Kmum_idx],mdc.py[Kmum_idx],mdc.pz[Kmum_idx], Em);
-    //}
-    //HepLorentzVector P = Pp + Pm;
-    //HepLorentzVector Pmis = P_psip - P_pip - P_pin - Pp - Pm;
-    //mdc.Mmiss = Pmis.m2();
-    //if( (nKp!=1 && nKm!=1) || (nmup!=1 && nmum!=1))
-    //{
-    ////calculate the for momentum
-    //  if(nKp==1) mdc.MKK = P.m();
-    //  if(nmup==1) mdc.Mmumu = P.m();
-    //}
-
-    ////tag KK decay channel. One kaon is missing
-    //if( nKp < 2 && nKm < 2 && 0 < (nKp + nKm) && (nKp + nKm) < 3 && (nmup + nmum) == 0 ) 
-    //{
-    //  mdc.jpsi_decay_channel = 0;
-    //}
-    ////tag mumu decay channel. One muon is missing
-    //if( nmup <2 && nmum < 2 && 0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) 
-    //{
-    //  mdc.jpsi_decay_channel = 1;
-    //}
-    //could not find required configuration
-
-    //if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
-
-    ////select event with missing particle using invariant mass
-    //if((nKp+nKm) == 1 && mdc.Mmiss < MIN_KAON_MISSING_MASS || MAX_KAON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
-    //if((nmup+nmum) == 1 && mdc.Mmiss < MIN_MUON_MISSING_MASS || MAX_MUON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
-    
-
-    /* ================================================================================= */
-    /*  fill data for neutral tracks */
-    int track=0; //index for neutral tracks
-    emc.Etotal=0;
-    emc.ngood_charged_track=good_charged_tracks;
-    mmap_t Emap; //multi map to sort good tracks by energy order
-    Emap.clear();
-    pmap.clear();
-    //calculate good tracks
-    for(int idx = evtRecEvent->totalCharged(); idx<evtRecEvent->totalTracks(); idx++)
-    {
-      EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + idx;
-      if(!(*itTrk)->isEmcShowerValid()) continue;
-      RecEmcShower *emcTrk = (*itTrk)->emcShower();
-      double c =  fabs(cos(emcTrk->theta())); //abs cos theta
-      double E  =  emcTrk->energy();
-      bool barrel = c <= 0.8;
-      bool endcup = (0.86 <=c) && (c <=0.92);
-      if( (E<EMC_BARREL_THRESHOLD && barrel) || (E<EMC_ENDCUP_THRESHOLD && endcup) ) continue; 
-      Emap.insert(pair_t(E,idx));
-    }
-    if(Emap.size()>0 && MAX_TRACK_NUMBER < Emap.size()) goto SKIP_CHARGED;  //no good neutral tracks
-    int gnidx=0; //good neutrack track idx
-    for(mmap_t::reverse_iterator ri=Emap.rbegin(); ri!=Emap.rend(); ++ri, ++gnidx)
-    {
-      EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + ri->second;
-      RecEmcShower *emcTrk = (*itTrk)->emcShower();
-      emc.status[gnidx] = emcTrk->status();
-      emc.ncrstl[gnidx] = emcTrk->numHits();
-      emc.cellId[gnidx] = emcTrk->cellId();
-      emc.module[gnidx] = emcTrk->module();
-      emc.x[gnidx] = emcTrk->x();
-      emc.y[gnidx] = emcTrk->y();
-      emc.z[gnidx] = emcTrk->z();
-      emc.phi[gnidx] = emcTrk->phi();
-      emc.theta[gnidx] = emcTrk->theta();
-      emc.E[gnidx]  =  emcTrk->energy();
-      emc.dE[gnidx] =  emcTrk->dE();
-      emc.Etotal+=emcTrk->energy();
-      emc.t[gnidx] = emcTrk->time();
-    }
-    emc.ntrack=gnidx;
+  fEvent.tuple.write();
+  event_write++;
+  return StatusCode::SUCCESS;
 
 
-    m_nchtr=evtRecEvent->totalCharged();
-    m_nneutr=evtRecEvent->totalNeutral();
-    m_ntrack=evtRecEvent->totalCharged()+evtRecEvent->totalNeutral();
-    m_Etotal = emc.Etotal+mdc.Emdc;
-    m_Eemc = emc.Etotal+mdc.Eemc;
-    m_time = eventHeader->time();
+  //if(evtRecEvent->totalCharged()  >= MIN_CHARGED_TRACKS)
+  //{
+  //  /*  loop over charged track */
+  //  mdc.ntrack=0;
+  //  //look thru the charged tracks and sort them on momentum
+  //  //count good charged tracks wich come from interaction point
+  //  //and has cos(theta) < 0.93
+  //  for(unsigned idx = 0; idx < evtRecEvent->totalCharged(); idx++)
+  //  {
+  //    EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + idx;
+  //    if(!(*itTrk)->isMdcTrackValid()) continue;  //use only valid charged tracks
+  //    RecMdcTrack *mdcTrk = (*itTrk)->mdcTrack();  //main drift chambe
+  //    //calculate interaction point distance
+  //    double rvxy=-9999,rvz=-9999,rvphi=-9999;
+  //    calculate_vertex(mdcTrk,rvxy,rvz,rvphi); //find distance to interaction point
+  //    bool is_fromIP = fabs(rvz)< IP_MAX_Z && fabs(rvxy)<IP_MAX_RHO;  //tracks begin near interaction point
+  //    bool is_good_track = is_fromIP && fabs(cos(mdcTrk->theta()))<MAX_COS_THETA; //track is good
+  //    if(!is_good_track) continue;
+  //    //if(!(*itTrk)->isEmcShowerValid()) continue; //charged track must have energy deposition in EMC
+  //    if(!(*itTrk)->isEmcShowerValid()) continue; 
+  //    //if((*itTrk)->isEmcShowerValid()) 
+  //    //{
+  //    RecEmcShower *emcTrk = (*itTrk)->emcShower();
+  //    double E = emcTrk->energy();
+  //    double p = mdcTrk->p();
+  //    //Emap.insert(pair_t(E,idx));
+  //    //}
+  //    //select kaon,pion,muons
+  //    //if(E/p> 0.26) continue;
+  //    pmap.insert(pair_t(p,idx));
+  //  }
+  //  good_charged_tracks=pmap.size();
+  //  if(good_charged_tracks < MIN_CHARGED_TRACKS   || MAX_CHARGED_TRACKS < good_charged_tracks) goto SKIP_CHARGED;
+
+  //  //now fill the arrayes using indexes sorted by energy
+  //  mdc.ntrack =good_charged_tracks; //save number of good charged tracks
+  //  muc.ntrack =good_charged_tracks;
+  //  dedx.ntrack=good_charged_tracks;
+  //  tof.ntrack =good_charged_tracks;
+
+  //  //particle id 
+  //  ParticleID *pid = ParticleID::instance();
+  //  //loop over tracks oredered by energy
+  //  int gidx=0; //good charged track idx
+  //  std::list<int> pions_plus; //positive pion candidate index list
+  //  std::list<int> pions_minus; //negative pion candidate index list 
+  //  std::list<int> high_mom_plus; //positive particles with high momentum
+  //  std::list<int> high_mom_minus; //negative particles with high momentum
+  //  for(mmap_t::reverse_iterator ri=pmap.rbegin(); ri!=pmap.rend(); ++ri)
+  //  {
+  //    EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + ri->second;
+  //    RecMdcTrack *mdcTrk = (*itTrk)->mdcTrack();  //main drift chambe
+  //    //RecEmcShower *emcTrk = (*itTrk)->emcShower(); //Electro Magnet Calorimeer
+  //    double rvxy=-9999,rvz=-9999,rvphi=-9999;
+  //    calculate_vertex(mdcTrk,rvxy,rvz,rvphi); //find distance to interaction point
+  //    //select good tracks before
+  //    int i = gidx; //now fill
+
+  //    //fill vertex information
+  //    mdc.rvxy[i]=rvxy;
+  //    mdc.rvz[i]=rvz;
+  //    mdc.rvphi[i]=rvphi;
+
+  //    //fil track information
+  //    mdc.p[i]     =  mdcTrk->p();
+  //    mdc.pt[i]    =  mdcTrk->p()*sin(mdcTrk->theta());
+  //    mdc.px[i]    =  mdcTrk->px();
+  //    mdc.py[i]    =  mdcTrk->py();
+  //    mdc.pz[i]    =  mdcTrk->pz();
+  //    mdc.theta[i] =  mdcTrk->theta();
+  //    mdc.phi[i]   =  mdcTrk->phi();
+  //    mdc.q[i]     =  mdcTrk->charge();
+  //    mdc.x[i]     =  mdcTrk->x();
+  //    mdc.y[i]     =  mdcTrk->y();
+  //    mdc.z[i]     =  mdcTrk->z();
+
+
+  //    /*  Particle identification game */
+  //    //pid->init();
+  //    //pid->setMethod(pid->methodProbability());
+  //    //pid->setChiMinCut(4);
+  //    //pid->setRecTrack(*itTrk);
+  //    ////pid->usePidSys((pid->useMuc() | pid->useEmc()) | pid->useDedx()); // use PID sub-system
+  //    ////pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useEmc() | pid->useMuc());
+  //    ////pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useTofE() | pid->useTofQ() | pid->useMuc());
+  //    //pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
+  //    ////pid->identify(pid->onlyMuon() | pid->onlyElectron()); 
+  //    //pid->identify(pid->all()); 
+  //    //pid->calculate();
+  //    //if(pid->IsPidInfoValid())
+  //    //{
+  //    //  mdc.probe[i] =  pid->probElectron();
+  //    //  mdc.probmu[i] = pid->probMuon();
+  //    //  mdc.probpi[i] = pid->probPion();
+  //    //  mdc.probK[i] =  pid->probKaon();
+  //    //  mdc.probp[i] =  pid->probProton();
+  //    //}
+
+  //    //if momentum below 0.5 GeV it could be pions
+  //    if(mdc.p[i] < MAX_PION_MOMENTUM)
+  //    {
+  //      mdc.M[i]=PION_MASS;
+  //      if(mdc.q[i]>0) 
+  //      {
+  //        pions_plus.push_back(i);
+  //      }
+  //      if(mdc.q[i]<0) 
+  //      { 
+  //        pions_minus.push_back(i);
+  //      }
+  //    }
+
+  //    //particles with high momentum could be kaons, muons, electrons, protons???, pions
+  //    if(mdc.p[i]>std::min(MIN_KAON_MOMENTUM, MIN_MUON_MOMENTUM))
+  //    {
+  //      if(mdc.q[i]<0) 
+  //      {
+  //        high_mom_minus.push_back(i);
+  //      }
+  //      if(mdc.q[i]>0) 
+  //      {
+  //        high_mom_plus.push_back(i);
+  //      }
+  //    }
+
+  //    //check for KAONS or muons
+  //    //if(mdc.p[i]>std::min(MIN_KAON_MOMENTUM, MIN_MUON_MOMENTUM))
+  //    //{
+  //    //  if (
+  //    //      mdc.probmu[i] > mdc.probe[i] &&
+  //    //      mdc.probmu[i] > mdc.probpi[i] &&
+  //    //      mdc.probmu[i] > mdc.probK[i] &&
+  //    //      mdc.probmu[i] > mdc.probp[i]
+  //    //     )
+  //    //  {
+  //    //    //nmu++;
+  //    //    mdc.M[i]=MUON_MASS;
+  //    //    if(mdc.q[i]>0) 
+  //    //    {
+  //    //      //nmup++;
+  //    //      //Kmup_idx = i;
+  //    //      muons_plus.push_back(i);
+  //    //    }
+  //    //    if(mdc.q[i]<0) 
+  //    //    {
+  //    //      //nmum++;
+  //    //      //Kmum_idx = i;
+  //    //      muons_minus.push_back(i);
+  //    //    }
+  //    //  }
+  //    //  if (
+  //    //      mdc.probK[i] > mdc.probe[i] &&
+  //    //      mdc.probK[i] > mdc.probpi[i] &&
+  //    //      mdc.probK[i] > mdc.probmu[i] &&
+  //    //      mdc.probK[i] > mdc.probp[i]
+  //    //     )
+  //    //  {
+  //    //    //nK++;
+  //    //    mdc.M[i]=KAON_MASS;
+  //    //    if(mdc.q[i]>0) 
+  //    //    {
+  //    //      //nKp++;
+  //    //      //Kmup_idx = i;
+  //    //      kaons_plus.push_back(i);
+  //    //    }
+  //    //    if(mdc.q[i]<0) 
+  //    //    {
+  //    //      //nKm++;
+  //    //      //Kmum_idx = i;
+  //    //      kaons_minus.push_back(i);
+  //    //    }
+  //    //  }
+  //    //}
+
+
+  //    mdc.Emdc+=sqrt(mdc.p[i]*mdc.p[i]+sq(PION_MASS));
+
+  //    if((*itTrk)->isEmcShowerValid())
+  //    {
+  //      mdc.isemc[i] = 1;
+  //      RecEmcShower *emcTrk = (*itTrk)->emcShower(); //Electro Magnet Calorimeer
+  //      // Add EMC information
+  //      mdc.E[i]     =  emcTrk->energy();
+  //      mdc.dE[i]    =  emcTrk->dE();
+  //      mdc.ncrstl[i] = emcTrk->numHits();
+  //      mdc.status[i] = emcTrk->status();
+  //      mdc.cellId[i] = emcTrk->cellId();
+  //      mdc.module[i] = emcTrk->module();
+  //      mdc.temc[i] = emcTrk->time();
+  //      mdc.Eemc+=mdc.E[i]; //Accumulate energy deposition
+  //    }
+  //    else
+  //    {
+  //      mdc.isemc[i]=0;
+  //    }
+
+  //    //HepLorentzVector P(mdc.px[i], mdc.py[i], mdc.pz[i], mdc.E[i]);
+  //    //mdc.M[i]=P.m();
+
+  //    /* Check muon system information for this track */
+  //    mdc.ismu[i]=(*itTrk)->isMucTrackValid();
+  //    if((*itTrk)->isMucTrackValid() && CHECK_MUC==1)
+  //    {
+  //      RecMucTrack *mucTrk = (*itTrk)->mucTrack();  //main drift chambe
+  //      muc.status[i]= mucTrk->status();
+  //      muc.type[i]= mucTrk->type();
+  //      muc.depth[i]= mucTrk->depth();
+  //      muc.chi2[i]= mucTrk->chi2();
+  //      muc.ndf[i]= mucTrk->dof();
+  //      muc.distance[i]= mucTrk->distance();
+  //      muc.phi[i]= mucTrk->deltaPhi();
+  //      muc.nhit[i] = mucTrk->numHits();
+  //      muc.nlayer[i] = mucTrk->numLayers();
+  //      muc.nhitmax[i] = mucTrk->maxHitsInLayer();
+  //      muc.brlast[i] = mucTrk->brLastLayer();
+  //      muc.eclast[i] = mucTrk->ecLastLayer();
+  //    }
+
+
+  //    /* dEdx information */
+  //    if(CHECK_DEDX == 1 && (*itTrk)->isMdcDedxValid())
+  //    {
+  //      RecMdcDedx* dedxTrk = (*itTrk)->mdcDedx();
+  //      dedx.chie[i] = dedxTrk->chiE();
+  //      dedx.chimu[i] = dedxTrk->chiMu();
+  //      dedx.chipi[i] = dedxTrk->chiPi();
+  //      dedx.chik[i] = dedxTrk->chiK();
+  //      dedx.chip[i] = dedxTrk->chiP();
+  //      dedx.ghit[i] = dedxTrk->numGoodHits();
+  //      dedx.thit[i] = dedxTrk->numTotalHits();
+  //      dedx.probPH[i] = dedxTrk->probPH();
+  //      dedx.normPH[i] = dedxTrk->normPH();
+  //      dedx.e[i] = dedxTrk->getDedxExpect(0);
+  //      dedx.mu[i] = dedxTrk->getDedxExpect(1);
+  //      dedx.pi[i] = dedxTrk->getDedxExpect(2);
+  //      dedx.K[i] = dedxTrk->getDedxExpect(3);
+  //      dedx.p[i] = dedxTrk->getDedxExpect(4);
+  //      dedx.pid[i]=dedxTrk->particleId();
+  //    }
+
+  //    /* check TOF information */
+  //    mdc.istof[i]=(*itTrk)->isTofTrackValid();
+  //    if(CHECK_TOF && mdc.istof[i])
+  //    {
+  //      SmartRefVector<RecTofTrack> tofTrkCol = (*itTrk)->tofTrack();
+  //      SmartRefVector<RecTofTrack>::iterator tofTrk = tofTrkCol.begin();
+  //      TofHitStatus *hitst = new TofHitStatus;
+  //      std::vector<int> tofecount;
+  //      int goodtofetrk=0;
+  //      for(tofTrk = tofTrkCol.begin(); tofTrk!=tofTrkCol.end(); tofTrk++,goodtofetrk++)
+  //      {
+  //        unsigned int st = (*tofTrk)->status();
+  //        hitst->setStatus(st);
+  //        //if(  (hitst->is_barrel()) ) continue;
+  //        //if( !(hitst->is_counter()) ) continue;
+  //        tofecount.push_back(goodtofetrk);
+  //      }
+  //      delete hitst;
+  //      if(tofecount.size()>0) //not tof2 track or more than 1 tracks
+  //      {
+  //        tofTrk = tofTrkCol.begin()+tofecount[0];
+
+  //        tof.trackID[i]=(*tofTrk)->trackID();
+  //        tof.tofID[i]=(*tofTrk)->tofID();
+  //        tof.tofTrackID[i]=(*tofTrk)->tofTrackID();
+  //        tof.status[i] = (*tofTrk)->status();
+  //        tof.path[i]  = (*tofTrk)->path();
+  //        tof.zrhit[i]  = (*tofTrk)->zrhit();
+  //        tof.ph[i]  = (*tofTrk)->ph();
+  //        tof.tof[i]  = (*tofTrk)->tof();
+  //        tof.errtof[i]  = (*tofTrk)->errtof();
+  //        tof.beta[i]  = (*tofTrk)->beta();
+  //        tof.texpe[i]  = (*tofTrk)->texpElectron();
+  //        tof.texpmu[i]  = (*tofTrk)->texpMuon();
+  //        tof.texppi[i]  = (*tofTrk)->texpPion();
+  //        tof.texpK[i]  = (*tofTrk)->texpKaon();
+  //        tof.texpp[i]  = (*tofTrk)->texpProton();
+  //        tof.toffsete[i]  = (*tofTrk)->toffsetElectron();
+  //        tof.toffsetmu[i]  = (*tofTrk)->toffsetMuon();
+  //        tof.toffsetpi[i]  = (*tofTrk)->toffsetPion();
+  //        tof.toffsetK[i]  = (*tofTrk)->toffsetKaon();
+  //        tof.toffsetp[i]  = (*tofTrk)->toffsetProton();
+  //        tof.toffsetap[i]  = (*tofTrk)->toffsetAntiProton();
+  //        tof.sigmae[i]  = (*tofTrk)->sigmaElectron();
+  //        tof.sigmamu[i]  = (*tofTrk)->sigmaMuon();
+  //        tof.sigmapi[i]  = (*tofTrk)->sigmaPion();
+  //        tof.sigmaK[i]  = (*tofTrk)->sigmaKaon();
+  //        tof.sigmap[i]  = (*tofTrk)->sigmaProton();
+  //        tof.sigmaap[i]  = (*tofTrk)->sigmaAntiProton();
+  //        tof.t0[i]  = (*tofTrk)->t0();
+  //        tof.errt0[i]  = (*tofTrk)->errt0();
+  //        tof.errz[i]  = (*tofTrk)->errz();
+  //        tof.phi[i]  = (*tofTrk)->phi();
+  //        tof.E[i]  = (*tofTrk)->energy();
+  //        tof.errE[i]  = (*tofTrk)->errenergy();
+  //      }
+  //    }
+
+  //    if(CHECK_MC)
+  //    {
+  //      for(Event::McParticleCol::iterator ip=mcParticleCol->begin(); ip!=mcParticleCol->end(); ++ip)
+  //      {
+  //        Event::McParticle * p = *ip;
+  //        int mc_track_id = p->trackIndex();
+  //        int pid = p->particleProperty();
+  //        HepLorentzVector P4 = p->initialFourMomentum();
+  //        Hep3Vector P3 = P4.vect();
+  //        double angle = P3.angle(mdcTrk->p3());
+////          Hep3Vector dP = P3 - mdcTrk->p3();
+  //        if(angle<MC_DP)
+  //        {
+  //          mc.px[i] = P3.x();
+  //          mc.py[i] = P3.y();
+  //          mc.pz[i] = P3.z();
+  //          mc.p[i] = P3.mag();
+  //          mc.E[i] = P4.e();
+  //          mc.id[i] = pid;
+  //          //cout << "mc track=" << mdcTrk->trackId() <<   " mc track=" << mc_track_id << " pid=" << pid <<endl;
+  //        }
+  //      }
+  //    }
+  //    gidx++;
+  //  }
+  //  mdc.ntrack=gidx;
+  //  mdc.ngood_track = gidx;
+  //  if(CHECK_MC) mc.ntrack=gidx;
+
+  //  //we must have at least two opposite charge pions
+  //  if(pions_plus.empty() || pions_minus.empty())  goto SKIP_CHARGED;
+  //  //find pairs
+  //  std::list<PionPair_t> pion_pairs;
+  //  HepLorentzVector P_psip(0.040546,0,0,PSIP_MASS); //initial vector of psip
+  //  for(std::list<int>::iterator it_minus=pions_minus.begin(); it_minus!=pions_minus.end(); it_minus++)
+  //    for(std::list<int>::iterator it_plus=pions_plus.begin(); it_plus!=pions_plus.end(); it_plus++)
+  //    {
+  //      EvtRecTrackIterator itTrk_minus = evtRecTrkCol->begin() + *it_minus;
+  //      EvtRecTrackIterator itTrk_plus = evtRecTrkCol->begin() + *it_plus;
+  //      RecMdcTrack * pion_minus = (*itTrk_minus)-> mdcTrack();
+  //      RecMdcTrack * pion_plus  = (*itTrk_plus) -> mdcTrack();
+  //      HepLorentzVector P_minus = pion_minus->p4(PION_MASS); //pion vector
+  //      HepLorentzVector P_plus =  pion_plus->p4(PION_MASS); //pion vector
+  //      HepLorentzVector P_recoil = P_psip  - P_minus - P_plus;
+  //      double Mrec = P_recoil.m(); //calculate recoil mass
+  //      pid->setRecTrack(*itTrk_minus);
+  //      pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
+  //      pid->identify(pid->onlyPion()); 
+  //      pid->calculate();
+  //      double pion_minus_prob = pid->probPion();
+  //      pid->setRecTrack(*itTrk_plus);
+  //      pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2());
+  //      pid->identify(pid->onlyPion()); 
+  //      pid->calculate();
+  //      double pion_plus_prob = pid->probPion();
+  //      if(MIN_RECOIL_MASS < Mrec && Mrec < MAX_RECOIL_MASS) 
+  //      {
+  //        PionPair_t pair;
+  //        pair.plus_index = *it_plus;
+  //        pair.minus_index = *it_minus;
+  //        pair.pid_pion_probability = pion_minus_prob*pion_plus_prob;
+  //        pair.recoil_mass = Mrec;
+  //        pair.P_minus = P_minus;
+  //        pair.P_plus = P_plus;
+  //        pion_pairs.push_back(pair);
+  //      }
+  //    }
+  //  //no pion pairs with appropriate recoil mass
+  //  if(pion_pairs.empty()) goto SKIP_CHARGED;
+  //  //find best pion pairs
+  //  std::list<PionPair_t>::iterator best_pion_pair_iterator=pion_pairs.begin();
+  //  for(std::list<PionPair_t>::iterator pair=pion_pairs.begin(); pair!=pion_pairs.end(); pair++)
+  //  {
+  //    if(pair->pid_pion_probability > best_pion_pair_iterator->pid_pion_probability) best_pion_pair_iterator = pair;
+  //  }
+  //  mdc.Mrec = best_pion_pair_iterator->recoil_mass;
+  //  HepLorentzVector P_pion_minus = best_pion_pair_iterator->P_minus;
+  //  HepLorentzVector P_pion_plus = best_pion_pair_iterator->P_plus;
+  //  good_pion_pairs_number++;
+
+  //  //skip event if no high energy particles 
+  //  if(high_mom_plus.empty() || high_mom_minus.empty())  goto SKIP_CHARGED;
+
+  //  //create all pairs with  invariant mass close to J/psi
+  //  std::list<ChargedPair_t> charged_pairs;
+  //  //std::list<ChargedPair_t> charged_pairs[5];
+  //  for(std::list<int>::iterator it_minus=high_mom_minus.begin(); it_minus!=high_mom_minus.end(); it_minus++)
+  //    for(std::list<int>::iterator it_plus=high_mom_plus.begin(); it_plus!=high_mom_plus.end(); it_plus++)
+  //    {
+  //      EvtRecTrackIterator itTrk_minus = evtRecTrkCol->begin() + *it_minus;
+  //      EvtRecTrackIterator itTrk_plus = evtRecTrkCol->begin() + *it_plus;
+  //      RecMdcTrack * mdcTrk_minus = (*itTrk_minus)-> mdcTrack();
+  //      RecMdcTrack * mdcTrk_plus  = (*itTrk_plus) -> mdcTrack();
+  //      for(int i=0;i<5; i++)
+  //      {
+  //        HepLorentzVector P_minus = mdcTrk_minus->p4(XMASS[i]); //pion vector
+  //        HepLorentzVector P_plus =  mdcTrk_plus->p4(XMASS[i]); //pion vector
+  //        HepLorentzVector P_sum = P_minus + P_plus;
+  //        HepLorentzVector P_recoil = P_psip  - P_sum;
+  //        double Mrec = P_recoil.m(); //calculate recoil mass
+  //        double Minv =  P_sum.m();
+  //        if(MIN_INVARIANT_MASS < Minv && Minv < MAX_INVARIANT_MASS)
+  //        {
+  //          pid->setRecTrack(*itTrk_minus);
+  //          pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useEmc());
+  //          pid->identify(pid->all()); 
+  //          pid->calculate();
+  //          double probKaon_minus = pid->probKaon();
+  //          double probMuon_minus = pid->probMuon();
+  //          double probElectron_minus = pid->probElectron();
+  //          double probPion_minus = pid->probPion();
+  //          double probProton_minus = pid->probProton();
+
+  //          pid->setRecTrack(*itTrk_plus);
+  //          pid->usePidSys(pid->useDedx() | pid->useTof1() | pid->useTof2() | pid->useEmc());
+  //          pid->identify(pid->all()); 
+  //          pid->calculate();
+  //          double probKaon_plus = pid->probKaon();
+  //          double probMuon_plus = pid->probMuon();
+  //          double probElectron_plus = pid->probElectron();
+  //          double probPion_plus = pid->probPion();
+  //          double probProton_plus = pid->probProton();
+
+  //          ChargedPair_t pair;
+  //          pair.minus_index = *it_minus;
+  //          pair.plus_index = *it_plus;
+  //          pair.P_minus = P_minus;
+  //          pair.P_plus = P_plus;
+  //          pair.recoil_mass = Mrec;
+  //          pair.invariant_mass = Minv;
+  //          pair.probability[PID_KAON] = probKaon_minus*probKaon_plus;
+  //          pair.probability[PID_MUON] = probMuon_minus*probMuon_plus;
+  //          pair.probability[PID_ELECTRON] = probElectron_minus*probElectron_plus;
+  //          pair.probability[PID_PION] = probPion_minus*probPion_plus;
+  //          pair.probability[PID_PROTON] = probProton_minus*probProton_plus;
+  //          for(int j=0;j<5;j++)
+  //          {
+  //            cout << pair.probability[j] <<  " " ;
+  //          }
+  //          cout << endl;
+  //          pair.particle_mass = XMASS[i];
+  //          pair.pid = (PairID_t)i;
+  //          charged_pairs.push_back(pair);
+  //        }
+  //      }
+  //    }
+
+  //  //no charged pairs with high momentum with appropriate invariant mass found
+  //  if(charged_pairs.empty()) goto SKIP_CHARGED;
+  //  good_high_mom_pairs_number++;
+
+  //  int channel=-1;
+  //  /* temporary suppresed 
+  //  //now analize high energy pairs
+  //  //find best pairs with most probable pid in each category
+  //  list<ChargedPair_t>::iterator best_pair[5];
+  //  double best_prob[5]={0,0,0,0,0};
+  //  for(list<ChargedPair_t>::iterator it= charged_pairs.begin(); it!=charged_pairs.end(); it++)
+  //  {
+  //    for(int pid=0; pid<5; pid++)
+  //    {
+  //      cout << pid << " " << it->probability[pid] << endl;
+  //      if( pid == it->pid)
+  //      {
+  //        if(it->probability[pid] >= best_prob[pid]) 
+  //        {
+  //          best_pair[pid] = it;
+  //          best_prob[pid] = it->probability[pid];
+  //        }
+  //      }
+  //    }
+  //  }
+  //  cout << "Before channel" << endl;
+
+  //  for(int pid=0; pid<5;pid++)
+  //  {
+  //    cout << "best_prob[" << pid << "] = " << best_prob[pid] << endl;
+  //    if( best_prob[pid] > best_prob[channel]) channel= (PairID_t)pid;
+  //  }
+  //  */
+  //  ChargedPair_t best_pair=charged_pairs.front();
+  //  for(list<ChargedPair_t>::iterator it= charged_pairs.begin(); it!=charged_pairs.end(); it++)
+  //  {
+  //    double minv = it->invariant_mass;
+  //    if(  fabs(minv - JPSI_MASS)  <  fabs(best_pair.invariant_mass - JPSI_MASS))
+  //    {
+  //      best_pair = *it;
+  //    }
+  //  }
+
+  //  channel = best_pair.pid;
+
+  //  HepLorentzVector P_charged_minus = best_pair.P_minus;
+  //  HepLorentzVector P_charged_plus = best_pair.P_plus;
+  //  HepLorentzVector P_sum = P_charged_minus + P_charged_plus;
+  //  HepLorentzVector P_mis = P_psip - P_pion_minus - P_pion_plus  - P_charged_minus - P_charged_plus;
+  //  mdc.Mmiss = P_mis.m2();
+
+  //  //select only if no missing mass here
+  //  if(mdc.Mmiss < MIN_MISSING_MASS || MAX_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
+
+
+  //  mdc.jpsi_decay_channel = channel;
+
+  //  
+
+  //  //calculate pion energy 
+  //  //double Epin = sqrt(mdc.p[pin_idx]*mdc.p[pin_idx] + mdc.M[pin_idx]*mdc.M[pin_idx]);
+  //  //double Epip = sqrt(mdc.p[pip_idx]*mdc.p[pip_idx] + mdc.M[pip_idx]*mdc.M[pip_idx]);
+  //  //HepLorentzVector P_psip(0.040546,0,0,3.686); //initial vector of psip
+  //  //HepLorentzVector P_pip(mdc.px[pip_idx],mdc.py[pip_idx],mdc.pz[pip_idx], Epip); //pion vector
+  //  //HepLorentzVector P_pin(mdc.px[pin_idx],mdc.py[pin_idx],mdc.pz[pin_idx], Epin); //pion vector
+  //  //HepLorentzVector P_recoil = P_psip  - P_pip - P_pin;
+  //  //mdc.Mrec = P_recoil.m(); //recoil mass of two pions
+  //  //if(mdc.Mrec < MIN_RECOIL_MASS || MAX_RECOIL_MASS < mdc.Mrec) goto SKIP_CHARGED;
+
+  //  //and other must be Kaons or muons
+  //  //if( (nKp!=1 || nKm!=1) && (nmup!=1 || nmum!=1)) goto SKIP_CHARGED;
+  //  //HepLorentzVector Pp(0,0,0,0);
+  //  //HepLorentzVector Pm(0,0,0,0);
+  //  //if(nKp>0 || nmup>0)
+  //  //{
+  //  //  double Ep = sqrt(mdc.p[Kmup_idx]*mdc.p[Kmup_idx] + mdc.M[Kmup_idx]*mdc.M[Kmup_idx]);
+  //  //  Pp=HepLorentzVector(mdc.px[Kmup_idx],mdc.py[Kmup_idx],mdc.pz[Kmup_idx], Ep);
+  //  //}
+  //  //if(nKm>0 || nmum>0)
+  //  //{
+  //  //  double Em = sqrt(mdc.p[Kmum_idx]*mdc.p[Kmum_idx] + mdc.M[Kmum_idx]*mdc.M[Kmum_idx]);
+  //  //  Pm=HepLorentzVector(mdc.px[Kmum_idx],mdc.py[Kmum_idx],mdc.pz[Kmum_idx], Em);
+  //  //}
+  //  //HepLorentzVector P = Pp + Pm;
+  //  //HepLorentzVector Pmis = P_psip - P_pip - P_pin - Pp - Pm;
+  //  //mdc.Mmiss = Pmis.m2();
+  //  //if( (nKp!=1 && nKm!=1) || (nmup!=1 && nmum!=1))
+  //  //{
+  //  ////calculate the for momentum
+  //  //  if(nKp==1) mdc.MKK = P.m();
+  //  //  if(nmup==1) mdc.Mmumu = P.m();
+  //  //}
+
+  //  ////tag KK decay channel. One kaon is missing
+  //  //if( nKp < 2 && nKm < 2 && 0 < (nKp + nKm) && (nKp + nKm) < 3 && (nmup + nmum) == 0 ) 
+  //  //{
+  //  //  mdc.jpsi_decay_channel = 0;
+  //  //}
+  //  ////tag mumu decay channel. One muon is missing
+  //  //if( nmup <2 && nmum < 2 && 0 < (nmup + nmum) && (nmup + nmum) < 3 && (nKp + nKm) == 0 ) 
+  //  //{
+  //  //  mdc.jpsi_decay_channel = 1;
+  //  //}
+  //  //could not find required configuration
+
+  //  //if(mdc.jpsi_decay_channel < 0) goto SKIP_CHARGED;
+
+  //  ////select event with missing particle using invariant mass
+  //  //if((nKp+nKm) == 1 && mdc.Mmiss < MIN_KAON_MISSING_MASS || MAX_KAON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
+  //  //if((nmup+nmum) == 1 && mdc.Mmiss < MIN_MUON_MISSING_MASS || MAX_MUON_MISSING_MASS < mdc.Mmiss) goto SKIP_CHARGED;
+  //  
+
+  //  /* ================================================================================= */
+  //  /*  fill data for neutral tracks */
+  //  int track=0; //index for neutral tracks
+  //  emc.Etotal=0;
+  //  emc.ngood_charged_track=good_charged_tracks;
+  //  mmap_t Emap; //multi map to sort good tracks by energy order
+  //  Emap.clear();
+  //  pmap.clear();
+  //  //calculate good tracks
+  //  for(int idx = evtRecEvent->totalCharged(); idx<evtRecEvent->totalTracks(); idx++)
+  //  {
+  //    EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + idx;
+  //    if(!(*itTrk)->isEmcShowerValid()) continue;
+  //    RecEmcShower *emcTrk = (*itTrk)->emcShower();
+  //    double c =  fabs(cos(emcTrk->theta())); //abs cos theta
+  //    double E  =  emcTrk->energy();
+  //    bool barrel = c <= 0.8;
+  //    bool endcup = (0.86 <=c) && (c <=0.92);
+  //    if( (E<EMC_BARREL_THRESHOLD && barrel) || (E<EMC_ENDCUP_THRESHOLD && endcup) ) continue; 
+  //    Emap.insert(pair_t(E,idx));
+  //  }
+  //  if(Emap.size()>0 && MAX_TRACK_NUMBER < Emap.size()) goto SKIP_CHARGED;  //no good neutral tracks
+  //  int gnidx=0; //good neutrack track idx
+  //  for(mmap_t::reverse_iterator ri=Emap.rbegin(); ri!=Emap.rend(); ++ri, ++gnidx)
+  //  {
+  //    EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + ri->second;
+  //    RecEmcShower *emcTrk = (*itTrk)->emcShower();
+  //    emc.status[gnidx] = emcTrk->status();
+  //    emc.ncrstl[gnidx] = emcTrk->numHits();
+  //    emc.cellId[gnidx] = emcTrk->cellId();
+  //    emc.module[gnidx] = emcTrk->module();
+  //    emc.x[gnidx] = emcTrk->x();
+  //    emc.y[gnidx] = emcTrk->y();
+  //    emc.z[gnidx] = emcTrk->z();
+  //    emc.phi[gnidx] = emcTrk->phi();
+  //    emc.theta[gnidx] = emcTrk->theta();
+  //    emc.E[gnidx]  =  emcTrk->energy();
+  //    emc.dE[gnidx] =  emcTrk->dE();
+  //    emc.Etotal+=emcTrk->energy();
+  //    emc.t[gnidx] = emcTrk->time();
+  //  }
+  //  emc.ntrack=gnidx;
+
+
+  //  m_nchtr=evtRecEvent->totalCharged();
+  //  m_nneutr=evtRecEvent->totalNeutral();
+  //  m_ntrack=evtRecEvent->totalCharged()+evtRecEvent->totalNeutral();
+  //  m_Etotal = emc.Etotal+mdc.Emdc;
+  //  m_Eemc = emc.Etotal+mdc.Eemc;
+  //  m_time = eventHeader->time();
+
 
 
     /* now fill the data */
-    main_tuple->write();
-    mdc_tuple->write();
-    emc_tuple->write();
-    if(CHECK_DEDX) dedx_tuple->write();
-    if(CHECK_MUC) muc_tuple->write();
-    if(CHECK_TOF) tof_tuple->write();
-    if(CHECK_MC) mc.tuple->write();
-    event_write++;
-  }
-//selection of gamma-gamma events
-SKIP_CHARGED:
-  mmap_t Emap;
-  gg.ngood_charged_track = good_charged_tracks;
-  if(good_charged_tracks==0)
-  {
-    //select and sort only good neutral tracks.
-    Emap.clear();
-    for(int track = evtRecEvent->totalCharged(); track < evtRecEvent->totalTracks(); track++)
-    {
-      EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + track;
-      if(!(*itTrk)->isEmcShowerValid()) continue;
-      RecEmcShower *emcTrk = (*itTrk)->emcShower();
-      double E = emcTrk->energy();
-      double c =  fabs(cos(emcTrk->theta())); //abs cos theta
-      bool barrel = c <= 0.8;
-      bool endcup = (0.86 <=c) && (c <=0.92);
-      //save only good photons
-      if( (E<EMC_BARREL_THRESHOLD && barrel) || (E<EMC_ENDCUP_THRESHOLD && endcup) ) continue; 
-      Emap.insert(pair_t(E,track));
-    }
-    //Select exactly two good photons
-    if(Emap.size() < 2) goto SKIP_GG;
-    if(MAX_TRACK_NUMBER < Emap.size()) goto SKIP_GG;
-    gg.ngood_track=Emap.size();
-    gg.ntrack= Emap.size();
-    Sphericity SS;
-    vector < Hep3Vector> R(Emap.size());
-    int idx=0;
-    for(mmap_t::reverse_iterator ri=Emap.rbegin(); ri!=Emap.rend(); ++ri)
-    {
-      EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + ri->second;
-      assert((*itTrk)->isEmcShowerValid()); //check that EMS data is present
-      RecEmcShower *emcTrk = (*itTrk)->emcShower();
-      gg.x[idx] = emcTrk->x();
-      gg.y[idx] = emcTrk->y();
-      gg.z[idx] = emcTrk->z();
-      gg.theta[idx] = emcTrk->theta();
-      gg.phi[idx] = emcTrk->phi();
-      gg.E[idx]  =  emcTrk->energy();
-      gg.dE[idx] =  emcTrk->dE();
-      gg.status[idx] = emcTrk->status();
-      gg.ncrstl[idx] = emcTrk->numHits();
-      gg.module[idx] = emcTrk->module();
-      gg.cellId[idx] = emcTrk->cellId();
-      gg.Etotal+=gg.E[idx];
-      /* Calculate sphericity tensor */
-      R[idx] = Hep3Vector(emcTrk->x(),emcTrk->y(),emcTrk->z());
-      SS.add(R[idx]);
-      idx++;
-    }
-    SS.norm();
-    gg.S = SS();
-
-
-    //calculate colliniarity of two high energy tracks
-    gg.ccos = R[0].dot(R[1])/(R[0].mag()*R[1].mag());
-    gg.atheta = gg.theta[0]+gg.theta[1] - M_PI;
-    gg.aphi = fabs(gg.phi[0]-gg.phi[1]) - M_PI;
-
-    bool acol = fabs(gg.atheta) < 0.05 && -0.06 < gg.aphi && gg.aphi<0.02;
-    bool barrel = fabs(cos(gg.theta[0])) < 0.8 && fabs(cos(gg.theta[1])) < 0.8;
-    bool highE = gg.E[0] > 0.8*1.4 && gg.E[1] > 0.8*1.4  && gg.E[0] < 1.2*1.9 && gg.E[1] < 1.2*1.9;
-
-    bool isgg =  gg.ngood_track==2 && acol && barrel && highE;
-    if(!isgg) goto SKIP_GG;
-
-    gg_tuple->write();
-    gg_event_writed++;
-  }
-SKIP_GG:
+ //   main_tuple->write();
+ //   mdc_tuple->write();
+ //   emc_tuple->write();
+ //   if(CHECK_DEDX) dedx_tuple->write();
+ //   if(CHECK_MUC) muc_tuple->write();
+ //   if(CHECK_TOF) tof_tuple->write();
+ //   if(CHECK_MC) mc.tuple->write();
+ //   event_write++;
+ // }
   return StatusCode::SUCCESS;
 }
 
@@ -1484,22 +1625,6 @@ StatusCode JpsiKK::finalize()
 {
   std::cout << "Event proceed: " << event_proceed << std::endl;
   std::cout << "Event selected: " << event_write << std::endl;
-  std::cout << "Good pion pairs selected: " << good_pion_pairs_number << endl;
-  std::cout << "Good high momentum pairs selected: " << good_high_mom_pairs_number << endl;
-  std::cout << "Bhabha candidates: " << bhabha_events << endl;
-  std::cout << "Gamma-Gamma candidates: " << gg_event_writed << endl;
-  std::cout << "Selection efficiency: " << event_write/double(event_proceed) << std::endl;
-  std::cout << "Average number of total tracks: " << nttr_a.average() << ", rms=" << nttr_a.rms() << endl;
-  std::cout << "Average number of charged tracks: " << nchtr_a.average() << ", rms=" << nchtr_a.rms() << endl;
-  std::cout << "Average number of neutral tracks: " << nntr_a.average() << ", rms=" << nntr_a.rms() << endl;
-  head_event_selected=event_write;
-  head_ncharged_tracks=nchtr_a.average();
-  head_ncharged_tracks_rms=nchtr_a.rms();
-  head_nneutral_tracks=nntr_a.average();
-  head_nneutral_tracks_rms=nntr_a.rms();
-  head_ntotal_tracks=nttr_a.average();
-  head_ntotal_tracks_rms=nttr_a.rms();
-  head_tuple->write();
   return StatusCode::SUCCESS;
 }
 

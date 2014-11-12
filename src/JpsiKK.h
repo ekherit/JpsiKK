@@ -93,6 +93,45 @@ class JpsiKK : public Algorithm
   NTuple::Item<double> m_Etotal; //total energy deposition
   NTuple::Item<double> m_Eemc; //total energy deposition EMC only
 
+  struct RootPair
+  {
+    NTuple::Array<long> index; //index of track
+    NTuple::Array<double> q; //charge of the track
+    NTuple::Array<double> E;
+    NTuple::Array<double> p;
+    NTuple::Array<double> px;
+    NTuple::Array<double> py;
+    NTuple::Array<double> pz;
+    NTuple::Array<double> pt; //transvese momentum
+    NTuple::Array<double> theta,phi;
+    NTuple::Array<double> x, y, z, r; //poca coordinate of track
+    NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
+    NTuple::Item<double>  M2;     //square invariant mass of the two tracks
+  };
+
+  struct RootEvent
+  {
+    NTuple::Item<long>    ntrack;     //number of good charged tracks in event
+    NTuple::Item<long>    npositive_track; //number of positive charged tracks
+    NTuple::Item<long>    nnegative_track; //number of positive charged tracks
+    NTuple::Item<long>    npositve_pions; //number of positive pions
+    NTuple::Item<long>    nnegative_pions; //number of negative pions
+    NTuple::Item<long>    npion_pairs; //total number of found pion pairs
+    NTuple::Item<long>    channel;     //J/psi decay channel 0 -- K+K-, 1 -- mu+mu-
+    RootPair  pions;   //pion momentum
+    RootPair  kmuons;   //kaon or muon momentum
+    NTuple::Item<double>  Mrec;  //pion recoil mass
+    NTuple::Item<double>  Mmiss; //missing square invariant mass
+
+    NTuple::Tuple * tuple; //tuple
+    void init(void);
+    StatusCode init_tuple(NTuple::Tuple * tuple);
+  };
+
+
+  RootEvent fEvent;
+
+
   /*  Main Drift Chamber Information */
   struct MDC_t
   {
