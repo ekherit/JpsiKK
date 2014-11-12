@@ -540,7 +540,7 @@ StatusCode JpsiKK::execute()
     }
 
 
-  if(kaon_pairs.empty()) return StatusCode::SUCCESS;
+  if(kmuon_pairs.empty()) return StatusCode::SUCCESS;
 
   //the best kaon pair
   std::pair<EvtRecTrackIterator,EvtRecTrackIterator> kaon_pair = kmuon_pairs.front();
