@@ -491,7 +491,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(NTuple::Tuple * tuple)
   status = tuple->addItem ("ntrack", ntrack); //good charged track in event
   status = tuple->addItem ("nptrack", npositive_track); //good positive charged track in event
   status = tuple->addItem ("nntrack", nnegative_track); //good negative charged track in event
-  status = tuple->addItem ("nppions", npositve_pions); //good poitive pion tracks in event
+  status = tuple->addItem ("nppions", npositive_pions); //good poitive pion tracks in event
   status = tuple->addItem ("nnpions", nnegative_pions); //good negative pion track in event
   status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
   status = tuple->addItem ("channel", channel); //decay channel of the J/psi
@@ -972,10 +972,11 @@ StatusCode JpsiKK::execute()
   for(list<EvtRecTrackIterator>::iterator i=negative_pion_tracks.begin(); i!=positive_pion_tracks.end(); ++i)
     for(list<EvtRecTrackIterator>::iterator j=negative_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
     {
-      double M_recoil = get_recoil__mass(*i,*j);
+      std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
+      double M_recoil = get_recoil__mass(pair, PION_MASS);
       if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
       {
-        pion_pairs.push_back(make_pair(*i, *j));
+        pion_pairs.push_back(pair);
       }
     }
 
