@@ -295,7 +295,7 @@ StatusCode JpsiKK::execute()
   SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
 
 
-  //InitData(evtRecEvent->totalCharged(), evtRecEvent->totalNeutral());
+  //InitData2(evtRecEvent->totalCharged(), evtRecEvent->totalNeutral());
 
   //typedef std::multimap <double, unsigned> mmap_t;
   //typedef std::pair <double, unsigned> pair_t;
