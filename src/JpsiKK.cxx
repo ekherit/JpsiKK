@@ -520,6 +520,7 @@ StatusCode JpsiKK::execute()
         double E = emcTrk->energy();
         double p = mdcTrk->p();
         cout << "track"<< k << " = "   << itTrk[k] - evtRecTrkCol->begin() << ", p = " << p << endl;
+        if(p<1.0) exit(1);
         //cout << k << ": " << p << " " << E << endl;
         //if(E/p < MAX_EP_RATIO) //it could be kaon or muon
         //{
