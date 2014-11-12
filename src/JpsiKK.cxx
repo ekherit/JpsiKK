@@ -162,6 +162,8 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
   status = tuple->addItem ("channel", channel); //decay channel of the J/psi
   status = tuple->addItem ("ngood_pions", ngood_pions,2,2); 
+  status = tuple->addItem ("Mrec", Mrecoil); 
+  status = tuple->addItem ("M2mis", M2missing); 
   //pions information
   status = tuple->addIndexedItem ("pidx", ngood_pions, pions.index);
   status = tuple->addIndexedItem ("pq", ngood_pions, pions.q);
@@ -398,7 +400,7 @@ StatusCode JpsiKK::execute()
       cout << "Mrecoil = " << M_recoil << endl;
       if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
       {
-        fEvent.Mrec = M_recoil;
+        //fEvent.Mrec = M_recoil;
         pion_pairs.push_back(pair);
       }
     }
@@ -419,7 +421,7 @@ StatusCode JpsiKK::execute()
   fEvent.channel = -1; //yet not identify other particles
 
   cout << "Before recoil mass calculation" << endl;
-  //fEvent.Mrec = get_recoil__mass(pion_pairs.front(), PION_MASS);
+  fEvent.Mrecoil = get_recoil__mass(pion_pairs.front(), PION_MASS);
   cout << "After recoil mass calculation" << endl;
 
   cout << "Before tuple write" << endl;

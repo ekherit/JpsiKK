@@ -107,8 +107,8 @@ class JpsiKK : public Algorithm
     NTuple::Item<long>    ngood_pions;     //ngood pions should be always 2
     RootPair  pions;   //pion momentum
     RootPair  kmuons;   //kaon or muon momentum
-    NTuple::Item<double>  Mrec;  //pion recoil mass
-    NTuple::Item<double>  Mmiss; //missing square invariant mass
+    NTuple::Item<double>  Mrecoil;  //pion recoil mass
+    NTuple::Item<double>  M2missing; //missing square invariant mass
 
     NTuple::Tuple * tuple; //tuple
     void init(void);
