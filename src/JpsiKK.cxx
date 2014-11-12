@@ -356,7 +356,8 @@ StatusCode JpsiKK::execute()
     double p = mdcTrk->p();
     double q = mdcTrk->charge();
     bool barrel = c < EMC_BARREL_MAX_COS_THETA;
-    bool not_electron = E/p < MAX_EP_RATIO; 
+    //bool not_electron = E/p < MAX_EP_RATIO; 
+    bool not_electron=true;
     if(barrel & not_electron) 
     {
       if(q>0) 
