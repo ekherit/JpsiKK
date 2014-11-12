@@ -841,14 +841,14 @@ double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, 
     P[k] = mdcTrk->p4(mass);
   }
   HepLorentzVector P_psip(0.040546,0,0,PSIP_MASS); //initial vector of psip
-  HepLorentzVector Psum = P[0]+P[1];
+  HepLorentzVector P_sum = P[0]+P[1];
   HepLorentzVector P_recoil = P_psip - P_sum;
   return P_recoil.m();
 }
 
-double get_recoil__mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pair, double mass)
+double get_recoil__mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> p, double mass)
 {
-  return get_recoil__mass(pair->first, pair->second, mass);
+  return get_recoil__mass(p.first, p.second, mass);
 }
 
 StatusCode JpsiKK::execute()
