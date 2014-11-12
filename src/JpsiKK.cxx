@@ -371,11 +371,11 @@ StatusCode JpsiKK::execute()
       }
       if(q<0) 
       {
+        negative_charged_tracks.push_back(itTrk);
         if(p<MAX_PION_MOMENTUM) 
         {
           negative_pion_tracks.push_back(itTrk);
         }
-        negative_charged_tracks.push_back(itTrk);
       }
       charged_tracks.push_back(itTrk);
     }
@@ -394,6 +394,7 @@ StatusCode JpsiKK::execute()
     {
       std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
       double M_recoil = get_recoil__mass(pair, PION_MASS);
+      cout << M_recoil << endl;
       if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
       {
         //fEvent.Mrec = M_recoil;
