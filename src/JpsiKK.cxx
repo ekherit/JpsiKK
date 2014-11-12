@@ -138,7 +138,7 @@ StatusCode JpsiKK::initialize(void)
     fEvent.tuple = ntupleSvc()->book("FILE1/event", CLID_ColumnWiseTuple, "Signal events pi+pi- K+K-, or pi+pi- mu+mu-");
     if(fEvent.tuple)
     {
-      status = fEvent.init_tuple(muc_tuple);
+      status = fEvent.init_tuple(fEvent.tuple);
     }
     else
     {
@@ -273,9 +273,9 @@ StatusCode JpsiKK::execute()
   int runNo=eventHeader->runNumber();
   //if(runNo<0) CHECK_MC = true;
   int event=eventHeader->eventNumber();
-  head_event_number=event;
-  head_run=runNo;
-  time_t t=eventHeader->time();
+  //head_event_number=event;
+  //head_run=runNo;
+  //time_t t=eventHeader->time();
   bool isprint=false;
   if(event_proceed<10) isprint=true;
   if(10 <= event_proceed && event_proceed < 100 && event_proceed % 10 ==0) isprint=true;
@@ -295,7 +295,7 @@ StatusCode JpsiKK::execute()
   SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
 
 
-  InitData(evtRecEvent->totalCharged(), evtRecEvent->totalNeutral());
+  //InitData(evtRecEvent->totalCharged(), evtRecEvent->totalNeutral());
 
   //typedef std::multimap <double, unsigned> mmap_t;
   //typedef std::pair <double, unsigned> pair_t;
