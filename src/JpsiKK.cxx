@@ -425,8 +425,8 @@ StatusCode JpsiKK::execute()
   std::list<EvtRecTrackIterator> negative_charged_tracks; //selected tracks for specific cut
   std::list<EvtRecTrackIterator> positive_pion_tracks; //selected pion tracks for specific cut
   std::list<EvtRecTrackIterator> negative_pion_tracks; //selected pion tracks for specific cut
-  std::list<EvtRecTrackIterator> other_positive_tracks; //selected pion tracks for specific cut
-  std::list<EvtRecTrackIterator> other_negative_tracks; //selected pion tracks for specific cut
+  std::list<EvtRecTrackIterator> other_positive_tracks; //other positive tracks for specific cut
+  std::list<EvtRecTrackIterator> other_negative_tracks; //other positive tracks for specific cut
   for(std::list<EvtRecTrackIterator>::iterator track=good_charged_tracks.begin(); track!=good_charged_tracks.end(); track++)
   {
     EvtRecTrackIterator & itTrk = *track;
@@ -513,6 +513,7 @@ StatusCode JpsiKK::execute()
         RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
         double E = emcTrk->energy();
         double p = mdcTrk->p();
+        cout << k << ": " << p << " " << E << endl;
         //if(E/p < MAX_EP_RATIO) //it could be kaon or muon
         //{
         //}
