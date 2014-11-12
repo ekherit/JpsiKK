@@ -497,7 +497,7 @@ StatusCode JpsiKK::execute()
   std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pion_pair = pion_pairs.front();
 
   //make kaon or muon pairs
-  std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > kumon_pairs;
+  std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > kmuon_pairs;
   for(list<EvtRecTrackIterator>::iterator i=other_negative_tracks.begin(); i!=other_negative_tracks.end(); ++i)
     for(list<EvtRecTrackIterator>::iterator j=other_positive_tracks.begin(); j!=other_positive_tracks.end(); ++j)
     {
@@ -515,12 +515,13 @@ StatusCode JpsiKK::execute()
         //{
         //}
       }
-      double M_inv=get_invariant__mass2(itTrk[0],itTrk[1],KAON_MASS);
+      double M_inv=get_invariant__mass2(pair,KAON_MASS);
+      kmuon_pairs.push_back(pair);
     }
 
 
   //the best kaon pair
-  std::pair<EvtRecTrackIterator,EvtRecTrackIterator> kaon_pair = kaon_pairs.front();
+  std::pair<EvtRecTrackIterator,EvtRecTrackIterator> kaon_pair = kmuon_pairs.front();
 
 
   //now fill the pion information
