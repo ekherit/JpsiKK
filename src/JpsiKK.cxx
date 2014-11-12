@@ -161,7 +161,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("nnpions", nnegative_pions); //good negative pion track in event
   status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
   status = tuple->addItem ("channel", channel); //decay channel of the J/psi
-  status = tuple->addItem ("ngood_pions", ngood_pions,2,2); 
+  status = tuple->addItem ("ngood_pions", ngood_pions,0,2); 
   status = tuple->addItem ("Mrec", Mrecoil); 
   status = tuple->addItem ("Minv", Minv); 
   status = tuple->addItem ("M2mis", M2missing); 
