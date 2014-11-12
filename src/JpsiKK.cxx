@@ -278,23 +278,23 @@ void JpsiKK::RootPair::fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> p
     if(!(*itTrk[i])->isEmcShowerValid()) continue; //keep only valid neutral tracks
     RecMdcTrack  *mdcTrk = (*itTrk[i])->mdcTrack();
     RecEmcShower *emcTrk = (*itTrk[i])->emcShower();
-    q = mdcTrk->charge(); //charge of the track
-    E = emcTrk->energy();
-    p = mdcTrk->p();
-    px= mdcTrk->px();
-    py= mdcTrk->py();
-    pz= mdcTrk->pz();
-    pt= mdcTrk->pt();
-    theta= mdcTrk->theta();
-    phi = mdcTrk->phi();
-    x  = mdcTrk->x();
-    y  = mdcTrk->y();
-    z  = mdcTrk->z();
+    q[i] = mdcTrk->charge(); //charge of the track
+    E[i] = emcTrk->energy();
+    p[i] = mdcTrk->p();
+    px[i]= mdcTrk->px();
+    py[i]= mdcTrk->py();
+    pz[i]= mdcTrk->pz();
+    pt[i]= mdcTrk->pt();
+    theta[i]= mdcTrk->theta();
+    phi[i] = mdcTrk->phi();
+    x[i]  = mdcTrk->x();
+    y[i]  = mdcTrk->y();
+    z[i]  = mdcTrk->z();
     double rvxy,rvz,rvphi;
     calculate_vertex(mdcTrk,rvxy,rvz,rvphi); 
-    vxy = rvxy;
-    vz  = rvz; 
-    vphi = rvphi; 
+    vxy[i] = rvxy;
+    vz[i]  = rvz; 
+    vphi[i] = rvphi; 
   }
 }
 
