@@ -271,7 +271,7 @@ double get_recoil__mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> p, d
 
 void JpsiKK::RootPair::fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair)
 {
-  EvtRecTrackIterator itTrk[2] = {pair.front().first, pair.front().second};
+  EvtRecTrackIterator itTrk[2] = {pair.first, pair.second};
   for(int i=0;i<2;i++)
   {
     if(!(*itTrk[i])->isMdcTrackValid()) continue; 
