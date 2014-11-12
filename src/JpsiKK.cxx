@@ -452,6 +452,7 @@ StatusCode JpsiKK::execute()
   fEvent.Mrecoil = get_recoil__mass(pion_pairs.front(), PION_MASS);
 
   fEvent.pions.fill(pion_pairs.front());
+  cout << "pion momentum2: " << fEvent.pions.p[0] << " " << fEvent.pions.p[1] << endl;
   //kmuons.fill(pion_pairs.pions());
 
   //fill pion information for pos and negative pion pairs
