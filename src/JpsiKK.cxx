@@ -131,14 +131,20 @@ StatusCode JpsiKK::initialize(void)
 
   StatusCode status;
 
+  log << MSG::INFO << "Before NTuplePtr" << endmsg;
   NTuplePtr nt_event(ntupleSvc(), "FILE1/event");
+  log << MSG::INFO << "After NTuplePtr" << endmsg;
   if(nt_event) fEvent.tuple = nt_event;
   else
   {
+    log << MSG::INFO << "Before book" << endmsg;
     fEvent.tuple = ntupleSvc()->book("FILE1/event", CLID_ColumnWiseTuple, "Signal events pi+pi- K+K-, or pi+pi- mu+mu-");
+    log << MSG::INFO << "After book" << endmsg;
     if(fEvent.tuple)
     {
-      status = fEvent.init_tuple(fEvent.tuple);
+      log << MSG::INFO << "Before init tuple" << endmsg;
+      status = fEvent.init_tuple();
+      log << MSG::INFO << "After init tuple" << endmsg;
     }
     else
     {
@@ -150,7 +156,7 @@ StatusCode JpsiKK::initialize(void)
 }
 
 
-StatusCode JpsiKK::RootEvent::init_tuple(NTuple::Tuple * tuple)
+StatusCode JpsiKK::RootEvent::init_tuple(void)
 {
   StatusCode status;
   status = tuple->addItem ("ntrack", ntrack); //good charged track in event
