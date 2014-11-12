@@ -412,7 +412,7 @@ StatusCode JpsiKK::execute()
   fEvent.npositive_track = positive_charged_tracks.size();
   fEvent.nnegative_track = negative_charged_tracks.size();
   fEvent.npositive_pions = positive_pion_tracks.size();
-  fEvent.nnegative_track = negative_pion_tracks.size();
+  fEvent.nnegative_pions = negative_pion_tracks.size();
   fEvent.npion_pairs = pion_pairs.size();
   fEvent.ngood_pions = 2;
   fEvent.channel = -1; //yet not identify other particles
