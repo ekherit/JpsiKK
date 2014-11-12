@@ -418,7 +418,7 @@ StatusCode JpsiKK::execute()
   cout << "Good charged track: ";
   for(list<EvtRecTrackIterator>::iterator i=good_charged_tracks.begin();i!=good_charged_tracks.end();i++)
   {
-    cout << *i - evtRecTrkCol.begin() << " ";
+    cout << *i - evtRecTrkCol->begin() << " ";
   }
   cout << endl;
 
