@@ -44,6 +44,14 @@ class JpsiKK : public Algorithm
 	double IP_MAX_RHO, IP_MAX_Z; //interection point cut
   double MAX_COS_THETA; //maximum  cos(theta) for good charged track
 
+  double EMC_ENDCUP_MIN_COS_THETA;
+  double EMC_ENDCUP_MAX_COS_THETA;
+  double EMC_ENDCUP_MIN_ENERGY;
+  double EMC_BARREL_MAX_COS_THETA;
+  double EMC_BARREL_MIN_ENERGY;
+
+  double MAX_EP_RATIO;
+
   double MAX_PION_MOMENTUM; //maximum pion momentum
 
   double MIN_RECOIL_MASS; //minimum recoil mass cut

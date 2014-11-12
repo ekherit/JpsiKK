@@ -845,7 +845,7 @@ double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, 
   return P_recoil.m();
 };
 
-double get_recoil__mass(pair_t<EvtRecTrackIterator, EvtRecTrackIterator> pair, double mass)
+double get_recoil__mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pair, double mass)
 {
   return get_recoil__mass(pair->first, pair->second, mass);
 };
