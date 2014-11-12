@@ -485,7 +485,7 @@ StatusCode JpsiKK::initialize(void)
 }
 
 
-void JpsiKK::RootEvent::init_tuple(NTuple::Tuple * tuple)
+StatusCode JpsiKK::RootEvent::init_tuple(NTuple::Tuple * tuple)
 {
   StatusCode status;
   status = tuple->addItem ("ntrack", ntrack); //good charged track in event
@@ -831,7 +831,7 @@ void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
 
 double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, double mass)
 {
-  EvtRecTrackIterator & itTrk[2] = {trk1, trk2};
+  EvtRecTrackIterator  itTrk[2] = {trk1, trk2};
   HepLorentzVector  P[2];
   for(int k=0;k<2;k++)
   {
@@ -843,12 +843,12 @@ double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, 
   HepLorentzVector Psum = P[0]+P[1];
   HepLorentzVector P_recoil = P_psip - P_sum;
   return P_recoil.m();
-};
+}
 
 double get_recoil__mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pair, double mass)
 {
   return get_recoil__mass(pair->first, pair->second, mass);
-};
+}
 
 StatusCode JpsiKK::execute()
 {
@@ -936,8 +936,8 @@ StatusCode JpsiKK::execute()
     RecEmcShower *emcTrk = (*itTrk)->emcShower();
     double c = fabs(cos(mdcTrk->theta()));
     double E = emcTrk->energy();
-    double p = emcTrk->p();
-    double q = emcTrk->charge();
+    double p = mdcTrk->p();
+    double q = mdcTrk->charge();
     bool barrel = c < EMC_BARREL_MAX_COS_THETA;
     bool not_electron = E/p < MAX_EP_RATIO; 
     if(barrel & not_electron) 
