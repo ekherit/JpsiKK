@@ -166,7 +166,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("Minv", Minv); 
   status = tuple->addItem ("M2mis", M2missing); 
   status = tuple->addItem ("pM2", pions.M2); 
-  status = tuple->addItem ("kM2", kmouns.M2); 
+  status = tuple->addItem ("kM2", kmuons.M2); 
   //pions information
   status = tuple->addIndexedItem ("pidx", ngood_pions, pions.index);
   status = tuple->addIndexedItem ("pq", ngood_pions, pions.q);
