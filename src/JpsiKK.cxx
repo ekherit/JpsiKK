@@ -100,9 +100,9 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("MAX_EP_RATIO", MAX_EP_RATIO = 0.26);
 
   declareProperty("MAX_PION_MOMENTUM", MAX_PION_MOMENTUM = 0.45); //GeV
-  declareProperty("MIN_KAON_MOMENTUM", MAX_KAON_MOMENTUM = 1.0); //GeV
+  declareProperty("MIN_KAON_MOMENTUM", MIN_KAON_MOMENTUM = 1.0); //GeV
   declareProperty("MAX_KAON_MOMENTUM", MAX_KAON_MOMENTUM = 2.0); //GeV
-  declareProperty("MIN_MUON_MOMENTUM", MAX_MUON_MOMENTUM = 1.0); //GeV
+  declareProperty("MIN_MUON_MOMENTUM", MIN_MUON_MOMENTUM = 1.0); //GeV
   declareProperty("MAX_MUON_MOMENTUM", MAX_MUON_MOMENTUM = 2.0); //GeV
 
   declareProperty("MIN_RECOIL_MASS", MIN_RECOIL_MASS = 3.0); //GeV
