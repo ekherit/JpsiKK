@@ -398,6 +398,7 @@ StatusCode JpsiKK::execute()
       cout << "Mrecoil = " << M_recoil << endl;
       if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
       {
+        fEvent.Mrec = M_recoil;
         pion_pairs.push_back(pair);
       }
     }
@@ -418,7 +419,7 @@ StatusCode JpsiKK::execute()
   fEvent.channel = -1; //yet not identify other particles
 
   cout << "Before recoil mass calculation" << endl;
-  fEvent.Mrec = get_recoil__mass(pion_pairs.front(), PION_MASS);
+  //fEvent.Mrec = get_recoil__mass(pion_pairs.front(), PION_MASS);
   cout << "After recoil mass calculation" << endl;
 
   cout << "Before tuple write" << endl;
