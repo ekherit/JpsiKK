@@ -414,6 +414,14 @@ StatusCode JpsiKK::execute()
     if(good_track) good_neutral_tracks.push_back(itTrk);
   }
 
+  //print good charged track index
+  cout << "Good charged track: ";
+  for(list<EvtRecTrackIterator>::iterator i=good_charged_tracks.begin();i!=good_charged_tracks.end();i++)
+  {
+    cout << *i - evtRecTrkCol.begin() << " ";
+  }
+  cout << endl;
+
 
 
   //number of good neutral tracks must be 0
