@@ -308,7 +308,7 @@ StatusCode JpsiKK::execute()
   std::list<EvtRecTrackIterator> good_neutral_tracks;
 
   //now count good charged track
-  for(unsigned i = 0; i < evtRecEvent->totalCharged(); ++i)
+  for(unsigned i = 0; i < evtRecEvent->totalCharged(); i++)
   {
     EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + i;
     if(!(*itTrk)->isMdcTrackValid()) continue;  //use only valid charged tracks
@@ -321,7 +321,7 @@ StatusCode JpsiKK::execute()
     if(good_track) good_charged_tracks.push_back(itTrk);
   }
   //now count good neutral track
-  for(int i = evtRecEvent->totalCharged(); i<evtRecEvent->totalTracks(); ++i)
+  for(int i = evtRecEvent->totalCharged(); i<evtRecEvent->totalTracks(); i++)
   {
     EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + i;
     if(!(*itTrk)->isEmcShowerValid()) continue; //keep only valid neutral tracks
@@ -334,7 +334,6 @@ StatusCode JpsiKK::execute()
     if(good_track) good_neutral_tracks.push_back(itTrk);
   }
 
-  cout << "Number of charged and neutral tracks: " << good_charged_tracks.size() << "    " <<  good_neutral_tracks.size() << std::endl;
 
 
   //number of good neutral tracks must be 0
@@ -381,8 +380,6 @@ StatusCode JpsiKK::execute()
       charged_tracks.push_back(itTrk);
     }
   }
-  cout << "pions plus and minus " << positive_pion_tracks.size() << "    " <<  negative_pion_tracks.size() << std::endl;
-  cout << "positive negative " << positive_charged_tracks.size() << "    " <<  negative_charged_tracks.size() << std::endl;
 
   
 
@@ -397,7 +394,6 @@ StatusCode JpsiKK::execute()
     {
       std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
       double M_recoil = get_recoil__mass(pair, PION_MASS);
-      cout << "Mrecoil = " << M_recoil << endl;
       if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
       {
         //fEvent.Mrec = M_recoil;
@@ -405,7 +401,6 @@ StatusCode JpsiKK::execute()
       }
     }
 
-  cout << "pion pairs number: " << pion_pairs.size() << endl;
 
   if(pion_pairs.empty()) return StatusCode::SUCCESS;
 
@@ -420,13 +415,9 @@ StatusCode JpsiKK::execute()
   fEvent.ngood_pions = 2;
   fEvent.channel = -1; //yet not identify other particles
 
-  cout << "Before recoil mass calculation" << endl;
   fEvent.Mrecoil = get_recoil__mass(pion_pairs.front(), PION_MASS);
-  cout << "After recoil mass calculation" << endl;
 
-  cout << "Before tuple write" << endl;
   fEvent.tuple->write();
-  cout << "After tuple write" << endl;
   event_write++;
   return StatusCode::SUCCESS;
 }
