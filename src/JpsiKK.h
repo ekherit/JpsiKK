@@ -93,6 +93,10 @@ class JpsiKK : public Algorithm
     NTuple::Array<double> x, y, z, r; //poca coordinate of track
     NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
     NTuple::Item<double>  M2;     //square invariant mass of the two tracks
+
+    void fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair)
+    {
+    }
   };
 
   struct RootEvent
@@ -109,6 +113,7 @@ class JpsiKK : public Algorithm
     RootPair  kmuons;   //kaon or muon momentum
     NTuple::Item<double>  Mrecoil;  //pion recoil mass
     NTuple::Item<double>  M2missing; //missing square invariant mass
+    NTuple::Item<double>  Minv; //invariant mass of the Kauons or muons
 
     NTuple::Tuple * tuple; //tuple
     void init(void);

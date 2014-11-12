@@ -163,6 +163,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("channel", channel); //decay channel of the J/psi
   status = tuple->addItem ("ngood_pions", ngood_pions,2,2); 
   status = tuple->addItem ("Mrec", Mrecoil); 
+  status = tuple->addItem ("Minv", Minv); 
   status = tuple->addItem ("M2mis", M2missing); 
   //pions information
   status = tuple->addIndexedItem ("pidx", ngood_pions, pions.index);
@@ -389,13 +390,13 @@ StatusCode JpsiKK::execute()
   if(negative_pion_tracks.empty() || positive_pion_tracks.empty()) return StatusCode::SUCCESS;
   std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > pion_pairs;
   //create pion pairs
-  cout << "Pions: " << negative_pion_tracks.size() << " " << positive_pion_tracks.size() << endl;
+  //cout << "Pions: " << negative_pion_tracks.size() << " " << positive_pion_tracks.size() << endl;
   for(list<EvtRecTrackIterator>::iterator i=negative_pion_tracks.begin(); i!=negative_pion_tracks.end(); ++i)
     for(list<EvtRecTrackIterator>::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
     {
       std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
       double M_recoil = get_recoil__mass(pair, PION_MASS);
-      cout << M_recoil << endl;
+      //cout << M_recoil << endl;
       if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
       {
         //fEvent.Mrec = M_recoil;
@@ -418,6 +419,13 @@ StatusCode JpsiKK::execute()
   fEvent.channel = -1; //yet not identify other particles
 
   fEvent.Mrecoil = get_recoil__mass(pion_pairs.front(), PION_MASS);
+
+  //fill pion information for pos and negative pion pairs
+  //EvtRecTrackIterator pair[2] = {pion_pair.front().first, pion_pair.front().second};
+  //for(int i=0;i<2;i++)
+  //{
+  //}
+
 
   fEvent.tuple->write();
   event_write++;
