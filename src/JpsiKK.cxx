@@ -450,7 +450,7 @@ StatusCode JpsiKK::execute()
 
   fEvent.Mrecoil = get_recoil__mass(pion_pairs.front(), PION_MASS);
 
-  fEvent.pions.fill(pion_pairs.pions());
+  fEvent.pions.fill(pion_pairs.front());
   //kmuons.fill(pion_pairs.pions());
 
   //fill pion information for pos and negative pion pairs
