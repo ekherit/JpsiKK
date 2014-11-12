@@ -495,42 +495,43 @@ StatusCode JpsiKK::RootEvent::init_tuple(NTuple::Tuple * tuple)
   status = tuple->addItem ("nnpions", nnegative_pions); //good negative pion track in event
   status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
   status = tuple->addItem ("channel", channel); //decay channel of the J/psi
+  status = tuple->addItem ("ngood_pions", ngood_pions); //decay channel of the J/psi
   //pions information
-  status = tuple->addIndexedItem ("pidx", 2, pions.index);
-  status = tuple->addIndexedItem ("pq", 2, pions.q);
-  status = tuple->addIndexedItem ("pE", 2, pions.E);
-  status = tuple->addIndexedItem ("pp", 2, pions.p);
-  status = tuple->addIndexedItem ("ppx", 2, pions.px);
-  status = tuple->addIndexedItem ("ppy", 2, pions.py);
-  status = tuple->addIndexedItem ("ppz", 2, pions.pz);
-  status = tuple->addIndexedItem ("ppt", 2, pions.pt);
-  status = tuple->addIndexedItem ("ptheta", 2, pions.theta);
-  status = tuple->addIndexedItem ("pphi", 2, pions.phi);
-  status = tuple->addIndexedItem ("px", 2, pions.x);
-  status = tuple->addIndexedItem ("py", 2, pions.y);
-  status = tuple->addIndexedItem ("pz", 2, pions.z);
-  status = tuple->addIndexedItem ("pr", 2, pions.r);
-  status = tuple->addIndexedItem ("pvxy", 2, pions.vxy);
-  status = tuple->addIndexedItem ("pvz", 2, pions.vz);
-  status = tuple->addIndexedItem ("pvphi", 2, pions.vphi);
+  status = tuple->addIndexedItem ("pidx", ngood_pions, pions.index);
+  status = tuple->addIndexedItem ("pq", ngood_pions, pions.q);
+  status = tuple->addIndexedItem ("pE", ngood_pions, pions.E);
+  status = tuple->addIndexedItem ("pp", ngood_pions, pions.p);
+  status = tuple->addIndexedItem ("ppx", ngood_pions, pions.px);
+  status = tuple->addIndexedItem ("ppy", ngood_pions, pions.py);
+  status = tuple->addIndexedItem ("ppz", ngood_pions, pions.pz);
+  status = tuple->addIndexedItem ("ppt", ngood_pions, pions.pt);
+  status = tuple->addIndexedItem ("ptheta", ngood_pions, pions.theta);
+  status = tuple->addIndexedItem ("pphi", ngood_pions, pions.phi);
+  status = tuple->addIndexedItem ("px", ngood_pions, pions.x);
+  status = tuple->addIndexedItem ("py", ngood_pions, pions.y);
+  status = tuple->addIndexedItem ("pz", ngood_pions, pions.z);
+  status = tuple->addIndexedItem ("pr", ngood_pions, pions.r);
+  status = tuple->addIndexedItem ("pvxy", ngood_pions, pions.vxy);
+  status = tuple->addIndexedItem ("pvz", ngood_pions, pions.vz);
+  status = tuple->addIndexedItem ("pvphi", ngood_pions, pions.vphi);
   //kaons or muons information
-  status = tuple->addIndexedItem ("kidx", 2, kmuons.index);
-  status = tuple->addIndexedItem ("kq", 2, kmuons.q);
-  status = tuple->addIndexedItem ("kE", 2, kmuons.E);
-  status = tuple->addIndexedItem ("kp", 2, kmuons.p);
-  status = tuple->addIndexedItem ("kpx", 2, kmuons.px);
-  status = tuple->addIndexedItem ("kpy", 2, kmuons.py);
-  status = tuple->addIndexedItem ("kpz", 2, kmuons.pz);
-  status = tuple->addIndexedItem ("kpt", 2, kmuons.pt);
-  status = tuple->addIndexedItem ("ktheta", 2, kmuons.theta);
-  status = tuple->addIndexedItem ("kphi", 2, kmuons.phi);
-  status = tuple->addIndexedItem ("kx", 2, kmuons.x);
-  status = tuple->addIndexedItem ("ky", 2, kmuons.y);
-  status = tuple->addIndexedItem ("kz", 2, kmuons.z);
-  status = tuple->addIndexedItem ("kr", 2, kmuons.r);
-  status = tuple->addIndexedItem ("kvxy", 2, kmuons.vxy);
-  status = tuple->addIndexedItem ("kvz", 2, kmuons.vz);
-  status = tuple->addIndexedItem ("kvphi", 2, kmuons.vphi);
+  status = tuple->addIndexedItem ("kidx", ngood_pions, kmuons.index);
+  status = tuple->addIndexedItem ("kq", ngood_pions, kmuons.q);
+  status = tuple->addIndexedItem ("kE", ngood_pions, kmuons.E);
+  status = tuple->addIndexedItem ("kp", ngood_pions, kmuons.p);
+  status = tuple->addIndexedItem ("kpx", ngood_pions, kmuons.px);
+  status = tuple->addIndexedItem ("kpy", ngood_pions, kmuons.py);
+  status = tuple->addIndexedItem ("kpz", ngood_pions, kmuons.pz);
+  status = tuple->addIndexedItem ("kpt", ngood_pions, kmuons.pt);
+  status = tuple->addIndexedItem ("ktheta", ngood_pions, kmuons.theta);
+  status = tuple->addIndexedItem ("kphi", ngood_pions, kmuons.phi);
+  status = tuple->addIndexedItem ("kx", ngood_pions, kmuons.x);
+  status = tuple->addIndexedItem ("ky", ngood_pions, kmuons.y);
+  status = tuple->addIndexedItem ("kz", ngood_pions, kmuons.z);
+  status = tuple->addIndexedItem ("kr", ngood_pions, kmuons.r);
+  status = tuple->addIndexedItem ("kvxy", ngood_pions, kmuons.vxy);
+  status = tuple->addIndexedItem ("kvz", ngood_pions, kmuons.vz);
+  status = tuple->addIndexedItem ("kvphi", ngood_pions, kmuons.vphi);
   return status;
 }
 
@@ -989,6 +990,7 @@ StatusCode JpsiKK::execute()
   fEvent.npositive_pions = positive_pion_tracks.size();
   fEvent.nnegative_track = negative_pion_tracks.size();
   fEvent.npion_pairs = pion_pairs.size();
+  fEvent.ngood_pions = 2;
   fEvent.channel = -1; //yet not identify other particles
 
   fEvent.Mrec = get_recoil__mass(pion_pairs.front(), PION_MASS);
