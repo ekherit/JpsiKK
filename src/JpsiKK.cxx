@@ -507,8 +507,8 @@ StatusCode JpsiKK::execute()
       {
         if(!(*itTrk[k])->isMdcTrackValid()) continue; 
         if(!(*itTrk[k])->isEmcShowerValid()) continue; 
-        RecMdcTrack *mdcTrk = (*itTrk)->mdcTrack();
-        RecEmcShower *emcTrk = (*itTrk)->emcShower();
+        RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
+        RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
         double E = emcTrk->energy();
         double p = mdcTrk->p();
         //if(E/p < MAX_EP_RATIO) //it could be kaon or muon
