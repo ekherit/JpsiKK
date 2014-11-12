@@ -296,6 +296,7 @@ void JpsiKK::RootPair::fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> p
     vz[i]  = rvz; 
     vphi[i] = rvphi; 
   }
+  cout << "pion momentum: " << p[0] << " " << p[1] << endl;
 }
 
 StatusCode JpsiKK::execute()
