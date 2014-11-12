@@ -252,9 +252,9 @@ void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
 }
 
 
-double get_invariant__mass2(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, double mass)
+double get_invariant__mass2(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> & pair, double mass)
 {
-  EvtRecTrackIterator  itTrk[2] = {trk1, trk2};
+  EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
   HepLorentzVector  P[2];
   for(int k=0;k<2;k++)
   {
