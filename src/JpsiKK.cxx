@@ -284,7 +284,7 @@ void JpsiKK::RootPair::fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> p
     px[i]= mdcTrk->px();
     py[i]= mdcTrk->py();
     pz[i]= mdcTrk->pz();
-    pt[i]= mdcTrk->pt();
+    //pt[i]= mdcTrk->pt();
     theta[i]= mdcTrk->theta();
     phi[i] = mdcTrk->phi();
     x[i]  = mdcTrk->x();
@@ -450,7 +450,7 @@ StatusCode JpsiKK::execute()
 
   fEvent.Mrecoil = get_recoil__mass(pion_pairs.front(), PION_MASS);
 
-  pions.fill(pion_pairs.pions());
+  fEvent.pions.fill(pion_pairs.pions());
   //kmuons.fill(pion_pairs.pions());
 
   //fill pion information for pos and negative pion pairs

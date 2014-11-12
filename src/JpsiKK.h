@@ -108,7 +108,7 @@ class JpsiKK : public Algorithm
     NTuple::Item<long>    npion_pairs; //total number of found pion pairs
     NTuple::Item<long>    channel;     //J/psi decay channel 0 -- K+K-, 1 -- mu+mu-
     NTuple::Item<long>    ngood_pions;     //ngood pions should be always 2
-    RootPair  pions;   //pion momentum
+    RootPair  pions;   //pions information
     RootPair  kmuons;   //kaon or muon momentum
     NTuple::Item<double>  Mrecoil;  //pion recoil mass
     NTuple::Item<double>  M2missing; //missing square invariant mass
