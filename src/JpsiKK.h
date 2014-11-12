@@ -93,7 +93,7 @@ class JpsiKK : public Algorithm
     NTuple::Array<double> theta,phi;
     NTuple::Array<double> x, y, z, r; //poca coordinate of track
     NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
-    NTuple::Item<double>  M2;     //square invariant mass of the two tracks
+    NTuple::Array<double>  M2;     //square invariant mass of the two tracks with different hypo
 
     void fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair, EvtRecTrackIterator begin);
   };
@@ -108,6 +108,7 @@ class JpsiKK : public Algorithm
     NTuple::Item<long>    npion_pairs; //total number of found pion pairs
     NTuple::Item<long>    channel;     //J/psi decay channel 0 -- K+K-, 1 -- mu+mu-
     NTuple::Item<long>    ngood_pions;     //ngood pions should be always 2
+    NTuple::Item<long>    npid;     //number of particle hypo 0-K,1-mu,2-e,3-pi,4-p
     RootPair  pions;   //pions information
     RootPair  kmuons;   //kaon or muon momentum
     NTuple::Item<double>  Mrecoil;  //pion recoil mass

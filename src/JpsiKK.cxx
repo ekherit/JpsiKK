@@ -162,11 +162,12 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
   status = tuple->addItem ("channel", channel); //decay channel of the J/psi
   status = tuple->addItem ("ngood_pions", ngood_pions,0,2); 
+  status = tuple->addItem ("npid", npid,0,5); 
   status = tuple->addItem ("Mrec", Mrecoil); 
   status = tuple->addItem ("Minv", Minv); 
   status = tuple->addItem ("M2mis", M2missing); 
-  status = tuple->addItem ("pM2", pions.M2); 
-  status = tuple->addItem ("kM2", kmuons.M2); 
+
+
   //pions information
   status = tuple->addIndexedItem ("pidx", ngood_pions, pions.index);
   status = tuple->addIndexedItem ("pq", ngood_pions, pions.q);
@@ -185,6 +186,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addIndexedItem ("pvxy", ngood_pions, pions.vxy);
   status = tuple->addIndexedItem ("pvz", ngood_pions, pions.vz);
   status = tuple->addIndexedItem ("pvphi", ngood_pions, pions.vphi);
+  status = tuple->addIndexedItem("pM2", npid, pions.M2); 
   //kaons or muons information
   status = tuple->addIndexedItem ("kidx", ngood_pions, kmuons.index);
   status = tuple->addIndexedItem ("kq", ngood_pions, kmuons.q);
@@ -203,12 +205,14 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addIndexedItem ("kvxy", ngood_pions, kmuons.vxy);
   status = tuple->addIndexedItem ("kvz", ngood_pions, kmuons.vz);
   status = tuple->addIndexedItem ("kvphi", ngood_pions, kmuons.vphi);
+  status = tuple->addIndexedItem ("kM2", npid, kmuons.M2); 
   return status;
 }
 
 void JpsiKK::RootEvent::init(void)
 {
   ngood_pions=2;
+  npid=5;
   //for(int i=0;i<2;i++)
   //{
   //  pions.p[i]=-999;
@@ -344,7 +348,10 @@ void JpsiKK::RootPair::fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> p
     vz[i]  = rvz; 
     vphi[i] = rvphi; 
   }
-  M2 = get_invariant__mass2(pair,KAON_MASS);
+  for(int i=0;i<5;i++)
+  {
+    M2[i] = sqrt(get_invariant__mass2(pair,XMASS[i]));
+  }
 }
 
 StatusCode JpsiKK::execute()
@@ -528,8 +535,6 @@ StatusCode JpsiKK::execute()
         RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
         double E = emcTrk->energy();
         double p = mdcTrk->p();
-        cout << "track"<< k << " = "   << itTrk[k] - evtRecTrkCol->begin() << ", p = " << p << endl;
-        if(p<1.0) exit(1);
         //cout << k << ": " << p << " " << E << endl;
         //if(E/p < MAX_EP_RATIO) //it could be kaon or muon
         //{
@@ -562,15 +567,6 @@ StatusCode JpsiKK::execute()
 
   fEvent.pions.fill(pion_pair, evtRecTrkCol->begin());
   fEvent.kmuons.fill(kaon_pair, evtRecTrkCol->begin());
-  if(fEvent.kmuons.p[0]<1.0 || fEvent.kmuons.p[1]<1.0 )
-  {
-    cout << "p0=" <<fEvent.kmuons.p[0]<< "   p1=" << fEvent.kmuons.p[1] << endl;
-    cout << "Wrong kaon momentum: exiting" << endl;
-    exit(1);
-  }
-
-  //fill pion information for pos and negative pion pairs
-
 
   fEvent.tuple->write();
   event_write++;
