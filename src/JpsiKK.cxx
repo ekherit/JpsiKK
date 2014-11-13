@@ -450,10 +450,10 @@ StatusCode JpsiKK::execute()
     }
   //SELECTION CODE
   if(pion_pairs.empty()) return StatusCode::SUCCESS;
-  log << MSG::ERROR << "good charged tracks: " << charged_tracks.size() << " (" << negative_charged_tracks.size() << ", " << positive_charged_tracks.size() << endmsg;
-  log << MSG::ERROR << "pions: " << negative_pion_tracks.size()  << ", " << positive_pion_tracks.size() << endmsg;
-  log << MSG::ERROR << "other: " << other_negative_tracks.size()  << ", " << other_positive_tracks.size() << endmsg;
-  log << MSG::ERROR << "pion pairs: " << pion_pairs.size() << endmsg;
+  //log << MSG::ERROR << "good charged tracks: " << charged_tracks.size() << " (" << negative_charged_tracks.size() << ", " << positive_charged_tracks.size() << endmsg;
+  //log << MSG::ERROR << "pions: " << negative_pion_tracks.size()  << ", " << positive_pion_tracks.size() << endmsg;
+  //log << MSG::ERROR << "other: " << other_negative_tracks.size()  << ", " << other_positive_tracks.size() << endmsg;
+  //log << MSG::ERROR << "pion pairs: " << pion_pairs.size() << endmsg;
 
   //find the best pion pair using closest value to JPSI_MASS
   std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pion_pair = pion_pairs.front();
@@ -491,7 +491,6 @@ StatusCode JpsiKK::execute()
         if(M[pid]>0) M[pid] = sqrt(M[pid]);
         else M[pid] = 0;
       }
-      cout << M[0] << " " << M[1] << endl;
       //SELECTION CODE KAON CASE
       if(MIN_INVARIANT_MASS <  M[0]   && M[0]  < MAX_INVARIANT_MASS)
       {
@@ -512,7 +511,7 @@ StatusCode JpsiKK::execute()
       }
     }
 
-  log << MSG::ERROR << "kaon pairs: " << kaon_pairs.size() << ",  muon pairs: " << muon_pairs.size() << endmsg;
+  //log << MSG::ERROR << "kaon pairs: " << kaon_pairs.size() << ",  muon pairs: " << muon_pairs.size() << endmsg;
   //SELECTION CODE
   if(muon_pairs.empty() && kaon_pairs.empty()) return StatusCode::SUCCESS;
 
