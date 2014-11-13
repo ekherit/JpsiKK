@@ -396,8 +396,6 @@ StatusCode JpsiKK::execute()
     double p = mdcTrk->p();
     double q = mdcTrk->charge();
     bool barrel = c < EMC_BARREL_MAX_COS_THETA;
-    bool not_electron_pion = E/p < MAX_EP_RATIO; 
-    not_electron_pion=true;
     if(barrel) 
     {
       if(q>0) 
@@ -407,7 +405,7 @@ StatusCode JpsiKK::execute()
         {
           positive_pion_tracks.push_back(itTrk);
         }
-        if(p>MIN_KAON_MOMENTUM && not_electron_pion)
+        if(p>std::min(MIN_KAON_MOMENTUM, MIN_MUON_MOMENTUM))
         {
           other_positive_tracks.push_back(itTrk);
         }
@@ -419,7 +417,7 @@ StatusCode JpsiKK::execute()
         {
           negative_pion_tracks.push_back(itTrk);
         }
-        if(p>MIN_KAON_MOMENTUM && not_electron_pion)
+        if(p>std::min(MIN_KAON_MOMENTUM, MIN_MUON_MOMENTUM))
         {
           other_negative_tracks.push_back(itTrk);
         }
@@ -479,10 +477,35 @@ StatusCode JpsiKK::execute()
         else M[pid] = 0;
       }
       cout << M[0] << " " << M[1] << endl;
-      if(MIN_INVARIANT_MASS <  M[0]   && M[0]  < MAX_INVARIANT_MASS)   
+      //SELECTION CODE
+      if(MIN_INVARIANT_MASS <  M[0]   && M[0]  < MAX_INVARIANT_MASS)
+      {
         kaon_pairs.push_back(pair);
-      if(MIN_INVARIANT_MASS <  M[1]   && M[1]  < MAX_INVARIANT_MASS)   
-        muon_pairs.push_back(pair);
+      }
+      //SELECTION CODE
+      if(MIN_INVARIANT_MASS <  M[1]   && M[1]  < MAX_INVARIANT_MASS)
+      {
+        EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
+        double Ep[2];
+        for(int k=0;k<2;k++)
+        {
+          if(!(*itTrk[k])->isMdcTrackValid() || ! (*itTrk[k])->isEmcShowerValid()) 
+          {
+            log << MSG::ERROR << "Invalid mdc or ems info for track.Exiting" << endmsg;
+            return StatusCode::FAILURE;
+          }
+          RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
+          RecEmcShower *emcTrk = (*itTrk)->emcShower();
+          double E = emcTrk->energy();
+          double p = mdcTrk->p();
+          Ep[k] = E/p;
+        }
+        //SELECTION CODE
+        if(Ep[0] < MAX_EP_RATIO && Ep[1] < MAX_EP_RATIO)
+        {
+          muon_pairs.push_back(pair);
+        }
+      }
     }
 
   log << MSG::ERROR << "kaon pairs: " << kaon_pairs.size() << ",  muon pairs: " << muon_pairs.size() << endmsg;
