@@ -449,7 +449,7 @@ StatusCode JpsiKK::execute()
 
   //find the best pion pair using closest value to JPSI_MASS
   std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pion_pair = pion_pairs.front();
-  for(PairsList_t::iterator p=pion_pairs.begin();p!=pion_pairs.end();p++)
+  for(PairList_t::iterator p=pion_pairs.begin();p!=pion_pairs.end();p++)
   {
     if(fabs(get_recoil__mass(*p,PION_MASS) - JPSI_MASS) <  fabs(get_recoil__mass(pion_pair,PION_MASS) - JPSI_MASS)) pion_pair = *p;
   }
