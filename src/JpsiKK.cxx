@@ -149,7 +149,7 @@ StatusCode JpsiKK::initialize(void)
   }
 
   NTuplePtr nt_neutral(ntupleSvc(), "FILE1/neutral");
-  if(nt_neutral) fEvent.tuple = nt_neutral;
+  if(nt_neutral) fNeutral.tuple = nt_neutral;
   else
   {
     fNeutral.tuple = ntupleSvc()->book("FILE1/neutral", CLID_ColumnWiseTuple, "good neutral tracks");
