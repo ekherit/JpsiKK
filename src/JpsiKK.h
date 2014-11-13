@@ -27,7 +27,7 @@
 #include <algorithm>
 
 #include "EventModel/EventHeader.h"
-#include <TNtupleD.h>
+#include <TTree.h>
 
 #include "ibn/averager.h"
 
@@ -121,7 +121,7 @@ class JpsiKK : public Algorithm
     StatusCode init_tuple(void);
   };
   RootEvent fEvent;
-  TNtupleD *tree;
+  TTree *tree;
 };
 
 #endif
