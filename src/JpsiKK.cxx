@@ -430,8 +430,9 @@ StatusCode JpsiKK::execute()
   //SELECTION CODE
   if(negative_pion_tracks.empty() || positive_pion_tracks.empty()) return StatusCode::SUCCESS;
 
+  typedef std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > PairsList_t;
   //create pion pairs
-  std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > pion_pairs;
+  PairsList_t pion_pairs;
   for(list<EvtRecTrackIterator>::iterator i=negative_pion_tracks.begin(); i!=negative_pion_tracks.end(); ++i)
     for(list<EvtRecTrackIterator>::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
     {
@@ -448,7 +449,7 @@ StatusCode JpsiKK::execute()
 
   //find the best pion pair using closest value to JPSI_MASS
   std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pion_pair = pion_pairs.front();
-  for(list<EvtRecTrackIterator,EvtRecTrackIterator>::iterator p=pion_pairs.begin();p!=pion_pairs.end();p++)
+  for(PairsList_t::iterator p=pion_pairs.begin();p!=pion_pairs.end();p++)
   {
     if(fabs(get_recoil__mass(*p,PION_MASS) - JPSI_MASS) <  fabs(get_recoil__mass(pion_pair,PION_MASS) - JPSI_MASS)) pion_pair = *p;
   }
@@ -480,7 +481,7 @@ StatusCode JpsiKK::execute()
   if(!kaon_pairs.empty()) result_pair = kaon_pairs.front();
   if(!muon_pairs.empty()) result_pair = muon_pairs.front();
   int channel=-1; //default no channel
-  for(list<EvtRecTrackIterator,EvtRecTrackIterator>::iterator p=kaon_pairs.begin();p!=kaon_pairs.end();p++)
+  for(PairsList_t::iterator p=kaon_pairs.begin();p!=kaon_pairs.end();p++)
   {
     if(fabs(sqrt(get_invariant_mass2(*p,KAON_MASS)) - JPSI_MASS) 
         <=  fabs(sqrt(get_invariant_mass2(result_pair,KAON_MASS)) - JPSI_MASS)) 
@@ -489,7 +490,7 @@ StatusCode JpsiKK::execute()
       channel=0; //setup kaon channel
     }
   }
-  for(list<EvtRecTrackIterator,EvtRecTrackIterator>::iterator p=muon_pairs.begin();p!=muon_pairs.end();p++)
+  for(PairList_t::iterator p=muon_pairs.begin();p!=muon_pairs.end();p++)
   {
     if(fabs(sqrt(get_invariant_mass2(*p,MUON_MASS)) - JPSI_MASS) 
         <=  fabs(sqrt(get_invariant_mass2(result_pair,MUON_MASS)) - JPSI_MASS)) 
