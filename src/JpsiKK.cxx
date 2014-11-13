@@ -495,7 +495,7 @@ StatusCode JpsiKK::execute()
             return StatusCode::FAILURE;
           }
           RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
-          RecEmcShower *emcTrk = (*itTrk)->emcShower();
+          RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
           double E = emcTrk->energy();
           double p = mdcTrk->p();
           Ep[k] = E/p;
