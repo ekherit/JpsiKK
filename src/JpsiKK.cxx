@@ -593,11 +593,18 @@ StatusCode JpsiKK::execute()
         return StatusCode::FAILURE;
       }
     }
+    if((*itTrk[i])->isEmcShowerValid())
+    {
+      RecEmcShower *emcTrk = (*itTrk[i])->emcShower();
+      fEvent.E[i] = emcTrk->energy();
+    }
+    else
+    {
+      fEvent.E[i] = 0;
+    }
     RecMdcTrack  *mdcTrk = (*itTrk[i])->mdcTrack();
-    RecEmcShower *emcTrk = (*itTrk[i])->emcShower();
     fEvent.index[i] = itTrk[i]-evtRecTrkCol->begin(); 
     fEvent.q[i] = mdcTrk->charge(); 
-    fEvent.E[i] = emcTrk->energy();
     fEvent.p[i] = mdcTrk->p();
     fEvent.px[i]= mdcTrk->px();
     fEvent.py[i]= mdcTrk->py();
