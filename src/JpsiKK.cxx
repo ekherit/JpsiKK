@@ -514,7 +514,6 @@ StatusCode JpsiKK::execute()
           muon_pairs.push_back(pair);
         }
       }
-SKIP_THIS_PAIR:
     }
 
   int channel=-1; //default no channel
