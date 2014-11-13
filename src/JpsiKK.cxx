@@ -360,7 +360,11 @@ StatusCode JpsiKK::execute()
     //barrel and endcup calorimeters have different energy threshold
     bool barrel_good_track = hit_barrel && (E > EMC_BARREL_MIN_ENERGY);
     bool endcup_good_track = hit_endcup && (E > EMC_ENDCUP_MIN_ENERGY);
-    if(barrel_good_track  || endcup_good_track) good_neutral_tracks.push_back(itTrk);
+    if(barrel_good_track  || endcup_good_track) 
+    {
+      cout << "Energy of good neutral track: " << E << endl;
+      good_neutral_tracks.push_back(itTrk);
+    }
   }
 
   //print good charged track index
