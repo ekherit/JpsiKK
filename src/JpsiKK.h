@@ -87,7 +87,8 @@ class JpsiKK : public Algorithm
     NTuple::Item<long>    run; //run number
     NTuple::Item<long>    event; //event number 
     NTuple::Item<long>    time; //time of the event
-    NTuple::Item<long>    ngood_track;     //number of good charged tracks in event
+    NTuple::Item<long>    ngood_charged_track;     //number of good charged tracks in event
+    NTuple::Item<long>    ngood_neutral_track;     //number of good neutral tracks in event
     NTuple::Item<long>    npositive_track; //number of positive charged tracks
     NTuple::Item<long>    nnegative_track; //number of positive charged tracks
     NTuple::Item<long>    npositive_pions; //number of positive pions

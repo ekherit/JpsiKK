@@ -158,7 +158,8 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("run", run); //run number
   status = tuple->addItem ("event", event); //event number
   status = tuple->addItem ("time", time); //event time
-  status = tuple->addItem ("ngoodtrack", ngood_track); //good charged track in event
+  status = tuple->addItem ("ngtrack", ngood_charged_track); //good charged track in event
+  status = tuple->addItem ("ngntrack", ngood_neutral_track); //good neutral track in event
   status = tuple->addItem ("nptrack", npositive_track); //good positive charged track in event
   status = tuple->addItem ("nntrack", nnegative_track); //good negative charged track in event
   status = tuple->addItem ("nppions", npositive_pions); //good poitive pion tracks in event
@@ -573,7 +574,8 @@ StatusCode JpsiKK::execute()
   //now fill the tuples
 
   //some statistics information
-  fEvent.ngood_track = good_charged_tracks.size();
+  fEvent.ngood_charged_track = good_charged_tracks.size();
+  fEvent.ngood_neutral_track = good_neutral_tracks.size();
   fEvent.npositive_track = positive_charged_tracks.size();
   fEvent.nnegative_track = negative_charged_tracks.size();
   fEvent.npositive_pions = positive_pion_tracks.size();
