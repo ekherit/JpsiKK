@@ -319,17 +319,20 @@ StatusCode JpsiKK::execute()
   }
   event_proceed++;
 
-  /*  Get information about reconstructed events */
+  //  Get information about reconstructed events
   SmartDataPtr<EvtRecEvent> evtRecEvent(eventSvc(), EventModel::EvtRec::EvtRecEvent);
   SmartDataPtr<EvtRecTrackCol> evtRecTrkCol(eventSvc(),  EventModel::EvtRec::EvtRecTrackCol);
   SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
 
+  //fill initial value of the selected event
   fEvent.init();
 
+  //list of good charged tracks
   std::list<EvtRecTrackIterator> good_charged_tracks;
+  //list of good netutral tracks
   std::list<EvtRecTrackIterator> good_neutral_tracks;
 
-  //now count good charged track
+  //collect  good charged track
   for(unsigned i = 0; i < evtRecEvent->totalCharged(); i++)
   {
     EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + i;
@@ -342,7 +345,8 @@ StatusCode JpsiKK::execute()
     bool good_track = IP_track && fabs(cos(mdcTrk->theta()))<MAX_COS_THETA; //track is good
     if(good_track) good_charged_tracks.push_back(itTrk);
   }
-  //now count good neutral track
+
+  //collect good neutral track
   for(int i = evtRecEvent->totalCharged(); i<evtRecEvent->totalTracks(); i++)
   {
     EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + i;
@@ -350,10 +354,12 @@ StatusCode JpsiKK::execute()
     RecEmcShower *emcTrk = (*itTrk)->emcShower();
     double c =  fabs(cos(emcTrk->theta())); //abs cos theta
     double E  =  emcTrk->energy();
-    bool barrel = (c <= EMC_BARREL_MAX_COS_THETA);
-    bool endcup = (EMC_ENDCUP_MIN_COS_THETA <=c) && (c <= EMC_ENDCUP_MAX_COS_THETA);
-    bool good_track = ( barrel && E > EMC_BARREL_MIN_ENERGY) || (endcup && EMC_ENDCUP_MIN_ENERGY);
-    if(good_track) good_neutral_tracks.push_back(itTrk);
+    bool hit_barrel = (c <= EMC_BARREL_MAX_COS_THETA);
+    bool hit_endcup = (EMC_ENDCUP_MIN_COS_THETA <=c) && (c <= EMC_ENDCUP_MAX_COS_THETA);
+    //barrel and endcup calorimeters have different energy threshold
+    bool barrel_good_track = hit_barrel && (E > EMC_BARREL_MIN_ENERGY);
+    bool endcup_good_track = hit_endcup && (E > EMC_ENDCUP_MIN_ENERGY);
+    if(barrel_good_track  || endcup_good_track) good_neutral_tracks.push_back(itTrk);
   }
 
   //print good charged track index
