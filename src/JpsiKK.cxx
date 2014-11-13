@@ -674,9 +674,9 @@ StatusCode JpsiKK::execute()
   {
     EvtRecTrackIterator  itTrk = *track;
     RecEmcShower *emcTrk = (*itTrk)->emcShower();
-    fNeutral.E  =  emcTrk->energy();
-    fNeutral.theta =  emcTrk->theta();
-    fNeutral.phi =  emcTrk->phi();
+    fNeutral.E[idx]  =  emcTrk->energy();
+    fNeutral.theta[idx] =  emcTrk->theta();
+    fNeutral.phi[idx] =  emcTrk->phi();
     idx++;
   }
 
