@@ -120,14 +120,14 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
 }
 
 template <class A>
-StatusCode init_tuple(A a,  const char * dir, const char * title)
+StatusCode init_tuple(JpsiKK & alg, A a,  const char * dir, const char * title)
 {
   StatusCode status;
-  NTuplePtr nt(ntupleSvc(), dir);
+  NTuplePtr nt(alg->ntupleSvc(), dir);
   if(nt) a.tuple = nt;
   else
   {
-    a.tuple = ntupleSvc()->book(dir, CLID_ColumnWiseTuple, title);
+    a.tuple = alg->ntupleSvc()->book(dir, CLID_ColumnWiseTuple, title);
     if(tuple)
     {
       return a.init_tuple();
