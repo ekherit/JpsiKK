@@ -148,21 +148,21 @@ StatusCode JpsiKK::initialize(void)
     }
   }
 
-  NTuplePtr nt_neutral(ntupleSvc(), "FILE1/neutral");
-  if(nt_neutral) fNeutral.tuple = nt_neutral;
-  else
-  {
-    fNeutral.tuple = ntupleSvc()->book("FILE1/neutral", CLID_ColumnWiseTuple, "good neutral tracks");
-    if(fNeutral.tuple)
-    {
-      status = fNeutral.init_tuple();
-    }
-    else
-    {
-      log << MSG::ERROR << "    Cannot book N-tuple:" << long(fNeutral.tuple) << endmsg;
-      return StatusCode::FAILURE;
-    }
-  }
+  //NTuplePtr nt_neutral(ntupleSvc(), "FILE1/neutral");
+  //if(nt_neutral) fNeutral.tuple = nt_neutral;
+  //else
+  //{
+  //  fNeutral.tuple = ntupleSvc()->book("FILE1/neutral", CLID_ColumnWiseTuple, "good neutral tracks");
+  //  if(fNeutral.tuple)
+  //  {
+  //    status = fNeutral.init_tuple();
+  //  }
+  //  else
+  //  {
+  //    log << MSG::ERROR << "    Cannot book N-tuple:" << long(fNeutral.tuple) << endmsg;
+  //    return StatusCode::FAILURE;
+  //  }
+  //}
   return StatusCode::SUCCESS;
 }
 
@@ -674,9 +674,9 @@ StatusCode JpsiKK::execute()
   {
     EvtRecTrackIterator  itTrk = *track;
     RecEmcShower *emcTrk = (*itTrk)->emcShower();
-    fNeutral.E[idx]  =  emcTrk->energy();
-    fNeutral.theta[idx] =  emcTrk->theta();
-    fNeutral.phi[idx] =  emcTrk->phi();
+    //fNeutral.E[idx]  =  emcTrk->energy();
+    //fNeutral.theta[idx] =  emcTrk->theta();
+    //fNeutral.phi[idx] =  emcTrk->phi();
     idx++;
   }
 
