@@ -129,7 +129,7 @@ class JpsiKK : public Algorithm
     NTuple::Tuple * tuple; //tuple
     void init(void);
     StatusCode init_tuple(void);
-  }
+  };
 
   RootEvent fEvent;
   RootNeutralTrack fNeutral;
