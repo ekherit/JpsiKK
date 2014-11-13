@@ -367,7 +367,7 @@ StatusCode JpsiKK::execute()
   log << MSG::INFO << "MAX_NEUTRAL_TRACKS  = " << MAX_NEUTRAL_TRACKS << endmsg;
   log << MSG::INFO << "MIN_CHARGED_TRACKS  = " << MIN_CHARGED_TRACKS << endmsg;
   log << MSG::INFO << "MAX_CHARGED_TRACKS  = " << MAX_CHARGED_TRACKS << endmsg;
-  log << MSG::INFO << "good charged tracks: " << charged_tracks.size() <<  ",  neutral tracks: " << good_neutral_tracks.size() << endmsg;
+  log << MSG::INFO << "good charged tracks: " << good_charged_tracks.size() <<  ",  neutral tracks: " << good_neutral_tracks.size() << endmsg;
 
   //SELECTION CODE
   if( MAX_NEUTRAL_TRACKS < good_neutral_tracks.size()) return StatusCode::SUCCESS;
