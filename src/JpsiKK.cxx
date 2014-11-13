@@ -681,7 +681,7 @@ StatusCode JpsiKK::execute()
   //}
 
   fEvent.tuple->write();
-  fNeutral.tuple->write();
+  //fNeutral.tuple->write();
   event_write++;
   return StatusCode::SUCCESS;
 }
