@@ -154,69 +154,43 @@ StatusCode JpsiKK::initialize(void)
 StatusCode JpsiKK::RootEvent::init_tuple(void)
 {
   StatusCode status;
-  status = tuple->addItem ("ntrack", ntrack); //good charged track in event
+  status = tuple->addItem ("ngoodtrack", ngood_track); //good charged track in event
   status = tuple->addItem ("nptrack", npositive_track); //good positive charged track in event
   status = tuple->addItem ("nntrack", nnegative_track); //good negative charged track in event
   status = tuple->addItem ("nppions", npositive_pions); //good poitive pion tracks in event
   status = tuple->addItem ("nnpions", nnegative_pions); //good negative pion track in event
   status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
   status = tuple->addItem ("channel", channel); //decay channel of the J/psi
-  status = tuple->addItem ("ngood_pions", ngood_pions,0,2); 
-  status = tuple->addItem ("npid", npid,0,5); 
   status = tuple->addItem ("Mrec", Mrecoil); 
   status = tuple->addItem ("Minv", Minv); 
   status = tuple->addItem ("M2mis", M2missing); 
+  status = tuple->addItem ("npid", npid,0,5); 
+  status = tuple->addIndexedItem ("M", npid, M); 
 
-
+  status = tuple->addItem ("ntrack", ntrack,0,2); //array size must be =2
   //pions information
-  status = tuple->addIndexedItem ("pidx", ngood_pions, pions.index);
-  status = tuple->addIndexedItem ("pq", ngood_pions, pions.q);
-  status = tuple->addIndexedItem ("pE", ngood_pions, pions.E);
-  status = tuple->addIndexedItem ("pp", ngood_pions, pions.p);
-  status = tuple->addIndexedItem ("ppx", ngood_pions, pions.px);
-  status = tuple->addIndexedItem ("ppy", ngood_pions, pions.py);
-  status = tuple->addIndexedItem ("ppz", ngood_pions, pions.pz);
-  status = tuple->addIndexedItem ("ppt", ngood_pions, pions.pt);
-  status = tuple->addIndexedItem ("ptheta", ngood_pions, pions.theta);
-  status = tuple->addIndexedItem ("pphi", ngood_pions, pions.phi);
-  status = tuple->addIndexedItem ("px", ngood_pions, pions.x);
-  status = tuple->addIndexedItem ("py", ngood_pions, pions.y);
-  status = tuple->addIndexedItem ("pz", ngood_pions, pions.z);
-  status = tuple->addIndexedItem ("pr", ngood_pions, pions.r);
-  status = tuple->addIndexedItem ("pvxy", ngood_pions, pions.vxy);
-  status = tuple->addIndexedItem ("pvz", ngood_pions, pions.vz);
-  status = tuple->addIndexedItem ("pvphi", ngood_pions, pions.vphi);
-  status = tuple->addIndexedItem("pM2", npid, pions.M2); 
-  //kaons or muons information
-  status = tuple->addIndexedItem ("kidx", ngood_pions, kmuons.index);
-  status = tuple->addIndexedItem ("kq", ngood_pions, kmuons.q);
-  status = tuple->addIndexedItem ("kE", ngood_pions, kmuons.E);
-  status = tuple->addIndexedItem ("kp", ngood_pions, kmuons.p);
-  status = tuple->addIndexedItem ("kpx", ngood_pions, kmuons.px);
-  status = tuple->addIndexedItem ("kpy", ngood_pions, kmuons.py);
-  status = tuple->addIndexedItem ("kpz", ngood_pions, kmuons.pz);
-  status = tuple->addIndexedItem ("kpt", ngood_pions, kmuons.pt);
-  status = tuple->addIndexedItem ("ktheta", ngood_pions, kmuons.theta);
-  status = tuple->addIndexedItem ("kphi", ngood_pions, kmuons.phi);
-  status = tuple->addIndexedItem ("kx", ngood_pions, kmuons.x);
-  status = tuple->addIndexedItem ("ky", ngood_pions, kmuons.y);
-  status = tuple->addIndexedItem ("kz", ngood_pions, kmuons.z);
-  status = tuple->addIndexedItem ("kr", ngood_pions, kmuons.r);
-  status = tuple->addIndexedItem ("kvxy", ngood_pions, kmuons.vxy);
-  status = tuple->addIndexedItem ("kvz", ngood_pions, kmuons.vz);
-  status = tuple->addIndexedItem ("kvphi", ngood_pions, kmuons.vphi);
-  status = tuple->addIndexedItem ("kM2", npid, kmuons.M2); 
+  status = tuple->addIndexedItem ("idx",   ntrack, index);
+  status = tuple->addIndexedItem ("q",     ntrack, q);
+  status = tuple->addIndexedItem ("E",     ntrack, E);
+  status = tuple->addIndexedItem ("p",     ntrack, p);
+  status = tuple->addIndexedItem ("px",    ntrack, px);
+  status = tuple->addIndexedItem ("py",    ntrack, py);
+  status = tuple->addIndexedItem ("pz",    ntrack, pz);
+  status = tuple->addIndexedItem ("pt",    ntrack, pt);
+  status = tuple->addIndexedItem ("theta", ntrack, theta);
+  status = tuple->addIndexedItem ("phi",   ntrack, phi);
+  status = tuple->addIndexedItem ("x",     ntrack, x);
+  status = tuple->addIndexedItem ("y",     ntrack, y);
+  status = tuple->addIndexedItem ("z",     ntrack, z);
+  status = tuple->addIndexedItem ("r",     ntrack, r);
+  status = tuple->addIndexedItem ("vxy",   ntrack, vxy);
+  status = tuple->addIndexedItem ("vz",    ntrack, vz);
+  status = tuple->addIndexedItem ("vphi",  ntrack, vphi);
   return status;
 }
 
 void JpsiKK::RootEvent::init(void)
 {
-  ngood_pions=2;
-  npid=5;
-  //for(int i=0;i<2;i++)
-  //{
-  //  pions.p[i]=-999;
-  //}
 }
 
 void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
@@ -319,41 +293,6 @@ double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pion
   return Pmis.m2();
 }
 
-
-void JpsiKK::RootPair::fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair, EvtRecTrackIterator begin)
-{
-  EvtRecTrackIterator itTrk[2] = {pair.first, pair.second};
-  for(int i=0;i<2;i++)
-  {
-    if(!(*itTrk[i])->isMdcTrackValid()) continue; 
-    if(!(*itTrk[i])->isEmcShowerValid()) continue; //keep only valid neutral tracks
-    RecMdcTrack  *mdcTrk = (*itTrk[i])->mdcTrack();
-    RecEmcShower *emcTrk = (*itTrk[i])->emcShower();
-    index[i] = itTrk[i]-begin;
-    q[i] = mdcTrk->charge(); //charge of the track
-    E[i] = emcTrk->energy();
-    p[i] = mdcTrk->p();
-    px[i]= mdcTrk->px();
-    py[i]= mdcTrk->py();
-    pz[i]= mdcTrk->pz();
-    //pt[i]= mdcTrk->pt();
-    theta[i]= mdcTrk->theta();
-    phi[i] = mdcTrk->phi();
-    x[i]  = mdcTrk->x();
-    y[i]  = mdcTrk->y();
-    z[i]  = mdcTrk->z();
-    double rvxy,rvz,rvphi;
-    calculate_vertex(mdcTrk,rvxy,rvz,rvphi); 
-    vxy[i] = rvxy;
-    vz[i]  = rvz; 
-    vphi[i] = rvphi; 
-  }
-  for(int i=0;i<5;i++)
-  {
-    M2[i] = sqrt(get_invariant_mass2(pair,XMASS[i]));
-  }
-}
-
 StatusCode JpsiKK::execute()
 {
   MsgStream log(msgSvc(), name());
@@ -423,12 +362,12 @@ StatusCode JpsiKK::execute()
   }
 
   //print good charged track index
-  cout << "Good charged track: ";
-  for(list<EvtRecTrackIterator>::iterator i=good_charged_tracks.begin();i!=good_charged_tracks.end();i++)
-  {
-    cout << *i - evtRecTrkCol->begin() << " ";
-  }
-  cout << endl;
+  //cout << "Good charged track: ";
+  //for(list<EvtRecTrackIterator>::iterator i=good_charged_tracks.begin();i!=good_charged_tracks.end();i++)
+  //{
+  //  cout << *i - evtRecTrkCol->begin() << " ";
+  //}
+  //cout << endl;
 
 
 
@@ -455,24 +394,19 @@ StatusCode JpsiKK::execute()
     double p = mdcTrk->p();
     double q = mdcTrk->charge();
     bool barrel = c < EMC_BARREL_MAX_COS_THETA;
-    //bool not_electron = E/p < MAX_EP_RATIO; 
-    bool not_electron=true;
-    if(barrel & not_electron) 
+    bool not_electron_pion = E/p < MAX_EP_RATIO; 
+    if(barrel) 
     {
-      //cout << "charged_track: " << itTrk - evtRecTrkCol->begin()  << " MIN_KAON_MOMENTUM = " << MIN_KAON_MOMENTUM << endl;
-
       if(q>0) 
       {
         positive_charged_tracks.push_back(itTrk);
         if(p<MAX_PION_MOMENTUM) 
         {
           positive_pion_tracks.push_back(itTrk);
-          cout << "pi+track" << " = "   << itTrk - evtRecTrkCol->begin() << ", p = " << p << endl;
         }
-        if(p>MIN_KAON_MOMENTUM)
+        if(p>MIN_KAON_MOMENTUM && not_electron_pion)
         {
           other_positive_tracks.push_back(itTrk);
-          cout << "K+track" << " = "   << itTrk - evtRecTrkCol->begin() << ", p = " << p << endl;
         }
       }
       if(q<0) 
@@ -481,12 +415,10 @@ StatusCode JpsiKK::execute()
         if(p<MAX_PION_MOMENTUM) 
         {
           negative_pion_tracks.push_back(itTrk);
-          cout << "pi-track" << " = "   << itTrk - evtRecTrkCol->begin() << ", p = " << p << endl;
         }
-        if(p>MIN_KAON_MOMENTUM)
+        if(p>MIN_KAON_MOMENTUM && not_electron_pion)
         {
           other_negative_tracks.push_back(itTrk);
-          cout << "K-track" << " = "   << itTrk - evtRecTrkCol->begin() << ", p = " << p << endl;
         }
       }
       charged_tracks.push_back(itTrk);
@@ -497,76 +429,134 @@ StatusCode JpsiKK::execute()
 
   //keep only specific signature
   if(positive_charged_tracks.size()!=2 || negative_charged_tracks.size()!=2) return StatusCode::SUCCESS;
-
   if(negative_pion_tracks.empty() || positive_pion_tracks.empty()) return StatusCode::SUCCESS;
-  std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > pion_pairs;
+
   //create pion pairs
-  //cout << "Pions: " << negative_pion_tracks.size() << " " << positive_pion_tracks.size() << endl;
+  std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > pion_pairs;
   for(list<EvtRecTrackIterator>::iterator i=negative_pion_tracks.begin(); i!=negative_pion_tracks.end(); ++i)
     for(list<EvtRecTrackIterator>::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
     {
       std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
       double M_recoil = get_recoil__mass(pair, PION_MASS);
-      //cout << M_recoil << endl;
       if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
       {
-        //fEvent.Mrec = M_recoil;
         pion_pairs.push_back(pair);
       }
     }
 
   if(pion_pairs.empty()) return StatusCode::SUCCESS;
 
-  //the best pion pair
+  //find the best pion pair using closest value to JPSI_MASS
   std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pion_pair = pion_pairs.front();
+  for(list<EvtRecTrackIterator,EvtRecTrackIterator>::iterator p=pion_pairs.begin();p!=pion_pairs.end();p++)
+  {
+    if(fabs(get_recoil__mass(*p,PION_MASS) - JPSI_MASS) <  fabs(get_recoil__mass(pion_pair,PION_MASS) - JPSI_MASS)) pion_pair = *p;
+  }
 
   //make kaon or muon pairs
-  std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > kmuon_pairs;
+  std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > muon_pairs;
+  std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > kaon_pairs;
   for(list<EvtRecTrackIterator>::iterator i=other_negative_tracks.begin(); i!=other_negative_tracks.end(); ++i)
     for(list<EvtRecTrackIterator>::iterator j=other_positive_tracks.begin(); j!=other_positive_tracks.end(); ++j)
     {
       std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
-      EvtRecTrackIterator  itTrk[2] = {*i,*j};
-      for(int k=0;k<2;k++)
+      double M[5]={0,0,0,0,0};
+      for(int pid=0;pid<5;pid++)
       {
-        if(!(*itTrk[k])->isMdcTrackValid()) continue; 
-        if(!(*itTrk[k])->isEmcShowerValid()) continue; 
-        RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
-        RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
-        double E = emcTrk->energy();
-        double p = mdcTrk->p();
-        //cout << k << ": " << p << " " << E << endl;
-        //if(E/p < MAX_EP_RATIO) //it could be kaon or muon
-        //{
-        //}
+        M[i]=get_invariant_mass2(pair,XMASS[pid]);
+        if(M[i]>0) M[i] = sqrt(M[i]);
+        else M[i] = 0;
       }
-      double M_inv=get_invariant_mass2(pair,KAON_MASS);
-      kmuon_pairs.push_back(pair);
+      if(MIN_INVARIANT_MASS <  fabs(M[0] - JPSI_MASS)  && fabs(M[0] - JPSI_MASS) < MAX_INVARIANT_MASS)   kaon_pairs.push_back(pair);
+      if(MIN_INVARIANT_MASS <  fabs(M[1] - JPSI_MASS)  && fabs(M[1] - JPSI_MASS) < MAX_INVARIANT_MASS)   muon_pairs.push_back(pair);
     }
 
 
-  if(kmuon_pairs.empty()) return StatusCode::SUCCESS;
-
-  //the best kaon pair
-  std::pair<EvtRecTrackIterator,EvtRecTrackIterator> kaon_pair = kmuon_pairs.front();
 
 
-  //now fill the pion information
-  fEvent.ntrack = good_charged_tracks.size();
+  if(muon_pairs.empty() && kaon_pairs.empty()) return StatusCode::SUCCESS;
+
+
+  //the best pair which is closer to JPSI
+  std::pair<EvtRecTrackIterator,EvtRecTrackIterator> result_pair;
+  if(!kaon_pairs.empty()) result_pair = kaon_pairs.front();
+  if(!muon_pairs.empty()) result_pair = muon_pairs.front();
+  int channel=-1; //default no channel
+  for(list<EvtRecTrackIterator,EvtRecTrackIterator>::iterator p=kaon_pairs.begin();p!=kaon_pairs.end();p++)
+  {
+    if(fabs(sqrt(get_invariant_mass2(*p,KAON_MASS)) - JPSI_MASS) 
+        <=  fabs(sqrt(get_invariant_mass2(result_pair,KAON_MASS)) - JPSI_MASS)) 
+    {
+      result_pair = *p;
+      channel=0; //setup kaon channel
+    }
+  }
+  for(list<EvtRecTrackIterator,EvtRecTrackIterator>::iterator p=muon_pairs.begin();p!=muon_pairs.end();p++)
+  {
+    if(fabs(sqrt(get_invariant_mass2(*p,MUON_MASS)) - JPSI_MASS) 
+        <=  fabs(sqrt(get_invariant_mass2(result_pair,MUON_MASS)) - JPSI_MASS)) 
+    {
+      result_pair = *p;
+      channel=1; //setup muon channel
+    }
+  }
+  if(channel<0) 
+  {
+    clog << MSG::WARNING << "Must be some channel but it's not" << endmsg;
+    return StatusCode::FAILURE; 
+  }
+
+
+  //now fill the tuples
+
+  //some statistics information
+  fEvent.ngood_track = good_charged_tracks.size();
   fEvent.npositive_track = positive_charged_tracks.size();
   fEvent.nnegative_track = negative_charged_tracks.size();
   fEvent.npositive_pions = positive_pion_tracks.size();
   fEvent.nnegative_pions = negative_pion_tracks.size();
   fEvent.npion_pairs = pion_pairs.size();
-  fEvent.ngood_pions = 2;
-  fEvent.channel = -1; //yet not identify other particles
+  // fill the decay channel of the J/psi 0 - kaons, 1 --muons
+  fEvent.channel = channel; 
 
   fEvent.Mrecoil = get_recoil__mass(pion_pair, PION_MASS);
-  fEvent.Minv    = sqrt(get_invariant_mass2(kaon_pair,KAON_MASS));
-  fEvent.M2missing = get_missing_mass(pion_pair,kaon_pair);
+  fEvent.Minv    = sqrt(get_invariant_mass2(result_pair,XMASS[channel]));
+  fEvent.M2missing = get_missing_mass(pion_pair,result_pair);
 
-  fEvent.pions.fill(pion_pair, evtRecTrkCol->begin());
-  fEvent.kmuons.fill(kaon_pair, evtRecTrkCol->begin());
+  fEvent.ntrack=4;
+  EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
+  for(int i=0;i<4;i++)
+  {
+    if(!(*itTrk[i])->isMdcTrackValid() || !(*itTrk[i])->isEmcShowerValid()) 
+    {
+      clog << MSG::ERROR << "Somthing wrong in selection. This track must have Mdc and Emc information but it is not. exiting." << endmsg;
+      return StatusCode::FAILURE;
+    }
+    RecMdcTrack  *mdcTrk = (*itTrk[i])->mdcTrack();
+    RecEmcShower *emcTrk = (*itTrk[i])->emcShower();
+    fEvent.index[i] = itTrk[i]-evtRecTrkCol->begin(); 
+    fEvent.q[i] = mdcTrk->charge(); 
+    fEvent.E[i] = emcTrk->energy();
+    fEvent.p[i] = mdcTrk->p();
+    fEvent.px[i]= mdcTrk->px();
+    fEvent.py[i]= mdcTrk->py();
+    fEvent.pz[i]= mdcTrk->pz();
+    fEvent.theta[i]= mdcTrk->theta();
+    fEvent.phi[i] = mdcTrk->phi();
+    fEvent.x[i]  = mdcTrk->x();
+    fEvent.y[i]  = mdcTrk->y();
+    fEvent.z[i]  = mdcTrk->z();
+    double rvxy,rvz,rvphi;
+    calculate_vertex(mdcTrk,rvxy,rvz,rvphi); 
+    fEvent.vxy[i] = rvxy;
+    fEvent.vz[i]  = rvz; 
+    fEvent.vphi[i] = rvphi; 
+  }
+  fEvent.npid=5;
+  for(int i=0;i<5;i++)
+  {
+    fEvent.M[i] = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
+  }
 
   fEvent.tuple->write();
   event_write++;

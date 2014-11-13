@@ -64,8 +64,8 @@ class JpsiKK : public Algorithm
   double MIN_MUON_MOMENTUM; //minimum kaon momentum
   double MAX_MUON_MOMENTUM; //maximum pion momentum
 
-  double MIN_INVARIANT_MASS; //minimum recoil mass cut
-  double MAX_INVARIANT_MASS; //minimum recoil mass cut
+  double MIN_INVARIANT_MASS; //minimum invariant  mass cut
+  double MAX_INVARIANT_MASS; //manimum invariant  mass cut
 
   double MIN_KAON_MISSING_MASS;   //minimum kaon missing mass
   double MAX_KAON_MISSING_MASS;   //minimum kaon missing mass
@@ -80,8 +80,25 @@ class JpsiKK : public Algorithm
   long int good_pion_pairs_number;
   long int good_high_mom_pairs_number; //Kaon, muon kandidates
 
-  struct RootPair
+  struct RootEvent
   {
+    NTuple::Item<long>    ngood_track;     //number of good charged tracks in event
+    NTuple::Item<long>    npositive_track; //number of positive charged tracks
+    NTuple::Item<long>    nnegative_track; //number of positive charged tracks
+    NTuple::Item<long>    npositive_pions; //number of positive pions
+    NTuple::Item<long>    nnegative_pions; //number of negative pions
+    NTuple::Item<long>    npion_pairs; //total number of found pion pairs
+    NTuple::Item<long>    channel;     //J/psi decay channel 0 -- K+K-, 1 -- mu+mu-
+    NTuple::Item<double>  Mrecoil;  //pion recoil mass
+    NTuple::Item<double>  M2missing; //missing square invariant mass
+    NTuple::Item<double>  Minv; //invariant mass two charged particles
+
+    NTuple::Item<long>    npid;     //number of particle hypo 0-K,1-mu,2-e,3-pi,4-p
+    NTuple::Array<double> M;     
+
+    //(0,1) -pi-,pi+
+    //(1,2)  K-,K+, or mu-,mu+
+    NTuple::Item<long>    ntrack;  //size of the array
     NTuple::Array<long> index; //index of track
     NTuple::Array<double> q; //charge of the track
     NTuple::Array<double> E;
@@ -93,27 +110,6 @@ class JpsiKK : public Algorithm
     NTuple::Array<double> theta,phi;
     NTuple::Array<double> x, y, z, r; //poca coordinate of track
     NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
-    NTuple::Array<double>  M2;     //square invariant mass of the two tracks with different hypo
-
-    void fill(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair, EvtRecTrackIterator begin);
-  };
-
-  struct RootEvent
-  {
-    NTuple::Item<long>    ntrack;     //number of good charged tracks in event
-    NTuple::Item<long>    npositive_track; //number of positive charged tracks
-    NTuple::Item<long>    nnegative_track; //number of positive charged tracks
-    NTuple::Item<long>    npositive_pions; //number of positive pions
-    NTuple::Item<long>    nnegative_pions; //number of negative pions
-    NTuple::Item<long>    npion_pairs; //total number of found pion pairs
-    NTuple::Item<long>    channel;     //J/psi decay channel 0 -- K+K-, 1 -- mu+mu-
-    NTuple::Item<long>    ngood_pions;     //ngood pions should be always 2
-    NTuple::Item<long>    npid;     //number of particle hypo 0-K,1-mu,2-e,3-pi,4-p
-    RootPair  pions;   //pions information
-    RootPair  kmuons;   //kaon or muon momentum
-    NTuple::Item<double>  Mrecoil;  //pion recoil mass
-    NTuple::Item<double>  M2missing; //missing square invariant mass
-    NTuple::Item<double>  Minv; //invariant mass of the Kauons or muons
 
     NTuple::Tuple * tuple; //tuple
     void init(void);
