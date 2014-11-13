@@ -132,7 +132,7 @@ class JpsiKK : public Algorithm
   };
 
   RootEvent fEvent;
-  //RootNeutralTrack fNeutral;
+  RootNeutralTrack fNeutral;
 };
 
 #endif
