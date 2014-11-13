@@ -139,7 +139,7 @@ StatusCode init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title
     }
   }
   return status;
-};
+}
 
 StatusCode JpsiKK::initialize(void)
 {
