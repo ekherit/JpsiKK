@@ -120,7 +120,7 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
 }
 
 template <class A>
-StatusCode init_tuple(JpsiKK & alg, A a,  const char * dir, const char * title)
+StatusCode init_tuple(JpsiKK * alg, A a,  const char * dir, const char * title)
 {
   StatusCode status;
   NTuplePtr nt(alg->ntupleSvc(), dir);
@@ -183,7 +183,7 @@ StatusCode JpsiKK::initialize(void)
   //    return StatusCode::FAILURE;
   //  }
   //}
-  init_tuple(fNeutral,"FILE1/neutral","Good neutral tracks");
+  init_tuple(this, fNeutral,"FILE1/neutral","Good neutral tracks");
 
   return StatusCode::SUCCESS;
 }
