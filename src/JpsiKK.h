@@ -27,7 +27,6 @@
 #include <algorithm>
 
 #include "EventModel/EventHeader.h"
-#include <TTree.h>
 
 #include "ibn/averager.h"
 
@@ -120,8 +119,20 @@ class JpsiKK : public Algorithm
     void init(void);
     StatusCode init_tuple(void);
   };
+
+  struct RootNeutralTrack
+  {
+    NTuple::Item<long> ntrack; //number of good neutral track
+    NTuple::Array<double> E;
+    NTuple::Array<double> theta;
+    NTuple::Array<double> phi;
+    NTuple::Tuple * tuple; //tuple
+    void init(void);
+    StatusCode init_tuple(void);
+  }
+
   RootEvent fEvent;
-  TTree *tree;
+  RootNeutralTrack fNeutral;
 };
 
 #endif

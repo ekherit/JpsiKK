@@ -137,7 +137,6 @@ StatusCode JpsiKK::initialize(void)
   else
   {
     fEvent.tuple = ntupleSvc()->book("FILE1/event", CLID_ColumnWiseTuple, "Signal events pi+pi- K+K-, or pi+pi- mu+mu-");
-    log << MSG::INFO << "After book" << endmsg;
     if(fEvent.tuple)
     {
       status = fEvent.init_tuple();
@@ -145,6 +144,22 @@ StatusCode JpsiKK::initialize(void)
     else
     {
       log << MSG::ERROR << "    Cannot book N-tuple:" << long(fEvent.tuple) << endmsg;
+      return StatusCode::FAILURE;
+    }
+  }
+
+  NTuplePtr nt_neutral(ntupleSvc(), "FILE1/neutral");
+  if(nt_neutral) fEvent.tuple = nt_neutral;
+  else
+  {
+    fNeutral.tuple = ntupleSvc()->book("FILE1/neutral", CLID_ColumnWiseTuple, "good neutral tracks");
+    if(fNeutral.tuple)
+    {
+      status = fNeutral.init_tuple();
+    }
+    else
+    {
+      log << MSG::ERROR << "    Cannot book N-tuple:" << long(fNeutral.tuple) << endmsg;
       return StatusCode::FAILURE;
     }
   }
@@ -197,6 +212,21 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
 void JpsiKK::RootEvent::init(void)
 {
 }
+
+StatusCode JpsiKK::RootNeutralTrack::init_tuple(void)
+{
+  StatusCode status;
+  status = tuple->addItem ("ntrack", ntrack); //good nuetral track in event
+  status = tuple->addIndexedItem ("E",     ntrack, E);
+  status = tuple->addIndexedItem ("theta", ntrack, theta);
+  status = tuple->addIndexedItem ("phi",   ntrack, phi);
+  return status;
+}
+
+void JpsiKK::RootNeutralTrack::init(void)
+{
+}
+
 
 void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
 {
@@ -638,7 +668,20 @@ StatusCode JpsiKK::execute()
     fEvent.M[i] = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
   }
 
+  fNeutral.ntrack=good_neutral_tracks.size();
+  int idx=0;
+  for(list<EvtRecTrackIterator>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
+  {
+    EvtRecTrackIterator  itTrk = *track;
+    RecEmcShower *emcTrk = (*itTrk)->emcShower();
+    fNeutral.E  =  emcTrk->energy();
+    fNeutral.theta =  emcTrk->theta();
+    fNeutral.phi =  emcTrk->phi();
+    idx++;
+  }
+
   fEvent.tuple->write();
+  fNeutral.tuple->write();
   event_write++;
   return StatusCode::SUCCESS;
 }
