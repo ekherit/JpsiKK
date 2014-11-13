@@ -216,7 +216,7 @@ void JpsiKK::RootEvent::init(void)
 StatusCode JpsiKK::RootNeutralTrack::init_tuple(void)
 {
   StatusCode status;
-  status = tuple->addItem ("ntrack", ntrack); //good nuetral track in event
+  status = tuple->addItem ("ntrack", ntrack,0,100); //good nuetral track in event
   status = tuple->addIndexedItem ("E",     ntrack, E);
   status = tuple->addIndexedItem ("theta", ntrack, theta);
   status = tuple->addIndexedItem ("phi",   ntrack, phi);
