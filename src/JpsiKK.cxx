@@ -119,8 +119,9 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("MAX_MISSING_MASS", MAX_MISSING_MASS = +0.1); //GeV^2
 }
 
+//this is service function for fast book ntuple
 template <class A>
-StatusCode init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title)
+StatusCode init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title, MsgStream & log)
 {
   StatusCode status;
   NTuplePtr nt(alg->ntupleSvc(), dir);
@@ -134,7 +135,7 @@ StatusCode init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title
     }
     else
     {
-      //log << MSG::ERROR << "    Cannot book N-tuple:" << long(a.tuple) << endmsg;
+      log << MSG::ERROR << "    Cannot book N-tuple:" << long(a.tuple) << endmsg;
       return StatusCode::FAILURE;
     }
   }
@@ -152,40 +153,10 @@ StatusCode JpsiKK::initialize(void)
   event_with_muons=0;
 
   StatusCode status;
+  status = init_tuple(this, fEvent,"FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
+  status = init_tuple(this, fNeutral,"FILE1/neutral","Good neutral tracks",log);
 
-  NTuplePtr nt_event(ntupleSvc(), "FILE1/event");
-  if(nt_event) fEvent.tuple = nt_event;
-  else
-  {
-    fEvent.tuple = ntupleSvc()->book("FILE1/event", CLID_ColumnWiseTuple, "Signal events pi+pi- K+K-, or pi+pi- mu+mu-");
-    if(fEvent.tuple)
-    {
-      status = fEvent.init_tuple();
-    }
-    else
-    {
-      log << MSG::ERROR << "    Cannot book N-tuple:" << long(fEvent.tuple) << endmsg;
-      return StatusCode::FAILURE;
-    }
-  }
-  //NTuplePtr nt_neutral(ntupleSvc(), "FILE1/neutral");
-  //if(nt_neutral) fNeutral.tuple = nt_neutral;
-  //else
-  //{
-  //  fNeutral.tuple = ntupleSvc()->book("FILE1/neutral", CLID_ColumnWiseTuple, "good neutral tracks");
-  //  if(fNeutral.tuple)
-  //  {
-  //    status = fNeutral.init_tuple();
-  //  }
-  //  else
-  //  {
-  //    log << MSG::ERROR << "    Cannot book N-tuple:" << long(fNeutral.tuple) << endmsg;
-  //    return StatusCode::FAILURE;
-  //  }
-  //}
-  init_tuple(this, fNeutral,"FILE1/neutral","Good neutral tracks");
-
-  return StatusCode::SUCCESS;
+  return status;
 }
 
 
