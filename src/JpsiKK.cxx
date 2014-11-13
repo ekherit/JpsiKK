@@ -364,6 +364,10 @@ StatusCode JpsiKK::execute()
   //}
   //cout << endl;
 
+  log << MSG::INFO << "MAX_NEUTRAL_TRACKS  = " << MAX_NEUTRAL_TRACKS << endmsg;
+  log << MSG::INFO << "MIN_CHARGED_TRACKS  = " << MIN_CHARGED_TRACKS << endmsg;
+  log << MSG::INFO << "MAX_CHARGED_TRACKS  = " << MAX_CHARGED_TRACKS << endmsg;
+  log << MSG::INFO << "good charged tracks: " << charged_tracks.size() <<  ",  neutral tracks: " << good_neutral_tracks.size() << endmsg;
 
   //SELECTION CODE
   if( MAX_NEUTRAL_TRACKS < good_neutral_tracks.size()) return StatusCode::SUCCESS;
@@ -423,6 +427,10 @@ StatusCode JpsiKK::execute()
   }
 
   
+  log << MSG::INFO << "good charged tracks: " << charged_tracks.size() << " (" << negative_charged_tracks.size() << ", " << positive_charged_tracks.size() << endmsg;
+  log << MSG::INFO << "pions: " << negative_pion_tracks.size()  << ", " << positive_pion_tracks.size() << endmsg;
+  log << MSG::INFO << "other: " << other_negative_tracks.size()  << ", " << other_positive_tracks.size() << endmsg;
+
 
   //SELECTION CODE
   //keep only specific signature
@@ -443,7 +451,7 @@ StatusCode JpsiKK::execute()
         pion_pairs.push_back(pair);
       }
     }
-
+  log << MSG::INFO << "pion pairs: " << pion_pairs.size() << endmsg;
   //SELECTION CODE
   if(pion_pairs.empty()) return StatusCode::SUCCESS;
 
@@ -468,10 +476,11 @@ StatusCode JpsiKK::execute()
         if(M[pid]>0) M[pid] = sqrt(M[pid]);
         else M[pid] = 0;
       }
-      if(MIN_INVARIANT_MASS <  fabs(M[0] - JPSI_MASS)  && fabs(M[0] - JPSI_MASS) < MAX_INVARIANT_MASS)   kaon_pairs.push_back(pair);
-      if(MIN_INVARIANT_MASS <  fabs(M[1] - JPSI_MASS)  && fabs(M[1] - JPSI_MASS) < MAX_INVARIANT_MASS)   muon_pairs.push_back(pair);
+      if(MIN_INVARIANT_MASS <  M[0] - JPSI_MASS  && M[0] - JPSI_MASS < MAX_INVARIANT_MASS)   kaon_pairs.push_back(pair);
+      if(MIN_INVARIANT_MASS <  M[1] - JPSI_MASS  && M[1] - JPSI_MASS < MAX_INVARIANT_MASS)   muon_pairs.push_back(pair);
     }
 
+  log << MSG::INFO << "kaon pairs: " << kaon_pairs.size() << ",  muon pairs: " << muon_pairs.size() << endmsg;
   //SELECTION CODE
   if(muon_pairs.empty() && kaon_pairs.empty()) return StatusCode::SUCCESS;
 
