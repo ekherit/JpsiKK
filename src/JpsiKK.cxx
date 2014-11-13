@@ -388,11 +388,11 @@ StatusCode JpsiKK::execute()
   {
     EvtRecTrackIterator & itTrk = *track;
     if(!(*itTrk)->isMdcTrackValid()) continue; 
-    if(!(*itTrk)->isEmcShowerValid()) continue; 
     RecMdcTrack *mdcTrk = (*itTrk)->mdcTrack();
-    RecEmcShower *emcTrk = (*itTrk)->emcShower();
+    //if(!(*itTrk)->isEmcShowerValid()) continue; 
+    //RecEmcShower *emcTrk = (*itTrk)->emcShower();
     double c = fabs(cos(mdcTrk->theta()));
-    double E = emcTrk->energy();
+    //double E = emcTrk->energy();
     double p = mdcTrk->p();
     double q = mdcTrk->charge();
     bool barrel = c < EMC_BARREL_MAX_COS_THETA;
@@ -473,11 +473,13 @@ StatusCode JpsiKK::execute()
       double Ep[2];
       for(int k=0;k<2;k++)
       {
-        if(!(*itTrk[k])->isMdcTrackValid() || ! (*itTrk[k])->isEmcShowerValid()) 
+        if(!(*itTrk[k])->isMdcTrackValid() ) 
         {
-          log << MSG::ERROR << "Invalid mdc or ems info for track.Exiting" << endmsg;
+          log << MSG::ERROR << "Invalid mdc info for track.Exiting" << endmsg;
           return StatusCode::FAILURE;
         }
+        //SELECTION CODE: no EMC information
+        if(! (*itTrk[k])->isEmcShowerValid()) goto SKIP_THIS_PAIR:
         RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
         RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
         double E = emcTrk->energy();
@@ -509,6 +511,7 @@ StatusCode JpsiKK::execute()
           muon_pairs.push_back(pair);
         }
       }
+SKIP_THIS_PAIR:
     }
 
   int channel=-1; //default no channel
