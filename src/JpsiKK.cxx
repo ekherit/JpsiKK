@@ -134,7 +134,7 @@ StatusCode init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title
     }
     else
     {
-      log << MSG::ERROR << "    Cannot book N-tuple:" << long(a.tuple) << endmsg;
+      //log << MSG::ERROR << "    Cannot book N-tuple:" << long(a.tuple) << endmsg;
       return StatusCode::FAILURE;
     }
   }
