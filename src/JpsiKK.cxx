@@ -477,6 +477,7 @@ StatusCode JpsiKK::execute()
         if(M[pid]>0) M[pid] = sqrt(M[pid]);
         else M[pid] = 0;
       }
+      cout << M[0] << " " << M[1] << endl;
       if(MIN_INVARIANT_MASS <  M[0] - JPSI_MASS  && M[0] - JPSI_MASS < MAX_INVARIANT_MASS)   kaon_pairs.push_back(pair);
       if(MIN_INVARIANT_MASS <  M[1] - JPSI_MASS  && M[1] - JPSI_MASS < MAX_INVARIANT_MASS)   muon_pairs.push_back(pair);
     }
