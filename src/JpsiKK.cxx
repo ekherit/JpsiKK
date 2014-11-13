@@ -464,9 +464,9 @@ StatusCode JpsiKK::execute()
       double M[5]={0,0,0,0,0};
       for(int pid=0;pid<5;pid++)
       {
-        M[i]=get_invariant_mass2(pair,XMASS[pid]);
-        if(M[i]>0) M[i] = sqrt(M[i]);
-        else M[i] = 0;
+        M[pid]=get_invariant_mass2(pair,XMASS[pid]);
+        if(M[pid]>0) M[pid] = sqrt(M[pid]);
+        else M[pid] = 0;
       }
       if(MIN_INVARIANT_MASS <  fabs(M[0] - JPSI_MASS)  && fabs(M[0] - JPSI_MASS) < MAX_INVARIANT_MASS)   kaon_pairs.push_back(pair);
       if(MIN_INVARIANT_MASS <  fabs(M[1] - JPSI_MASS)  && fabs(M[1] - JPSI_MASS) < MAX_INVARIANT_MASS)   muon_pairs.push_back(pair);
