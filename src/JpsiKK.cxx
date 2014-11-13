@@ -389,10 +389,7 @@ StatusCode JpsiKK::execute()
     EvtRecTrackIterator & itTrk = *track;
     if(!(*itTrk)->isMdcTrackValid()) continue; 
     RecMdcTrack *mdcTrk = (*itTrk)->mdcTrack();
-    //if(!(*itTrk)->isEmcShowerValid()) continue; 
-    //RecEmcShower *emcTrk = (*itTrk)->emcShower();
     double c = fabs(cos(mdcTrk->theta()));
-    //double E = emcTrk->energy();
     double p = mdcTrk->p();
     double q = mdcTrk->charge();
     bool barrel = c < EMC_BARREL_MAX_COS_THETA;
@@ -407,7 +404,10 @@ StatusCode JpsiKK::execute()
         }
         if(p>std::min(MIN_KAON_MOMENTUM, MIN_MUON_MOMENTUM))
         {
-          other_positive_tracks.push_back(itTrk);
+          if((*itTrk)->isEmcShowerValid())
+          {
+            other_positive_tracks.push_back(itTrk);
+          }
         }
       }
       if(q<0) 
@@ -419,7 +419,10 @@ StatusCode JpsiKK::execute()
         }
         if(p>std::min(MIN_KAON_MOMENTUM, MIN_MUON_MOMENTUM))
         {
-          other_negative_tracks.push_back(itTrk);
+          if((*itTrk)->isEmcShowerValid())
+          {
+            other_negative_tracks.push_back(itTrk);
+          }
         }
       }
       charged_tracks.push_back(itTrk);
@@ -473,13 +476,13 @@ StatusCode JpsiKK::execute()
       double Ep[2];
       for(int k=0;k<2;k++)
       {
-        if(!(*itTrk[k])->isMdcTrackValid() ) 
+        if(!(*itTrk[k])->isMdcTrackValid() || ! (*itTrk[k])->isEmcShowerValid()) 
         {
           log << MSG::ERROR << "Invalid mdc info for track.Exiting" << endmsg;
           return StatusCode::FAILURE;
         }
         //SELECTION CODE: no EMC information
-        if(! (*itTrk[k])->isEmcShowerValid()) goto SKIP_THIS_PAIR;
+        //if(! (*itTrk[k])->isEmcShowerValid()) goto SKIP_THIS_PAIR;
         RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
         RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
         double E = emcTrk->energy();
