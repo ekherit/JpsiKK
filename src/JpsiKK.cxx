@@ -584,10 +584,14 @@ StatusCode JpsiKK::execute()
   EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
   for(int i=0;i<4;i++)
   {
-    if(!(*itTrk[i])->isMdcTrackValid() || !(*itTrk[i])->isEmcShowerValid()) 
+    if(!(*itTrk[i])->isMdcTrackValid() || !(*itTrk[i])->isEmcShowerValid() ) 
     {
-      log << MSG::ERROR << "Somthing wrong in selection. This track must have Mdc and Emc information but it is not. exiting." << endmsg;
-      return StatusCode::FAILURE;
+      //pions could not have EMC information
+      if(i>1)
+      {
+        log << MSG::ERROR << "Somthing wrong in selection. This track must have Mdc and Emc information but it is not. exiting." << endmsg;
+        return StatusCode::FAILURE;
+      }
     }
     RecMdcTrack  *mdcTrk = (*itTrk[i])->mdcTrack();
     RecEmcShower *emcTrk = (*itTrk[i])->emcShower();
