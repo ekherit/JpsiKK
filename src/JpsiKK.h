@@ -27,7 +27,7 @@
 #include <algorithm>
 
 #include "EventModel/EventHeader.h"
-#include <TTree.h>
+#include <TNtupleD.h>
 
 #include "ibn/averager.h"
 
