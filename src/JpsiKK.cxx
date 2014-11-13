@@ -368,7 +368,7 @@ StatusCode JpsiKK::execute()
   //log << MSG::ERROR << "MAX_NEUTRAL_TRACKS  = " << MAX_NEUTRAL_TRACKS << endmsg;
   //log << MSG::ERROR << "MIN_CHARGED_TRACKS  = " << MIN_CHARGED_TRACKS << endmsg;
   //log << MSG::ERROR << "MAX_CHARGED_TRACKS  = " << MAX_CHARGED_TRACKS << endmsg;
-  //log << MSG::ERROR << "good charged tracks: " << good_charged_tracks.size() <<  ",  neutral tracks: " << good_neutral_tracks.size() << endmsg;
+  log << MSG::ERROR << "good charged tracks: " << good_charged_tracks.size() <<  ",  neutral tracks: " << good_neutral_tracks.size() << endmsg;
 
   //SELECTION CODE
   if( MAX_NEUTRAL_TRACKS < good_neutral_tracks.size()) return StatusCode::SUCCESS;
@@ -511,47 +511,50 @@ StatusCode JpsiKK::execute()
       }
     }
 
+  int channel=-1; //default no channel
+  std::pair<EvtRecTrackIterator,EvtRecTrackIterator> result_pair;
   //log << MSG::ERROR << "kaon pairs: " << kaon_pairs.size() << ",  muon pairs: " << muon_pairs.size() << endmsg;
   //SELECTION CODE
-  if(muon_pairs.empty() && kaon_pairs.empty()) return StatusCode::SUCCESS;
-
-
-  //the best pair which is closer to JPSI
-  std::pair<EvtRecTrackIterator,EvtRecTrackIterator> result_pair;
-  if(!kaon_pairs.empty()) result_pair = kaon_pairs.front();
-  if(!muon_pairs.empty()) result_pair = muon_pairs.front();
-  int channel=-1; //default no channel
-  for(PairList_t::iterator p=kaon_pairs.begin();p!=kaon_pairs.end();p++)
+  if(!muon_pairs.empty() || !kaon_pairs.empty()) 
   {
-    if(fabs(sqrt(get_invariant_mass2(*p,KAON_MASS)) - JPSI_MASS) 
-        <=  fabs(sqrt(get_invariant_mass2(result_pair,KAON_MASS)) - JPSI_MASS)) 
+    //the best pair which is closer to JPSI
+    if(!kaon_pairs.empty()) result_pair = kaon_pairs.front();
+    if(!muon_pairs.empty()) result_pair = muon_pairs.front();
+    for(PairList_t::iterator p=kaon_pairs.begin();p!=kaon_pairs.end();p++)
     {
-      result_pair = *p;
-      channel=0; //setup kaon channel
+      if(fabs(sqrt(get_invariant_mass2(*p,KAON_MASS)) - JPSI_MASS) 
+          <=  fabs(sqrt(get_invariant_mass2(result_pair,KAON_MASS)) - JPSI_MASS)) 
+      {
+        result_pair = *p;
+        channel=0; //setup kaon channel
+      }
+    }
+    for(PairList_t::iterator p=muon_pairs.begin();p!=muon_pairs.end();p++)
+    {
+      if(fabs(sqrt(get_invariant_mass2(*p,MUON_MASS)) - JPSI_MASS) 
+          <=  fabs(sqrt(get_invariant_mass2(result_pair,MUON_MASS)) - JPSI_MASS)) 
+      {
+        result_pair = *p;
+        channel=1; //setup muon channel
+      }
+    }
+    if(channel<0) 
+    {
+      log << MSG::ERROR << "Must be some channel but it's not" << endmsg;
+      return StatusCode::FAILURE; 
+    }
+    switch(channel)
+    {
+      case 0:
+        event_with_kaons++;
+        break;
+      case 1:
+        event_with_muons++;
+        break;
     }
   }
-  for(PairList_t::iterator p=muon_pairs.begin();p!=muon_pairs.end();p++)
+  else
   {
-    if(fabs(sqrt(get_invariant_mass2(*p,MUON_MASS)) - JPSI_MASS) 
-        <=  fabs(sqrt(get_invariant_mass2(result_pair,MUON_MASS)) - JPSI_MASS)) 
-    {
-      result_pair = *p;
-      channel=1; //setup muon channel
-    }
-  }
-  if(channel<0) 
-  {
-    log << MSG::ERROR << "Must be some channel but it's not" << endmsg;
-    return StatusCode::FAILURE; 
-  }
-  switch(channel)
-  {
-    case 0:
-      event_with_kaons++;
-      break;
-    case 1:
-      event_with_muons++;
-      break;
   }
 
 
