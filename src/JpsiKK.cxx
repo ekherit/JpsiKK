@@ -171,7 +171,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("npid", npid,0,5); 
   status = tuple->addIndexedItem ("M", npid, M); 
 
-  status = tuple->addItem ("ntrack", ntrack,0,2); //array size must be =2
+  status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
   //pions information
   status = tuple->addIndexedItem ("idx",   ntrack, index);
   status = tuple->addIndexedItem ("q",     ntrack, q);
@@ -512,7 +512,7 @@ StatusCode JpsiKK::execute()
   }
   if(channel<0) 
   {
-    clog << MSG::WARNING << "Must be some channel but it's not" << endmsg;
+    log << MSG::ERROR << "Must be some channel but it's not" << endmsg;
     return StatusCode::FAILURE; 
   }
   switch(channel)
@@ -548,7 +548,7 @@ StatusCode JpsiKK::execute()
   {
     if(!(*itTrk[i])->isMdcTrackValid() || !(*itTrk[i])->isEmcShowerValid()) 
     {
-      clog << MSG::ERROR << "Somthing wrong in selection. This track must have Mdc and Emc information but it is not. exiting." << endmsg;
+      log << MSG::ERROR << "Somthing wrong in selection. This track must have Mdc and Emc information but it is not. exiting." << endmsg;
       return StatusCode::FAILURE;
     }
     RecMdcTrack  *mdcTrk = (*itTrk[i])->mdcTrack();
