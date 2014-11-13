@@ -479,7 +479,7 @@ StatusCode JpsiKK::execute()
           return StatusCode::FAILURE;
         }
         //SELECTION CODE: no EMC information
-        if(! (*itTrk[k])->isEmcShowerValid()) goto SKIP_THIS_PAIR:
+        if(! (*itTrk[k])->isEmcShowerValid()) goto SKIP_THIS_PAIR;
         RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
         RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
         double E = emcTrk->energy();
