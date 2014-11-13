@@ -97,8 +97,8 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("EMC_BARREL_MAX_COS_THETA", EMC_BARREL_MAX_COS_THETA = 0.8);
   declareProperty("EMC_BARREL_MIN_ENERGY", EMC_BARREL_MIN_ENERGY = 0.025);
 
-  //not electron
-  declareProperty("MAX_EP_RATIO", MAX_EP_RATIO = 0.26);
+  declareProperty("MAX_MUON_EP_RATIO", MAX_MUON_EP_RATIO = 0.26);
+  declareProperty("MAX_KAON_EP_RATIO", MAX_KAON_EP_RATIO = 0.8);
 
   declareProperty("MAX_PION_MOMENTUM", MAX_PION_MOMENTUM = 0.45); //GeV
   declareProperty("MIN_KAON_MOMENTUM", MIN_KAON_MOMENTUM = 1.0); //GeV
@@ -469,6 +469,21 @@ StatusCode JpsiKK::execute()
     for(list<EvtRecTrackIterator>::iterator j=other_positive_tracks.begin(); j!=other_positive_tracks.end(); ++j)
     {
       std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
+      EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
+      double Ep[2];
+      for(int k=0;k<2;k++)
+      {
+        if(!(*itTrk[k])->isMdcTrackValid() || ! (*itTrk[k])->isEmcShowerValid()) 
+        {
+          log << MSG::ERROR << "Invalid mdc or ems info for track.Exiting" << endmsg;
+          return StatusCode::FAILURE;
+        }
+        RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
+        RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
+        double E = emcTrk->energy();
+        double p = mdcTrk->p();
+        Ep[k] = E/p;
+      }
       double M[5]={0,0,0,0,0};
       for(int pid=0;pid<5;pid++)
       {
@@ -477,31 +492,20 @@ StatusCode JpsiKK::execute()
         else M[pid] = 0;
       }
       cout << M[0] << " " << M[1] << endl;
-      //SELECTION CODE
+      //SELECTION CODE KAON CASE
       if(MIN_INVARIANT_MASS <  M[0]   && M[0]  < MAX_INVARIANT_MASS)
       {
-        kaon_pairs.push_back(pair);
+        //SELECTION CODE
+        if(Ep[0] < MAX_KAON_EP_RATIO && Ep[1] < MAX_KAON_EP_RATIO)
+        {
+          kaon_pairs.push_back(pair);
+        }
       }
       //SELECTION CODE
       if(MIN_INVARIANT_MASS <  M[1]   && M[1]  < MAX_INVARIANT_MASS)
       {
-        EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
-        double Ep[2];
-        for(int k=0;k<2;k++)
-        {
-          if(!(*itTrk[k])->isMdcTrackValid() || ! (*itTrk[k])->isEmcShowerValid()) 
-          {
-            log << MSG::ERROR << "Invalid mdc or ems info for track.Exiting" << endmsg;
-            return StatusCode::FAILURE;
-          }
-          RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
-          RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
-          double E = emcTrk->energy();
-          double p = mdcTrk->p();
-          Ep[k] = E/p;
-        }
         //SELECTION CODE
-        if(Ep[0] < MAX_EP_RATIO && Ep[1] < MAX_EP_RATIO)
+        if(Ep[0] < MAX_MUON_EP_RATIO && Ep[1] < MAX_MUON_EP_RATIO)
         {
           muon_pairs.push_back(pair);
         }

@@ -52,7 +52,8 @@ class JpsiKK : public Algorithm
   double EMC_BARREL_MAX_COS_THETA;
   double EMC_BARREL_MIN_ENERGY;
 
-  double MAX_EP_RATIO;
+  double MAX_MUON_EP_RATIO;
+  double MAX_KAON_EP_RATIO;
 
   double MAX_PION_MOMENTUM; //maximum pion momentum
 
