@@ -555,6 +555,7 @@ StatusCode JpsiKK::execute()
   }
   else
   {
+    return StatusCode::SUCCESS;
   }
 
 
