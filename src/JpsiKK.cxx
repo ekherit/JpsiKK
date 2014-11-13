@@ -430,9 +430,9 @@ StatusCode JpsiKK::execute()
   //SELECTION CODE
   if(negative_pion_tracks.empty() || positive_pion_tracks.empty()) return StatusCode::SUCCESS;
 
-  typedef std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > PairsList_t;
+  typedef std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > PairList_t;
   //create pion pairs
-  PairsList_t pion_pairs;
+  PairList_t pion_pairs;
   for(list<EvtRecTrackIterator>::iterator i=negative_pion_tracks.begin(); i!=negative_pion_tracks.end(); ++i)
     for(list<EvtRecTrackIterator>::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
     {
@@ -455,8 +455,8 @@ StatusCode JpsiKK::execute()
   }
 
   //make kaon or muon pairs
-  std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > muon_pairs;
-  std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > kaon_pairs;
+  PairList_t muon_pairs;
+  PairList_t kaon_pairs;
   for(list<EvtRecTrackIterator>::iterator i=other_negative_tracks.begin(); i!=other_negative_tracks.end(); ++i)
     for(list<EvtRecTrackIterator>::iterator j=other_positive_tracks.begin(); j!=other_positive_tracks.end(); ++j)
     {
@@ -481,7 +481,7 @@ StatusCode JpsiKK::execute()
   if(!kaon_pairs.empty()) result_pair = kaon_pairs.front();
   if(!muon_pairs.empty()) result_pair = muon_pairs.front();
   int channel=-1; //default no channel
-  for(PairsList_t::iterator p=kaon_pairs.begin();p!=kaon_pairs.end();p++)
+  for(PairList_t::iterator p=kaon_pairs.begin();p!=kaon_pairs.end();p++)
   {
     if(fabs(sqrt(get_invariant_mass2(*p,KAON_MASS)) - JPSI_MASS) 
         <=  fabs(sqrt(get_invariant_mass2(result_pair,KAON_MASS)) - JPSI_MASS)) 
