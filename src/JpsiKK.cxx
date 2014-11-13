@@ -668,7 +668,7 @@ StatusCode JpsiKK::execute()
     fEvent.M[i] = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
   }
 
-  fNeutral.ntrack=good_neutral_tracks.size();
+  //fNeutral.ntrack=good_neutral_tracks.size();
   int idx=0;
   //for(list<EvtRecTrackIterator>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
   //{
