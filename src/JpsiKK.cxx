@@ -119,6 +119,27 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("MAX_MISSING_MASS", MAX_MISSING_MASS = +0.1); //GeV^2
 }
 
+template <class A>
+StatusCode init_tuple(A a,  const char * dir, const char * title)
+{
+  StatusCode status;
+  NTuplePtr nt(ntupleSvc(), dir);
+  if(nt) a.tuple = nt;
+  else
+  {
+    a.tuple = ntupleSvc()->book(dir, CLID_ColumnWiseTuple, title);
+    if(tuple)
+    {
+      return a.init_tuple();
+    }
+    else
+    {
+      log << MSG::ERROR << "    Cannot book N-tuple:" << long(a.tuple) << endmsg;
+      return StatusCode::FAILURE;
+    }
+  }
+  return status;
+};
 
 StatusCode JpsiKK::initialize(void)
 {
@@ -147,22 +168,23 @@ StatusCode JpsiKK::initialize(void)
       return StatusCode::FAILURE;
     }
   }
+  //NTuplePtr nt_neutral(ntupleSvc(), "FILE1/neutral");
+  //if(nt_neutral) fNeutral.tuple = nt_neutral;
+  //else
+  //{
+  //  fNeutral.tuple = ntupleSvc()->book("FILE1/neutral", CLID_ColumnWiseTuple, "good neutral tracks");
+  //  if(fNeutral.tuple)
+  //  {
+  //    status = fNeutral.init_tuple();
+  //  }
+  //  else
+  //  {
+  //    log << MSG::ERROR << "    Cannot book N-tuple:" << long(fNeutral.tuple) << endmsg;
+  //    return StatusCode::FAILURE;
+  //  }
+  //}
+  init_tuple(fNeutral,"FILE1/neutral","Good neutral tracks");
 
-  NTuplePtr nt_neutral(ntupleSvc(), "FILE1/neutral");
-  if(nt_neutral) fNeutral.tuple = nt_neutral;
-  else
-  {
-    fNeutral.tuple = ntupleSvc()->book("FILE1/neutral", CLID_ColumnWiseTuple, "good neutral tracks");
-    if(fNeutral.tuple)
-    {
-      status = fNeutral.init_tuple();
-    }
-    else
-    {
-      log << MSG::ERROR << "    Cannot book N-tuple:" << long(fNeutral.tuple) << endmsg;
-      return StatusCode::FAILURE;
-    }
-  }
   return StatusCode::SUCCESS;
 }
 
@@ -212,6 +234,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
 void JpsiKK::RootEvent::init(void)
 {
 }
+
 
 StatusCode JpsiKK::RootNeutralTrack::init_tuple(void)
 {
