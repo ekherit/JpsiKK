@@ -79,8 +79,9 @@ double XMASS[5] = {KAON_MASS, MUON_MASS, ELECTRON_MASS, PION_MASS, PROTON_MASS};
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
 {
-  declareProperty("MAX_CHARGED_TRACKS", MAX_CHARGED_TRACKS=10); //maximum number of charged tracks in selection
-  declareProperty("MIN_CHARGED_TRACKS", MIN_CHARGED_TRACKS=3); //minimum number of charged tracks in selection
+  declareProperty("MAX_CHARGED_TRACKS", MAX_CHARGED_TRACKS=4); //maximum number of charged tracks in selection
+  declareProperty("MIN_CHARGED_TRACKS", MIN_CHARGED_TRACKS=4); //minimum number of charged tracks in selection
+  declareProperty("MAX_NEUTRAL_TRACKS", MAX_NEUTRAL_TRACKS=0); //maximum number of good charged tracks in selection
 
   //good charged track configuration
   declareProperty("IP_MAX_Z", IP_MAX_Z = 10.0); //cm?
@@ -126,8 +127,8 @@ StatusCode JpsiKK::initialize(void)
   log << MSG::INFO << "in initialize()" << endmsg;
   event_proceed=0;
   event_write = 0;
-  good_pion_pairs_number=0;
-  good_high_mom_pairs_number=0;
+  event_with_kaons=0;
+  event_with_muons=0;
 
   StatusCode status;
 
@@ -154,6 +155,9 @@ StatusCode JpsiKK::initialize(void)
 StatusCode JpsiKK::RootEvent::init_tuple(void)
 {
   StatusCode status;
+  status = tuple->addItem ("run", run); //run number
+  status = tuple->addItem ("event", event); //event number
+  status = tuple->addItem ("time", time); //event time
   status = tuple->addItem ("ngoodtrack", ngood_track); //good charged track in event
   status = tuple->addItem ("nptrack", npositive_track); //good positive charged track in event
   status = tuple->addItem ("nntrack", nnegative_track); //good negative charged track in event
@@ -296,15 +300,12 @@ double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pion
 StatusCode JpsiKK::execute()
 {
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "in execute()" << endreq;
+  log << MSG::INFO << "executing" << endreq;
 
   SmartDataPtr<Event::EventHeader> eventHeader(eventSvc(),"/Event/EventHeader");
-  int runNo=eventHeader->runNumber();
-  //if(runNo<0) CHECK_MC = true;
-  int event=eventHeader->eventNumber();
-  //head_event_number=event;
-  //head_run=runNo;
-  //time_t t=eventHeader->time();
+  fEvent.run=eventHeader->runNumber();
+  fEvent.event=eventHeader->eventNumber();
+  fEvent.time=eventHeader->time();
   bool isprint=false;
   if(event_proceed<10) isprint=true;
   if(10 <= event_proceed && event_proceed < 100 && event_proceed % 10 ==0) isprint=true;
@@ -323,13 +324,7 @@ StatusCode JpsiKK::execute()
   SmartDataPtr<EvtRecTrackCol> evtRecTrkCol(eventSvc(),  EventModel::EvtRec::EvtRecTrackCol);
   SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
 
-
-  //InitData2(evtRecEvent->totalCharged(), evtRecEvent->totalNeutral());
   fEvent.init();
-
-  //typedef std::multimap <double, unsigned> mmap_t;
-  //typedef std::pair <double, unsigned> pair_t;
-  //mmap_t pmap;
 
   std::list<EvtRecTrackIterator> good_charged_tracks;
   std::list<EvtRecTrackIterator> good_neutral_tracks;
@@ -370,9 +365,11 @@ StatusCode JpsiKK::execute()
   //cout << endl;
 
 
+  //SELECTION CODE
+  if( MAX_NEUTRAL_TRACKS < good_neutral_tracks.size()) return StatusCode::SUCCESS;
+  //SELECTION CODE
+  if( good_charged_tracks.size() < MIN_CHARGED_TRACKS || MAX_CHARGED_TRACKS < good_charged_tracks.size()) return StatusCode::SUCCESS;
 
-  //number of good neutral tracks must be 0
-  //if(!good_neutral_tracks.empty()) return StatusCode::SUCCESS;
 
   
   std::list<EvtRecTrackIterator> charged_tracks; //selected tracks for specific cut
@@ -427,8 +424,10 @@ StatusCode JpsiKK::execute()
 
   
 
+  //SELECTION CODE
   //keep only specific signature
   if(positive_charged_tracks.size()!=2 || negative_charged_tracks.size()!=2) return StatusCode::SUCCESS;
+  //SELECTION CODE
   if(negative_pion_tracks.empty() || positive_pion_tracks.empty()) return StatusCode::SUCCESS;
 
   //create pion pairs
@@ -444,6 +443,7 @@ StatusCode JpsiKK::execute()
       }
     }
 
+  //SELECTION CODE
   if(pion_pairs.empty()) return StatusCode::SUCCESS;
 
   //find the best pion pair using closest value to JPSI_MASS
@@ -471,9 +471,7 @@ StatusCode JpsiKK::execute()
       if(MIN_INVARIANT_MASS <  fabs(M[1] - JPSI_MASS)  && fabs(M[1] - JPSI_MASS) < MAX_INVARIANT_MASS)   muon_pairs.push_back(pair);
     }
 
-
-
-
+  //SELECTION CODE
   if(muon_pairs.empty() && kaon_pairs.empty()) return StatusCode::SUCCESS;
 
 
@@ -504,6 +502,15 @@ StatusCode JpsiKK::execute()
   {
     clog << MSG::WARNING << "Must be some channel but it's not" << endmsg;
     return StatusCode::FAILURE; 
+  }
+  switch(channel)
+  {
+    case 0:
+      event_with_kaons++;
+      break;
+    case 1:
+      event_with_muons++;
+      break;
   }
 
 
@@ -567,6 +574,7 @@ StatusCode JpsiKK::finalize()
 {
   std::cout << "Event proceed: " << event_proceed << std::endl;
   std::cout << "Event selected: " << event_write << std::endl;
+  std::cout << "Event with kaons: " << event_with_kaons << std::endl;
+  std::cout << "Event with muons: " << event_with_muons << std::endl;
   return StatusCode::SUCCESS;
 }
-// for particle id look /ihepbatch/bes/alex/workarea/Analysis/Physics/PsiPrime/G2MuMuAlg-00-00-01/PipiJpsiAlg/src

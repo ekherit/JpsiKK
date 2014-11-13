@@ -30,7 +30,7 @@
 
 #include "ibn/averager.h"
 
-#include "EvtRecEvent/EvtRecTrack.h"
+//#include "EvtRecEvent/EvtRecTrack.h"
 class JpsiKK : public Algorithm 
 {
 	public:
@@ -40,8 +40,9 @@ class JpsiKK : public Algorithm
   StatusCode finalize();  
 
 	private:
-	int MIN_CHARGED_TRACKS; //minimum charged tracks in selection
-	int MAX_CHARGED_TRACKS; //minimum charged tracks in selection
+	int MIN_CHARGED_TRACKS; //minimum good charged tracks in selection
+	int MAX_CHARGED_TRACKS; //maximum good charged tracks in selection
+	int MAX_NEUTRAL_TRACKS; //maximum good neutral tracks in selection
 	double IP_MAX_RHO, IP_MAX_Z; //interection point cut
   double MAX_COS_THETA; //maximum  cos(theta) for good charged track
 
@@ -77,11 +78,14 @@ class JpsiKK : public Algorithm
 
 	long int event_proceed;
 	long int event_write;
-  long int good_pion_pairs_number;
-  long int good_high_mom_pairs_number; //Kaon, muon kandidates
+  long int event_with_kaons;
+  long int event_with_muons;
 
   struct RootEvent
   {
+    NTuple::Item<long>    run; //run number
+    NTuple::Item<long>    event; //event number 
+    NTuple::Item<long>    time; //time of the event
     NTuple::Item<long>    ngood_track;     //number of good charged tracks in event
     NTuple::Item<long>    npositive_track; //number of positive charged tracks
     NTuple::Item<long>    nnegative_track; //number of positive charged tracks
