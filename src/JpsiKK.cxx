@@ -670,15 +670,15 @@ StatusCode JpsiKK::execute()
 
   fNeutral.ntrack=good_neutral_tracks.size();
   int idx=0;
-  for(list<EvtRecTrackIterator>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
-  {
-    EvtRecTrackIterator  itTrk = *track;
-    RecEmcShower *emcTrk = (*itTrk)->emcShower();
-    //fNeutral.E[idx]  =  emcTrk->energy();
-    //fNeutral.theta[idx] =  emcTrk->theta();
-    //fNeutral.phi[idx] =  emcTrk->phi();
-    idx++;
-  }
+  //for(list<EvtRecTrackIterator>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
+  //{
+  //  EvtRecTrackIterator  itTrk = *track;
+  //  RecEmcShower *emcTrk = (*itTrk)->emcShower();
+  //  //fNeutral.E[idx]  =  emcTrk->energy();
+  //  //fNeutral.theta[idx] =  emcTrk->theta();
+  //  //fNeutral.phi[idx] =  emcTrk->phi();
+  //  idx++;
+  //}
 
   fEvent.tuple->write();
   fNeutral.tuple->write();
