@@ -668,20 +668,20 @@ StatusCode JpsiKK::execute()
     fEvent.M[i] = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
   }
 
-  //fNeutral.ntrack=good_neutral_tracks.size();
+  fNeutral.ntrack=good_neutral_tracks.size();
   int idx=0;
-  //for(list<EvtRecTrackIterator>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
-  //{
-  //  EvtRecTrackIterator  itTrk = *track;
-  //  RecEmcShower *emcTrk = (*itTrk)->emcShower();
-  //  //fNeutral.E[idx]  =  emcTrk->energy();
-  //  //fNeutral.theta[idx] =  emcTrk->theta();
-  //  //fNeutral.phi[idx] =  emcTrk->phi();
-  //  idx++;
-  //}
+  for(list<EvtRecTrackIterator>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
+  {
+    EvtRecTrackIterator  itTrk = *track;
+    RecEmcShower *emcTrk = (*itTrk)->emcShower();
+    fNeutral.E[idx]  =  emcTrk->energy();
+    fNeutral.theta[idx] =  emcTrk->theta();
+    fNeutral.phi[idx] =  emcTrk->phi();
+    idx++;
+  }
 
   fEvent.tuple->write();
-  //fNeutral.tuple->write();
+  fNeutral.tuple->write();
   event_write++;
   return StatusCode::SUCCESS;
 }
