@@ -698,11 +698,11 @@ StatusCode JpsiKK::execute()
     PID->calculate();
     if(PID->IsPidInfoValid())
     {
-      fEvent.probe[i] =  pid->probElectron();
-      fEvent.probmu[i] = pid->probMuon();
-      fEvent.probpi[i] = pid->probPion();
-      fEvent.probk[i] =  pid->probKaon();
-      fEvent.probp[i] =  pid->probProton();
+      fEvent.probe[i] =  PID->probElectron();
+      fEvent.probmu[i] = PID->probMuon();
+      fEvent.probpi[i] = PID->probPion();
+      fEvent.probk[i] =  PID->probKaon();
+      fEvent.probp[i] =  PID->probProton();
     }
     //dedx information
     if((*itTrk[i])->isMdcDedxValid())
