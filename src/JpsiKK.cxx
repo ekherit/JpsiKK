@@ -223,7 +223,7 @@ StatusCode JpsiKK::RootEmc::init_tuple(void)
   status = tuple->addIndexedItem ("E",     ntrack, E);
   status = tuple->addIndexedItem ("theta", ntrack, theta);
   status = tuple->addIndexedItem ("phi",   ntrack, phi);
-  status = tuple->addIndexedItem ("t",     ntrack, time);
+  status = tuple->addIndexedItem ("time",     ntrack, time);
   return status;
 }
 
@@ -763,7 +763,7 @@ StatusCode JpsiKK::execute()
     fNeutral.E[idx]  =  emcTrk->energy();
     fNeutral.theta[idx] =  emcTrk->theta();
     fNeutral.phi[idx] =  emcTrk->phi();
-    fNeutral.t[i] = emcTrk->time();
+    fNeutral.time[i] = emcTrk->time();
     idx++;
   }
 
