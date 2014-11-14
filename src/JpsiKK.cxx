@@ -154,8 +154,9 @@ StatusCode JpsiKK::initialize(void)
 
   StatusCode status;
   status = init_tuple(this, fEvent,"FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
-  status = init_tuple(this, fNeutral,"FILE1/neutral","Good neutral tracks",log);
   status = init_tuple(this, fDedx,"FILE1/dedx","Dedx info for signal",log);
+  status = init_tuple(this, fEmc,"FILE1/emc","Emc info for signal",log);
+  status = init_tuple(this, fNeutral,"FILE1/neutral","Good neutral tracks",log);
 
   return status;
 }
@@ -215,17 +216,18 @@ void JpsiKK::RootEvent::init(void)
 }
 
 
-StatusCode JpsiKK::RootNeutralTrack::init_tuple(void)
+StatusCode JpsiKK::RootEmc::init_tuple(void)
 {
   StatusCode status;
   status = tuple->addItem ("ntrack", ntrack,0,100); //good nuetral track in event
   status = tuple->addIndexedItem ("E",     ntrack, E);
   status = tuple->addIndexedItem ("theta", ntrack, theta);
   status = tuple->addIndexedItem ("phi",   ntrack, phi);
+  status = tuple->addIndexedItem ("t",     ntrack, time);
   return status;
 }
 
-void JpsiKK::RootNeutralTrack::init(void)
+void JpsiKK::RootEmc::init(void)
 {
 }
 
@@ -656,6 +658,7 @@ StatusCode JpsiKK::execute()
 
   fEvent.ntrack=4;
   fDedx.ntrack=4;
+  fEmc.ntrack=4;
   EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
   for(int i=0;i<4;i++)
   {
@@ -672,6 +675,10 @@ StatusCode JpsiKK::execute()
     {
       RecEmcShower *emcTrk = (*itTrk[i])->emcShower();
       fEvent.E[i] = emcTrk->energy();
+      fEmc.E[i] = emcTrk->energy();
+      fEmc.theta[i] = emcTrk->theta();
+      fEmc.phi[i] = emcTrk->phi();
+      fEmc.t[i] = emcTrk->time();
     }
     else
     {
@@ -756,6 +763,7 @@ StatusCode JpsiKK::execute()
     fNeutral.E[idx]  =  emcTrk->energy();
     fNeutral.theta[idx] =  emcTrk->theta();
     fNeutral.phi[idx] =  emcTrk->phi();
+    fNeutral.t[i] = emcTrk->time();
     idx++;
   }
 

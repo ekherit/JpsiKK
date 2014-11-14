@@ -76,7 +76,15 @@ class JpsiKK : public Algorithm
   long int event_with_kaons;
   long int event_with_muons;
 
-  struct RootEvent
+  struct RootTuple
+  {
+    NTuple::Tuple * tuple; //tuple
+    virtual ~RootTuple(void){};
+    virtual void init(void);
+    virtual StatusCode init_tuple(void);
+  };
+
+  struct RootEvent : public RootTuple
   {
     NTuple::Item<long>    run; //run number
     NTuple::Item<long>    event; //event number 
@@ -111,12 +119,9 @@ class JpsiKK : public Algorithm
     NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
     NTuple::Array<double> probe,probmu,probpi,probk,probp; //probability of track to be e,mu,pi,k or p
     
-    NTuple::Tuple * tuple; //tuple
-    void init(void);
-    StatusCode init_tuple(void);
   };
 
-  struct RootDedx
+  struct RootDedx : public RootTuple
   {
     NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
     NTuple::Array<double> chie;  //chi e
@@ -131,27 +136,23 @@ class JpsiKK : public Algorithm
     //NTuple::Array<double> probpi; //prob e
     //NTuple::Array<double> probk;  //prob e
     //NTuple::Array<double> probp;  //prob e
-    NTuple::Tuple * tuple; //tuple
-    void init(void);
-    StatusCode init_tuple(void);
   };
 
-  struct RootNeutralTrack
+  struct RootEmc : public RootTuple
   {
-    NTuple::Item<long> ntrack; //number of good neutral track
+    NTuple::Item<long> ntrack;
     NTuple::Array<double> E;
     NTuple::Array<double> theta;
     NTuple::Array<double> phi;
-    NTuple::Tuple * tuple; //tuple
-    void init(void);
-    StatusCode init_tuple(void);
+    NTuple::Array<double> time;
   };
 
 
 
-  RootEvent fEvent;
-  RootDedx fDedx;
-  RootNeutralTrack fNeutral;
+  RootEvent fEvent; //signal event essential information
+  RootDedx  fDedx; //dedx for the event
+  RootEmc   fEmc;  //emc infromation for the event
+  RootEmc   fNeutral; //neutral tracks
 };
 
 #endif
