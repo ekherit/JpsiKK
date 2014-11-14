@@ -177,7 +177,7 @@ class JpsiKK : public Algorithm
   RootEvent fEvent; //signal event essential information
   RootDedx  fDedx; //dedx for the event
   RootEmc   fEmc;  //emc infromation for the event
-  RootEmc   fTof;  //emc infromation for the event
+  RootTof   fTof;  //emc infromation for the event
   RootEmc   fNeutral; //neutral tracks
 };
 
