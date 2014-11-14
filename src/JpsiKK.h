@@ -131,6 +131,9 @@ class JpsiKK : public Algorithm
     //NTuple::Array<double> probpi; //prob e
     //NTuple::Array<double> probk;  //prob e
     //NTuple::Array<double> probp;  //prob e
+    NTuple::Tuple * tuple; //tuple
+    void init(void);
+    StatusCode init_tuple(void);
   };
 
   struct RootNeutralTrack
