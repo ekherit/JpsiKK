@@ -792,7 +792,7 @@ StatusCode JpsiKK::execute()
         fTof.tof[i] = (*tofTrk)->tof();
         fTof.beta[i] = (*tofTrk)->beta();
         fTof.errtof[i] = (*tofTrk)->errtof();
-        fTof.chie[i] = (texpElectron());
+        fTof.chie[i] = ((*tofTrk)->texpElectron());
         fTof.chimu[i] = ((*tofTrk)->tof()-(*tofTrk)->texpMuon())/(*tofTrk)->errtof();
         fTof.chipi[i] = ((*tofTrk)->tof()-(*tofTrk)->texpPion())/(*tofTrk)->errtof();
         fTof.chik[i] = ((*tofTrk)->tof()-(*tofTrk)->texpKaon())/(*tofTrk)->errtof();
