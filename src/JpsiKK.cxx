@@ -678,7 +678,7 @@ StatusCode JpsiKK::execute()
       fEmc.E[i] = emcTrk->energy();
       fEmc.theta[i] = emcTrk->theta();
       fEmc.phi[i] = emcTrk->phi();
-      fEmc.t[i] = emcTrk->time();
+      fEmc.time[i] = emcTrk->time();
     }
     else
     {
