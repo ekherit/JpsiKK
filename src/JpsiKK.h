@@ -1,36 +1,30 @@
 /*
  * =====================================================================================
  *
- *       Filename:  JPsi.h
+ *       Filename:  JpsiKK.h
  *
- *    Description:  Multihadron event selection for j/psi and psi prime resonance.
- *
+ *    Description:  Event selection for measurement branching fraction Jpsi->K+K-
+ *    via Psi(2S)->Jpsi(->K+K-)pi+pi- decay *
+ *    
  *        Version:  1.0
- *        Created:  04/27/2010 02:47:32 PM
+ *        Created:  2014-11-06
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  Ivan Nikolaev (), I.B.Nikolaev@inp.nsk.su
+ *         Author:  Ivan Nikolaev (ekherit), I.B.Nikolaev@inp.nsk.su
  *        Company:  Budker Institute of Nuclear Physics
  *
  * =====================================================================================
  */
 
-#ifndef IBN_TAUEMU_H
-#define IBN_TAUEMU_H
+#ifndef IBN_BES3_JPSIKK_H
+#define IBN_BES3_JPSIKK_H
 #include "GaudiKernel/AlgFactory.h"
 #include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/NTuple.h"
 
-#include <TMatrixD.h>
-#include <vector>
-#include <algorithm>
-
 #include "EventModel/EventHeader.h"
 
-#include "ibn/averager.h"
-
-//#include "EvtRecEvent/EvtRecTrack.h"
 class JpsiKK : public Algorithm 
 {
 	public:

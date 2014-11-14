@@ -84,8 +84,8 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("MAX_NEUTRAL_TRACKS", MAX_NEUTRAL_TRACKS=0); //maximum number of good charged tracks in selection
 
   //good charged track configuration
-  declareProperty("IP_MAX_Z", IP_MAX_Z = 10.0); //cm?
-  declareProperty("IP_MAX_RHO", IP_MAX_RHO = 1.0); //cm?
+  declareProperty("IP_MAX_Z", IP_MAX_Z = 10.0); //cm
+  declareProperty("IP_MAX_RHO", IP_MAX_RHO = 1.0); //cm
   declareProperty("MAX_COS_THETA", MAX_COS_THETA = 0.93);
 
   //good neutral track configuration
