@@ -167,6 +167,7 @@ class JpsiKK : public Algorithm
     NTuple::Array<double> chipi; 
     NTuple::Array<double> chik;  
     NTuple::Array<double> chip;  
+    NTuple::Array<double> beta;  
     virtual void init(void);
     virtual StatusCode init_tuple(void);
   };

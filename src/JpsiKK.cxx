@@ -267,6 +267,7 @@ StatusCode JpsiKK::RootTof::init_tuple(void)
   status = tuple->addIndexedItem ("chipi",  ntrack, chipi);
   status = tuple->addIndexedItem ("chik",  ntrack, chik);
   status = tuple->addIndexedItem ("chip",  ntrack, chip);
+  status = tuple->addIndexedItem ("beta",  ntrack, beta);
   return status;
 }
 
@@ -789,8 +790,9 @@ StatusCode JpsiKK::execute()
         fTof.tofID[i] = (*tofTrk)->tofID();
         fTof.t0[i] = (*tofTrk)->t0();
         fTof.tof[i] = (*tofTrk)->tof();
+        fTof.beta[i] = (*tofTrk)->beta();
         fTof.errtof[i] = (*tofTrk)->errtof();
-        fTof.chie[i] = ((*tofTrk)->tof()-(*tofTrk)->texpElectron())/(*tofTrk)->errtof();
+        fTof.chie[i] = (texpElectron());
         fTof.chimu[i] = ((*tofTrk)->tof()-(*tofTrk)->texpMuon())/(*tofTrk)->errtof();
         fTof.chipi[i] = ((*tofTrk)->tof()-(*tofTrk)->texpPion())/(*tofTrk)->errtof();
         fTof.chik[i] = ((*tofTrk)->tof()-(*tofTrk)->texpKaon())/(*tofTrk)->errtof();
