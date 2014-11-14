@@ -785,7 +785,7 @@ StatusCode JpsiKK::execute()
       delete hitst;
       if(!tofecount.empty())
       {
-        tofTrk = tofTrkCol.begin()+tofcount[0];
+        tofTrk = tofTrkCol.begin()+tofecount[0];
         fTof.tofID[i] = (*tofTrk)->tofID();
         fTof.t0[i] = (*tofTrk)->t0();
         fTof.tof[i] = (*tofTrk)->tof();
