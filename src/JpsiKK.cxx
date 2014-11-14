@@ -783,7 +783,7 @@ StatusCode JpsiKK::execute()
       //  tofecount.push_back(goodtofetrk);
       //}
       //delete hitst;
-      fTof.ID[i] = (*tofTrk)->tofID();
+      fTof.tofID[i] = (*tofTrk)->tofID();
       fTof.t0[i] = (*tofTrk)->t0();
       fTof.tof[i] = (*tofTrk)->tof();
       fTof.errtof[i] = (*tofTrk)->errtof();
