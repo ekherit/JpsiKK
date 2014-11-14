@@ -262,11 +262,11 @@ StatusCode JpsiKK::RootTof::init_tuple(void)
   status = tuple->addIndexedItem ("tof",  ntrack, tof);
   status = tuple->addIndexedItem ("errtof",  ntrack, errtof);
   status = tuple->addIndexedItem ("t0",  ntrack, t0);
-  //status = tuple->addIndexedItem ("chie",  ntrack, chie);
-  //status = tuple->addIndexedItem ("chimu",  ntrack, chimu);
-  //status = tuple->addIndexedItem ("chipi",  ntrack, chipi);
-  //status = tuple->addIndexedItem ("chik",  ntrack, chik);
-  //status = tuple->addIndexedItem ("chip",  ntrack, chip);
+  status = tuple->addIndexedItem ("chie",  ntrack, chie);
+  status = tuple->addIndexedItem ("chimu",  ntrack, chimu);
+  status = tuple->addIndexedItem ("chipi",  ntrack, chipi);
+  status = tuple->addIndexedItem ("chik",  ntrack, chik);
+  status = tuple->addIndexedItem ("chip",  ntrack, chip);
   status = tuple->addIndexedItem ("beta",  ntrack, beta);
   status = tuple->addIndexedItem ("te",  ntrack, te);
   status = tuple->addIndexedItem ("tmu",  ntrack, tmu);
@@ -802,6 +802,12 @@ StatusCode JpsiKK::execute()
         fTof.tpi[i]= (*tofTrk)->texpPion();
         fTof.tk[i] = (*tofTrk)->texpKaon();
         fTof.tp[i] = (*tofTrk)->texpProton();
+
+        fTof.chie[i] = (fTof.tof[i]-fTof.te[i])/fTof.errtof[i];
+        fTof.chimu[i]= (fTof.tof[i] -fTof.tmu[i])/fTof.errtof[i];
+        fTof.chipi[i]= (fTof.tof[i] -fTof.tpi[i])/fTof.errtof[i];
+        fTof.chik[i] = (fTof.tof[i] -fTof.tk[i])/fTof.errtof[i];
+        fTof.chip[i] = (fTof.tof[i] -fTof.tp[i])/fTof.errtof[i];
       }
     }
   }
