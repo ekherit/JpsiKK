@@ -771,27 +771,31 @@ StatusCode JpsiKK::execute()
     {
       SmartRefVector<RecTofTrack> tofTrkCol = (*itTrk[i])->tofTrack();
       SmartRefVector<RecTofTrack>::iterator tofTrk = tofTrkCol.begin();
-      //TofHitStatus *hitst = new TofHitStatus;
-      //std::vector<int> tofecount;
-      //int goodtofetrk=0;
-      //for(tofTrk = tofTrkCol.begin(); tofTrk!=tofTrkCol.end(); tofTrk++,goodtofetrk++)
-      //{
-      //  unsigned int st = (*tofTrk)->status();
-      //  hitst->setStatus(st);
-      //  //if(  (hitst->is_barrel()) ) continue;
-      //  //if( !(hitst->is_counter()) ) continue;
-      //  tofecount.push_back(goodtofetrk);
-      //}
-      //delete hitst;
-      fTof.tofID[i] = (*tofTrk)->tofID();
-      fTof.t0[i] = (*tofTrk)->t0();
-      fTof.tof[i] = (*tofTrk)->tof();
-      fTof.errtof[i] = (*tofTrk)->errtof();
-      fTof.chie[i] = ((*tofTrk)->tof()-(*tofTrk)->texpElectron())/(*tofTrk)->errtof();
-      fTof.chimu[i] = ((*tofTrk)->tof()-(*tofTrk)->texpMuon())/(*tofTrk)->errtof();
-      fTof.chipi[i] = ((*tofTrk)->tof()-(*tofTrk)->texpPion())/(*tofTrk)->errtof();
-      fTof.chik[i] = ((*tofTrk)->tof()-(*tofTrk)->texpKaon())/(*tofTrk)->errtof();
-      fTof.chip[i] = ((*tofTrk)->tof()-(*tofTrk)->texpProton())/(*tofTrk)->errtof();
+      TofHitStatus *hitst = new TofHitStatus;
+      std::vector<int> tofecount;
+      int goodtofetrk=0;
+      for(tofTrk = tofTrkCol.begin(); tofTrk!=tofTrkCol.end(); tofTrk++,goodtofetrk++)
+      {
+        unsigned int st = (*tofTrk)->status();
+        hitst->setStatus(st);
+        //if(  (hitst->is_barrel()) ) continue;
+        if( !(hitst->is_counter()) ) continue;
+        tofecount.push_back(goodtofetrk);
+      }
+      delete hitst;
+      if(!tofecount.empty())
+      {
+        tofTrk = tofTrkCol.begin()+tofcount[0];
+        fTof.tofID[i] = (*tofTrk)->tofID();
+        fTof.t0[i] = (*tofTrk)->t0();
+        fTof.tof[i] = (*tofTrk)->tof();
+        fTof.errtof[i] = (*tofTrk)->errtof();
+        fTof.chie[i] = ((*tofTrk)->tof()-(*tofTrk)->texpElectron())/(*tofTrk)->errtof();
+        fTof.chimu[i] = ((*tofTrk)->tof()-(*tofTrk)->texpMuon())/(*tofTrk)->errtof();
+        fTof.chipi[i] = ((*tofTrk)->tof()-(*tofTrk)->texpPion())/(*tofTrk)->errtof();
+        fTof.chik[i] = ((*tofTrk)->tof()-(*tofTrk)->texpKaon())/(*tofTrk)->errtof();
+        fTof.chip[i] = ((*tofTrk)->tof()-(*tofTrk)->texpProton())/(*tofTrk)->errtof();
+      }
     }
   }
   fEvent.npid=5;
