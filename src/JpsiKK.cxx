@@ -155,6 +155,7 @@ StatusCode JpsiKK::initialize(void)
   StatusCode status;
   status = init_tuple(this, fEvent,"FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
   status = init_tuple(this, fNeutral,"FILE1/neutral","Good neutral tracks",log);
+  status = init_tuple(this, fDedx,"FILE1/dedx","Dedx info for signal",log);
 
   return status;
 }
@@ -707,7 +708,7 @@ StatusCode JpsiKK::execute()
     //dedx information
     if((*itTrk[i])->isMdcDedxValid())
     {
-      RecMdcDedx* dedxTrk = (*itTrk)->mdcDedx();
+      RecMdcDedx* dedxTrk = (*itTrk[i])->mdcDedx();
       fDedx.chie[i] = dedxTrk->chiE();
       fDedx.chimu[i] = dedxTrk->chiMu();
       fDedx.chipi[i] = dedxTrk->chiPi();
