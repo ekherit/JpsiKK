@@ -80,6 +80,7 @@ class JpsiKK : public Algorithm
   public:
   struct RootTuple
   {
+    public:
     NTuple::Tuple * tuple; //tuple
     virtual ~RootTuple(void){};
     virtual void init(void);
