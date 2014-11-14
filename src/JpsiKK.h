@@ -83,8 +83,8 @@ class JpsiKK : public Algorithm
     public:
     NTuple::Tuple * tuple; //tuple
     virtual ~RootTuple(void){};
-    virtual void init(void);
-    virtual StatusCode init_tuple(void);
+    virtual void init(void)=0;
+    virtual StatusCode init_tuple(void)=0;
   };
 
   struct RootEvent : public RootTuple
@@ -121,7 +121,8 @@ class JpsiKK : public Algorithm
     NTuple::Array<double> x, y, z, r; //poca coordinate of track
     NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
     NTuple::Array<double> probe,probmu,probpi,probk,probp; //probability of track to be e,mu,pi,k or p
-    
+    virtual void init(void);
+    virtual StatusCode init_tuple(void);
   };
 
   struct RootDedx : public RootTuple
@@ -139,6 +140,8 @@ class JpsiKK : public Algorithm
     //NTuple::Array<double> probpi; //prob e
     //NTuple::Array<double> probk;  //prob e
     //NTuple::Array<double> probp;  //prob e
+    virtual void init(void);
+    virtual StatusCode init_tuple(void);
   };
 
   struct RootEmc : public RootTuple
@@ -148,6 +151,8 @@ class JpsiKK : public Algorithm
     NTuple::Array<double> theta;
     NTuple::Array<double> phi;
     NTuple::Array<double> time;
+    virtual void init(void);
+    virtual StatusCode init_tuple(void);
   };
 
 
