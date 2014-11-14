@@ -180,7 +180,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("M2mis", M2missing); 
   status = tuple->addItem ("npid", npid,0,5); 
   status = tuple->addIndexedItem ("M", npid, M); 
-  status = tuple->addIndexedItem ("prob", npid, M); 
+  status = tuple->addIndexedItem ("prob", npid, prob); 
 
   status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
   status = tuple->addIndexedItem ("idx",   ntrack, index);
