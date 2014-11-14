@@ -232,7 +232,7 @@ void JpsiKK::RootNeutralTrack::init(void)
 StatusCode JpsiKK::RootDedx::init_tuple(void)
 {
   StatusCode status;
-  status = tuple->addItem ("ntrack", ntrack,0,100); 
+  status = tuple->addItem ("ntrack", ntrack,0,4); 
   status = tuple->addIndexedItem ("chie",  ntrack, chie);
   status = tuple->addIndexedItem ("chimu",  ntrack, chimu);
   status = tuple->addIndexedItem ("chipi",  ntrack, chipi);
@@ -248,7 +248,7 @@ StatusCode JpsiKK::RootDedx::init_tuple(void)
   return status;
 }
 
-void JpsiKK::RootNeutralTrack::init(void)
+void JpsiKK::RootDedx::init(void)
 {
 }
 
