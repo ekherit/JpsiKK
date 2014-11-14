@@ -95,6 +95,7 @@ class JpsiKK : public Algorithm
 
     NTuple::Item<long>    npid;     //number of particle hypo 0-K,1-mu,2-e,3-pi,4-p
     NTuple::Array<double> M;     
+    NTuple::Array<double> prob;     
 
     NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
     NTuple::Array<long> index; //index of track
@@ -108,10 +109,28 @@ class JpsiKK : public Algorithm
     NTuple::Array<double> theta,phi;
     NTuple::Array<double> x, y, z, r; //poca coordinate of track
     NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
-
+    NTuple::Array<double> probe,probmu,probpi,probk,probp; //probability of track to be e,mu,pi,k or p
+    
     NTuple::Tuple * tuple; //tuple
     void init(void);
     StatusCode init_tuple(void);
+  };
+
+  struct RootDedx
+  {
+    NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
+    NTuple::Array<double> chie;  //chi e
+    NTuple::Array<double> chimu; //chi e
+    NTuple::Array<double> chipi; //chi e
+    NTuple::Array<double> chik;  //chi e
+    NTuple::Array<double> chip;  //chi e
+    NTuple::Array<double> probPH;  //хрень какая-то
+    NTuple::Array<double> normPH;
+    //NTuple::Array<double> probe;  //prob e
+    //NTuple::Array<double> probmu; //prob e
+    //NTuple::Array<double> probpi; //prob e
+    //NTuple::Array<double> probk;  //prob e
+    //NTuple::Array<double> probp;  //prob e
   };
 
   struct RootNeutralTrack
@@ -125,7 +144,10 @@ class JpsiKK : public Algorithm
     StatusCode init_tuple(void);
   };
 
+
+
   RootEvent fEvent;
+  RootDedx fDedx;
   RootNeutralTrack fNeutral;
 };
 

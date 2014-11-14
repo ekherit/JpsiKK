@@ -179,9 +179,9 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("M2mis", M2missing); 
   status = tuple->addItem ("npid", npid,0,5); 
   status = tuple->addIndexedItem ("M", npid, M); 
+  status = tuple->addIndexedItem ("prob", npid, M); 
 
   status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
-  //pions information
   status = tuple->addIndexedItem ("idx",   ntrack, index);
   status = tuple->addIndexedItem ("q",     ntrack, q);
   status = tuple->addIndexedItem ("E",     ntrack, E);
@@ -199,6 +199,13 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addIndexedItem ("vxy",   ntrack, vxy);
   status = tuple->addIndexedItem ("vz",    ntrack, vz);
   status = tuple->addIndexedItem ("vphi",  ntrack, vphi);
+
+  //particle id information
+  status = tuple->addIndexedItem ("probe",  ntrack, probe);
+  status = tuple->addIndexedItem ("probmu",  ntrack, probmu);
+  status = tuple->addIndexedItem ("probpi",  ntrack, probpi);
+  status = tuple->addIndexedItem ("probk",  ntrack, probk);
+  status = tuple->addIndexedItem ("probp",  ntrack, probp);
   return status;
 }
 
@@ -214,6 +221,29 @@ StatusCode JpsiKK::RootNeutralTrack::init_tuple(void)
   status = tuple->addIndexedItem ("E",     ntrack, E);
   status = tuple->addIndexedItem ("theta", ntrack, theta);
   status = tuple->addIndexedItem ("phi",   ntrack, phi);
+  return status;
+}
+
+void JpsiKK::RootNeutralTrack::init(void)
+{
+}
+
+StatusCode JpsiKK::RootDedx::init_tuple(void)
+{
+  StatusCode status;
+  status = tuple->addItem ("ntrack", ntrack,0,100); 
+  status = tuple->addIndexedItem ("chie",  ntrack, chie);
+  status = tuple->addIndexedItem ("chimu",  ntrack, chimu);
+  status = tuple->addIndexedItem ("chipi",  ntrack, chipi);
+  status = tuple->addIndexedItem ("chik",  ntrack, chik);
+  status = tuple->addIndexedItem ("chip",  ntrack, chip);
+  status = tuple->addIndexedItem ("probPH",  ntrack, probPH);
+  status = tuple->addIndexedItem ("normPH",  ntrack, normPH);
+  //status = tuple->addIndexedItem ("probe",  ntrack, probe);
+  //status = tuple->addIndexedItem ("probmu",  ntrack, probmu);
+  //status = tuple->addIndexedItem ("probpi",  ntrack, probpi);
+  //status = tuple->addIndexedItem ("probk",  ntrack, probk);
+  //status = tuple->addIndexedItem ("probp",  ntrack, probp);
   return status;
 }
 
@@ -616,7 +646,15 @@ StatusCode JpsiKK::execute()
   fEvent.Minv    = sqrt(get_invariant_mass2(result_pair,XMASS[channel]));
   fEvent.M2missing = get_missing_mass(pion_pair,result_pair);
 
+  ParticleID * PID = ParticleID::instance();
+  PID->init();
+  PID->setMethod(PID->methodProbability());
+  PID->setChiMinCut(4);
+  PID->usePidSys(PID->useDedx());
+  PID->identify(PID->all()); 
+
   fEvent.ntrack=4;
+  fDedx.ntrack=4;
   EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
   for(int i=0;i<4;i++)
   {
@@ -655,12 +693,58 @@ StatusCode JpsiKK::execute()
     fEvent.vxy[i] = rvxy;
     fEvent.vz[i]  = rvz; 
     fEvent.vphi[i] = rvphi; 
+
+    PID->setRecTrack(*itTrk[i]);
+    PID->calculate();
+    if(PID->IsPidInfoValid())
+    {
+      fEvent.probe[i] =  pid->probElectron();
+      fEvent.probmu[i] = pid->probMuon();
+      fEvent.probpi[i] = pid->probPion();
+      fEvent.probk[i] =  pid->probKaon();
+      fEvent.probp[i] =  pid->probProton();
+    }
+    //dedx information
+    if((*itTrk[i])->isMdcDedxValid())
+    {
+      RecMdcDedx* dedxTrk = (*itTrk)->mdcDedx();
+      fDedx.chie[i] = dedxTrk->chiE();
+      fDedx.chimu[i] = dedxTrk->chiMu();
+      fDedx.chipi[i] = dedxTrk->chiPi();
+      fDedx.chik[i] = dedxTrk->chiK();
+      fDedx.chip[i] = dedxTrk->chiP();
+      //fDedx.ghit[i] = dedxTrk->numGoodHits();
+      //fDedx.thit[i] = dedxTrk->numTotalHits();
+      fDedx.probPH[i] = dedxTrk->probPH();
+      fDedx.normPH[i] = dedxTrk->normPH();
+      //fDedx.e[i] = dedxTrk->getDedxExpect(0);
+      //fDedx.mu[i] = dedxTrk->getDedxExpect(1);
+      //fDedx.pi[i] = dedxTrk->getDedxExpect(2);
+      //fDedx.K[i] = dedxTrk->getDedxExpect(3);
+      //fDedx.p[i] = dedxTrk->getDedxExpect(4);
+      //fDedx.pid[i]=dedxTrk->particleId();
+    }
+    else
+    {
+      fDedx.chie[i] = -1000;
+      fDedx.chimu[i] = -1000;
+      fDedx.chipi[i] = -1000;
+      fDedx.chik[i] = -1000; 
+      fDedx.chip[i] = -1000; 
+      fDedx.probPH[i] = -1000;
+      fDedx.normPH[i] = -1000; 
+    }
   }
   fEvent.npid=5;
   for(int i=0;i<5;i++)
   {
     fEvent.M[i] = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
   }
+  fEvent.prob[0] =  fEvent.probk[2]*fEvent.probk[3];
+  fEvent.prob[1] =  fEvent.probmu[2]*fEvent.probmu[3];
+  fEvent.prob[2] =  fEvent.probe[2]*fEvent.probe[3];
+  fEvent.prob[3] =  fEvent.probpi[2]*fEvent.probpi[3];
+  fEvent.prob[4] =  fEvent.probp[2]*fEvent.probp[3];
 
   fNeutral.ntrack=good_neutral_tracks.size();
   int idx=0;
@@ -675,6 +759,7 @@ StatusCode JpsiKK::execute()
   }
 
   fEvent.tuple->write();
+  fDedx.tuple->write();
   fNeutral.tuple->write();
   event_write++;
   return StatusCode::SUCCESS;
