@@ -262,12 +262,17 @@ StatusCode JpsiKK::RootTof::init_tuple(void)
   status = tuple->addIndexedItem ("tof",  ntrack, tof);
   status = tuple->addIndexedItem ("errtof",  ntrack, errtof);
   status = tuple->addIndexedItem ("t0",  ntrack, t0);
-  status = tuple->addIndexedItem ("chie",  ntrack, chie);
-  status = tuple->addIndexedItem ("chimu",  ntrack, chimu);
-  status = tuple->addIndexedItem ("chipi",  ntrack, chipi);
-  status = tuple->addIndexedItem ("chik",  ntrack, chik);
-  status = tuple->addIndexedItem ("chip",  ntrack, chip);
+  //status = tuple->addIndexedItem ("chie",  ntrack, chie);
+  //status = tuple->addIndexedItem ("chimu",  ntrack, chimu);
+  //status = tuple->addIndexedItem ("chipi",  ntrack, chipi);
+  //status = tuple->addIndexedItem ("chik",  ntrack, chik);
+  //status = tuple->addIndexedItem ("chip",  ntrack, chip);
   status = tuple->addIndexedItem ("beta",  ntrack, beta);
+  status = tuple->addIndexedItem ("te",  ntrack, te);
+  status = tuple->addIndexedItem ("tmu",  ntrack, tmu);
+  status = tuple->addIndexedItem ("tpi",  ntrack, tpi);
+  status = tuple->addIndexedItem ("tk",  ntrack, tk);
+  status = tuple->addIndexedItem ("tp",  ntrack, tp);
   return status;
 }
 
@@ -790,13 +795,13 @@ StatusCode JpsiKK::execute()
         fTof.tofID[i] = (*tofTrk)->tofID();
         fTof.t0[i] = (*tofTrk)->t0();
         fTof.tof[i] = (*tofTrk)->tof();
-        fTof.beta[i] = (*tofTrk)->beta();
         fTof.errtof[i] = (*tofTrk)->errtof();
-        fTof.chie[i] = ((*tofTrk)->texpElectron());
-        fTof.chimu[i] = ((*tofTrk)->tof()-(*tofTrk)->texpMuon())/(*tofTrk)->errtof();
-        fTof.chipi[i] = ((*tofTrk)->tof()-(*tofTrk)->texpPion())/(*tofTrk)->errtof();
-        fTof.chik[i] = ((*tofTrk)->tof()-(*tofTrk)->texpKaon())/(*tofTrk)->errtof();
-        fTof.chip[i] = ((*tofTrk)->tof()-(*tofTrk)->texpProton())/(*tofTrk)->errtof();
+        fTof.beta[i] = (*tofTrk)->beta();
+        fTof.te[i] = (*tofTrk)->texpElectron();
+        fTof.tmu[i]= (*tofTrk)->texpMuon();
+        fTof.tpi[i]= (*tofTrk)->texpPion();
+        fTof.tk[i] = (*tofTrk)->texpKaon();
+        fTof.tp[i] = (*tofTrk)->texpProton();
       }
     }
   }

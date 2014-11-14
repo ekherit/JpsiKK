@@ -162,12 +162,18 @@ class JpsiKK : public Algorithm
     NTuple::Array<double> t0;
     NTuple::Array<double> tof;
     NTuple::Array<double> errtof;
+    NTuple::Array<double> beta;  
+    NTuple::Array<double> te;  //electron expected time
+    NTuple::Array<double> tmu; //muon
+    NTuple::Array<double> tpi; //pion
+    NTuple::Array<double> tk;  //kaon
+    NTuple::Array<double> tp;  //proton
+
     NTuple::Array<double> chie;  
     NTuple::Array<double> chimu; 
     NTuple::Array<double> chipi; 
     NTuple::Array<double> chik;  
     NTuple::Array<double> chip;  
-    NTuple::Array<double> beta;  
     virtual void init(void);
     virtual StatusCode init_tuple(void);
   };
