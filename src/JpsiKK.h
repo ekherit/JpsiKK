@@ -33,6 +33,14 @@ class JpsiKK : public Algorithm
   StatusCode execute();
   StatusCode finalize();  
 
+  struct RootTuple
+  {
+    NTuple::Tuple * tuple; //tuple
+    virtual ~RootTuple(void){};
+    virtual void init(void);
+    virtual StatusCode init_tuple(void);
+  };
+
 	private:
 	int MIN_CHARGED_TRACKS; //minimum good charged tracks in selection
 	int MAX_CHARGED_TRACKS; //maximum good charged tracks in selection
@@ -76,13 +84,6 @@ class JpsiKK : public Algorithm
   long int event_with_kaons;
   long int event_with_muons;
 
-  struct RootTuple
-  {
-    NTuple::Tuple * tuple; //tuple
-    virtual ~RootTuple(void){};
-    virtual void init(void);
-    virtual StatusCode init_tuple(void);
-  };
 
   struct RootEvent : public RootTuple
   {
