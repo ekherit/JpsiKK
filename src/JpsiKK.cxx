@@ -763,7 +763,7 @@ StatusCode JpsiKK::execute()
     fNeutral.E[idx]  =  emcTrk->energy();
     fNeutral.theta[idx] =  emcTrk->theta();
     fNeutral.phi[idx] =  emcTrk->phi();
-    fNeutral.time[i] = emcTrk->time();
+    fNeutral.time[idx] = emcTrk->time();
     idx++;
   }
 
