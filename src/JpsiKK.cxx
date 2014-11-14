@@ -803,11 +803,22 @@ StatusCode JpsiKK::execute()
         fTof.tk[i] = (*tofTrk)->texpKaon();
         fTof.tp[i] = (*tofTrk)->texpProton();
 
-        fTof.chie[i] = (fTof.tof[i]-fTof.te[i])/fTof.errtof[i];
-        fTof.chimu[i]= (fTof.tof[i] -fTof.tmu[i])/fTof.errtof[i];
-        fTof.chipi[i]= (fTof.tof[i] -fTof.tpi[i])/fTof.errtof[i];
-        fTof.chik[i] = (fTof.tof[i] -fTof.tk[i])/fTof.errtof[i];
-        fTof.chip[i] = (fTof.tof[i] -fTof.tp[i])/fTof.errtof[i];
+        if(fTof.errtof[i]>0)
+        {
+          fTof.chie[i] = (fTof.tof[i]-fTof.te[i])/fTof.errtof[i];
+          fTof.chimu[i]= (fTof.tof[i] -fTof.tmu[i])/fTof.errtof[i];
+          fTof.chipi[i]= (fTof.tof[i] -fTof.tpi[i])/fTof.errtof[i];
+          fTof.chik[i] = (fTof.tof[i] -fTof.tk[i])/fTof.errtof[i];
+          fTof.chip[i] = (fTof.tof[i] -fTof.tp[i])/fTof.errtof[i];
+        }
+        else
+        {
+          fTof.chie[i] =0; 
+          fTof.chimu[i]=0; 
+          fTof.chipi[i]=0; 
+          fTof.chik[i] =0; 
+          fTof.chip[i] =0; 
+        }
       }
     }
   }
