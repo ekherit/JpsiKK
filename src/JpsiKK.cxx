@@ -156,6 +156,7 @@ StatusCode JpsiKK::initialize(void)
   status = init_tuple(this, fEvent,"FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
   status = init_tuple(this, fDedx,"FILE1/dedx","Dedx info for signal",log);
   status = init_tuple(this, fEmc,"FILE1/emc","Emc info for signal",log);
+  status = init_tuple(this, fTof,"FILE1/tof","Tof info for signal",log);
   status = init_tuple(this, fNeutral,"FILE1/neutral","Good neutral tracks",log);
 
   return status;
@@ -251,6 +252,25 @@ StatusCode JpsiKK::RootDedx::init_tuple(void)
 }
 
 void JpsiKK::RootDedx::init(void)
+{
+}
+StatusCode JpsiKK::RootTof::init_tuple(void)
+{
+  StatusCode status;
+  status = tuple->addItem ("ntrack", ntrack,0,4); 
+  status = tuple->addIndexedItem ("ID",  ntrack, tofID);
+  status = tuple->addIndexedItem ("tof",  ntrack, tof);
+  status = tuple->addIndexedItem ("errtof",  ntrack, errtof);
+  status = tuple->addIndexedItem ("t0",  ntrack, t0);
+  status = tuple->addIndexedItem ("chie",  ntrack, chie);
+  status = tuple->addIndexedItem ("chimu",  ntrack, chimu);
+  status = tuple->addIndexedItem ("chipi",  ntrack, chipi);
+  status = tuple->addIndexedItem ("chik",  ntrack, chik);
+  status = tuple->addIndexedItem ("chip",  ntrack, chip);
+  return status;
+}
+
+void JpsiKK::RootTof::init(void)
 {
 }
 
@@ -659,6 +679,7 @@ StatusCode JpsiKK::execute()
   fEvent.ntrack=4;
   fDedx.ntrack=4;
   fEmc.ntrack=4;
+  fTof.ntrack=4;
   EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
   for(int i=0;i<4;i++)
   {
@@ -683,6 +704,10 @@ StatusCode JpsiKK::execute()
     else
     {
       fEvent.E[i] = 0;
+      fEmc.E[i] = 0;
+      fEmc.theta[i] = -1000;;
+      fEmc.phi[i] = -1000;
+      fEmc.time[i] = -1000;
     }
     RecMdcTrack  *mdcTrk = (*itTrk[i])->mdcTrack();
     fEvent.index[i] = itTrk[i]-evtRecTrkCol->begin(); 
@@ -742,6 +767,32 @@ StatusCode JpsiKK::execute()
       fDedx.probPH[i] = -1000;
       fDedx.normPH[i] = -1000; 
     }
+    if((*itTrk[i])->isTofTrackValid())
+    {
+      SmartRefVector<RecTofTrack> tofTrkCol = (*itTrk[i])->tofTrack();
+      SmartRefVector<RecTofTrack>::iterator tofTrk = tofTrkCol.begin();
+      //TofHitStatus *hitst = new TofHitStatus;
+      //std::vector<int> tofecount;
+      //int goodtofetrk=0;
+      //for(tofTrk = tofTrkCol.begin(); tofTrk!=tofTrkCol.end(); tofTrk++,goodtofetrk++)
+      //{
+      //  unsigned int st = (*tofTrk)->status();
+      //  hitst->setStatus(st);
+      //  //if(  (hitst->is_barrel()) ) continue;
+      //  //if( !(hitst->is_counter()) ) continue;
+      //  tofecount.push_back(goodtofetrk);
+      //}
+      //delete hitst;
+      fTof.ID[i] = (*tofTrk)->tofID();
+      fTof.t0[i] = (*tofTrk)->t0();
+      fTof.tof[i] = (*tofTrk)->tof();
+      fTof.errtof[i] = (*tofTrk)->errtof();
+      fTof.chie[i] = ((*tofTrk)->tof()-(*tofTrk)->texpElectron())/(*tofTrk)->errtof();
+      fTof.chimu[i] = ((*tofTrk)->tof()-(*tofTrk)->texpMuon())/(*tofTrk)->errtof();
+      fTof.chipi[i] = ((*tofTrk)->tof()-(*tofTrk)->texpPion())/(*tofTrk)->errtof();
+      fTof.chik[i] = ((*tofTrk)->tof()-(*tofTrk)->texpKaon())/(*tofTrk)->errtof();
+      fTof.chip[i] = ((*tofTrk)->tof()-(*tofTrk)->texpProton())/(*tofTrk)->errtof();
+    }
   }
   fEvent.npid=5;
   for(int i=0;i<5;i++)
@@ -770,6 +821,7 @@ StatusCode JpsiKK::execute()
   fEvent.tuple->write();
   fEmc.tuple->write();
   fDedx.tuple->write();
+  fTof.tuple->write();
   fNeutral.tuple->write();
   event_write++;
   return StatusCode::SUCCESS;

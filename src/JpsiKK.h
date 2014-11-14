@@ -155,12 +155,29 @@ class JpsiKK : public Algorithm
     virtual StatusCode init_tuple(void);
   };
 
+  struct RootTof : public RootTuple
+  {
+    NTuple::Item<long> ntrack;
+    NTuple::Array<double> tofID;
+    NTuple::Array<double> t0;
+    NTuple::Array<double> tof;
+    NTuple::Array<double> errtof;
+    NTuple::Array<double> chie;  
+    NTuple::Array<double> chimu; 
+    NTuple::Array<double> chipi; 
+    NTuple::Array<double> chik;  
+    NTuple::Array<double> chip;  
+    virtual void init(void);
+    virtual StatusCode init_tuple(void);
+  };
+
 
   private:
 
   RootEvent fEvent; //signal event essential information
   RootDedx  fDedx; //dedx for the event
   RootEmc   fEmc;  //emc infromation for the event
+  RootEmc   fTof;  //emc infromation for the event
   RootEmc   fNeutral; //neutral tracks
 };
 
