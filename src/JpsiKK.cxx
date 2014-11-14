@@ -417,7 +417,7 @@ StatusCode JpsiKK::execute()
     bool endcup_good_track = hit_endcup && (E > EMC_ENDCUP_MIN_ENERGY);
     if(barrel_good_track  || endcup_good_track) 
     {
-      cout << "Energy of good neutral track: " << E << endl;
+      //cout << "Energy of good neutral track: " << E << endl;
       good_neutral_tracks.push_back(itTrk);
     }
   }
@@ -434,7 +434,7 @@ StatusCode JpsiKK::execute()
   //log << MSG::ERROR << "MAX_NEUTRAL_TRACKS  = " << MAX_NEUTRAL_TRACKS << endmsg;
   //log << MSG::ERROR << "MIN_CHARGED_TRACKS  = " << MIN_CHARGED_TRACKS << endmsg;
   //log << MSG::ERROR << "MAX_CHARGED_TRACKS  = " << MAX_CHARGED_TRACKS << endmsg;
-  log << MSG::ERROR << "good charged tracks: " << good_charged_tracks.size() <<  ",  neutral tracks: " << good_neutral_tracks.size() << endmsg;
+  //log << MSG::ERROR << "good charged tracks: " << good_charged_tracks.size() <<  ",  neutral tracks: " << good_neutral_tracks.size() << endmsg;
 
   //SELECTION CODE
   if( MAX_NEUTRAL_TRACKS < good_neutral_tracks.size()) return StatusCode::SUCCESS;
