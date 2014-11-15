@@ -819,6 +819,7 @@ StatusCode JpsiKK::execute()
           fTof.chik[i] =0; 
           fTof.chip[i] =0; 
         }
+        cout << i << " " << fTof.chik[i] << " " << fTof.chimu[i] << endl;
       }
     }
   }
