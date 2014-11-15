@@ -217,7 +217,6 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
 void JpsiKK::RootEvent::init(void)
 {
   ntrack=4;
-
 }
 
 
@@ -235,13 +234,13 @@ StatusCode JpsiKK::RootEmc::init_tuple(void)
 void JpsiKK::RootEmc::init(void)
 {
   ntrack=4;
-  for(int i=0;i<ntrack;i++)
-  {
-    E[i] = 0;
-    theta[i] = -1000;;
-    phi[i] = -1000;
-    time[i] = -1000;
-  }
+  //for(int i=0;i<ntrack;i++)
+  //{
+  //  E[i] = 0;
+  //  theta[i] = -1000;;
+  //  phi[i] = -1000;
+  //  time[i] = -1000;
+  //}
 }
 
 StatusCode JpsiKK::RootDedx::init_tuple(void)
@@ -266,16 +265,16 @@ StatusCode JpsiKK::RootDedx::init_tuple(void)
 void JpsiKK::RootDedx::init(void)
 {
   ntrack=4;
-  for(int i=0;i<ntrack;i++)
-  {
-    chie[i]=-1000;
-    chimu[i]=-1000;
-    chipi[i]=-1000;
-    chik[i]=-1000;
-    chip[i]=-1000;
-    probPH[i]=0;
-    normPH[i]=0;
-  }
+  //for(int i=0;i<ntrack;i++)
+  //{
+  //  chie[i]=-1000;
+  //  chimu[i]=-1000;
+  //  chipi[i]=-1000;
+  //  chik[i]=-1000;
+  //  chip[i]=-1000;
+  //  probPH[i]=0;
+  //  normPH[i]=0;
+  //}
 }
 
 StatusCode JpsiKK::RootTof::init_tuple(void)
@@ -303,24 +302,24 @@ StatusCode JpsiKK::RootTof::init_tuple(void)
 void JpsiKK::RootTof::init(void)
 {
   ntrack=4;
-  for(int i=0;i<ntrack;i++)
-  {
-    tofID[i]=-1000;
-    t[i]=-1000;
-    dt[i]=-1000;
-    t0[i]=-1000;
-    chie[i]=-1000;
-    chimu[i]=-1000;
-    chipi[i]=-1000;
-    chik[i]=-1000;
-    chip[i]=-1000;
-    beta[i]=-1000;
-    te[i]=-1000;
-    tmu[i]=-1000;
-    tpi[i]=-1000;
-    tk[i]=-1000;
-    tp[i]=-1000;
-  }
+  //for(int i=0;i<ntrack;i++)
+  //{
+  //  tofID[i]=-1000;
+  //  t[i]=-1000;
+  //  dt[i]=-1000;
+  //  t0[i]=-1000;
+  //  chie[i]=-1000;
+  //  chimu[i]=-1000;
+  //  chipi[i]=-1000;
+  //  chik[i]=-1000;
+  //  chip[i]=-1000;
+  //  beta[i]=-1000;
+  //  te[i]=-1000;
+  //  tmu[i]=-1000;
+  //  tpi[i]=-1000;
+  //  tk[i]=-1000;
+  //  tp[i]=-1000;
+  //}
 }
 
 
