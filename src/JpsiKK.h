@@ -161,8 +161,8 @@ class JpsiKK : public Algorithm
     NTuple::Item<long> ntrack;
     NTuple::Array<double> tofID;
     NTuple::Array<double> t0;
-    NTuple::Array<double> tof;
-    NTuple::Array<double> errtof;
+    NTuple::Array<double> t; //tof time
+    NTuple::Array<double> dt; //error of tof time
     NTuple::Array<double> beta;  
     NTuple::Array<double> te;  //electron expected time
     NTuple::Array<double> tmu; //muon

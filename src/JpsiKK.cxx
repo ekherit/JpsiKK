@@ -62,19 +62,20 @@ typedef HepGeom::Point3D<double> HepPoint3D;
 #include "ParticleID/ParticleID.h"
 
 
-const double PI_MESON_MASS =0.13957018; //GeV
-const double PION_MASS =0.13957018; //GeV
-const double MUON_MASS = 0.105658389; //GeV
-const double KAON_MASS = 0.493677; //GeV
+const double PI_MESON_MASS = 0.13957018; //GeV
+const double PION_MASS     = 0.13957018; //GeV
+const double MUON_MASS     = 0.105658389; //GeV
+const double KAON_MASS     = 0.493677; //GeV
 const double ELECTRON_MASS = 0.000510999;//GeV
-const double PROTON_MASS = 0.93827231;//GeV
+const double PROTON_MASS   = 0.93827231;//GeV
 
 const double JPSI_MASS = 3.096916; //GeV
 const double PSIP_MASS = 3.686093; //GeV
 
-inline double sq(double x) { return x*x; }
-
+enum              {ID_KAON=0, ID_MUON=1, ID_ELECTRON=2, ID_PION=3, ID_PROTON=4}
 double XMASS[5] = {KAON_MASS, MUON_MASS, ELECTRON_MASS, PION_MASS, PROTON_MASS};
+
+inline double sq(double x) { return x*x; }
 
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
@@ -223,7 +224,7 @@ void JpsiKK::RootEvent::init(void)
 StatusCode JpsiKK::RootEmc::init_tuple(void)
 {
   StatusCode status;
-  status = tuple->addItem ("ntrack",       ntrack,0,MAX_NEUTRAL_TRACKS); //good nuetral track in event
+  status = tuple->addItem ("ntrack",       ntrack,0,4); //good nuetral track in event
   status = tuple->addIndexedItem ("E",     ntrack, E);
   status = tuple->addIndexedItem ("theta", ntrack, theta);
   status = tuple->addIndexedItem ("phi",   ntrack, phi);
@@ -236,10 +237,10 @@ void JpsiKK::RootEmc::init(void)
   ntrack=4;
   for(int i=0;i<ntrack;i++)
   {
-    fEmc.E[i] = 0;
-    fEmc.theta[i] = -1000;;
-    fEmc.phi[i] = -1000;
-    fEmc.time[i] = -1000;
+    E[i] = 0;
+    theta[i] = -1000;;
+    phi[i] = -1000;
+    time[i] = -1000;
   }
 }
 
@@ -304,7 +305,7 @@ void JpsiKK::RootTof::init(void)
   ntrack=4;
   for(int i=0;i<ntrack;i++)
   {
-    ID[i]=-1000;
+    tofID[i]=-1000;
     t[i]=-1000;
     dt[i]=-1000;
     t0[i]=-1000;
@@ -422,6 +423,69 @@ double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pion
   HepLorentzVector Pmis = P_psip - pionP[0] - pionP[1] - kaonP[0] - kaonP[1];
   return Pmis.m2();
 }
+
+SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk)
+{
+  SmartRefVector<RecTofTrack> tofTrkCol = (*itTrk)->tofTrack();
+  SmartRefVector<RecTofTrack>::iterator tofTrk = tofTrkCol.begin();
+  TofHitStatus *hitst = new TofHitStatus;
+  std::vector<int> tofecount;
+  int goodtofetrk=0;
+  for(tofTrk = tofTrkCol.begin(); tofTrk!=tofTrkCol.end(); tofTrk++,goodtofetrk++)
+  {
+    unsigned int st = (*tofTrk)->status();
+    hitst->setStatus(st);
+    //if(  (hitst->is_barrel()) ) continue;
+    if( !(hitst->is_counter()) ) continue;
+    tofecount.push_back(goodtofetrk);
+  }
+  delete hitst;
+  return tofTrk;
+};
+
+vector<double> get_chi2(EvtRecTrackIterator & itTrk)
+{
+  vector<double> chi2(5,0);
+  if(!(*itTrk)->isMdcTrackValid()) return chi2;
+  if(!(*itTrk)->isMdcDedxValid())  return chi2;
+  RecMdcTrack * mdcTrk  = (*itTrk)->mdcTrack();
+
+  //dedx information
+  RecMdcDedx  * dedxTrk = (*itTrk)->mdcDedx();
+  chi2[ID_KAON]     +=   sq(dedxTrk->chiK());
+  chi2[ID_MUON]     +=   sq(dedxTrk->chimu());
+  chi2[ID_ELECTRON] +=   sq(dedxTrk->chie());
+  chi2[ID_PION]     +=   sq(dedxTrk->chipi());
+  chi2[ID_PROTON]   +=   sq(dedxTrk->chip());
+
+  //tof information
+  if(!(*itTrk)->isTofTrackValid()) return chi2;
+  SmartRefVector<RecTofTrack>::iterator tofTrk = getTofTrk(mdcTrk);
+  double t = (*tofTrk)->tof();  //flight time
+  double dt = (*tofTrk)->errtof(); //error of flight time
+  chi2[ID_KAON]     +=   sq(((*tofTrk)->texpKaon()-t)/dt);
+  chi2[ID_MUON]     +=   sq(((*tofTrk)->texpMuon()-t)/dt);
+  chi2[ID_ELECTRON] +=   sq(((*tofTrk)->texpElectron()-t)/dt);
+  chi2[ID_PION]     +=   sq(((*tofTrk)->texpPion()-t)/dt);
+  chi2[ID_PROTON]   +=   sq(((*tofTrk)->texpProton()-t)/dt);
+  return chi2;
+}
+
+double get_chi2(std::pair<EvtRecTrackIterator & trk1,EvtRecTrackIterator & trk2>)
+{
+  EvtRecTrackIterator  itTrk[2] = {trk1, trk2};
+  vector<double> chi2(5,0);
+  for(int track=0;track<2;track++)
+  {
+    for(int i=0;i<5;i++)
+    {
+      chi2[i]  += get_chi2(itTrk[track]); 
+    }
+  }
+  return chi2;
+}
+
+
 
 StatusCode JpsiKK::execute()
 {
@@ -822,8 +886,8 @@ StatusCode JpsiKK::execute()
         tofTrk = tofTrkCol.begin()+tofecount[0];
         fTof.tofID[i] = (*tofTrk)->tofID();
         fTof.t0[i] = (*tofTrk)->t0();
-        fTof.tof[i] = (*tofTrk)->tof();
-        fTof.errtof[i] = (*tofTrk)->errtof();
+        fTof.t[i] = (*tofTrk)->tof();
+        fTof.dt[i] = (*tofTrk)->errtof();
         fTof.beta[i] = (*tofTrk)->beta();
         fTof.te[i] = (*tofTrk)->texpElectron();
         fTof.tmu[i]= (*tofTrk)->texpMuon();
@@ -832,20 +896,24 @@ StatusCode JpsiKK::execute()
         fTof.tp[i] = (*tofTrk)->texpProton();
         if(fTof.errtof[i]>0)
         {
-          fTof.chie[i] = (fTof.tof[i]-fTof.te[i])/fTof.errtof[i];
-          fTof.chimu[i]= (fTof.tof[i] -fTof.tmu[i])/fTof.errtof[i];
-          fTof.chipi[i]= (fTof.tof[i] -fTof.tpi[i])/fTof.errtof[i];
-          fTof.chik[i] = (fTof.tof[i] -fTof.tk[i])/fTof.errtof[i];
-          fTof.chip[i] = (fTof.tof[i] -fTof.tp[i])/fTof.errtof[i];
+          fTof.chie[i]  = (fTof.t[i] - fTof.te[i])  /  fTof.dt[i];
+          fTof.chimu[i] = (fTof.t[i] - fTof.tmu[i]) /  fTof.dt[i];
+          fTof.chipi[i] = (fTof.t[i] - fTof.tpi[i]) /  fTof.dt[i];
+          fTof.chik[i]  = (fTof.t[i] - fTof.tk[i])  /  fTof.dt[i];
+          fTof.chip[i]  = (fTof.t[i] - fTof.tp[i])  /  fTof.dt[i];
         }
       }
     }
   }
   fEvent.npid=5;
+  vector<double> chi2 = get_chi2(result_pair);
   for(int i=0;i<5;i++)
   {
-    fEvent.M[i] = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
+    fEvent.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
+    fEvent.chi2[i] = chi2[i];
   }
+
+
   fEvent.prob[0] =  fEvent.probk[2]*fEvent.probk[3];
   fEvent.prob[1] =  fEvent.probmu[2]*fEvent.probmu[3];
   fEvent.prob[2] =  fEvent.probe[2]*fEvent.probe[3];
