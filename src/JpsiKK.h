@@ -100,6 +100,8 @@ class JpsiKK : public Algorithm
     NTuple::Item<long>    nnegative_pions; //number of negative pions
     NTuple::Item<long>    npion_pairs; //total number of found pion pairs
     NTuple::Item<long>    channel;     //J/psi decay channel 0 -- K+K-, 1 -- mu+mu-
+    NTuple::Item<long>    KK;     //KK Jpsi decay event
+    NTuple::Item<long>    uu;     //MuMu event
     NTuple::Item<double>  Mrecoil;  //pion recoil mass
     NTuple::Item<double>  M2missing; //missing square invariant mass
     NTuple::Item<double>  Minv; //invariant mass two charged particles

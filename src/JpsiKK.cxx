@@ -182,6 +182,8 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("nnpions", nnegative_pions); //good negative pion track in event
   status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
   status = tuple->addItem ("channel", channel); //decay channel of the J/psi
+  status = tuple->addItem ("KK", KK); //KK decay channel of the J/psi
+  status = tuple->addItem ("uu", uu); //uu decay channel of the J/psi
   status = tuple->addItem ("Mrec", Mrecoil); 
   status = tuple->addItem ("Minv", Minv); 
   status = tuple->addItem ("M2mis", M2missing); 
@@ -763,9 +765,13 @@ StatusCode JpsiKK::execute()
     switch(channel)
     {
       case ID_KAON:
+        fEvent.KK=1;
+        fEvent.uu=0;
         event_with_kaons++;
         break;
       case ID_MUON:
+        fEvent.KK=0;
+        fEvent.uu=1;
         event_with_muons++;
         break;
     }
