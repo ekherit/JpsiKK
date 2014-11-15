@@ -519,6 +519,9 @@ StatusCode JpsiKK::execute()
   if(isprint)
   {
     std::cout << "proceed event: " << setw(15) << event_proceed;
+    std::cout << "event write: "   << setw(15) << event_write;
+    std::cout << "kaons: "   << setw(15) << event_with_kaons;
+    std::cout << "muons "   << setw(15) << event_with_muons;
     std::cout << std::endl;
   }
   event_proceed++;
