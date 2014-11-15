@@ -468,7 +468,7 @@ vector<double> get_chi2(EvtRecTrackIterator & itTrk)
 
   //tof information
   if(!(*itTrk)->isTofTrackValid()) return chi2;
-  bool isTofValid=false
+  bool isTofValid=false;
   SmartRefVector<RecTofTrack>::iterator tofTrk = getTofTrk(itTrk, isTofValid);
   if(isTofValid)
   {
