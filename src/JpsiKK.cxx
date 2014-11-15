@@ -427,7 +427,7 @@ double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pion
   return Pmis.m2();
 }
 
-SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk)
+SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk, bool & isTofValid=false)
 {
   SmartRefVector<RecTofTrack> tofTrkCol = (*itTrk)->tofTrack();
   SmartRefVector<RecTofTrack>::iterator tofTrk = tofTrkCol.begin();
@@ -443,8 +443,12 @@ SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk)
     tofecount.push_back(goodtofetrk);
   }
   delete hitst;
-  if(!tofecount.empty()) tofTrk = tofTrkCol.begin()+tofecount[0];
-  else return 0;
+  if(!tofecount.empty()) 
+  {
+    tofTrk = tofTrkCol.begin()+tofecount[0];
+    isTofValid = true;
+  }
+  return tofTrk;
 }
 
 vector<double> get_chi2(EvtRecTrackIterator & itTrk)
@@ -464,8 +468,9 @@ vector<double> get_chi2(EvtRecTrackIterator & itTrk)
 
   //tof information
   if(!(*itTrk)->isTofTrackValid()) return chi2;
-  SmartRefVector<RecTofTrack>::iterator tofTrk = getTofTrk(itTrk);
-  if(tofTrk!=0)
+  bool isTofValid=false
+  SmartRefVector<RecTofTrack>::iterator tofTrk = getTofTrk(itTrk, isTofValid);
+  if(isTofValid)
   {
     double t = (*tofTrk)->tof();  //flight time
     double dt = (*tofTrk)->errtof(); //error of flight time
