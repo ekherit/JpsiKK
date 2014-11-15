@@ -106,7 +106,7 @@ class JpsiKK : public Algorithm
 
     NTuple::Item<long>    npid;  //number of particle hypo 0-K,1-mu,2-e,3-pi,4-p
     NTuple::Array<double> M;     
-    //NTuple::Array<double> chi2;  //chi2 to be particle 
+    NTuple::Array<double> chi2;  //chi2 to be particle 
     NTuple::Array<double> prob;     
 
     NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]

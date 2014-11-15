@@ -188,7 +188,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("npid", npid,0,5); 
   status = tuple->addIndexedItem ("M", npid, M); 
   status = tuple->addIndexedItem ("prob", npid, prob); 
-  //status = tuple->addIndexedItem ("chi2", npid, chi2); 
+  status = tuple->addIndexedItem ("chi2", npid, chi2); 
 
   status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
   status = tuple->addIndexedItem ("idx",   ntrack, index);
@@ -220,7 +220,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
 
 void JpsiKK::RootEvent::init(void)
 {
-  //ntrack=4;
+  ntrack=4;
 }
 
 
@@ -238,13 +238,13 @@ StatusCode JpsiKK::RootEmc::init_tuple(void)
 void JpsiKK::RootEmc::init(void)
 {
   ntrack=4;
-  //for(int i=0;i<ntrack;i++)
-  //{
-  //  E[i] = 0;
-  //  theta[i] = -1000;;
-  //  phi[i] = -1000;
-  //  time[i] = -1000;
-  //}
+  for(int i=0;i<ntrack;i++)
+  {
+    E[i] = 0;
+    theta[i] = -1000;;
+    phi[i] = -1000;
+    time[i] = -1000;
+  }
 }
 
 StatusCode JpsiKK::RootDedx::init_tuple(void)
@@ -268,17 +268,17 @@ StatusCode JpsiKK::RootDedx::init_tuple(void)
 
 void JpsiKK::RootDedx::init(void)
 {
-  //ntrack=4;
-  //for(int i=0;i<ntrack;i++)
-  //{
-  //  chie[i]=-1000;
-  //  chimu[i]=-1000;
-  //  chipi[i]=-1000;
-  //  chik[i]=-1000;
-  //  chip[i]=-1000;
-  //  probPH[i]=0;
-  //  normPH[i]=0;
-  //}
+  ntrack=4;
+  for(int i=0;i<ntrack;i++)
+  {
+    chie[i]=-1000;
+    chimu[i]=-1000;
+    chipi[i]=-1000;
+    chik[i]=-1000;
+    chip[i]=-1000;
+    probPH[i]=0;
+    normPH[i]=0;
+  }
 }
 
 StatusCode JpsiKK::RootTof::init_tuple(void)
@@ -305,25 +305,25 @@ StatusCode JpsiKK::RootTof::init_tuple(void)
 
 void JpsiKK::RootTof::init(void)
 {
-  //ntrack=4;
-  //for(int i=0;i<ntrack;i++)
-  //{
-  //  tofID[i]=-1000;
-  //  t[i]=-1000;
-  //  dt[i]=-1000;
-  //  t0[i]=-1000;
-  //  chie[i]=-1000;
-  //  chimu[i]=-1000;
-  //  chipi[i]=-1000;
-  //  chik[i]=-1000;
-  //  chip[i]=-1000;
-  //  beta[i]=-1000;
-  //  te[i]=-1000;
-  //  tmu[i]=-1000;
-  //  tpi[i]=-1000;
-  //  tk[i]=-1000;
-  //  tp[i]=-1000;
-  //}
+  ntrack=4;
+  for(int i=0;i<ntrack;i++)
+  {
+    tofID[i]=-1000;
+    t[i]=-1000;
+    dt[i]=-1000;
+    t0[i]=-1000;
+    chie[i]=-1000;
+    chimu[i]=-1000;
+    chipi[i]=-1000;
+    chik[i]=-1000;
+    chip[i]=-1000;
+    beta[i]=-1000;
+    te[i]=-1000;
+    tmu[i]=-1000;
+    tpi[i]=-1000;
+    tk[i]=-1000;
+    tp[i]=-1000;
+  }
 }
 
 
@@ -446,7 +446,6 @@ SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk)
   return tofTrk;
 }
 
-/*
 vector<double> get_chi2(EvtRecTrackIterator & itTrk)
 {
   vector<double> chi2(5,0);
@@ -490,8 +489,6 @@ vector<double> get_chi2(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> & pa
   }
   return chi2;
 }
-*/
-
 
 
 StatusCode JpsiKK::execute()
@@ -913,11 +910,11 @@ StatusCode JpsiKK::execute()
     }
   }
   fEvent.npid=5;
-  //vector<double> chi2 = get_chi2(result_pair);
+  vector<double> chi2 = get_chi2(result_pair);
   for(int i=0;i<5;i++)
   {
     fEvent.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
-    //fEvent.chi2[i] = chi2[i];
+    fEvent.chi2[i] = chi2[i];
   }
 
 
