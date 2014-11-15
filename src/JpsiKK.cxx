@@ -216,7 +216,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
 
 void JpsiKK::RootEvent::init(void)
 {
-  ntrack=4;
+  //ntrack=4;
 }
 
 
@@ -264,7 +264,7 @@ StatusCode JpsiKK::RootDedx::init_tuple(void)
 
 void JpsiKK::RootDedx::init(void)
 {
-  ntrack=4;
+  //ntrack=4;
   //for(int i=0;i<ntrack;i++)
   //{
   //  chie[i]=-1000;
@@ -301,7 +301,7 @@ StatusCode JpsiKK::RootTof::init_tuple(void)
 
 void JpsiKK::RootTof::init(void)
 {
-  ntrack=4;
+  //ntrack=4;
   //for(int i=0;i<ntrack;i++)
   //{
   //  tofID[i]=-1000;
