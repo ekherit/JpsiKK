@@ -62,6 +62,10 @@ typedef HepGeom::Point3D<double> HepPoint3D;
 #include "ParticleID/ParticleID.h"
 
 
+#include <algorithm>
+
+JpsiKK::RootEmc::ARRAY_SIZE = 100;
+
 const double PI_MESON_MASS = 0.13957018; //GeV
 const double PION_MASS     = 0.13957018; //GeV
 const double MUON_MASS     = 0.105658389; //GeV
@@ -223,7 +227,7 @@ void JpsiKK::RootEvent::init(void)
 StatusCode JpsiKK::RootEmc::init_tuple(void)
 {
   StatusCode status;
-  status = tuple->addItem ("ntrack",       ntrack,0,MAX_NEUTRAL_TRACKS); //good nuetral track in event
+  status = tuple->addItem ("ntrack",       ntrack,0,ARRAY_SIZE); //good nuetral track in event
   status = tuple->addIndexedItem ("E",     ntrack, E);
   status = tuple->addIndexedItem ("theta", ntrack, theta);
   status = tuple->addIndexedItem ("phi",   ntrack, phi);
@@ -923,7 +927,7 @@ StatusCode JpsiKK::execute()
   fEvent.prob[3] =  fEvent.probpi[2]*fEvent.probpi[3];
   fEvent.prob[4] =  fEvent.probp[2]*fEvent.probp[3];
 
-  fNeutral.ntrack=std::min(good_neutral_tracks.size(), MAX_NEUTRAL_TRACKS);
+  fNeutral.ntrack=std::min(good_neutral_tracks.size(), RootEmc::ARRAY_SIZE);
   int idx=0;
   for(list<EvtRecTrackIterator>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
   {
