@@ -183,6 +183,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("npid", npid,0,5); 
   status = tuple->addIndexedItem ("M", npid, M); 
   status = tuple->addIndexedItem ("prob", npid, prob); 
+  status = tuple->addIndexedItem ("chi2", npid, chi2); 
 
   status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
   status = tuple->addIndexedItem ("idx",   ntrack, index);
@@ -214,22 +215,32 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
 
 void JpsiKK::RootEvent::init(void)
 {
+  ntrack=4;
+
 }
 
 
 StatusCode JpsiKK::RootEmc::init_tuple(void)
 {
   StatusCode status;
-  status = tuple->addItem ("ntrack", ntrack,0,100); //good nuetral track in event
+  status = tuple->addItem ("ntrack",       ntrack,0,MAX_NEUTRAL_TRACKS); //good nuetral track in event
   status = tuple->addIndexedItem ("E",     ntrack, E);
   status = tuple->addIndexedItem ("theta", ntrack, theta);
   status = tuple->addIndexedItem ("phi",   ntrack, phi);
-  status = tuple->addIndexedItem ("time",     ntrack, time);
+  status = tuple->addIndexedItem ("time",  ntrack, time);
   return status;
 }
 
 void JpsiKK::RootEmc::init(void)
 {
+  ntrack=4;
+  for(int i=0;i<ntrack;i++)
+  {
+    fEmc.E[i] = 0;
+    fEmc.theta[i] = -1000;;
+    fEmc.phi[i] = -1000;
+    fEmc.time[i] = -1000;
+  }
 }
 
 StatusCode JpsiKK::RootDedx::init_tuple(void)
@@ -253,7 +264,19 @@ StatusCode JpsiKK::RootDedx::init_tuple(void)
 
 void JpsiKK::RootDedx::init(void)
 {
+  ntrack=4;
+  for(int i=0;i<ntrack;i++)
+  {
+    chie[i]=-1000;
+    chimu[i]=-1000;
+    chipi[i]=-1000;
+    chik[i]=-1000;
+    chip[i]=-1000;
+    probPH[i]=0;
+    normPH[i]=0;
+  }
 }
+
 StatusCode JpsiKK::RootTof::init_tuple(void)
 {
   StatusCode status;
@@ -278,6 +301,25 @@ StatusCode JpsiKK::RootTof::init_tuple(void)
 
 void JpsiKK::RootTof::init(void)
 {
+  ntrack=4;
+  for(int i=0;i<ntrack;i++)
+  {
+    ID[i]=-1000;
+    t[i]=-1000;
+    dt[i]=-1000;
+    t0[i]=-1000;
+    chie[i]=-1000;
+    chimu[i]=-1000;
+    chipi[i]=-1000;
+    chik[i]=-1000;
+    chip[i]=-1000;
+    beta[i]=-1000;
+    te[i]=-1000;
+    tmu[i]=-1000;
+    tpi[i]=-1000;
+    tk[i]=-1000;
+    tp[i]=-1000;
+  }
 }
 
 
@@ -707,13 +749,9 @@ StatusCode JpsiKK::execute()
       fEmc.phi[i] = emcTrk->phi();
       fEmc.time[i] = emcTrk->time();
     }
-    else
+    else 
     {
-      fEvent.E[i] = 0;
-      fEmc.E[i] = 0;
-      fEmc.theta[i] = -1000;;
-      fEmc.phi[i] = -1000;
-      fEmc.time[i] = -1000;
+      fEvent.E[i]=0;
     }
     RecMdcTrack  *mdcTrk = (*itTrk[i])->mdcTrack();
     fEvent.index[i] = itTrk[i]-evtRecTrkCol->begin(); 
@@ -763,16 +801,6 @@ StatusCode JpsiKK::execute()
       //fDedx.p[i] = dedxTrk->getDedxExpect(4);
       //fDedx.pid[i]=dedxTrk->particleId();
     }
-    else
-    {
-      fDedx.chie[i] = -1000;
-      fDedx.chimu[i] = -1000;
-      fDedx.chipi[i] = -1000;
-      fDedx.chik[i] = -1000; 
-      fDedx.chip[i] = -1000; 
-      fDedx.probPH[i] = -1000;
-      fDedx.normPH[i] = -1000; 
-    }
     if((*itTrk[i])->isTofTrackValid())
     {
       SmartRefVector<RecTofTrack> tofTrkCol = (*itTrk[i])->tofTrack();
@@ -802,7 +830,6 @@ StatusCode JpsiKK::execute()
         fTof.tpi[i]= (*tofTrk)->texpPion();
         fTof.tk[i] = (*tofTrk)->texpKaon();
         fTof.tp[i] = (*tofTrk)->texpProton();
-
         if(fTof.errtof[i]>0)
         {
           fTof.chie[i] = (fTof.tof[i]-fTof.te[i])/fTof.errtof[i];
@@ -811,15 +838,6 @@ StatusCode JpsiKK::execute()
           fTof.chik[i] = (fTof.tof[i] -fTof.tk[i])/fTof.errtof[i];
           fTof.chip[i] = (fTof.tof[i] -fTof.tp[i])/fTof.errtof[i];
         }
-        else
-        {
-          fTof.chie[i] =0; 
-          fTof.chimu[i]=0; 
-          fTof.chipi[i]=0; 
-          fTof.chik[i] =0; 
-          fTof.chip[i] =0; 
-        }
-        cout << i << " " << fTof.chik[i] << " " << fTof.chimu[i] << endl;
       }
     }
   }
