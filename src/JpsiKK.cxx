@@ -912,7 +912,7 @@ StatusCode JpsiKK::execute()
   for(int i=0;i<5;i++)
   {
     fEvent.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
-    fEvent.chi2[i] = chi2[i];
+    //fEvent.chi2[i] = chi2[i];
   }
 
 
