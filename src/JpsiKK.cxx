@@ -687,7 +687,9 @@ StatusCode JpsiKK::execute()
     {
       std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
       EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
-      double Ep[2];
+      double Ep[2]; // E/p ratio
+      double E[2];
+      double p[2];
       for(int k=0;k<2;k++)
       {
         if(!(*itTrk[k])->isMdcTrackValid() || ! (*itTrk[k])->isEmcShowerValid()) 
@@ -695,12 +697,11 @@ StatusCode JpsiKK::execute()
           log << MSG::ERROR << "Invalid mdc info for track.Exiting" << endmsg;
           return StatusCode::FAILURE;
         }
-        //SELECTION CODE: no EMC information
-        //if(! (*itTrk[k])->isEmcShowerValid()) goto SKIP_THIS_PAIR;
+        //SELECTION CODE:
         RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
         RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
-        double E = emcTrk->energy();
-        double p = mdcTrk->p();
+        E[k] = emcTrk->energy();
+        p[k] = mdcTrk->p();
         Ep[k] = E/p;
       }
       double M[5]={0,0,0,0,0};
@@ -713,19 +714,29 @@ StatusCode JpsiKK::execute()
       //SELECTION CODE KAON CASE
       if(MIN_INVARIANT_MASS <  M[0]   && M[0]  < MAX_INVARIANT_MASS)
       {
-        //SELECTION CODE
         if(Ep[0] < MAX_KAON_EP_RATIO && Ep[1] < MAX_KAON_EP_RATIO)
         {
-          kaon_pairs.push_back(pair);
+          if(MIN_KAON_MOMENTUM < p[0] && p[0] < MAX_KAON_MOMENTUM)
+          {
+            if(MIN_KAON_MOMENTUM < p[1] && p[1] < MAX_KAON_MOMENTUM)
+            {
+              kaon_pairs.push_back(pair);
+            }
+          }
         }
       }
       //SELECTION CODE
       if(MIN_INVARIANT_MASS <  M[1]   && M[1]  < MAX_INVARIANT_MASS)
       {
-        //SELECTION CODE
         if(Ep[0] < MAX_MUON_EP_RATIO && Ep[1] < MAX_MUON_EP_RATIO)
         {
-          muon_pairs.push_back(pair);
+          if(MIN_MUON_MOMENTUM < p[0] && p[0] < MAX_MUON_MOMENTUM)
+          {
+            if(MIN_MUON_MOMENTUM < p[1] && p[1] < MAX_MUON_MOMENTUM)
+            {
+              muon_pairs.push_back(pair);
+            }
+          }
         }
       }
     }
