@@ -72,7 +72,7 @@ const double PROTON_MASS   = 0.93827231;//GeV
 const double JPSI_MASS = 3.096916; //GeV
 const double PSIP_MASS = 3.686093; //GeV
 
-enum              {ID_KAON=0, ID_MUON=1, ID_ELECTRON=2, ID_PION=3, ID_PROTON=4}
+enum              {ID_KAON=0, ID_MUON=1, ID_ELECTRON=2, ID_PION=3, ID_PROTON=4};
 double XMASS[5] = {KAON_MASS, MUON_MASS, ELECTRON_MASS, PION_MASS, PROTON_MASS};
 
 inline double sq(double x) { return x*x; }
@@ -283,8 +283,8 @@ StatusCode JpsiKK::RootTof::init_tuple(void)
   StatusCode status;
   status = tuple->addItem ("ntrack", ntrack,0,4); 
   status = tuple->addIndexedItem ("ID",  ntrack, tofID);
-  status = tuple->addIndexedItem ("t",  ntrack, tof);
-  status = tuple->addIndexedItem ("dt",  ntrack, errtof);
+  status = tuple->addIndexedItem ("t",  ntrack, t);
+  status = tuple->addIndexedItem ("dt",  ntrack, dt);
   status = tuple->addIndexedItem ("t0",  ntrack, t0);
   status = tuple->addIndexedItem ("chie",  ntrack, chie);
   status = tuple->addIndexedItem ("chimu",  ntrack, chimu);
@@ -441,7 +441,7 @@ SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk)
   }
   delete hitst;
   return tofTrk;
-};
+}
 
 vector<double> get_chi2(EvtRecTrackIterator & itTrk)
 {
@@ -453,14 +453,14 @@ vector<double> get_chi2(EvtRecTrackIterator & itTrk)
   //dedx information
   RecMdcDedx  * dedxTrk = (*itTrk)->mdcDedx();
   chi2[ID_KAON]     +=   sq(dedxTrk->chiK());
-  chi2[ID_MUON]     +=   sq(dedxTrk->chimu());
-  chi2[ID_ELECTRON] +=   sq(dedxTrk->chie());
-  chi2[ID_PION]     +=   sq(dedxTrk->chipi());
-  chi2[ID_PROTON]   +=   sq(dedxTrk->chip());
+  chi2[ID_MUON]     +=   sq(dedxTrk->chiMU());
+  chi2[ID_ELECTRON] +=   sq(dedxTrk->chiE());
+  chi2[ID_PION]     +=   sq(dedxTrk->chiPI());
+  chi2[ID_PROTON]   +=   sq(dedxTrk->chiP());
 
   //tof information
   if(!(*itTrk)->isTofTrackValid()) return chi2;
-  SmartRefVector<RecTofTrack>::iterator tofTrk = getTofTrk(mdcTrk);
+  SmartRefVector<RecTofTrack>::iterator tofTrk = getTofTrk(itTrk);
   double t = (*tofTrk)->tof();  //flight time
   double dt = (*tofTrk)->errtof(); //error of flight time
   chi2[ID_KAON]     +=   sq(((*tofTrk)->texpKaon()-t)/dt);
@@ -471,9 +471,9 @@ vector<double> get_chi2(EvtRecTrackIterator & itTrk)
   return chi2;
 }
 
-double get_chi2(std::pair<EvtRecTrackIterator & trk1,EvtRecTrackIterator & trk2>)
+double get_chi2(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> & pair)
 {
-  EvtRecTrackIterator  itTrk[2] = {trk1, trk2};
+  EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
   vector<double> chi2(5,0);
   for(int track=0;track<2;track++)
   {
@@ -894,7 +894,7 @@ StatusCode JpsiKK::execute()
         fTof.tpi[i]= (*tofTrk)->texpPion();
         fTof.tk[i] = (*tofTrk)->texpKaon();
         fTof.tp[i] = (*tofTrk)->texpProton();
-        if(fTof.errtof[i]>0)
+        if(fTof.dt[i]>0)
         {
           fTof.chie[i]  = (fTof.t[i] - fTof.te[i])  /  fTof.dt[i];
           fTof.chimu[i] = (fTof.t[i] - fTof.tmu[i]) /  fTof.dt[i];
