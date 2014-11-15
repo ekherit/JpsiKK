@@ -702,7 +702,8 @@ StatusCode JpsiKK::execute()
         RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
         E[k] = emcTrk->energy();
         p[k] = mdcTrk->p();
-        Ep[k] = E/p;
+        if(p[k]!=0) Ep[k] = E[k]/p[k];
+        else Ep[k]=999999;
       }
       double M[5]={0,0,0,0,0};
       for(int pid=0;pid<5;pid++)
