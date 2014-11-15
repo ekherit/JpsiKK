@@ -443,7 +443,8 @@ SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk)
     tofecount.push_back(goodtofetrk);
   }
   delete hitst;
-  return tofTrk;
+  if(!tofecount.empty()) tofTrk = tofTrkCol.begin()+tofecount[0];
+  else return 0;
 }
 
 vector<double> get_chi2(EvtRecTrackIterator & itTrk)
@@ -461,17 +462,19 @@ vector<double> get_chi2(EvtRecTrackIterator & itTrk)
   chi2[ID_PION]     +=   sq(dedxTrk->chiPi());
   chi2[ID_PROTON]   +=   sq(dedxTrk->chiP());
 
-  //return chi2;
   //tof information
   if(!(*itTrk)->isTofTrackValid()) return chi2;
   SmartRefVector<RecTofTrack>::iterator tofTrk = getTofTrk(itTrk);
-  double t = (*tofTrk)->tof();  //flight time
-  double dt = (*tofTrk)->errtof(); //error of flight time
-  chi2[ID_KAON]     +=   sq(((*tofTrk)->texpKaon()-t)/dt);
-  chi2[ID_MUON]     +=   sq(((*tofTrk)->texpMuon()-t)/dt);
-  chi2[ID_ELECTRON] +=   sq(((*tofTrk)->texpElectron()-t)/dt);
-  chi2[ID_PION]     +=   sq(((*tofTrk)->texpPion()-t)/dt);
-  chi2[ID_PROTON]   +=   sq(((*tofTrk)->texpProton()-t)/dt);
+  if(tofTrk)
+  {
+    double t = (*tofTrk)->tof();  //flight time
+    double dt = (*tofTrk)->errtof(); //error of flight time
+    chi2[ID_KAON]     +=   sq(((*tofTrk)->texpKaon()-t)/dt);
+    chi2[ID_MUON]     +=   sq(((*tofTrk)->texpMuon()-t)/dt);
+    chi2[ID_ELECTRON] +=   sq(((*tofTrk)->texpElectron()-t)/dt);
+    chi2[ID_PION]     +=   sq(((*tofTrk)->texpPion()-t)/dt);
+    chi2[ID_PROTON]   +=   sq(((*tofTrk)->texpProton()-t)/dt);
+  }
   return chi2;
 }
 
