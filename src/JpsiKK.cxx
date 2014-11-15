@@ -427,7 +427,7 @@ double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pion
   return Pmis.m2();
 }
 
-SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk, bool & isTofValid=false)
+SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk, bool & isTofValid)
 {
   SmartRefVector<RecTofTrack> tofTrkCol = (*itTrk)->tofTrack();
   SmartRefVector<RecTofTrack>::iterator tofTrk = tofTrkCol.begin();
