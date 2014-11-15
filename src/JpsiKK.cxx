@@ -743,7 +743,7 @@ StatusCode JpsiKK::execute()
           <=  fabs(sqrt(get_invariant_mass2(result_pair,KAON_MASS)) - JPSI_MASS)) 
       {
         result_pair = *p;
-        channel=0; //setup kaon channel
+        channel=ID_KAON; //setup kaon channel
       }
     }
     for(PairList_t::iterator p=muon_pairs.begin();p!=muon_pairs.end();p++)
@@ -752,7 +752,7 @@ StatusCode JpsiKK::execute()
           <=  fabs(sqrt(get_invariant_mass2(result_pair,MUON_MASS)) - JPSI_MASS)) 
       {
         result_pair = *p;
-        channel=1; //setup muon channel
+        channel=ID_MUON; //setup muon channel
       }
     }
     if(channel<0) 
@@ -762,10 +762,10 @@ StatusCode JpsiKK::execute()
     }
     switch(channel)
     {
-      case 0:
+      case ID_KAON:
         event_with_kaons++;
         break;
-      case 1:
+      case ID_MUON:
         event_with_muons++;
         break;
     }
