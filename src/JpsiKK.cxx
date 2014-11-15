@@ -477,9 +477,10 @@ double get_chi2(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> & pair)
   vector<double> chi2(5,0);
   for(int track=0;track<2;track++)
   {
+    vector<double> tmp_chi2=get_chi2(itTrk[track]);
     for(int i=0;i<5;i++)
     {
-      chi2[i]  += get_chi2(itTrk[track]); 
+      chi2[i]  += tmp_chi2[i]; 
     }
   }
   return chi2;
