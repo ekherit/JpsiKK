@@ -465,7 +465,7 @@ vector<double> get_chi2(EvtRecTrackIterator & itTrk)
   //tof information
   if(!(*itTrk)->isTofTrackValid()) return chi2;
   SmartRefVector<RecTofTrack>::iterator tofTrk = getTofTrk(itTrk);
-  if(tofTrk)
+  if(tofTrk!=0)
   {
     double t = (*tofTrk)->tof();  //flight time
     double dt = (*tofTrk)->errtof(); //error of flight time
