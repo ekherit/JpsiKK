@@ -908,7 +908,7 @@ StatusCode JpsiKK::execute()
     }
   }
   fEvent.npid=5;
-  vector<double> chi2 = get_chi2(result_pair);
+  //vector<double> chi2 = get_chi2(result_pair);
   for(int i=0;i<5;i++)
   {
     fEvent.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
