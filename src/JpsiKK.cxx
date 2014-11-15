@@ -64,7 +64,7 @@ typedef HepGeom::Point3D<double> HepPoint3D;
 
 #include <algorithm>
 
-unsigned int JpsiKK::RootEmc::ARRAY_SIZE = 100;
+int JpsiKK::RootEmc::ARRAY_SIZE = 100;
 
 const double PI_MESON_MASS = 0.13957018; //GeV
 const double PION_MASS     = 0.13957018; //GeV

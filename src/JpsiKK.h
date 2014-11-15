@@ -147,7 +147,7 @@ class JpsiKK : public Algorithm
 
   struct RootEmc : public RootTuple
   {
-    static unsigned int ARRAY_SIZE; 
+    static int ARRAY_SIZE; 
     NTuple::Item<long> ntrack;
     NTuple::Array<double> E;
     NTuple::Array<double> theta;
