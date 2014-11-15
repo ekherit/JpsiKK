@@ -927,7 +927,7 @@ StatusCode JpsiKK::execute()
   fEvent.prob[3] =  fEvent.probpi[2]*fEvent.probpi[3];
   fEvent.prob[4] =  fEvent.probp[2]*fEvent.probp[3];
 
-  fNeutral.ntrack=std::min(good_neutral_tracks.size(), RootEmc::ARRAY_SIZE);
+  fNeutral.ntrack=std::min(good_neutral_tracks.size(), size_t(RootEmc::ARRAY_SIZE));
   int idx=0;
   for(list<EvtRecTrackIterator>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
   {
