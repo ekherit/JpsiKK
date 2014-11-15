@@ -259,8 +259,8 @@ StatusCode JpsiKK::RootTof::init_tuple(void)
   StatusCode status;
   status = tuple->addItem ("ntrack", ntrack,0,4); 
   status = tuple->addIndexedItem ("ID",  ntrack, tofID);
-  status = tuple->addIndexedItem ("tof",  ntrack, tof);
-  status = tuple->addIndexedItem ("errtof",  ntrack, errtof);
+  status = tuple->addIndexedItem ("t",  ntrack, tof);
+  status = tuple->addIndexedItem ("dt",  ntrack, errtof);
   status = tuple->addIndexedItem ("t0",  ntrack, t0);
   status = tuple->addIndexedItem ("chie",  ntrack, chie);
   status = tuple->addIndexedItem ("chimu",  ntrack, chimu);
