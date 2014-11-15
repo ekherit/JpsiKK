@@ -223,7 +223,7 @@ void JpsiKK::RootEvent::init(void)
 StatusCode JpsiKK::RootEmc::init_tuple(void)
 {
   StatusCode status;
-  status = tuple->addItem ("ntrack",       ntrack,0,4); //good nuetral track in event
+  status = tuple->addItem ("ntrack",       ntrack,0,MAX_NEUTRAL_TRACKS); //good nuetral track in event
   status = tuple->addIndexedItem ("E",     ntrack, E);
   status = tuple->addIndexedItem ("theta", ntrack, theta);
   status = tuple->addIndexedItem ("phi",   ntrack, phi);
@@ -923,7 +923,7 @@ StatusCode JpsiKK::execute()
   fEvent.prob[3] =  fEvent.probpi[2]*fEvent.probpi[3];
   fEvent.prob[4] =  fEvent.probp[2]*fEvent.probp[3];
 
-  fNeutral.ntrack=good_neutral_tracks.size();
+  fNeutral.ntrack=std::min(good_neutral_tracks.size(), MAX_NEUTRAL_TRACKS);
   int idx=0;
   for(list<EvtRecTrackIterator>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
   {
