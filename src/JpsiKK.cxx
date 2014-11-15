@@ -453,9 +453,9 @@ vector<double> get_chi2(EvtRecTrackIterator & itTrk)
   //dedx information
   RecMdcDedx  * dedxTrk = (*itTrk)->mdcDedx();
   chi2[ID_KAON]     +=   sq(dedxTrk->chiK());
-  chi2[ID_MUON]     +=   sq(dedxTrk->chiMU());
+  chi2[ID_MUON]     +=   sq(dedxTrk->chiMu());
   chi2[ID_ELECTRON] +=   sq(dedxTrk->chiE());
-  chi2[ID_PION]     +=   sq(dedxTrk->chiPI());
+  chi2[ID_PION]     +=   sq(dedxTrk->chiPi());
   chi2[ID_PROTON]   +=   sq(dedxTrk->chiP());
 
   //tof information
