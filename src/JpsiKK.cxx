@@ -471,7 +471,7 @@ vector<double> get_chi2(EvtRecTrackIterator & itTrk)
   return chi2;
 }
 
-double get_chi2(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> & pair)
+vector<double> get_chi2(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> & pair)
 {
   EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
   vector<double> chi2(5,0);
