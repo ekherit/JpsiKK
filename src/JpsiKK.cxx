@@ -184,7 +184,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("npid", npid,0,5); 
   status = tuple->addIndexedItem ("M", npid, M); 
   status = tuple->addIndexedItem ("prob", npid, prob); 
-  status = tuple->addIndexedItem ("chi2", npid, chi2); 
+  //status = tuple->addIndexedItem ("chi2", npid, chi2); 
 
   status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
   status = tuple->addIndexedItem ("idx",   ntrack, index);
@@ -442,6 +442,7 @@ SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk)
   return tofTrk;
 }
 
+/*
 vector<double> get_chi2(EvtRecTrackIterator & itTrk)
 {
   vector<double> chi2(5,0);
@@ -485,6 +486,7 @@ vector<double> get_chi2(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> & pa
   }
   return chi2;
 }
+*/
 
 
 
@@ -936,7 +938,7 @@ StatusCode JpsiKK::execute()
 
   fEvent.tuple->write();
   fEmc.tuple->write();
-  //fDedx.tuple->write();
+  fDedx.tuple->write();
   fTof.tuple->write();
   fNeutral.tuple->write();
   event_write++;
