@@ -461,7 +461,7 @@ vector<double> get_chi2(EvtRecTrackIterator & itTrk)
   chi2[ID_PION]     +=   sq(dedxTrk->chiPi());
   chi2[ID_PROTON]   +=   sq(dedxTrk->chiP());
 
-  return chi2;
+  //return chi2;
   //tof information
   if(!(*itTrk)->isTofTrackValid()) return chi2;
   SmartRefVector<RecTofTrack>::iterator tofTrk = getTofTrk(itTrk);
