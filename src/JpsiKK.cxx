@@ -884,7 +884,7 @@ StatusCode JpsiKK::execute()
     fEvent.vphi[i] = rvphi; 
 
 
-    McParticleVector particles = navigator->getMcParticles((*itTrk[k])->mdcKalTrack());
+    McParticleVector particles = navigator->getMcParticles((*itTrk[i])->mdcKalTrack());
     if(!particles.empty())
     {
       cout <<"REC: " << fEvent.channel << " MC: ";
