@@ -36,7 +36,7 @@
 #include "EventModel/EventHeader.h"
 
 #include "McTruth/McParticle.h"
-#include "EventNavigator/EventNavigator.h"
+//#include "EventNavigator/EventNavigator.h"
 
 
 #include "TMath.h"
@@ -534,13 +534,13 @@ StatusCode JpsiKK::execute()
   SmartDataPtr<EvtRecTrackCol> evtRecTrkCol(eventSvc(),  EventModel::EvtRec::EvtRecTrackCol);
   SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
 
-  SmartDataPtr<EventNavigator> navigator (eventSvc(),"/Event/Navigator");
-  if( ! navigator )
-    {
-      log << MSG::ERROR << " Unable to retrieve EventNavigator" << endreq;
-      return StatusCode::FAILURE;
-    }
-
+//  SmartDataPtr<EventNavigator> navigator (eventSvc(),"/Event/Navigator");
+//  if( ! navigator )
+//    {
+//      log << MSG::ERROR << " Unable to retrieve EventNavigator" << endreq;
+//      return StatusCode::FAILURE;
+//    }
+//
   //log << MSG::INFO << "EventNavigator object" << endreq;
   //navigator->Print();
   
@@ -884,20 +884,20 @@ StatusCode JpsiKK::execute()
     fEvent.vphi[i] = rvphi; 
 
 
-    McParticleVector particles = navigator->getMcParticles((*itTrk[i])->mdcKalTrack());
-    if(!particles.empty())
-    {
-      cout <<"REC: " << fEvent.channel << " MC: ";
-      for(int k = 0;k<particles.size();k++)
-      {
-         cout << particles[k]->particleProperty() << " "; 
-      }
-      cout << endl;
-      //cout << "Retrieved " << particles.size() << " McParticles for for MdcKalTrack # " 
-      //  << mdcTrk->trackId() << " of reconstructed momentum " << mdcTrk->p() << " GeV/c (PID=" 
-      //  << endl;
-    }
-      //<< particles.front()->particleProperty() << endl;
+    //McParticleVector particles = navigator->getMcParticles((*itTrk[i])->mdcKalTrack());
+    //if(!particles.empty())
+    //{
+    //  cout <<"REC: " << fEvent.channel << " MC: ";
+    //  for(int k = 0;k<particles.size();k++)
+    //  {
+    //     cout << particles[k]->particleProperty() << " "; 
+    //  }
+    //  cout << endl;
+    //  //cout << "Retrieved " << particles.size() << " McParticles for for MdcKalTrack # " 
+    //  //  << mdcTrk->trackId() << " of reconstructed momentum " << mdcTrk->p() << " GeV/c (PID=" 
+    //  //  << endl;
+    //}
+    //  //<< particles.front()->particleProperty() << endl;
     
 
     
@@ -971,8 +971,6 @@ StatusCode JpsiKK::execute()
         }
       }
     }
-    /*
-    SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(), "/Event/MC/McParticleCol");
     if(fEvent.run<0)
     {
       int m_numParticle(0), m_true_pid(0);
@@ -999,18 +997,19 @@ StatusCode JpsiKK::execute()
           if (!psipDecay) continue;
           int mcidx = ((*iter_mc)->mother()).trackIndex() - rootIndex;
           int pdgid = (*iter_mc)->particleProperty();
-          m_pdgid[m_numParticle] = pdgid;
-          m_motheridx[m_numParticle] = mcidx;
-          m_numParticle ++;    
+          cout << pdgid << " ";
+          //m_pdgid[m_numParticle] = pdgid;
+          //m_motheridx[m_numParticle] = mcidx;
+          //m_numParticle ++;    
 
           //if(!(*iter_mc)->leafParticle()) continue;
-          if((*iter_mc)->particleProperty() == 211) m_true_pionp = (*iter_mc)->initialFourMomentum().vect().mag();
-          if((*iter_mc)->particleProperty() == -211) m_true_pionm = (*iter_mc)->initialFourMomentum().vect().mag();
+          //if((*iter_mc)->particleProperty() == 211) m_true_pionp = (*iter_mc)->initialFourMomentum().vect().mag();
+          //if((*iter_mc)->particleProperty() == -211) m_true_pionm = (*iter_mc)->initialFourMomentum().vect().mag();
         }
-        m_idxmc = m_numParticle;
+        //m_idxmc = m_numParticle;
       }
     }
-    */
+    cout << endl;
     
 
 
