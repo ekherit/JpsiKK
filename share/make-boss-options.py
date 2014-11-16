@@ -23,18 +23,18 @@ def configure_pbs_jobs(run):
   filename = str(run)+".sh"
   f = open(filename, 'w')
   rundir=os.path.abspath(os.curdir)
-  sharedir=os.path.abspath(os.curdir+"/../share/")
   f.write("#!/bin/tcsh\n")
   f.write("cd "+rundir+"\n")
-  f.write("source "+sharedir+"/setup.csh\n")
-  f.write("boss.exe "+str(run)+".cfg\n")
+  f.write("source /ihepbatch/bes/nikolaev/bin/boss664\n")
+  RunBoss = "boss.exe JpsiKK-%07d.cfg" % run
+  f.write(RunBoss)
 
 
 
 def proceed(run, directory, files):
-    TEMPLATE_RUN_NUMBER=str(run)
-    TARGET_FILE = TEMPLATE_RUN_NUMBER+".cfg"
-    r = "run_0+"+str(run)+"_.+\.dst"
+    TEMPLATE_RUN_NUMBER = "JpsiKK-%07d" % run
+    TARGET_FILE = TEMPLATE_RUN_NUMBER+".cfg" 
+    r = "run_%07d_.+\.dst" %run
     flist = []
     TEMPLATE_DST_FILES=''
     for f in files:
@@ -46,14 +46,12 @@ def proceed(run, directory, files):
         TEMPLATE_DST_FILES=TEMPLATE_DST_FILES+comma+'"'+name+'"'
     if TEMPLATE_DST_FILES=='': return
     print TEMPLATE_DST_FILES
-    configure('../share/template.cfg',TARGET_FILE,TEMPLATE_RUN_NUMBER, TEMPLATE_DST_FILES)
+    configure('/afs/ihep.ac.cn/users/n/nikolaev/batch/6.6.4.p03/JpsiKK/JpsiKK-00-00-01/share/template.cfg',TARGET_FILE,TEMPLATE_RUN_NUMBER, TEMPLATE_DST_FILES)
 #create qsub files
     configure_pbs_jobs(run)
 
-psi2s2011 = range(25244,25338);
-jpsi2011 = range(24937,24979);
-tau2011 = range(24984,25244)
+psip2009 = range(0,9999999);
 
-for run in tau2011:
+for run in psip2009 :
   print "Proceeding run ", run
   os.path.walk("data", proceed, run)
