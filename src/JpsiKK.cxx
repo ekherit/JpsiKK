@@ -36,6 +36,8 @@
 #include "EventModel/EventHeader.h"
 
 #include "McTruth/McParticle.h"
+#include "EventNavigator/EventNavigator.h"
+
 
 #include "TMath.h"
 #include "GaudiKernel/INTupleSvc.h"
@@ -531,6 +533,17 @@ StatusCode JpsiKK::execute()
   SmartDataPtr<EvtRecTrackCol> evtRecTrkCol(eventSvc(),  EventModel::EvtRec::EvtRecTrackCol);
   SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
 
+  SmartDataPtr<EventNavigator> navigator (eventSvc(),"/Event/Navigator");
+  if( ! navigator )
+    {
+      log << MSG::ERROR << " Unable to retrieve EventNavigator" << endreq;
+      return StatusCode::FAILURE;
+    }
+
+  log << MSG::INFO << "EventNavigator object" << endreq;
+  navigator->Print();
+  
+
   //fill initial value of the selected event
   fEvent.init();
 
@@ -937,6 +950,49 @@ StatusCode JpsiKK::execute()
         }
       }
     }
+    /*
+    SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(), "/Event/MC/McParticleCol");
+    if(fEvent.run<0)
+    {
+      int m_numParticle(0), m_true_pid(0);
+      if(!mcParticleCol)
+      {
+        log << MSG::ERROR << "Could not retrieve McParticelCol" << endreq;
+        return StatusCode::FAILURE;
+      }
+      else
+      {
+        bool psipDecay(false);
+        int rootIndex(-1);
+        Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
+        for (; iter_mc != mcParticleCol->end(); iter_mc++)
+        {
+          if ((*iter_mc)->primaryParticle()) continue;
+          if (!(*iter_mc)->decayFromGenerator()) continue;
+          //if ( ((*iter_mc)->mother()).trackIndex()<3 ) continue;
+          if ((*iter_mc)->particleProperty()==100443)
+          {
+            psipDecay = true;
+            rootIndex = (*iter_mc)->trackIndex();
+          }
+          if (!psipDecay) continue;
+          int mcidx = ((*iter_mc)->mother()).trackIndex() - rootIndex;
+          int pdgid = (*iter_mc)->particleProperty();
+          m_pdgid[m_numParticle] = pdgid;
+          m_motheridx[m_numParticle] = mcidx;
+          m_numParticle ++;    
+
+          //if(!(*iter_mc)->leafParticle()) continue;
+          if((*iter_mc)->particleProperty() == 211) m_true_pionp = (*iter_mc)->initialFourMomentum().vect().mag();
+          if((*iter_mc)->particleProperty() == -211) m_true_pionm = (*iter_mc)->initialFourMomentum().vect().mag();
+        }
+        m_idxmc = m_numParticle;
+      }
+    }
+    */
+    
+
+
   }
   fEvent.npid=5;
   vector<double> chi2 = get_chi2(result_pair);
