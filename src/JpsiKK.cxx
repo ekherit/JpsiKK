@@ -886,8 +886,8 @@ StatusCode JpsiKK::execute()
 
     McParticleVector particles = navigator->getMcParticles(mdcTrk);
     log << MSG::INFO << "Retrieved " << particles.size() << " McParticles for for MdcKalTrack # " 
-      << (*it)->trackId() << " of reconstructed momentum " << (*it)->p() << " GeV/c (PID=" 
-      << (*it)->getPidType() << ")" << endreq;
+      << mdcTrk->trackId() << " of reconstructed momentum " << mdcTrk->p() << " GeV/c (PID=" 
+      << mdcTrk->getPidType() << ")" << endreq;
     
 
     
