@@ -1008,8 +1008,8 @@ StatusCode JpsiKK::execute()
         }
         //m_idxmc = m_numParticle;
       }
+      cout << endl;
     }
-    cout << endl;
     
 
 
