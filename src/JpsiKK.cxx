@@ -971,7 +971,7 @@ StatusCode JpsiKK::execute()
         }
       }
     }
-    if(fEvent.run<0)
+    if(fEvent.run<0 && false)
     {
       int m_numParticle(0), m_true_pid(0);
       if(!mcParticleCol)
