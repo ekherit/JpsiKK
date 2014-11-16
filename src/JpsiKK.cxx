@@ -885,9 +885,18 @@ StatusCode JpsiKK::execute()
 
 
     McParticleVector particles = navigator->getMcParticles(mdcTrk);
-    cout << "Retrieved " << particles.size() << " McParticles for for MdcKalTrack # " 
-      << mdcTrk->trackId() << " of reconstructed momentum " << mdcTrk->p() << " GeV/c (PID=" 
-      << endl;
+    if(!particles.empty())
+    {
+      cout <<"REC: " << fEvent.channel << " MC: ";
+      for(int k = 0;k<particles.size();k++)
+      {
+         cout << particles[k]->particleProperty() << " "; 
+      }
+      cout << endl;
+      //cout << "Retrieved " << particles.size() << " McParticles for for MdcKalTrack # " 
+      //  << mdcTrk->trackId() << " of reconstructed momentum " << mdcTrk->p() << " GeV/c (PID=" 
+      //  << endl;
+    }
       //<< particles.front()->particleProperty() << endl;
     
 
