@@ -883,6 +883,15 @@ StatusCode JpsiKK::execute()
     fEvent.vz[i]  = rvz; 
     fEvent.vphi[i] = rvphi; 
 
+
+    McParticleVector particles = navigator->getMcParticles(mdcTrk);
+    log << MSG::INFO << "Retrieved " << particles.size() << " McParticles for for MdcKalTrack # " 
+      << (*it)->trackId() << " of reconstructed momentum " << (*it)->p() << " GeV/c (PID=" 
+      << (*it)->getPidType() << ")" << endreq;
+    
+
+    
+
     PID->setRecTrack(*itTrk[i]);
     PID->calculate();
     if(PID->IsPidInfoValid())
