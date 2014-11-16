@@ -51,7 +51,8 @@ def proceed(run, directory, files):
     configure_pbs_jobs(run)
 
 psip2009 = range(0,9999999);
+test = range(26996,27000);
 
-for run in psip2009 :
+for run in test :
   print "Proceeding run ", run
   os.path.walk("data", proceed, run)
