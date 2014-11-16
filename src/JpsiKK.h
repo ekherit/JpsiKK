@@ -113,6 +113,7 @@ class JpsiKK : public Algorithm
 
     NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
     NTuple::Array<long> index; //index of track
+    NTuple::Array<long> trackId; //id of the track
     NTuple::Array<double> q; //charge of the track
     NTuple::Array<double> E;
     NTuple::Array<double> p;

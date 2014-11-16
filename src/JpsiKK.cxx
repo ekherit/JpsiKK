@@ -196,6 +196,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
 
   status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
   status = tuple->addIndexedItem ("idx",   ntrack, index);
+  status = tuple->addIndexedItem ("trackId",   ntrack, trackId);
   status = tuple->addIndexedItem ("q",     ntrack, q);
   status = tuple->addIndexedItem ("E",     ntrack, E);
   status = tuple->addIndexedItem ("p",     ntrack, p);
@@ -540,8 +541,8 @@ StatusCode JpsiKK::execute()
       return StatusCode::FAILURE;
     }
 
-  log << MSG::INFO << "EventNavigator object" << endreq;
-  navigator->Print();
+  //log << MSG::INFO << "EventNavigator object" << endreq;
+  //navigator->Print();
   
 
   //fill initial value of the selected event
@@ -865,6 +866,7 @@ StatusCode JpsiKK::execute()
     }
     RecMdcTrack  *mdcTrk = (*itTrk[i])->mdcTrack();
     fEvent.index[i] = itTrk[i]-evtRecTrkCol->begin(); 
+    fEvent.trackId[i] = mdcTrk->trackId();
     fEvent.q[i] = mdcTrk->charge(); 
     fEvent.p[i] = mdcTrk->p();
     fEvent.px[i]= mdcTrk->px();
