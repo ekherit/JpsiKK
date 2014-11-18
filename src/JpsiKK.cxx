@@ -926,7 +926,7 @@ StatusCode JpsiKK::execute()
     {
       WTP[i] =  vtxfit->wtrk(i);
       Pkf[i] = WTP[i].p();
-      cout << WTP[i].p().px() << " "<< WTP[i].p().py() << " " << WTP[i].p().pz() << endl;
+      cout << WTP[i].p().px() << " "<< WTP[i].p().py() << " " << WTP[i].p().pz()  << " " << WTP[i].p().m()<< endl;
     }
     cout << endl;
     /*
