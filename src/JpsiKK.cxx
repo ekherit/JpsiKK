@@ -992,6 +992,10 @@ StatusCode JpsiKK::execute()
         channel = pid;
         kinematic_chi2 = chi2_tmp;
         Pkf=P_tmp;
+        if(Pkf.p()==0)
+        {
+          cout << "Strange Pkf=0" << endl;
+        }
       }
     }
   }
