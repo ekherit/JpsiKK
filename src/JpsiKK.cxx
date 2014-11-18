@@ -86,7 +86,7 @@ inline double sq(double x) { return x*x; }
 
 typedef std::pair<EvtRecTrackIterator, EvtRecTrackIterator> TrackPair_t;
 typedef std::list<TrackPair_t> TrackPairList_t;
-typedef std::list<TrackList_t> TrackList_t;
+typedef std::list<EvtRecTrackIterator> TrackList_t;
 
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
@@ -952,6 +952,9 @@ StatusCode JpsiKK::execute()
 
 
   if(other_pairs.empty()) return StatusCode::SUCCESS;
+  double chi2;
+  HepLorentzVector Pkf;
+  bool GoodKinematikFit = kinematic_fit(ID_KAON, pion_pairs, other_pairs, Pkf,chi2);
 
   //now fill the tuples
 
