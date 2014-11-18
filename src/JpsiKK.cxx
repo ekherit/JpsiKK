@@ -873,7 +873,7 @@ StatusCode JpsiKK::execute()
   {
     EvtRecTrackIterator  PionTrk[2] = {pion_pair.first, pion_pair.second};
     //EvtRecTrackIterator  OtherTrk[2] = {other_pair->first, other_pair->second};
-    EvtRecTrackIterator  OtherTrk[2] = {result_pair->first, result_pair->second};
+    EvtRecTrackIterator  OtherTrk[2] = {result_pair.first, result_pair.second};
     RecMdcKalTrack * PionKalTrk[2];
     RecMdcKalTrack * OtherKalTrk[2];
     WTrackParameter PionWTrk[2];
