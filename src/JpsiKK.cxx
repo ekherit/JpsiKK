@@ -603,6 +603,7 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
     for(int i=0;i<4;i++)
     {
       P[i] = kmfit->pfit(i);
+      cout << "P=" << P[i].px() << " " << P[i].py() << " " << P[i].pz() << " " <<  P[i].m() << endl;
     }
   }
 }
@@ -982,7 +983,7 @@ StatusCode JpsiKK::execute()
     {
       for(int i=0;i<4;i++)
       {
-        cout << P_tmp[i].px() << " " << P_tmp[i].py() << " " << P_tmp[i].pz() << " " <<  P_tmp[i].m() << endl;
+        cout << "P_tmp=" << P_tmp[i].px() << " " << P_tmp[i].py() << " " << P_tmp[i].pz() << " " <<  P_tmp[i].m() << endl;
       }
       GoodKinematikFit = true;
       if(chi2_tmp<kinematic_chi2)
