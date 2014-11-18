@@ -919,10 +919,10 @@ StatusCode JpsiKK::execute()
     //KinematicFit * kmfit = KinematicFit::instance();
     KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
     kmfit->init();
-    kmfit->AddTrack(0, PION_MASS, WTP[0]);
-    kmfit->AddTrack(1, PION_MASS, WTP[1]);
-    kmfit->AddTrack(2, KAON_MASS, WTP[2]);
-    kmfit->AddTrack(3, KAON_MASS, WTP[3]);
+    kmfit->AddTrack(0,  WTP[0]);
+    kmfit->AddTrack(1,  WTP[1]);
+    kmfit->AddTrack(2,  WTP[2]);
+    kmfit->AddTrack(3,  WTP[3]);
     HepLorentzVector Pcmf(0.040546,0,0,PSIP_MASS); //initial vector of center of mass frame
     kmfit->AddFourMomentum(0,  Pcmf);
     kmfit->AddResonance(0, JPSI_MASS, 2, 3);
@@ -1005,12 +1005,12 @@ StatusCode JpsiKK::execute()
     fEvent.q[i] = mdcTrk->charge(); 
     if(GoodKinematikFit)
     {
-      fEvent.p[i] = Po[i].p();
-      fEvent.px[i]= Pkf[i]->px();
-      fEvent.py[i]= Pkf[i]->py();
-      fEvent.pz[i]= Pkf[i]->pz();
-      fEvent.theta[i]= Pkf[i]->theta();
-      fEvent.phi[i] = Pkf[i]->phi();
+      fEvent.px[i]= Pkf[i].px();
+      fEvent.py[i]= Pkf[i].py();
+      fEvent.pz[i]= Pkf[i].pz();
+      fEvent.p[i] = sqrt(sq(Pkf[i].px()) sq(Pkf[i].py())+sq(Pkf[i].pz()));
+      fEvent.theta[i]= Pkf[i].theta();
+      fEvent.phi[i] = Pkf[i].phi();
     }
     else 
     {
