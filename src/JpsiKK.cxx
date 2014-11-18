@@ -868,12 +868,12 @@ StatusCode JpsiKK::execute()
   if(other_pairs.empty()) return StatusCode::SUCCESS;
   HepLorentzVector Pkf[4]; //vector after kinematic fit
   double chi2_tmp = 9999999;
-  bool GoodKinematikFit=true;
+  bool GoodKinematikFit=false;
   for(PairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
   {
     EvtRecTrackIterator  PionTrk[2] = {pion_pair.first, pion_pair.second};
-    //EvtRecTrackIterator  OtherTrk[2] = {other_pair->first, other_pair->second};
-    EvtRecTrackIterator  OtherTrk[2] = {result_pair.first, result_pair.second};
+    EvtRecTrackIterator  OtherTrk[2] = {other_pair->first, other_pair->second};
+    //EvtRecTrackIterator  OtherTrk[2] = {result_pair.first, result_pair.second};
     RecMdcKalTrack * PionKalTrk[2];
     RecMdcKalTrack * OtherKalTrk[2];
     WTrackParameter PionWTrk[2];
@@ -931,16 +931,6 @@ StatusCode JpsiKK::execute()
       Pkf[i] = WTP[i].p();
       cout << WTP[i].p().px() << " "<< WTP[i].p().py() << " " << WTP[i].p().pz()  << " " << WTP[i].p().m()<< endl;
     }
-    /*
-    for(int i=0;i<2;i++)
-    {
-      WTP[i+2] =  OtherWTrk[i];
-      Pkf[i+2] = WTP[i+2].p();
-      cout << WTP[i+2].p().px() << " "<< WTP[i+2].p().py() << " " << WTP[i+2].p().pz()  << " " << WTP[i+2].p().m()<< endl;
-    }
-    */
-    cout << endl;
-    /*
 
     //KinematicFit * kmfit = KinematicFit::instance();
     KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
@@ -969,7 +959,12 @@ StatusCode JpsiKK::execute()
         }
       }
     }
-    */
+    cout << "new momentum after kinematic fit: " << endl;
+    for(int i=0;i<4;i++) 
+    {
+      Pkf[i] = WTP[i].p();
+      cout << Pkf[i].px() << " "<< Pkf[i].py() << " " << Pkf[i].pz()  << " " << Pkf[i].m()<< endl;
+    }
   }
 
 
