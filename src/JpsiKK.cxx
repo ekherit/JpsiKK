@@ -971,7 +971,7 @@ StatusCode JpsiKK::execute()
   bool GoodKinematikFit=false;
   double kinematic_chi2=2e100;
   std::vector<HepLorentzVector> Pkf(4);
-  for(int pid = 0;i<5;i++)
+  for(int pid = 0;pid<5;pid++)
   {
     std::vector<HepLorentzVector> P_tmp(4);
     TrackPair_t pion_pr;
