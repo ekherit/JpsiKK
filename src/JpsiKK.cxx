@@ -620,7 +620,7 @@ bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  ot
     {
       std::vector<HepLorentzVector> P_tmp;
       double chi2_tmp;
-      bool oksq=kinematic_fit(PID, *pion_pair, *other_pair, P_tmp, chi2_tmp)
+      bool oksq=kinematic_fit(PID, *pion_pair, *other_pair, P_tmp, chi2_tmp);
       if(oksq) 
       {
         if(chi2_tmp < chi2)
