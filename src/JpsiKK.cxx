@@ -84,6 +84,10 @@ double XMASS[5] = {KAON_MASS, MUON_MASS, ELECTRON_MASS, PION_MASS, PROTON_MASS};
 
 inline double sq(double x) { return x*x; }
 
+typedef std::pair<EvtRecTrackIterator, EvtRecTrackIterator> TrackPair_t;
+typedef std::list<TrackPair_t> TrackPairList_t;
+typedef std::list<TrackList_t> TrackList_t;
+
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
 {
@@ -530,6 +534,91 @@ vector<double> get_chi2(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> & pa
   return chi2;
 }
 
+bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  other_pairs, HepLorentzVector & P, double & chi2)
+{
+  double chi2_tmp = 1e100;
+  bool GoodKinematikFit=false;
+  for(PairList_t::iterator pion_pair=pion_pairs.begin(); pion_pair!=pion_pairs.end();pion_pair++)
+    for(PairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
+    {
+      EvtRecTrackIterator  PionTrk[2] = {pion_pair->first, pion_pair->second};
+      EvtRecTrackIterator  OtherTrk[2] = {other_pair->first, other_pair->second};
+      RecMdcKalTrack * PionKalTrk[2];
+      RecMdcKalTrack * OtherKalTrk[2];
+      WTrackParameter PionWTrk[2];
+      WTrackParameter OtherWTrk[2];
+
+      for(int i=0;i<2;i++)
+      {
+        PionKalTrk[i] = (*PionTrk[i])->mdcKalTrack();
+        OtherKalTrk[i] = (*OtherTrk[i])->mdcKalTrack();
+        PionWTrk[i] = WTrackParameter(PION_MASS, PionKalTrk[i]->getZHelix(), PionKalTrk[i]->getZError());
+        OtherWTrk[i] = WTrackParameter(XMASS[PID], OtherKalTrk[i]->getZHelix(), OtherKalTrk[i]->getZError());
+      }
+      //now try the kinematic fit
+      //initial vertex
+      HepPoint3D vx(0., 0., 0.);
+      //error matrix inital valu
+      HepSymMatrix Evx(3, 0);
+      double bx = 1E+6;
+      double by = 1E+6;
+      double bz = 1E+6;
+      Evx[0][0] = bx*bx;
+      Evx[1][1] = by*by;
+      Evx[2][2] = bz*bz;
+      VertexParameter vxpar;
+      vxpar.setVx(vx);
+      vxpar.setEvx(Evx);
+
+
+      //Vetex fitter
+      VertexFit* vtxfit = VertexFit::instance();
+      vtxfit->init();
+      //add tracks. I know the first two one must be pions
+      vtxfit->AddTrack(0,  PionWTrk[0]);
+      vtxfit->AddTrack(1,  PionWTrk[1]);
+      vtxfit->AddTrack(2,  OtherWTrk[0]);
+      vtxfit->AddTrack(3,  OtherWTrk[1]);
+      vtxfit->AddVertex(0, vxpar,0, 1, 2,3);
+      //if(!vtxfit->Fit(0)) return SUCCESS;
+      vtxfit->Fit(0);
+      vtxfit->Fit(1);
+      vtxfit->Fit(2);
+      vtxfit->Fit(3);
+      vtxfit->Fit();
+      vtxfit->Swim(0);
+
+      //KinematicFit * kmfit = KinematicFit::instance();
+      KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
+      kmfit->init();
+      for(int i=0;i<4;i++)
+      {
+        kmfit->AddTrack(i,vtxfit->wtrk(i));
+      }
+      HepLorentzVector Pcmf(0.040546,0,0,PSIP_MASS); //initial vector of center of mass frame
+      kmfit->AddFourMomentum(0,  Pcmf);
+      kmfit->AddResonance(1, JPSI_MASS, 2, 3);
+      kmfit->Fit(0);
+      kmfit->Fit(1);
+      kmfit->Fit(2);
+      kmfit->Fit(3);
+      bool oksq = kmfit->Fit();
+      if(oksq) 
+      {
+        cout << "Good kinematik fit" << endl;
+        double chi2_tmp = kmfit->chisq();
+        if(chi2_tmp < chi2)
+        {
+          GoodKinematikFit = true;
+          chi2  = chi2_tmp;
+          for(int i=0;i<4;i++)
+          {
+            P[i] = kmfit->pfit(i);
+          }
+        }
+      }
+    } 
+}
 
 StatusCode JpsiKK::execute()
 {
@@ -635,14 +724,14 @@ StatusCode JpsiKK::execute()
 
 
   
-  std::list<EvtRecTrackIterator> charged_tracks; //selected tracks for specific cut
-  std::list<EvtRecTrackIterator> positive_charged_tracks; //selected tracks for specific cut
-  std::list<EvtRecTrackIterator> negative_charged_tracks; //selected tracks for specific cut
-  std::list<EvtRecTrackIterator> positive_pion_tracks; //selected pion tracks for specific cut
-  std::list<EvtRecTrackIterator> negative_pion_tracks; //selected pion tracks for specific cut
-  std::list<EvtRecTrackIterator> other_positive_tracks; //other positive tracks for specific cut
-  std::list<EvtRecTrackIterator> other_negative_tracks; //other positive tracks for specific cut
-  for(std::list<EvtRecTrackIterator>::iterator track=good_charged_tracks.begin(); track!=good_charged_tracks.end(); track++)
+  TrackList_t charged_tracks; //selected tracks for specific cut
+  TrackList_t positive_charged_tracks; //selected tracks for specific cut
+  TrackList_t negative_charged_tracks; //selected tracks for specific cut
+  TrackList_t positive_pion_tracks; //selected pion tracks for specific cut
+  TrackList_t negative_pion_tracks; //selected pion tracks for specific cut
+  TrackList_t other_positive_tracks; //other positive tracks for specific cut
+  TrackList_t other_negative_tracks; //other positive tracks for specific cut
+  for(TrackList_t::iterator track=good_charged_tracks.begin(); track!=good_charged_tracks.end(); track++)
   {
     EvtRecTrackIterator & itTrk = *track;
     if(!(*itTrk)->isMdcTrackValid()) continue; 
@@ -687,8 +776,6 @@ StatusCode JpsiKK::execute()
     }
   }
 
-  
-
 
   //SELECTION CODE
   //keep only specific signature
@@ -696,13 +783,13 @@ StatusCode JpsiKK::execute()
   //SELECTION CODE
   if(negative_pion_tracks.empty() || positive_pion_tracks.empty()) return StatusCode::SUCCESS;
 
-  typedef std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > PairList_t;
+  //typedef std::list< std::pair<EvtRecTrackIterator, EvtRecTrackIterator> > PairList_t;
   //create pion pairs
-  PairList_t pion_pairs;
-  for(list<EvtRecTrackIterator>::iterator i=negative_pion_tracks.begin(); i!=negative_pion_tracks.end(); ++i)
-    for(list<EvtRecTrackIterator>::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
+  TrackPairList_t pion_pairs;
+  for(TrackList_t::iterator i=negative_pion_tracks.begin(); i!=negative_pion_tracks.end(); ++i)
+    for(TrackList_t::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
     {
-      std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
+      TrackPair_t pair(*i,*j);
       double M_recoil = get_recoil__mass(pair, PION_MASS);
       if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
       {
@@ -717,8 +804,8 @@ StatusCode JpsiKK::execute()
   //log << MSG::ERROR << "pion pairs: " << pion_pairs.size() << endmsg;
 
   //find the best pion pair using closest value to JPSI_MASS
-  std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pion_pair = pion_pairs.front();
-  for(PairList_t::iterator p=pion_pairs.begin();p!=pion_pairs.end();p++)
+  TrackPair_t pion_pair = pion_pairs.front();
+  for(TrackPairList_t::iterator p=pion_pairs.begin();p!=pion_pairs.end();p++)
   {
     if(fabs(get_recoil__mass(*p,PION_MASS) - JPSI_MASS) <  fabs(get_recoil__mass(pion_pair,PION_MASS) - JPSI_MASS)) pion_pair = *p;
   }
@@ -727,10 +814,10 @@ StatusCode JpsiKK::execute()
   PairList_t muon_pairs;
   PairList_t kaon_pairs;
   PairList_t other_pairs;
-  for(list<EvtRecTrackIterator>::iterator i=other_negative_tracks.begin(); i!=other_negative_tracks.end(); ++i)
-    for(list<EvtRecTrackIterator>::iterator j=other_positive_tracks.begin(); j!=other_positive_tracks.end(); ++j)
+  for(TrackList_t::iterator i=other_negative_tracks.begin(); i!=other_negative_tracks.end(); ++i)
+    for(TrackList_t::iterator j=other_positive_tracks.begin(); j!=other_positive_tracks.end(); ++j)
     {
-      std::pair<EvtRecTrackIterator,EvtRecTrackIterator> pair(*i,*j);
+      TrackPair_t pair(*i,*j);
       EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
       double Ep[2]; // E/p ratio
       double E[2];
@@ -800,15 +887,14 @@ StatusCode JpsiKK::execute()
     }
 
   int channel=-1; //default no channel
-  std::pair<EvtRecTrackIterator,EvtRecTrackIterator> result_pair;
-  //log << MSG::ERROR << "kaon pairs: " << kaon_pairs.size() << ",  muon pairs: " << muon_pairs.size() << endmsg;
+  TrackPair_t result_pair;
   //SELECTION CODE
   if(!muon_pairs.empty() || !kaon_pairs.empty()) 
   {
     //the best pair which is closer to JPSI
     if(!kaon_pairs.empty()) result_pair = kaon_pairs.front();
     if(!muon_pairs.empty()) result_pair = muon_pairs.front();
-    for(PairList_t::iterator p=kaon_pairs.begin();p!=kaon_pairs.end();p++)
+    for(TrackPairList_t::iterator p=kaon_pairs.begin();p!=kaon_pairs.end();p++)
     {
       if(fabs(sqrt(get_invariant_mass2(*p,KAON_MASS)) - JPSI_MASS) 
           <=  fabs(sqrt(get_invariant_mass2(result_pair,KAON_MASS)) - JPSI_MASS)) 
@@ -817,7 +903,7 @@ StatusCode JpsiKK::execute()
         channel=ID_KAON; //setup kaon channel
       }
     }
-    for(PairList_t::iterator p=muon_pairs.begin();p!=muon_pairs.end();p++)
+    for(TrackPairList_t::iterator p=muon_pairs.begin();p!=muon_pairs.end();p++)
     {
       if(fabs(sqrt(get_invariant_mass2(*p,MUON_MASS)) - JPSI_MASS) 
           <=  fabs(sqrt(get_invariant_mass2(result_pair,MUON_MASS)) - JPSI_MASS)) 
@@ -866,113 +952,6 @@ StatusCode JpsiKK::execute()
 
 
   if(other_pairs.empty()) return StatusCode::SUCCESS;
-  HepLorentzVector Pkf[4]; //vector after kinematic fit
-  double chi2_tmp = 1e100;
-  bool GoodKinematikFit=false;
-  for(PairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
-  {
-    EvtRecTrackIterator  PionTrk[2] = {pion_pair.first, pion_pair.second};
-    EvtRecTrackIterator  OtherTrk[2] = {other_pair->first, other_pair->second};
-    //EvtRecTrackIterator  OtherTrk[2] = {result_pair.first, result_pair.second};
-    RecMdcKalTrack * PionKalTrk[2];
-    RecMdcKalTrack * OtherKalTrk[2];
-    WTrackParameter PionWTrk[2];
-    WTrackParameter OtherWTrk[2];
-
-    for(int i=0;i<2;i++)
-    {
-      PionKalTrk[i] = (*PionTrk[i])->mdcKalTrack();
-      OtherKalTrk[i] = (*OtherTrk[i])->mdcKalTrack();
-      PionWTrk[i] = WTrackParameter(PION_MASS, PionKalTrk[i]->getZHelix(), PionKalTrk[i]->getZError());
-      OtherWTrk[i] = WTrackParameter(KAON_MASS, OtherKalTrk[i]->getZHelix(), OtherKalTrk[i]->getZError());
-    }
-    //now try the kinematic fit
-    //initial vertex
-    HepPoint3D vx(0., 0., 0.);
-    //error matrix inital valu
-    HepSymMatrix Evx(3, 0);
-    double bx = 1E+6;
-    double by = 1E+6;
-    double bz = 1E+6;
-    Evx[0][0] = bx*bx;
-    Evx[1][1] = by*by;
-    Evx[2][2] = bz*bz;
-    VertexParameter vxpar;
-    vxpar.setVx(vx);
-    vxpar.setEvx(Evx);
-
-
-    //Vetex fitter
-    VertexFit* vtxfit = VertexFit::instance();
-    vtxfit->init();
-    //add tracks. I know the first two one must be pions
-    vtxfit->AddTrack(0,  PionWTrk[0]);
-    vtxfit->AddTrack(1,  PionWTrk[1]);
-    vtxfit->AddTrack(2,  OtherWTrk[0]);
-    vtxfit->AddTrack(3,  OtherWTrk[1]);
-    vtxfit->AddVertex(0, vxpar,0, 1, 2,3);
-    //if(!vtxfit->Fit(0)) return SUCCESS;
-    vtxfit->Fit(0);
-    vtxfit->Fit(1);
-    vtxfit->Fit(2);
-    vtxfit->Fit(3);
-    vtxfit->Fit();
-    vtxfit->Swim(0);
-
-    //Get new track parameters
-    WTrackParameter WTP[4];
-    cout << "Old momentum: " << endl;
-    for(int i=0;i<2; i++) cout << PionWTrk[i].p().px() << " "<< PionWTrk[i].p().py() << " " << PionWTrk[i].p().pz() << " " << PionWTrk[i].p().m() << endl;
-    for(int i=0;i<2; i++) cout << OtherWTrk[i].p().px() << " "<< OtherWTrk[i].p().py() << " " << OtherWTrk[i].p().pz() << " " << OtherWTrk[i].p().m() << endl;
-    cout << "new momentum: " << endl;
-    for(int i=0;i<4;i++) 
-    {
-      WTP[i] =  vtxfit->wtrk(i);
-      Pkf[i] = WTP[i].p();
-      cout << WTP[i].p().px() << " "<< WTP[i].p().py() << " " << WTP[i].p().pz()  << " " << WTP[i].p().m()<< endl;
-    }
-
-    //KinematicFit * kmfit = KinematicFit::instance();
-    KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
-    kmfit->init();
-    kmfit->AddTrack(0,  WTP[0]);
-    kmfit->AddTrack(1,  WTP[1]);
-    kmfit->AddTrack(2,  WTP[2]);
-    kmfit->AddTrack(3,  WTP[3]);
-    HepLorentzVector Pcmf(0.040546,0,0,PSIP_MASS); //initial vector of center of mass frame
-    kmfit->AddFourMomentum(0,  Pcmf);
-    kmfit->AddResonance(1, JPSI_MASS, 2, 3);
-    kmfit->Fit(0);
-    kmfit->Fit(1);
-    kmfit->Fit(2);
-    kmfit->Fit(3);
-    bool oksq = kmfit->Fit();
-    if(oksq) 
-    {
-      cout << "Good kinematik fit" << endl;
-      double chi2 = kmfit->chisq();
-      if(chi2 < chi2_tmp)
-      {
-        GoodKinematikFit = true;
-        chi2_tmp = chi2;
-        for(int i=0;i<4;i++)
-        {
-          Pkf[i] = kmfit->pfit(i);
-        }
-      }
-      cout << "new momentum after kinematic fit: " << endl;
-      for(int i=0;i<4;i++) 
-      {
-        //Pkf[i] = WTP[i].p();
-        cout << Pkf[i].px() << " "<< Pkf[i].py() << " " << Pkf[i].pz()  << " " << Pkf[i].m()<< endl;
-      }
-    }
-  } 
-  if(!GoodKinematikFit) return StatusCode::SUCCESS;
-
-
-
-
 
   //now fill the tuples
 
@@ -1039,7 +1018,6 @@ StatusCode JpsiKK::execute()
       fEvent.p[i] = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py())+sq(Pkf[i].pz()));
       fEvent.theta[i]= Pkf[i].theta();
       fEvent.phi[i] = Pkf[i].phi();
-      //fEvent.phi[i] = -99999;
     }
     else 
     {

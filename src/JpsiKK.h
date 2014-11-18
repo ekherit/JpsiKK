@@ -129,6 +129,25 @@ class JpsiKK : public Algorithm
     virtual StatusCode init_tuple(void);
   };
 
+  struct RootMdc : public RootTuple
+  {
+    NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
+    NTuple::Array<long>  trackId; //id of the track
+    NTuple::Array<double> q; //charge of the track
+    NTuple::Array<double> E;
+    NTuple::Array<double> p;
+    NTuple::Array<double> px;
+    NTuple::Array<double> py;
+    NTuple::Array<double> pz;
+    NTuple::Array<double> pt; //transvese momentum
+    NTuple::Array<double> theta,phi;
+    NTuple::Array<double> x, y, z, r; //poca coordinate of track
+    NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
+    virtual void init(void){};
+    virtual StatusCode init_tuple(void){};
+  };
+
+
   struct RootDedx : public RootTuple
   {
     NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
