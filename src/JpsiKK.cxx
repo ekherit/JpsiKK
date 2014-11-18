@@ -918,15 +918,20 @@ StatusCode JpsiKK::execute()
 
     //KinematicFit * kmfit = KinematicFit::instance();
     KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
+    cout << "Before kmfit init" << endl;
     kmfit->init();
     kmfit->AddTrack(0,  WTP[0]);
     kmfit->AddTrack(1,  WTP[1]);
     kmfit->AddTrack(2,  WTP[2]);
     kmfit->AddTrack(3,  WTP[3]);
+    cout << "After add track" << endl;
     HepLorentzVector Pcmf(0.040546,0,0,PSIP_MASS); //initial vector of center of mass frame
     kmfit->AddFourMomentum(0,  Pcmf);
+    cout << "After for momentum " << endl;
     kmfit->AddResonance(0, JPSI_MASS, 2, 3);
+    cout << "After resonance " << endl;
     bool oksq = kmfit->Fit();
+    cout << "After fit "<< oksq << endl;
     if(oksq) 
     {
       double chi2 = kmfit->chisq();
