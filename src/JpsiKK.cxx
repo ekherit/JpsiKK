@@ -1029,6 +1029,13 @@ StatusCode JpsiKK::execute()
   fEvent.Minv    = sqrt(get_invariant_mass2(result_pair,XMASS[channel]));
   fEvent.M2missing = get_missing_mass(pion_pair,result_pair);
 
+  if(GoodKinematikFit)
+  {
+    fEvent.Minv = (Pkf[2]+Pkf[3]).m();
+    HepLorentzVector P_psip(0.040546,0,0,PSIP_MASS); //initial vector of psip
+    fEvent.Mrecoil = (P_psip - Pkf[0] - Pkf[1]).m();
+  }
+
   ParticleID * PID = ParticleID::instance();
   PID->init();
   PID->setMethod(PID->methodProbability());
