@@ -983,6 +983,10 @@ StatusCode JpsiKK::execute()
     chi2_tmp+=pid_chi2[pid];
     if(fit_result)
     {
+      for(int i=0;i<4;i++)
+      {
+        cout << P_tmp[i].px() << " " << P_tmp[i].py() << " " << P_tmp[i].pz() << " " <<  P_tmp[i].m() << endl;
+      }
       GoodKinematikFit = true;
       if(chi2_tmp<kinematic_chi2)
       {
@@ -992,13 +996,6 @@ StatusCode JpsiKK::execute()
         channel = pid;
         kinematic_chi2 = chi2_tmp;
         Pkf=P_tmp;
-        for(int i=0;i<4;i++)
-        {
-          if(Pkf[i]==0)
-          {
-            cout << "Strange Pkf[" << i <<"]=0" << endl;
-          }
-        }
       }
     }
   }
