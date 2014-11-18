@@ -886,7 +886,7 @@ StatusCode JpsiKK::execute()
       PionWTrk[i] = WTrackParameter(PION_MASS, PionKalTrk[i]->getZHelix(), PionKalTrk[i]->getZError());
       OtherWTrk[i] = WTrackParameter(KAON_MASS, OtherKalTrk[i]->getZHelix(), OtherKalTrk[i]->getZError());
     }
-    //no try the kinematic fit
+    //now try the kinematic fit
     //initial vertex
     HepPoint3D vx(0., 0., 0.);
     //error matrix inital valu
@@ -917,7 +917,12 @@ StatusCode JpsiKK::execute()
 
     //Get new track parameters
     WTrackParameter WTP[4];
-    for(int i=0;i<4;i++) WTP[i] =  vtxfit->wtrk(i);
+    for(int i=0;i<4;i++) 
+    {
+      WTP[i] =  vtxfit->wtrk(i);
+      cout << WTP[i].px() << " "<< WTP[i].py() << " " << WTP[i].pz();
+    }
+    cout << endl;
 
     //KinematicFit * kmfit = KinematicFit::instance();
     KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
