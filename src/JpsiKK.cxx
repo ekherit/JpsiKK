@@ -917,6 +917,10 @@ StatusCode JpsiKK::execute()
 
     //Get new track parameters
     WTrackParameter WTP[4];
+    cout << "Old momentum: " << endl;
+    for(int i=0;i<2; i++) cout << PionWTrk[i].p().px() << " "<< PionWTrk[i].p().py() << " " << PionWTrk[i].p().pz() << endl;
+    for(int i=0;i<2; i++) cout << OtherWTrk[i].p().px() << " "<< OtherWTrk[i].p().py() << " " << OtherWTrk[i].p().pz() << endl;
+    cout << "new momentum: " << endl;
     for(int i=0;i<4;i++) 
     {
       WTP[i] =  vtxfit->wtrk(i);
