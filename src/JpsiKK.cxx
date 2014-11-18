@@ -1007,6 +1007,9 @@ StatusCode JpsiKK::execute()
         fEvent.uu=1;
         event_with_muons++;
       break;
+    default:
+      return StatusCode::SUCCESS;
+      break;
   }
 
   //now fill the tuples
