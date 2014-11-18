@@ -105,6 +105,7 @@ class JpsiKK : public Algorithm
     NTuple::Item<double>  Mrecoil;  //pion recoil mass
     NTuple::Item<double>  M2missing; //missing square invariant mass
     NTuple::Item<double>  Minv; //invariant mass two charged particles
+    NTuple::Item<double>  kchi2; //kinematic chi2 + pid chi2
 
     NTuple::Item<long>    npid;  //number of particle hypo 0-K,1-mu,2-e,3-pi,4-p
     NTuple::Array<double> M;     

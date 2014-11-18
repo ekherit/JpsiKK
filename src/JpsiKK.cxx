@@ -194,6 +194,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("Mrec", Mrecoil); 
   status = tuple->addItem ("Minv", Minv); 
   status = tuple->addItem ("M2mis", M2missing); 
+  status = tuple->addItem ("kchi2", kchi2); 
   status = tuple->addItem ("npid", npid,0,5); 
   status = tuple->addIndexedItem ("M", npid, M); 
   status = tuple->addIndexedItem ("prob", npid, prob); 
@@ -1227,6 +1228,7 @@ StatusCode JpsiKK::execute()
       cout << endl;
     }
   }
+  fEvent.kchi2 = kinematic_chi2;
   fEvent.npid=5;
   vector<double> chi2 = get_chi2(result_pair);
   for(int i=0;i<5;i++)
