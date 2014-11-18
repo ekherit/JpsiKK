@@ -2,7 +2,7 @@
 #This script create massive jobOptions files for all dst files
 #in data directory grouping them per single run
 #
-# Usage: make-batch.py <data_source_dir> <template_dir> [<target_dir>] [<prefix>]
+# Usage: make-boss-options.py <data_source_dir> <template_dir> [<target_dir>] [<prefix>]
 #
 #
 import os
@@ -24,7 +24,7 @@ if len(sys.argv)>=4:
     TARGET_DIR = os.path.abspath(sys.argv[3])
 
 if os.path.exists(DATA_SOURCE_DIR)==False:
-    print "Data dir: ", DATA_SOURCE_DIR, " does not exists"
+    print "Data dir: ", DATA_SOURCE_DIR, " does not exist"
     exit(1)
 
 if os.path.exists(TEMPLATE_DIR)==False:
