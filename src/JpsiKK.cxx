@@ -935,7 +935,7 @@ StatusCode JpsiKK::execute()
     {
       WTP[i+2] =  OtherWTrk[i];
       Pkf[i+2] = WTP[i+2].p();
-      cout << WTP[i].p().px() << " "<< WTP[i].p().py() << " " << WTP[i].p().pz()  << " " << WTP[i].p().m()<< endl;
+      cout << WTP[i+2].p().px() << " "<< WTP[i+2].p().py() << " " << WTP[i+2].p().pz()  << " " << WTP[i+2].p().m()<< endl;
     }
     cout << endl;
     /*
