@@ -941,25 +941,25 @@ StatusCode JpsiKK::execute()
       if(i!=ID_KAON) kaon_probable = kaon_probable && chi2[ID_KAON] < chi2[i];
       if(i!=ID_MUON) muon_probable = muon_probable && chi2[ID_MUON] < chi2[i];
     }
-    switch(channel)
-    {
-      case ID_KAON:
-        if(kaon_probable)
-        {
-          fEvent.KK=1;
-          fEvent.uu=0;
-          event_with_kaons++;
-        }
-        break;
-      case ID_MUON:
-        if(muon_probable)
-        {
-          fEvent.KK=0;
-          fEvent.uu=1;
-          event_with_muons++;
-        }
-        break;
-    }
+    //switch(channel)
+    //{
+    //  case ID_KAON:
+    //    if(kaon_probable)
+    //    {
+    //      fEvent.KK=1;
+    //      fEvent.uu=0;
+    //      event_with_kaons++;
+    //    }
+    //    break;
+    //  case ID_MUON:
+    //    if(muon_probable)
+    //    {
+    //      fEvent.KK=0;
+    //      fEvent.uu=1;
+    //      event_with_muons++;
+    //    }
+    //    break;
+    //}
   }
   else
   {
@@ -993,6 +993,20 @@ StatusCode JpsiKK::execute()
         Pkf=P_tmp;
       }
     }
+  }
+  if(!GoodKinematikFit) return StatusCode::SUCCESS;
+  switch(channel)
+  {
+    case ID_KAON:
+        fEvent.KK=1;
+        fEvent.uu=0;
+        event_with_kaons++;
+      break;
+    case ID_MUON:
+        fEvent.KK=0;
+        fEvent.uu=1;
+        event_with_muons++;
+      break;
   }
 
   //now fill the tuples
