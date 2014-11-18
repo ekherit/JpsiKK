@@ -994,7 +994,7 @@ StatusCode JpsiKK::execute()
         Pkf=P_tmp;
         for(int i=0;i<4;i++)
         {
-          if(Pkf[i].p()==0)
+          if(Pkf[i].p3().p()==0)
           {
             cout << "Strange Pkf[" << i <<"]=0" << endl;
           }
