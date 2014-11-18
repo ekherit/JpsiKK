@@ -867,7 +867,7 @@ StatusCode JpsiKK::execute()
 
   if(other_pairs.empty()) return StatusCode::SUCCESS;
   HepLorentzVector Pkf[4]; //vector after kinematic fit
-  double chi2_tmp = 9999999;
+  double chi2_tmp = 1e100;
   bool GoodKinematikFit=false;
   for(PairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
   {
@@ -918,6 +918,9 @@ StatusCode JpsiKK::execute()
     vtxfit->Fit(3);
     vtxfit->Fit();
     vtxfit->Swim(0);
+    vtxfit->Swim(1);
+    vtxfit->Swim(2);
+    vtxfit->Swim(3);
 
     //Get new track parameters
     WTrackParameter WTP[4];
@@ -960,15 +963,14 @@ StatusCode JpsiKK::execute()
           Pkf[i] = kmfit->pfit(i);
         }
       }
+      cout << "new momentum after kinematic fit: " << endl;
+      for(int i=0;i<4;i++) 
+      {
+        Pkf[i] = WTP[i].p();
+        cout << Pkf[i].px() << " "<< Pkf[i].py() << " " << Pkf[i].pz()  << " " << Pkf[i].m()<< endl;
+      }
     }
-    cout << "new momentum after kinematic fit: " << endl;
-    for(int i=0;i<4;i++) 
-    {
-      Pkf[i] = WTP[i].p();
-      cout << Pkf[i].px() << " "<< Pkf[i].py() << " " << Pkf[i].pz()  << " " << Pkf[i].m()<< endl;
-    }
-  }
-
+  } 
   if(!GoodKinematikFit) return StatusCode::SUCCESS;
 
 
@@ -1039,7 +1041,8 @@ StatusCode JpsiKK::execute()
       fEvent.pz[i]= Pkf[i].pz();
       fEvent.p[i] = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py())+sq(Pkf[i].pz()));
       fEvent.theta[i]= Pkf[i].theta();
-      fEvent.phi[i] = Pkf[i].phi();
+      //fEvent.phi[i] = Pkf[i].phi();
+      fEvent.phi[i] = -99999;
     }
     else 
     {
