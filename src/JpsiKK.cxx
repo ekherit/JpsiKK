@@ -577,7 +577,9 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   vtxfit->AddTrack(1,  PionWTrk[1]);
   vtxfit->AddTrack(2,  OtherWTrk[0]);
   vtxfit->AddTrack(3,  OtherWTrk[1]);
-  vtxfit->AddVertex(0, vxpar,0, 1, 2,3);
+  //vtxfit->AddVertex(0, vxpar,0, 1, 2,3);
+  vtxfit->AddVertex(0, vxpar,0, 1);
+  vtxfit->AddVertex(1, vxpar,2, 3);
   //if(!vtxfit->Fit(0)) return false;
   //if(!vtxfit->Fit(1)) return false;
   vtxfit->Fit();
