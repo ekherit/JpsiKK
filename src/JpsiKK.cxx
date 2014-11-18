@@ -883,7 +883,7 @@ StatusCode JpsiKK::execute()
       PionKalTrk[i] = (*PionTrk[i])->mdcKalTrack();
       OtherKalTrk[i] = (*OtherTrk[i])->mdcKalTrack();
       PionWTrk[i] = WTrackParameter(PION_MASS, PionKalTrk[i]->getZHelix(), PionKalTrk[i]->getZError());
-      OtherWTrk[i] = WTrackParameter(KAON_MASS, PionKalTrk[i]->getZHelix(), PionKalTrk[i]->getZError());
+      OtherWTrk[i] = WTrackParameter(KAON_MASS, OtherKalTrk[i]->getZHelix(), OtherKalTrk[i]->getZError());
     }
     //no try the kinematic fit
     //initial vertex
