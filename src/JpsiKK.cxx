@@ -918,7 +918,6 @@ StatusCode JpsiKK::execute()
 
     //KinematicFit * kmfit = KinematicFit::instance();
     KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
-    cout << "Before kmfit init" << endl;
     kmfit->init();
     kmfit->AddTrack(0,  WTP[0]);
     kmfit->AddTrack(1,  WTP[1]);
@@ -932,6 +931,7 @@ StatusCode JpsiKK::execute()
     bool oksq = kmfit->Fit();
     if(oksq) 
     {
+      cout << "Good kinematik fit" << endl;
       double chi2 = kmfit->chisq();
       if(chi2 < chi2_tmp)
       {
