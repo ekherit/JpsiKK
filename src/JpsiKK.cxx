@@ -868,7 +868,7 @@ StatusCode JpsiKK::execute()
   if(other_pairs.empty()) return StatusCode::SUCCESS;
   HepLorentzVector Pkf[4]; //vector after kinematic fit
   double chi2_tmp = 9999999;
-  bool GoodKinematikFit=false;
+  bool GoodKinematikFit=true;
   for(PairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
   {
     EvtRecTrackIterator  PionTrk[2] = {pion_pair.first, pion_pair.second};
@@ -901,6 +901,7 @@ StatusCode JpsiKK::execute()
     vxpar.setVx(vx);
     vxpar.setEvx(Evx);
 
+
     //Vetex fitter
     VertexFit* vtxfit = VertexFit::instance();
     vtxfit->init();
@@ -924,9 +925,11 @@ StatusCode JpsiKK::execute()
     for(int i=0;i<4;i++) 
     {
       WTP[i] =  vtxfit->wtrk(i);
+      Pkf[i] = WTP[i].p();
       cout << WTP[i].p().px() << " "<< WTP[i].p().py() << " " << WTP[i].p().pz() << endl;
     }
     cout << endl;
+    /*
 
     //KinematicFit * kmfit = KinematicFit::instance();
     KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
@@ -955,6 +958,7 @@ StatusCode JpsiKK::execute()
         }
       }
     }
+    */
   }
 
 
