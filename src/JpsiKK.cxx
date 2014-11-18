@@ -913,7 +913,7 @@ StatusCode JpsiKK::execute()
     //if(!vtxfit->Fit(0)) return SUCCESS;
     vtxfit->Fit(0);
     vtxfit->Fit();
-    vtxfit->Swim(0);
+    //vtxfit->Swim(0);
 
     //Get new track parameters
     WTrackParameter WTP[4];
