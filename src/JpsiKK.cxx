@@ -944,6 +944,8 @@ StatusCode JpsiKK::execute()
     //kmfit->AddResonance(1, JPSI_MASS, 2, 3);
     kmfit->Fit(0);
     kmfit->Fit(1);
+    kmfit->Fit(2);
+    kmfit->Fit(3);
     bool oksq = kmfit->Fit();
     if(oksq) 
     {
