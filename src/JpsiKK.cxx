@@ -953,9 +953,9 @@ StatusCode JpsiKK::execute()
 
 
   if(other_pairs.empty()) return StatusCode::SUCCESS;
-  double chi2;
+  double kinematic_chi2;
   std::vector<HepLorentzVector> Pkf;
-  bool GoodKinematikFit = kinematic_fit(ID_KAON, pion_pairs, other_pairs, Pkf,chi2);
+  bool GoodKinematikFit = kinematic_fit(ID_KAON, pion_pairs, other_pairs, Pkf,kinematic_chi2);
 
   //now fill the tuples
 
