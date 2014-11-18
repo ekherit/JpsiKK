@@ -910,6 +910,7 @@ StatusCode JpsiKK::execute()
     vtxfit->AddTrack(3,  OtherWTrk[3]);
     vtxfit->AddVertex(0, vxpar,0, 1, 2,3);
     //if(!vtxfit->Fit(0)) return SUCCESS;
+    vtxfit->Fit(0);
     vtxfit->Fit();
     vtxfit->Swim(0);
 
