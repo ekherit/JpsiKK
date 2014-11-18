@@ -926,8 +926,8 @@ StatusCode JpsiKK::execute()
     kmfit->AddTrack(2,  WTP[2]);
     kmfit->AddTrack(3,  WTP[3]);
     HepLorentzVector Pcmf(0.040546,0,0,PSIP_MASS); //initial vector of center of mass frame
-    kmfit->AddResonance(0, JPSI_MASS, 2, 3);
-    kmfit->AddFourMomentum(1,  Pcmf);
+    kmfit->AddFourMomentum(0,  Pcmf);
+    //kmfit->AddResonance(1, JPSI_MASS, 2, 3);
     kmfit->Fit(0);
     kmfit->Fit(1);
     bool oksq = kmfit->Fit();
