@@ -534,91 +534,106 @@ vector<double> get_chi2(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> & pa
   return chi2;
 }
 
-bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  other_pairs, std::vector<HepLorentzVector> & P, double & chi2)
+bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair, std::vector<HepLorentzVector> & P, double & chi2)
 {
-  double chi2_tmp = 1e100;
   P.resize(4);
+  EvtRecTrackIterator  PionTrk[2] = {pion_pair.first, pion_pair.second};
+  EvtRecTrackIterator  OtherTrk[2] = {other_pair.first, other_pair.second};
+  RecMdcKalTrack * PionKalTrk[2];
+  RecMdcKalTrack * OtherKalTrk[2];
+  WTrackParameter PionWTrk[2];
+  WTrackParameter OtherWTrk[2];
+
+  for(int i=0;i<2;i++)
+  {
+    PionKalTrk[i] = (*PionTrk[i])->mdcKalTrack();
+    OtherKalTrk[i] = (*OtherTrk[i])->mdcKalTrack();
+    PionWTrk[i] = WTrackParameter(PION_MASS, PionKalTrk[i]->getZHelix(), PionKalTrk[i]->getZError());
+    OtherWTrk[i] = WTrackParameter(XMASS[PID], OtherKalTrk[i]->getZHelix(), OtherKalTrk[i]->getZError());
+  }
+  //now try the kinematic fit
+  //initial vertex
+  HepPoint3D vx(0., 0., 0.);
+  //error matrix inital valu
+  HepSymMatrix Evx(3, 0);
+  double bx = 1E+6;
+  double by = 1E+6;
+  double bz = 1E+6;
+  Evx[0][0] = bx*bx;
+  Evx[1][1] = by*by;
+  Evx[2][2] = bz*bz;
+  VertexParameter vxpar;
+  vxpar.setVx(vx);
+  vxpar.setEvx(Evx);
+
+
+  //Vetex fitter
+  VertexFit* vtxfit = VertexFit::instance();
+  vtxfit->init();
+  //add tracks. I know the first two one must be pions
+  vtxfit->AddTrack(0,  PionWTrk[0]);
+  vtxfit->AddTrack(1,  PionWTrk[1]);
+  vtxfit->AddTrack(2,  OtherWTrk[0]);
+  vtxfit->AddTrack(3,  OtherWTrk[1]);
+  vtxfit->AddVertex(0, vxpar,0, 1, 2,3);
+  //if(!vtxfit->Fit(0)) return SUCCESS;
+  vtxfit->Fit(0);
+  vtxfit->Fit(1);
+  vtxfit->Fit(2);
+  vtxfit->Fit(3);
+  vtxfit->Fit();
+  vtxfit->Swim(0);
+
+  //KinematicFit * kmfit = KinematicFit::instance();
+  KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
+  kmfit->init();
+  for(int i=0;i<4;i++)
+  {
+    kmfit->AddTrack(i,vtxfit->wtrk(i));
+  }
+  HepLorentzVector Pcmf(0.040546,0,0,PSIP_MASS); //initial vector of center of mass frame
+  kmfit->AddFourMomentum(0,  Pcmf);
+  kmfit->AddResonance(1, JPSI_MASS, 2, 3);
+  kmfit->Fit(0);
+  kmfit->Fit(1);
+  kmfit->Fit(2);
+  kmfit->Fit(3);
+  bool oksq = kmfit->Fit();
+  if(oksq) 
+  {
+    chi2  = kmfit->chisq();
+    for(int i=0;i<4;i++)
+    {
+      P[i] = kmfit->pfit(i);
+    }
+  }
+}
+
+bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  other_pairs, std::vector<HepLorentzVector> & P, double & chi2, TrackPair_t & result_pion_pair, TrackPair_t & result_other_pair)
+{
+  if(pion_pairs.empty() || other_pairs.empty()) return false;
+  chi2=1e100;
   bool GoodKinematikFit=false;
+
   for(TrackPairList_t::iterator pion_pair=pion_pairs.begin(); pion_pair!=pion_pairs.end();pion_pair++)
     for(TrackPairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
     {
-      EvtRecTrackIterator  PionTrk[2] = {pion_pair->first, pion_pair->second};
-      EvtRecTrackIterator  OtherTrk[2] = {other_pair->first, other_pair->second};
-      RecMdcKalTrack * PionKalTrk[2];
-      RecMdcKalTrack * OtherKalTrk[2];
-      WTrackParameter PionWTrk[2];
-      WTrackParameter OtherWTrk[2];
-
-      for(int i=0;i<2;i++)
-      {
-        PionKalTrk[i] = (*PionTrk[i])->mdcKalTrack();
-        OtherKalTrk[i] = (*OtherTrk[i])->mdcKalTrack();
-        PionWTrk[i] = WTrackParameter(PION_MASS, PionKalTrk[i]->getZHelix(), PionKalTrk[i]->getZError());
-        OtherWTrk[i] = WTrackParameter(XMASS[PID], OtherKalTrk[i]->getZHelix(), OtherKalTrk[i]->getZError());
-      }
-      //now try the kinematic fit
-      //initial vertex
-      HepPoint3D vx(0., 0., 0.);
-      //error matrix inital valu
-      HepSymMatrix Evx(3, 0);
-      double bx = 1E+6;
-      double by = 1E+6;
-      double bz = 1E+6;
-      Evx[0][0] = bx*bx;
-      Evx[1][1] = by*by;
-      Evx[2][2] = bz*bz;
-      VertexParameter vxpar;
-      vxpar.setVx(vx);
-      vxpar.setEvx(Evx);
-
-
-      //Vetex fitter
-      VertexFit* vtxfit = VertexFit::instance();
-      vtxfit->init();
-      //add tracks. I know the first two one must be pions
-      vtxfit->AddTrack(0,  PionWTrk[0]);
-      vtxfit->AddTrack(1,  PionWTrk[1]);
-      vtxfit->AddTrack(2,  OtherWTrk[0]);
-      vtxfit->AddTrack(3,  OtherWTrk[1]);
-      vtxfit->AddVertex(0, vxpar,0, 1, 2,3);
-      //if(!vtxfit->Fit(0)) return SUCCESS;
-      vtxfit->Fit(0);
-      vtxfit->Fit(1);
-      vtxfit->Fit(2);
-      vtxfit->Fit(3);
-      vtxfit->Fit();
-      vtxfit->Swim(0);
-
-      //KinematicFit * kmfit = KinematicFit::instance();
-      KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
-      kmfit->init();
-      for(int i=0;i<4;i++)
-      {
-        kmfit->AddTrack(i,vtxfit->wtrk(i));
-      }
-      HepLorentzVector Pcmf(0.040546,0,0,PSIP_MASS); //initial vector of center of mass frame
-      kmfit->AddFourMomentum(0,  Pcmf);
-      kmfit->AddResonance(1, JPSI_MASS, 2, 3);
-      kmfit->Fit(0);
-      kmfit->Fit(1);
-      kmfit->Fit(2);
-      kmfit->Fit(3);
-      bool oksq = kmfit->Fit();
+      std::vector<HepLorentzVector> P_tmp;
+      double chi2_tmp;
+      bool oksq=kinematic_fit(PID, *pion_pair, *other_pair, P_tmp, chi2_tmp)
       if(oksq) 
       {
-        cout << "Good kinematik fit" << endl;
-        double chi2_tmp = kmfit->chisq();
         if(chi2_tmp < chi2)
         {
           GoodKinematikFit = true;
           chi2  = chi2_tmp;
-          for(int i=0;i<4;i++)
-          {
-            P[i] = kmfit->pfit(i);
-          }
+          P = P_tmp;
+          result_pion_pair = *pion_pair;
+          result_other_pair = * other_pair;
         }
       }
     } 
+  return GoodKinematikFit;
 }
 
 StatusCode JpsiKK::execute()
@@ -953,9 +968,32 @@ StatusCode JpsiKK::execute()
 
 
   if(other_pairs.empty()) return StatusCode::SUCCESS;
-  double kinematic_chi2;
-  std::vector<HepLorentzVector> Pkf;
-  bool GoodKinematikFit = kinematic_fit(ID_KAON, pion_pairs, other_pairs, Pkf,kinematic_chi2);
+  bool GoodKinematikFit=false;
+  double kinematic_chi2=2e100;
+  std::vector<HepLorentzVector Pkf(4);
+  for(int pid = 0;i<5;i++)
+  {
+    std::vector<HepLorentzVector> P_tmp(4);
+    TrackPair_t pion_pr;
+    TrackPair_t other_pr;
+    double chi2_tmp;
+    bool fit_result = kinematic_fit(pid, pion_pairs, other_pairs, P_tmp, chi2_tmp, pion_pr, other_pr);
+    vector<double> pid_chi2 = get_chi2(other_pr);
+    chi2_tmp+=pid_chi2[pid];
+    if(fit_result)
+    {
+      GoodKinematikFit = true;
+      if(chi2_tmp<kinematic_chi2)
+      {
+        //save this better fit result
+        pion_pair=pion_pr;
+        result_pair = other_pr;
+        channel = pid;
+        kinematic_chi2 = chi2_tmp;
+        Pkf=P_tmp;
+      }
+    }
+  }
 
   //now fill the tuples
 
