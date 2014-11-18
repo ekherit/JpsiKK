@@ -917,7 +917,7 @@ StatusCode JpsiKK::execute()
     vtxfit->Fit(2);
     vtxfit->Fit(3);
     vtxfit->Fit();
-    //vtxfit->Swim(0);
+    vtxfit->Swim(0);
 
     //Get new track parameters
     WTrackParameter WTP[4];
