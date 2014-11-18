@@ -914,7 +914,7 @@ StatusCode JpsiKK::execute()
 
     //Get new track parameters
     WTrackParameter WTP[4];
-    for(int i=0;i<4;i++) WTP[4] =  vtxfit->wtrk(i);
+    for(int i=0;i<4;i++) WTP[i] =  vtxfit->wtrk(i);
 
     //KinematicFit * kmfit = KinematicFit::instance();
     KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
