@@ -966,7 +966,7 @@ StatusCode JpsiKK::execute()
       cout << "new momentum after kinematic fit: " << endl;
       for(int i=0;i<4;i++) 
       {
-        Pkf[i] = WTP[i].p();
+        //Pkf[i] = WTP[i].p();
         cout << Pkf[i].px() << " "<< Pkf[i].py() << " " << Pkf[i].pz()  << " " << Pkf[i].m()<< endl;
       }
     }
