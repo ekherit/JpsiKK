@@ -59,6 +59,7 @@ typedef HepGeom::Point3D<double> HepPoint3D;
 
 
 #include "VertexFit/KinematicFit.h"
+#include "VertexFit/KalmanKinematicFit.h"
 #include "VertexFit/VertexFit.h"
 #include "VertexFit/Helix.h"
 #include "ParticleID/ParticleID.h"
