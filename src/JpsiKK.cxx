@@ -604,7 +604,7 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
     for(int i=0;i<4;i++)
     {
       P[i] = kmfit->pfit(i);
-      cout << "P=" << P[i].px() << " " << P[i].py() << " " << P[i].pz() << " " <<  P[i].m() << endl;
+      cout << "P=" << P[i].px() << " " << P[i].py() << " " << P[i].pz() << " " <<  P[i].m() << " chi2=" << chi2 << endl;
     }
   }
 }
