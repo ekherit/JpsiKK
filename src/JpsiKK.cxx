@@ -66,6 +66,7 @@ typedef HepGeom::Point3D<double> HepPoint3D;
 
 
 #include <algorithm>
+#include <limits>
 
 int JpsiKK::RootEmc::ARRAY_SIZE = 100;
 
@@ -978,10 +979,10 @@ StatusCode JpsiKK::execute()
     TrackPair_t other_pr;
     double chi2_tmp;
     bool fit_result = kinematic_fit(pid, pion_pairs, other_pairs, P_tmp, chi2_tmp, pion_pr, other_pr);
-    vector<double> pid_chi2 = get_chi2(other_pr);
-    chi2_tmp+=pid_chi2[pid];
     if(fit_result)
     {
+      vector<double> pid_chi2 = get_chi2(other_pr);
+      chi2_tmp+=pid_chi2[pid];
       for(int i=0;i<4;i++)
       {
         cout << "P_tmp=" << P_tmp[i].px() << " " << P_tmp[i].py() << " " << P_tmp[i].pz() << " " <<  P_tmp[i].m() << endl;
