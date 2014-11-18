@@ -1008,7 +1008,7 @@ StatusCode JpsiKK::execute()
       fEvent.px[i]= Pkf[i].px();
       fEvent.py[i]= Pkf[i].py();
       fEvent.pz[i]= Pkf[i].pz();
-      fEvent.p[i] = sqrt(sq(Pkf[i].px()) sq(Pkf[i].py())+sq(Pkf[i].pz()));
+      fEvent.p[i] = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py())+sq(Pkf[i].pz()));
       fEvent.theta[i]= Pkf[i].theta();
       fEvent.phi[i] = Pkf[i].phi();
     }
