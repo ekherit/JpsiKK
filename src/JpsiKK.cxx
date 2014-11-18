@@ -933,7 +933,7 @@ StatusCode JpsiKK::execute()
     }
     for(int i=0;i<2;i++)
     {
-      WTP[i+2] =  OtherWTrk[i].p();
+      WTP[i+2] =  OtherWTrk[i];
       Pkf[i+2] = WTP[i+2];
       cout << WTP[i].p().px() << " "<< WTP[i].p().py() << " " << WTP[i].p().pz()  << " " << WTP[i].p().m()<< endl;
     }
