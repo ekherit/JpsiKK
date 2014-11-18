@@ -604,7 +604,7 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
     for(int i=0;i<4;i++)
     {
       P[i] = kmfit->pfit(i);
-      cout << "P=" << P[i].px() << " " << P[i].py() << " " << P[i].pz() << " " <<  P[i].m() << " chi2=" << chi2 << endl;
+      cout << "pid = " << PID << " P=" << P[i].px() << " " << P[i].py() << " " << P[i].pz() << " " <<  P[i].m() << " chi2=" << chi2 << endl;
     }
   }
 }
@@ -619,7 +619,7 @@ bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  ot
     for(TrackPairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
     {
       std::vector<HepLorentzVector> P_tmp;
-      double chi2_tmp;
+      double chi2_tmp=3e100;
       bool oksq=kinematic_fit(PID, *pion_pair, *other_pair, P_tmp, chi2_tmp);
       if(oksq) 
       {
