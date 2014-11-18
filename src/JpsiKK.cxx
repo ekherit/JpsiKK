@@ -534,12 +534,13 @@ vector<double> get_chi2(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> & pa
   return chi2;
 }
 
-bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  other_pairs, HepLorentzVector & P, double & chi2)
+bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  other_pairs, std::vector<HepLorentzVector> & P, double & chi2)
 {
   double chi2_tmp = 1e100;
+  P.resize(4);
   bool GoodKinematikFit=false;
-  for(PairList_t::iterator pion_pair=pion_pairs.begin(); pion_pair!=pion_pairs.end();pion_pair++)
-    for(PairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
+  for(TrackPairList_t::iterator pion_pair=pion_pairs.begin(); pion_pair!=pion_pairs.end();pion_pair++)
+    for(TrackPairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
     {
       EvtRecTrackIterator  PionTrk[2] = {pion_pair->first, pion_pair->second};
       EvtRecTrackIterator  OtherTrk[2] = {other_pair->first, other_pair->second};
@@ -811,9 +812,9 @@ StatusCode JpsiKK::execute()
   }
 
   //make kaon or muon pairs
-  PairList_t muon_pairs;
-  PairList_t kaon_pairs;
-  PairList_t other_pairs;
+  TrackPairList_t muon_pairs;
+  TrackPairList_t kaon_pairs;
+  TrackPairList_t other_pairs;
   for(TrackList_t::iterator i=other_negative_tracks.begin(); i!=other_negative_tracks.end(); ++i)
     for(TrackList_t::iterator j=other_positive_tracks.begin(); j!=other_positive_tracks.end(); ++j)
     {
@@ -953,7 +954,7 @@ StatusCode JpsiKK::execute()
 
   if(other_pairs.empty()) return StatusCode::SUCCESS;
   double chi2;
-  HepLorentzVector Pkf;
+  std::vector<HepLorentzVector> Pkf;
   bool GoodKinematikFit = kinematic_fit(ID_KAON, pion_pairs, other_pairs, Pkf,chi2);
 
   //now fill the tuples
