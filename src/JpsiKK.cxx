@@ -969,6 +969,8 @@ StatusCode JpsiKK::execute()
     }
   }
 
+  if(!GoodKinematikFit) return StatusCode::SUCCESS;
+
 
 
 
