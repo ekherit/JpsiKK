@@ -443,7 +443,7 @@ SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk, bool
   {
     unsigned int st = (*tofTrk)->status();
     hitst->setStatus(st);
-    if( !hitst->is_claster() ) continue;
+    //if( !hitst->is_claster() ) continue;
     //if(  (hitst->is_barrel()) ) continue;
     if( !(hitst->is_counter()) ) continue;
     tofecount.push_back(goodtofetrk);
@@ -871,7 +871,7 @@ StatusCode JpsiKK::execute()
   for(PairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
   {
     EvtRecTrackIterator  PionTrk[2] = {pion_pair.first, pion_pair.second};
-    EvtRecTrackIterator  OtherTrk[2] = {pair.first, pair.second};
+    EvtRecTrackIterator  OtherTrk[2] = {other_pair.first, other_pair.second};
     RecMdcKalTrack PionKalTrk[2];
     RecMdcKalTrack OtherKalTrk[2];
     WTrackParameter PionWTrk[2];
