@@ -913,6 +913,9 @@ StatusCode JpsiKK::execute()
     vtxfit->AddVertex(0, vxpar,0, 1, 2,3);
     //if(!vtxfit->Fit(0)) return SUCCESS;
     vtxfit->Fit(0);
+    vtxfit->Fit(1);
+    vtxfit->Fit(2);
+    vtxfit->Fit(3);
     vtxfit->Fit();
     //vtxfit->Swim(0);
 
