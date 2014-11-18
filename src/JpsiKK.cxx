@@ -871,9 +871,9 @@ StatusCode JpsiKK::execute()
   for(PairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
   {
     EvtRecTrackIterator  PionTrk[2] = {pion_pair.first, pion_pair.second};
-    EvtRecTrackIterator  OtherTrk[2] = {other_pair.first, other_pair.second};
-    RecMdcKalTrack PionKalTrk[2];
-    RecMdcKalTrack OtherKalTrk[2];
+    EvtRecTrackIterator  OtherTrk[2] = {other_pair->first, other_pair->second};
+    RecMdcKalTrack * PionKalTrk[2];
+    RecMdcKalTrack * OtherKalTrk[2];
     WTrackParameter PionWTrk[2];
     WTrackParameter OtherWTrk[2];
 
@@ -903,10 +903,10 @@ StatusCode JpsiKK::execute()
     VertexFit* vtxfit = VertexFit::instance();
     vtxfit->init();
     //add tracks. I know the first two one must be pions
-    vtxfit->AddTrack(0, PION_MASS, PionWTrk[0]);
-    vtxfit->AddTrack(1, PION_MASS, PionWTrk[1]);
-    vtxfit->AddTrack(2, KAON_MASS, OtherWTrk[2]);
-    vtxfit->AddTrack(3, KAON_MASS, OtherWTrk[3]);
+    vtxfit->AddTrack(0,  PionWTrk[0]);
+    vtxfit->AddTrack(1,  PionWTrk[1]);
+    vtxfit->AddTrack(2,  OtherWTrk[2]);
+    vtxfit->AddTrack(3,  OtherWTrk[3]);
     vtxfit->AddVertex(0, vxpar,0, 1, 2,3);
     if(!vtxfit->Fit(0)) return SUCCESS;
     vtxfit->Swim(0);
