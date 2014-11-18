@@ -970,7 +970,7 @@ StatusCode JpsiKK::execute()
   if(other_pairs.empty()) return StatusCode::SUCCESS;
   bool GoodKinematikFit=false;
   double kinematic_chi2=2e100;
-  std::vector<HepLorentzVector Pkf(4);
+  std::vector<HepLorentzVector> Pkf(4);
   for(int pid = 0;i<5;i++)
   {
     std::vector<HepLorentzVector> P_tmp(4);
