@@ -909,7 +909,8 @@ StatusCode JpsiKK::execute()
     vtxfit->AddTrack(2,  OtherWTrk[2]);
     vtxfit->AddTrack(3,  OtherWTrk[3]);
     vtxfit->AddVertex(0, vxpar,0, 1, 2,3);
-    if(!vtxfit->Fit(0)) return SUCCESS;
+    //if(!vtxfit->Fit(0)) return SUCCESS;
+    vtxfit->Fit();
     vtxfit->Swim(0);
 
     //Get new track parameters
@@ -926,7 +927,7 @@ StatusCode JpsiKK::execute()
     HepLorentzVector Pcmf(0.040546,0,0,PSIP_MASS); //initial vector of center of mass frame
     kmfit->AddResonance(0, JPSI_MASS, 2, 3);
     kmfit->AddFourMomentum(1,  Pcmf);
-    kmfit->Fit(0);
+    if(!kmfit->Fit(0);
     kmfit->Fit(1);
     bool oksq = kmfit->Fit();
     if(oksq) 
