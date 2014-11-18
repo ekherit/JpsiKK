@@ -925,18 +925,20 @@ StatusCode JpsiKK::execute()
     for(int i=0;i<2; i++) cout << PionWTrk[i].p().px() << " "<< PionWTrk[i].p().py() << " " << PionWTrk[i].p().pz() << " " << PionWTrk[i].p().m() << endl;
     for(int i=0;i<2; i++) cout << OtherWTrk[i].p().px() << " "<< OtherWTrk[i].p().py() << " " << OtherWTrk[i].p().pz() << " " << OtherWTrk[i].p().m() << endl;
     cout << "new momentum: " << endl;
-    for(int i=0;i<2;i++) 
+    for(int i=0;i<4;i++) 
     {
       WTP[i] =  vtxfit->wtrk(i);
       Pkf[i] = WTP[i].p();
       cout << WTP[i].p().px() << " "<< WTP[i].p().py() << " " << WTP[i].p().pz()  << " " << WTP[i].p().m()<< endl;
     }
+    /*
     for(int i=0;i<2;i++)
     {
       WTP[i+2] =  OtherWTrk[i];
       Pkf[i+2] = WTP[i+2].p();
       cout << WTP[i+2].p().px() << " "<< WTP[i+2].p().py() << " " << WTP[i+2].p().pz()  << " " << WTP[i+2].p().m()<< endl;
     }
+    */
     cout << endl;
     /*
 
