@@ -211,7 +211,7 @@ class JpsiKK : public Algorithm
   private:
 
   RootEvent fEvent;   //signal event essential information
-  RootEvent fPid;   //Paritlce id information
+  RootPid fPid;   //Paritlce id information
   RootMdc   fMdc;     //Mdc information
   RootDedx  fDedx;    //DeDx for the event
   RootEmc   fEmc;     //Emc infromation for the event

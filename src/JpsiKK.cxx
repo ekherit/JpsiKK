@@ -220,7 +220,6 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("pid_chi2", pid_chi2); 
 
   status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
-  status = tuple->addIndexedItem ("trackId",   ntrack, trackId);
   status = tuple->addIndexedItem ("q",     ntrack, q);
   status = tuple->addIndexedItem ("E",     ntrack, E);
   status = tuple->addIndexedItem ("p",     ntrack, p);
@@ -596,8 +595,8 @@ vector<double> get_chi2(EvtRecTrackIterator & itTrk)
 
 vector< vector<double> > get_chi2(TrackPair_t & pion_pair, TrackPair_t & kaon_pair)
 {
-  EvtRecTrackIterator  itTrk[4] = {pion_pair.first, pion_pair.second, kaon_pair.first, kaon_pair.second}
-  vector<vector<double>> chi2(4);
+  EvtRecTrackIterator  itTrk[4] = {pion_pair.first, pion_pair.second, kaon_pair.first, kaon_pair.second};
+  vector< vector<double> > chi2(4);
   for(int track=0;track<chi2.size();track++)
   {
     chi2[track] = get_chi2(itTrk[track]);
