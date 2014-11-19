@@ -983,8 +983,8 @@ StatusCode JpsiKK::execute()
     bool fit_result = kinematic_fit(pid, pion_pairs, other_pairs, P_tmp, chi2_tmp, pion_pr, other_pr);
     if(fit_result)
     {
-      vector<double> pid_chi2 = get_chi2(other_pr);
-      chi2_tmp+=pid_chi2[pid];
+      //vector<double> pid_chi2 = get_chi2(other_pr);
+      //chi2_tmp+=pid_chi2[pid];
       GoodKinematikFit = true;
       if(chi2_tmp<kinematic_chi2)
       {
