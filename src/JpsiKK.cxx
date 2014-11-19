@@ -1149,6 +1149,7 @@ StatusCode JpsiKK::execute()
 
   fEvent.ntrack=4;
   fPid.ntrack=4;
+  fMdc.ntrack=4;
   fDedx.ntrack=4;
   fEmc.ntrack=4;
   fTof.ntrack=4;
