@@ -1143,7 +1143,7 @@ StatusCode JpsiKK::execute()
   PID->init();
   PID->setMethod(PID->methodProbability());
   PID->setChiMinCut(4);
-  PID->usePidSys(PID->useDedx() || PID->useTof);
+  PID->usePidSys(PID->useDedx() || PID->useTof());
   PID->identify(PID->all()); 
 
   fEvent.ntrack=4;
