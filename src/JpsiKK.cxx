@@ -594,7 +594,7 @@ vector<double> get_chi2(EvtRecTrackIterator & itTrk)
 }
 
 
-vector<vector<double>> get_chi2(TrackPair_t & pion_pair, TrackPair_t & kaon_pair)
+vector< vector<double> > get_chi2(TrackPair_t & pion_pair, TrackPair_t & kaon_pair)
 {
   EvtRecTrackIterator  itTrk[4] = {pion_pair.first, pion_pair.second, kaon_pair.first, kaon_pair.second}
   vector<vector<double>> chi2(4);
