@@ -1324,7 +1324,7 @@ StatusCode JpsiKK::execute()
       fPid.prob[ID_KAON][i]     = PID->probKaon();
       fPid.prob[ID_PROTON][i]   = PID->probProton();
     }
-    vector<double> chi2 = get_chi2(*itTrk[i]);
+    vector<double> chi2 = get_chi2(itTrk[i]);
     for(int pid=0;pid<5;pid++)
     {
       fPid.chi2[pid][i]   = chi2[pid];
