@@ -1354,6 +1354,7 @@ StatusCode JpsiKK::execute()
 
   fEvent.tuple->write();
   fPid.tuple->write();
+  fMdc.tuple->write();
   fEmc.tuple->write();
   fDedx.tuple->write();
   fTof.tuple->write();
