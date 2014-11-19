@@ -565,6 +565,7 @@ vector<double> get_chi2(EvtRecTrackIterator & itTrk)
   vector<double> chi2(5,99999);
   if(!(*itTrk)->isMdcTrackValid()) return chi2;
   if(!(*itTrk)->isMdcDedxValid())  return chi2;
+  for(int i=0;i<5;i++) chi2[i]=0;
   RecMdcTrack * mdcTrk  = (*itTrk)->mdcTrack();
 
   //dedx information
