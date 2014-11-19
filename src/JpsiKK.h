@@ -105,16 +105,10 @@ class JpsiKK : public Algorithm
     NTuple::Item<double>  Mrecoil;  //pion recoil mass
     NTuple::Item<double>  M2missing; //missing square invariant mass
     NTuple::Item<double>  Minv; //invariant mass two charged particles
-    NTuple::Item<double>  kchi2; //kinematic chi2 + pid chi2
-
-    NTuple::Item<long>    npid;  //number of particle hypo 0-K,1-mu,2-e,3-pi,4-p
-    NTuple::Array<double> M;     
-    NTuple::Array<double> chi2;  //chi2 to be particle 
-    NTuple::Array<double> prob;     
+    NTuple::Item<double>  kin_chi2; //kinematic chi2
+    NTuple::Item<double>  pid_chi2; //my prob  chi2
 
     NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
-    NTuple::Array<long> index; //index of track
-    NTuple::Array<long> trackId; //id of the track
     NTuple::Array<double> q; //charge of the track
     NTuple::Array<double> E;
     NTuple::Array<double> p;
@@ -125,27 +119,37 @@ class JpsiKK : public Algorithm
     NTuple::Array<double> theta,phi;
     NTuple::Array<double> x, y, z, r; //poca coordinate of track
     NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
-    NTuple::Array<double> probe,probmu,probpi,probk,probp; //probability of track to be e,mu,pi,k or p
+    virtual void init(void);
+    virtual StatusCode init_tuple(void);
+  };
+
+
+  struct RootPid : public RootTuple
+  {
+$   NTuple::Item<double>  M[5]; //invariant mass of highmomentum track 
+    NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
+    NTuple::Array<double> prob[5]; //probability of track to be e,mu,pi,k or p
+    NTuple::Array<double> chi2[5];  
     virtual void init(void);
     virtual StatusCode init_tuple(void);
   };
 
   struct RootMdc : public RootTuple
   {
+    NTuple::Item<double>  Mrecoil;  //pion recoil mass
+    NTuple::Item<double>  Minv; //invariant mass two charged particles
+
     NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
     NTuple::Array<long>  trackId; //id of the track
     NTuple::Array<double> q; //charge of the track
-    NTuple::Array<double> E;
-    NTuple::Array<double> p;
-    NTuple::Array<double> px;
-    NTuple::Array<double> py;
-    NTuple::Array<double> pz;
+    NTuple::Array<double> E,p;
+    NTuple::Array<double> px,py,pz;
     NTuple::Array<double> pt; //transvese momentum
     NTuple::Array<double> theta,phi;
     NTuple::Array<double> x, y, z, r; //poca coordinate of track
     NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
-    virtual void init(void){};
-    virtual StatusCode init_tuple(void){};
+    virtual void init(void);
+    virtual StatusCode init_tuple(void);
   };
 
 
@@ -206,10 +210,12 @@ class JpsiKK : public Algorithm
 
   private:
 
-  RootEvent fEvent; //signal event essential information
-  RootDedx  fDedx; //dedx for the event
-  RootEmc   fEmc;  //emc infromation for the event
-  RootTof   fTof;  //emc infromation for the event
+  RootEvent fEvent;   //signal event essential information
+  RootEvent fPid;   //Paritlce id information
+  RootMdc   fMdc;     //Mdc information
+  RootDedx  fDedx;    //DeDx for the event
+  RootEmc   fEmc;     //Emc infromation for the event
+  RootTof   fTof;     //TOF infromation for the event
   RootEmc   fNeutral; //neutral tracks
 };
 

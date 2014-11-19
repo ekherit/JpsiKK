@@ -88,6 +88,26 @@ inline double sq(double x) { return x*x; }
 typedef std::pair<EvtRecTrackIterator, EvtRecTrackIterator> TrackPair_t;
 typedef std::list<TrackPair_t> TrackPairList_t;
 typedef std::list<EvtRecTrackIterator> TrackList_t;
+typedef std::vector<EvtRecTrackIterator> TrackVector_t;
+
+
+TrackVector_t make_track_vector(TrackPair_t & pair1, TrackPair_t & pair2)
+{
+  TrackVector_t V(4);
+  V[0] = pair1.first;
+  V[1] = pair1.second;
+  V[2] = pair2.first;
+  V[3] = pair2.second;
+  return V;
+}
+
+TrackVector_t make_track_vector(TrackPair_t & pair1)
+{
+  TrackVector_t V(2);
+  V[0] = pair1.first;
+  V[1] = pair1.second;
+  return V;
+}
 
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
@@ -166,10 +186,12 @@ StatusCode JpsiKK::initialize(void)
   event_with_muons=0;
 
   StatusCode status;
-  status = init_tuple(this, fEvent,"FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
-  status = init_tuple(this, fDedx,"FILE1/dedx","Dedx info for signal",log);
-  status = init_tuple(this, fEmc,"FILE1/emc","Emc info for signal",log);
-  status = init_tuple(this, fTof,"FILE1/tof","Tof info for signal",log);
+  status = init_tuple(this, fEvent,  "FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
+  status = init_tuple(this, fPid,  "FILE1/pid","particle id",log);
+  status = init_tuple(this, fMdc,    "FILE1/mdc","Mdc info for signal",log);
+  status = init_tuple(this, fDedx,   "FILE1/dedx","Dedx info for signal",log);
+  status = init_tuple(this, fEmc,    "FILE1/emc","Emc info for signal",log);
+  status = init_tuple(this, fTof,    "FILE1/tof","Tof info for signal",log);
   status = init_tuple(this, fNeutral,"FILE1/neutral","Good neutral tracks",log);
 
   return status;
@@ -191,18 +213,13 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
   status = tuple->addItem ("channel", channel); //decay channel of the J/psi
   status = tuple->addItem ("KK", KK); //KK decay channel of the J/psi
-  status = tuple->addItem ("uu", uu); //uu decay channel of the J/psi
+  status = tuple->addItem ("uu", uu); //mu-mu decay channel of the J/psi
   status = tuple->addItem ("Mrec", Mrecoil); 
   status = tuple->addItem ("Minv", Minv); 
-  status = tuple->addItem ("M2mis", M2missing); 
-  status = tuple->addItem ("kchi2", kchi2); 
-  status = tuple->addItem ("npid", npid,0,5); 
-  status = tuple->addIndexedItem ("M", npid, M); 
-  status = tuple->addIndexedItem ("prob", npid, prob); 
-  status = tuple->addIndexedItem ("chi2", npid, chi2); 
+  status = tuple->addItem ("kin_chi2", kin_chi2); 
+  status = tuple->addItem ("pid_chi2", pid_chi2); 
 
   status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
-  status = tuple->addIndexedItem ("idx",   ntrack, index);
   status = tuple->addIndexedItem ("trackId",   ntrack, trackId);
   status = tuple->addIndexedItem ("q",     ntrack, q);
   status = tuple->addIndexedItem ("E",     ntrack, E);
@@ -220,17 +237,71 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addIndexedItem ("vxy",   ntrack, vxy);
   status = tuple->addIndexedItem ("vz",    ntrack, vz);
   status = tuple->addIndexedItem ("vphi",  ntrack, vphi);
-
-  //particle id information
-  status = tuple->addIndexedItem ("probe",  ntrack, probe);
-  status = tuple->addIndexedItem ("probmu",  ntrack, probmu);
-  status = tuple->addIndexedItem ("probpi",  ntrack, probpi);
-  status = tuple->addIndexedItem ("probk",  ntrack, probk);
-  status = tuple->addIndexedItem ("probp",  ntrack, probp);
   return status;
 }
 
 void JpsiKK::RootEvent::init(void)
+{
+  ntrack=4;
+}
+
+StatusCode JpsiKK::RootPid::init_tuple(void)
+{
+  StatusCode status;
+  status = tuple->addItem ("Mee", M[ID_ELECTRON]);
+  status = tuple->addItem ("MKK", M[ID_KAON]);
+  status = tuple->addItem ("Muu", M[ID_MUON]);
+  status = tuple->addItem ("Mpp", M[ID_PROTON]);
+  status = tuple->addItem ("Mpipi", M[ID_PION]);
+  //info prof ParticleID package
+  status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
+  status = tuple->addIndexedItem ("probe",  ntrack, prob[ID_ELECTRON]);
+  status = tuple->addIndexedItem ("probmu",  ntrack, prob[ID_MUON]);
+  status = tuple->addIndexedItem ("probpi",  ntrack, prob[ID_PION]);
+  status = tuple->addIndexedItem ("probk",  ntrack, prob[ID_KAON]);
+  status = tuple->addIndexedItem ("probp",  ntrack, prob[ID_PROTON]);
+  //my particle id information
+  status = tuple->addIndexedItem ("chi2e",  ntrack, chi2[ID_ELECTRON]);
+  status = tuple->addIndexedItem ("chi2mu",  ntrack, chi2[ID_MUON]);
+  status = tuple->addIndexedItem ("chi2pi",  ntrack, chi2[ID_PION]);
+  status = tuple->addIndexedItem ("chi2k",  ntrack, chi2[ID_KAON]);
+  status = tuple->addIndexedItem ("chi2p",  ntrack, chi2[ID_PROTON]);
+  return status;
+}
+
+void JpsiKK::RootPid::init(void)
+{
+  ntrack=4;
+}
+
+StatusCode JpsiKK::RootMdc::init_tuple(void)
+{
+  StatusCode status;
+  status = tuple->addItem ("Mrec", Mrecoil); 
+  status = tuple->addItem ("Minv", Minv); 
+  status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
+  status = tuple->addIndexedItem ("trackId",   ntrack, trackId);
+  status = tuple->addIndexedItem ("q",     ntrack, q);
+  status = tuple->addIndexedItem ("E",     ntrack, E);
+  status = tuple->addIndexedItem ("p",     ntrack, p);
+  status = tuple->addIndexedItem ("px",    ntrack, px);
+  status = tuple->addIndexedItem ("py",    ntrack, py);
+  status = tuple->addIndexedItem ("pz",    ntrack, pz);
+  status = tuple->addIndexedItem ("pt",    ntrack, pt);
+  status = tuple->addIndexedItem ("theta", ntrack, theta);
+  status = tuple->addIndexedItem ("phi",   ntrack, phi);
+  status = tuple->addIndexedItem ("x",     ntrack, x);
+  status = tuple->addIndexedItem ("y",     ntrack, y);
+  status = tuple->addIndexedItem ("z",     ntrack, z);
+  status = tuple->addIndexedItem ("r",     ntrack, r);
+  status = tuple->addIndexedItem ("vxy",   ntrack, vxy);
+  status = tuple->addIndexedItem ("vz",    ntrack, vz);
+  status = tuple->addIndexedItem ("vphi",  ntrack, vphi);
+  return status;
+}
+
+
+void JpsiKK::RootMdc::init(void)
 {
   ntrack=4;
 }
@@ -378,7 +449,7 @@ void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
 }
 
 
-double get_invariant_mass2(std::pair<EvtRecTrackIterator,EvtRecTrackIterator> & pair, double mass)
+double get_invariant_mass2(TrackPair_t & pair, double mass)
 {
   EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
   HepLorentzVector  P[2];
@@ -489,9 +560,10 @@ SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk, bool
 //  return tofTrk;
 //}
 
+
 vector<double> get_chi2(EvtRecTrackIterator & itTrk)
 {
-  vector<double> chi2(5,0);
+  vector<double> chi2(5,99999);
   if(!(*itTrk)->isMdcTrackValid()) return chi2;
   if(!(*itTrk)->isMdcDedxValid())  return chi2;
   RecMdcTrack * mdcTrk  = (*itTrk)->mdcTrack();
@@ -517,6 +589,18 @@ vector<double> get_chi2(EvtRecTrackIterator & itTrk)
     chi2[ID_ELECTRON] +=   sq(((*tofTrk)->texpElectron()-t)/dt);
     chi2[ID_PION]     +=   sq(((*tofTrk)->texpPion()-t)/dt);
     chi2[ID_PROTON]   +=   sq(((*tofTrk)->texpProton()-t)/dt);
+  }
+  return chi2;
+}
+
+
+vector<vector<double>> get_chi2(TrackPair_t & pion_pair, TrackPair_t & kaon_pair)
+{
+  EvtRecTrackIterator  itTrk[4] = {pion_pair.first, pion_pair.second, kaon_pair.first, kaon_pair.second}
+  vector<vector<double>> chi2(4);
+  for(int track=0;track<chi2.size();track++)
+  {
+    chi2[track] = get_chi2(itTrk[track]);
   }
   return chi2;
 }
@@ -983,8 +1067,6 @@ StatusCode JpsiKK::execute()
     bool fit_result = kinematic_fit(pid, pion_pairs, other_pairs, P_tmp, chi2_tmp, pion_pr, other_pr);
     if(fit_result)
     {
-      //vector<double> pid_chi2 = get_chi2(other_pr);
-      //chi2_tmp+=pid_chi2[pid];
       GoodKinematikFit = true;
       if(chi2_tmp<kinematic_chi2)
       {
@@ -1014,6 +1096,9 @@ StatusCode JpsiKK::execute()
       return StatusCode::SUCCESS;
       break;
   }
+  //now we have best pion_pair, best kaon/muon pair (result_pair), four-momentum
+  //of all particles after kinematik fit
+
 
   //now fill the tuples
 
@@ -1027,29 +1112,48 @@ StatusCode JpsiKK::execute()
   fEvent.npion_pairs = pion_pairs.size();
   // fill the decay channel of the J/psi 0 - kaons, 1 --muons
   fEvent.channel = channel; 
+  fEvent.kin_chi2 = kinematic_chi2;
+  fEvent.pid_chi2 = get_chi2(result_pair)[channel];
+  fEvent.Minv = (Pkf[2]+Pkf[3]).m();
+  HepLorentzVector P_psip(0.040546,0,0,PSIP_MASS); //initial vector of psip
+  fEvent.Mrecoil = (P_psip - Pkf[0] - Pkf[1]).m();
 
-  fEvent.Mrecoil = get_recoil__mass(pion_pair, PION_MASS);
-  fEvent.Minv    = sqrt(get_invariant_mass2(result_pair,XMASS[channel]));
-  fEvent.M2missing = get_missing_mass(pion_pair,result_pair);
-
-  if(GoodKinematikFit)
+  fEvent.ntrack = 4;
+  for ( int i=0;i<4;i++)
   {
-    fEvent.Minv = (Pkf[2]+Pkf[3]).m();
-    HepLorentzVector P_psip(0.040546,0,0,PSIP_MASS); //initial vector of psip
-    fEvent.Mrecoil = (P_psip - Pkf[0] - Pkf[1]).m();
+    fEvent.q[i]  = i%2 == 0 ? -1 : +1;
+    fEvent.E[i]  = Pkf[i].e();
+    fEvent.px[i] = Pkf[i].px();
+    fEvent.py[i] = Pkf[i].py();
+    fEvent.pz[i] = Pkf[i].pz();
+    fEvent.p[i]  = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py())+sq(Pkf[i].pz()));
+    fEvent.pt[i] = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py()));
+    fEvent.theta[i]= Pkf[i].theta();
+    fEvent.phi[i] = Pkf[i].phi();
+    fEvent.x[i]=0;
+    fEvent.y[i]=0;
+    fEvent.z[i]=0;
+    fEvent.r[i]=0;
+    fEvent.vxy[i]=0;
+    fEvent.vz[i]=0;
+    fEvent.vphi[i]=0;
   }
+
 
   ParticleID * PID = ParticleID::instance();
   PID->init();
   PID->setMethod(PID->methodProbability());
   PID->setChiMinCut(4);
-  PID->usePidSys(PID->useDedx());
+  PID->usePidSys(PID->useDedx() || PID->useTof);
   PID->identify(PID->all()); 
 
   fEvent.ntrack=4;
+  fPid.ntrack=4;
   fDedx.ntrack=4;
   fEmc.ntrack=4;
   fTof.ntrack=4;
+  fMdc.Mrecoil = get_recoil__mass(pion_pair, PION_MASS);
+  fMdc.Minv    = sqrt(get_invariant_mass2(result_pair,XMASS[channel]));
   EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
   for(int i=0;i<4;i++)
   {
@@ -1065,50 +1169,32 @@ StatusCode JpsiKK::execute()
     if((*itTrk[i])->isEmcShowerValid())
     {
       RecEmcShower *emcTrk = (*itTrk[i])->emcShower();
-      fEvent.E[i] = emcTrk->energy();
       fEmc.E[i] = emcTrk->energy();
       fEmc.theta[i] = emcTrk->theta();
       fEmc.phi[i] = emcTrk->phi();
       fEmc.time[i] = emcTrk->time();
     }
-    else 
-    {
-      fEvent.E[i]=0;
-    }
     RecMdcTrack  *mdcTrk = (*itTrk[i])->mdcTrack();
-    fEvent.index[i] = itTrk[i]-evtRecTrkCol->begin(); 
-    fEvent.trackId[i] = mdcTrk->trackId();
-    fEvent.q[i] = mdcTrk->charge(); 
-    if(GoodKinematikFit)
-    {
-      fEvent.px[i]= Pkf[i].px();
-      fEvent.py[i]= Pkf[i].py();
-      fEvent.pz[i]= Pkf[i].pz();
-      fEvent.p[i] = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py())+sq(Pkf[i].pz()));
-      fEvent.theta[i]= Pkf[i].theta();
-      fEvent.phi[i] = Pkf[i].phi();
-    }
-    else 
-    {
-      fEvent.p[i] = mdcTrk->p();
-      fEvent.px[i]= mdcTrk->px();
-      fEvent.py[i]= mdcTrk->py();
-      fEvent.pz[i]= mdcTrk->pz();
-      fEvent.theta[i]= mdcTrk->theta();
-      fEvent.phi[i] = mdcTrk->phi();
-      fEvent.x[i]  = mdcTrk->x();
-      fEvent.y[i]  = mdcTrk->y();
-      fEvent.z[i]  = mdcTrk->z();
-    }
-    fEvent.x[i]  = mdcTrk->x();
-    fEvent.y[i]  = mdcTrk->y();
-    fEvent.z[i]  = mdcTrk->z();
+    fMdc.trackId[i] = mdcTrk->trackId();
+    fMdc.q[i] = mdcTrk->charge(); 
+    fMdc.E[i] = 0;
+    fMdc.p[i] = mdcTrk->p();
+    fMdc.px[i]= mdcTrk->px();
+    fMdc.py[i]= mdcTrk->py();
+    fMdc.pz[i]= mdcTrk->pz();
+    fMdc.theta[i]= mdcTrk->theta();
+    fMdc.phi[i] = mdcTrk->phi();
+    fMdc.x[i]  = mdcTrk->x();
+    fMdc.y[i]  = mdcTrk->y();
+    fMdc.z[i]  = mdcTrk->z();
+    fMdc.x[i]  = mdcTrk->x();
+    fMdc.y[i]  = mdcTrk->y();
+    fMdc.z[i]  = mdcTrk->z();
     double rvxy,rvz,rvphi;
     calculate_vertex(mdcTrk,rvxy,rvz,rvphi); 
-    fEvent.vxy[i] = rvxy;
-    fEvent.vz[i]  = rvz; 
-    fEvent.vphi[i] = rvphi; 
-
+    fMdc.vxy[i] = rvxy;
+    fMdc.vz[i]  = rvz; 
+    fMdc.vphi[i] = rvphi; 
 
     //McParticleVector particles = navigator->getMcParticles((*itTrk[i])->mdcKalTrack());
     //if(!particles.empty())
@@ -1128,16 +1214,6 @@ StatusCode JpsiKK::execute()
 
     
 
-    PID->setRecTrack(*itTrk[i]);
-    PID->calculate();
-    if(PID->IsPidInfoValid())
-    {
-      fEvent.probe[i] =  PID->probElectron();
-      fEvent.probmu[i] = PID->probMuon();
-      fEvent.probpi[i] = PID->probPion();
-      fEvent.probk[i] =  PID->probKaon();
-      fEvent.probp[i] =  PID->probProton();
-    }
     //dedx information
     if((*itTrk[i])->isMdcDedxValid())
     {
@@ -1236,22 +1312,32 @@ StatusCode JpsiKK::execute()
       }
       cout << endl;
     }
+
+    //fill particle id
+
+    PID->setRecTrack(*itTrk[i]);
+    PID->calculate();
+    if(PID->IsPidInfoValid())
+    {
+      fPid.prob[ID_ELECTRON][i] = PID->probElectron();
+      fPid.prob[ID_MUON][i]     = PID->probMuon();
+      fPid.prob[ID_PION][i]     = PID->probPion();
+      fPid.prob[ID_KAON][i]     = PID->probKaon();
+      fPid.prob[ID_PROTON][i]   = PID->probProton();
+    }
+    vector<double> chi2 = get_chi2(*itTrk[i]);
+    for(int pid=0;pid<5;pid++)
+    {
+      fPid.chi2[pid][i]   = chi2[pid];
+    }
+
   }
-  fEvent.kchi2 = kinematic_chi2;
-  fEvent.npid=5;
-  vector<double> chi2 = get_chi2(result_pair);
   for(int i=0;i<5;i++)
   {
-    fEvent.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
-    fEvent.chi2[i] = chi2[i];
+    fPid.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
   }
 
 
-  fEvent.prob[0] =  fEvent.probk[2]*fEvent.probk[3];
-  fEvent.prob[1] =  fEvent.probmu[2]*fEvent.probmu[3];
-  fEvent.prob[2] =  fEvent.probe[2]*fEvent.probe[3];
-  fEvent.prob[3] =  fEvent.probpi[2]*fEvent.probpi[3];
-  fEvent.prob[4] =  fEvent.probp[2]*fEvent.probp[3];
 
   fNeutral.ntrack=std::min(good_neutral_tracks.size(), size_t(RootEmc::ARRAY_SIZE));
   int idx=0;
