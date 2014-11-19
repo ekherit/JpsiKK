@@ -662,8 +662,6 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   vtxfit->AddTrack(2,  OtherWTrk[0]);
   vtxfit->AddTrack(3,  OtherWTrk[1]);
   vtxfit->AddVertex(0, vxpar,0, 1, 2,3);
-  //vtxfit->AddVertex(0, vxpar,0, 1);
-  //vtxfit->AddVertex(1, vxpar,2, 3);
   if(!vtxfit->Fit(0)) return false;
   //if(!vtxfit->Fit(1)) return false;
   vtxfit->Fit();
@@ -1174,11 +1172,11 @@ StatusCode JpsiKK::execute()
       fEmc.theta[i] = emcTrk->theta();
       fEmc.phi[i] = emcTrk->phi();
       fEmc.time[i] = emcTrk->time();
+      fMdc.E[i] = fEmc.E[i];
     }
     RecMdcTrack  *mdcTrk = (*itTrk[i])->mdcTrack();
     fMdc.trackId[i] = mdcTrk->trackId();
     fMdc.q[i] = mdcTrk->charge(); 
-    fMdc.E[i] = 0;
     fMdc.p[i] = mdcTrk->p();
     fMdc.px[i]= mdcTrk->px();
     fMdc.py[i]= mdcTrk->py();
