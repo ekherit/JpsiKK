@@ -1410,8 +1410,8 @@ StatusCode JpsiKK::execute()
   for(int i=0;i<5;i++)
   {
     fPid.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
-    PWkf[2].setMass(XMASS[pid]);
-    PWkf[3].setMass(XMASS[pid]);
+    PWkf[2].setMass(XMASS[i]);
+    PWkf[3].setMass(XMASS[i]);
     HepLorentzVector p1 = PWkf[2].p();
     HepLorentzVector p2 = PWkf[2].p();
     fPid.kM[i] = (p1+p2).m();
