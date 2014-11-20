@@ -688,6 +688,11 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   cout << "After vertex fit: x: " << vtxfit->wtrk(1).x().x() << " " << vtxfit->wtrk(1).x().y() << " " << vtxfit->wtrk(1).x().z() << endl;
   cout << "After vertex fit: x: " << vtxfit->wtrk(2).x().x() << " " << vtxfit->wtrk(2).x().y() << " " << vtxfit->wtrk(2).x().z() << endl;
   cout << "After vertex fit: x: " << vtxfit->wtrk(3).x().x() << " " << vtxfit->wtrk(3).x().y() << " " << vtxfit->wtrk(3).x().z() << endl;
+  cout << endl;
+  cout << "After vertex fit: x: " << vtxfit->wtrk(0).px() << " " << vtxfit->wtrk(0).py() << " " << vtxfit->wtrk(0).pz() << endl;
+  cout << "After vertex fit: x: " << vtxfit->wtrk(1).px() << " " << vtxfit->wtrk(1).py() << " " << vtxfit->wtrk(1).pz() << endl;
+  cout << "After vertex fit: x: " << vtxfit->wtrk(2).px() << " " << vtxfit->wtrk(2).py() << " " << vtxfit->wtrk(2).pz() << endl;
+  cout << "After vertex fit: x: " << vtxfit->wtrk(3).px() << " " << vtxfit->wtrk(3).py() << " " << vtxfit->wtrk(3).pz() << endl;
 
   //KinematicFit * kmfit = KinematicFit::instance();
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
