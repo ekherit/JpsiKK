@@ -1415,7 +1415,7 @@ StatusCode JpsiKK::execute()
     PWkf[2].setMass(XMASS[i]);
     PWkf[3].setMass(XMASS[i]);
     HepLorentzVector p1 = PWkf[2].p();
-    HepLorentzVector p2 = PWkf[2].p();
+    HepLorentzVector p2 = PWkf[3].p();
     fPid.kM[i] = (p1+p2).m();
   };
 
