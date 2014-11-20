@@ -683,7 +683,7 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   //if(!vtxfit->Fit(0)) return false;
   //if(!vtxfit->Fit(1)) return false;
   vtxfit->Fit();
-  vtxfit->Swim(0);
+  //vtxfit->Swim(0);
   cout << "After vertex fit: x: " << vtxfit->wtrk(0).x().x() << " " << vtxfit->wtrk(0).x().y() << " " << vtxfit->wtrk(0).x().z() << endl;
 
   //KinematicFit * kmfit = KinematicFit::instance();
