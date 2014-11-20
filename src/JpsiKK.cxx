@@ -625,7 +625,9 @@ vector<double> get_chi2(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> & pa
 }
 
 bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair, std::vector<HepLorentzVector> & P, double & chi2)
+//bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair, std::vector<WTrackParameter> & WTP, double & chi2)
 {
+  //WTP.resize(4);
   P.resize(4);
   EvtRecTrackIterator  PionTrk[2] = {pion_pair.first, pion_pair.second};
   EvtRecTrackIterator  OtherTrk[2] = {other_pair.first, other_pair.second};
@@ -708,7 +710,7 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   {
     kmfit->AddTrack(i,vtxfit->wtrk(i));
   }
-  HepLorentzVector Pcmf(0.040546,0,0,PSIP_MASS); //initial vector of center of mass frame
+  HepLorentzVector Pcmf(PSIP_MASS*sin(0.011) /* 40.546 MeV*/,0,0,PSIP_MASS); //initial vector of center of mass frame
   //kmfit->AddTotalEnergy(0,PSIP_MASS,0,1,2,3);
   kmfit->AddFourMomentum(0,  Pcmf);
   //kmfit->AddResonance(0, JPSI_MASS, 2, 3);
@@ -722,6 +724,7 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
     chi2  = kmfit->chisq();
     for(int i=0;i<4;i++)
     {
+      //WTP[i] = kmfit->
       P[i] = kmfit->pfit(i);
     }
   }
@@ -730,15 +733,15 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
 
 bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  other_pairs, std::vector<HepLorentzVector> & P, double & chi2, TrackPair_t & result_pion_pair, TrackPair_t & result_other_pair)
 {
+  chi2=std::numeric_limits<double>::max();
   if(pion_pairs.empty() || other_pairs.empty()) return false;
-  chi2=1e100;
   bool GoodKinematikFit=false;
-
+  //loop over all pion pairs and all other pairs
   for(TrackPairList_t::iterator pion_pair=pion_pairs.begin(); pion_pair!=pion_pairs.end();pion_pair++)
     for(TrackPairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
     {
       std::vector<HepLorentzVector> P_tmp;
-      double chi2_tmp=3e100;
+      double chi2_tmp=std::numeric_limits<double>::max();
       bool oksq=kinematic_fit(PID, *pion_pair, *other_pair, P_tmp, chi2_tmp);
       if(oksq) 
       {
@@ -1092,6 +1095,7 @@ StatusCode JpsiKK::execute()
   bool GoodKinematikFit=false;
   double kinematic_chi2=2e100;
   std::vector<HepLorentzVector> Pkf(4);
+  std::vector<WTrackParameter>  PWkf(4);
   for(int pid = 0;pid<2;pid++)
   {
     std::vector<HepLorentzVector> P_tmp(4);
