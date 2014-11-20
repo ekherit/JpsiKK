@@ -704,8 +704,8 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   HepLorentzVector Pcmf(0.040546,0,0,PSIP_MASS); //initial vector of center of mass frame
   //kmfit->AddTotalEnergy(0,PSIP_MASS,0,1,2,3);
   //kmfit->AddFourMomentum(0,  Pcmf);
-  kmfit->AddResonance(0, PSIP_MASS, 0, 1, 2,3);
-  //kmfit->AddResonance(1, JPSI_MASS, 2, 3);
+  //kmfit->AddResonance(0, PSIP_MASS, 0, 1, 2,3);
+  kmfit->AddResonance(0, JPSI_MASS, 2, 3);
   //if(!kmfit->Fit(0)) return false;
   kmfit->Fit(0);
   bool oksq = kmfit->Fit();
