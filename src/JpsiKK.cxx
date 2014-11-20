@@ -184,6 +184,9 @@ StatusCode JpsiKK::initialize(void)
   event_write = 0;
   event_with_kaons=0;
   event_with_muons=0;
+  event_with_pions=0;
+  event_with_electrons=0;
+  event_with_protons=0;
   good_kinematic_fit=0;
 
   StatusCode status;
@@ -1113,15 +1116,23 @@ StatusCode JpsiKK::execute()
   switch(channel)
   {
     case ID_KAON:
-        fEvent.KK=1;
-        fEvent.uu=0;
-        event_with_kaons++;
+      fEvent.KK=1;
+      fEvent.uu=0;
+      event_with_kaons++;
       break;
     case ID_MUON:
+      fEvent.KK=0;
+      fEvent.uu=1;
+      event_with_muons++;
+      break;
     case ID_ELECTRON:
-        fEvent.KK=0;
-        fEvent.uu=1;
-        event_with_muons++;
+      event_with_electrons++;
+      break;
+    case ID_PION:
+      event_with_pions++;
+      break;
+    case ID_PROTON:
+      event_with_protons++;
       break;
     default:
       return StatusCode::SUCCESS;
@@ -1401,6 +1412,9 @@ StatusCode JpsiKK::finalize()
   std::cout << "Event selected: " << event_write << std::endl;
   std::cout << "Event with kaons: " << event_with_kaons << std::endl;
   std::cout << "Event with muons: " << event_with_muons << std::endl;
+  std::cout << "Event with pions: " << event_with_pions << std::endl;
+  std::cout << "Event with electron: " << event_with_electrons << std::endl;
+  std::cout << "Event with proton: " << event_with_protons << std::endl;
   std::cout << "Good kinematic fits: " << good_kinematic_fit << std::endl;
   return StatusCode::SUCCESS;
 }

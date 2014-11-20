@@ -77,6 +77,9 @@ class JpsiKK : public Algorithm
   long int event_with_kaons;
   long int event_with_muons;
   long int good_kinematic_fit;
+  long int event_with_pions;
+  long int event_with_protons;
+  long int event_with_electrons;
 
   public:
   struct RootTuple
