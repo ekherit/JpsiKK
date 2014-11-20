@@ -1127,12 +1127,15 @@ StatusCode JpsiKK::execute()
       break;
     case ID_ELECTRON:
       event_with_electrons++;
+      return StatusCode::SUCCESS;
       break;
     case ID_PION:
       event_with_pions++;
+      return StatusCode::SUCCESS;
       break;
     case ID_PROTON:
       event_with_protons++;
+      return StatusCode::SUCCESS;
       break;
     default:
       return StatusCode::SUCCESS;
