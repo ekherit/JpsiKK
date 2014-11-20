@@ -1114,6 +1114,7 @@ StatusCode JpsiKK::execute()
         event_with_kaons++;
       break;
     case ID_MUON:
+    case ID_ELECTRON:
         fEvent.KK=0;
         fEvent.uu=1;
         event_with_muons++;
