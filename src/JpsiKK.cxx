@@ -256,6 +256,12 @@ StatusCode JpsiKK::RootPid::init_tuple(void)
   status = tuple->addItem ("Muu", M[ID_MUON]);
   status = tuple->addItem ("Mpp", M[ID_PROTON]);
   status = tuple->addItem ("Mpipi", M[ID_PION]);
+
+  status = tuple->addItem ("kMee", kM[ID_ELECTRON]);
+  status = tuple->addItem ("kMKK", kM[ID_KAON]);
+  status = tuple->addItem ("kMuu", kM[ID_MUON]);
+  status = tuple->addItem ("kMpp", kM[ID_PROTON]);
+  status = tuple->addItem ("kMpipi", kM[ID_PION]);
   //info prof ParticleID package
   status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
   status = tuple->addIndexedItem ("probe",  ntrack, prob[ID_ELECTRON]);
@@ -624,11 +630,11 @@ vector<double> get_chi2(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> & pa
   return chi2;
 }
 
-bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair, std::vector<HepLorentzVector> & P, double & chi2)
-//bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair, std::vector<WTrackParameter> & WTP, double & chi2)
+//bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair, std::vector<HepLorentzVector> & P, double & chi2)
+bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair, std::vector<WTrackParameter> & WTP, double & chi2)
 {
-  //WTP.resize(4);
-  P.resize(4);
+  WTP.resize(4);
+  //P.resize(4);
   EvtRecTrackIterator  PionTrk[2] = {pion_pair.first, pion_pair.second};
   EvtRecTrackIterator  OtherTrk[2] = {other_pair.first, other_pair.second};
   RecMdcKalTrack * PionKalTrk[2];
@@ -690,15 +696,15 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   //if(!vtxfit->Fit(1)) return false;
   vtxfit->Fit();
   vtxfit->Swim(0);
-  cout << "After vertex fit: x: " << vtxfit->wtrk(0).x().x() << " " << vtxfit->wtrk(0).x().y() << " " << vtxfit->wtrk(0).x().z() << endl;
-  cout << "After vertex fit: x: " << vtxfit->wtrk(1).x().x() << " " << vtxfit->wtrk(1).x().y() << " " << vtxfit->wtrk(1).x().z() << endl;
-  cout << "After vertex fit: x: " << vtxfit->wtrk(2).x().x() << " " << vtxfit->wtrk(2).x().y() << " " << vtxfit->wtrk(2).x().z() << endl;
-  cout << "After vertex fit: x: " << vtxfit->wtrk(3).x().x() << " " << vtxfit->wtrk(3).x().y() << " " << vtxfit->wtrk(3).x().z() << endl;
-  cout << endl;
-  cout << "After vertex fit: x: " << vtxfit->wtrk(0).p().px() << " " << vtxfit->wtrk(0).p().py() << " " << vtxfit->wtrk(0).p().pz() << endl;
-  cout << "After vertex fit: x: " << vtxfit->wtrk(1).p().px() << " " << vtxfit->wtrk(1).p().py() << " " << vtxfit->wtrk(1).p().pz() << endl;
-  cout << "After vertex fit: x: " << vtxfit->wtrk(2).p().px() << " " << vtxfit->wtrk(2).p().py() << " " << vtxfit->wtrk(2).p().pz() << endl;
-  cout << "After vertex fit: x: " << vtxfit->wtrk(3).p().px() << " " << vtxfit->wtrk(3).p().py() << " " << vtxfit->wtrk(3).p().pz() << endl;
+  //cout << "After vertex fit: x: " << vtxfit->wtrk(0).x().x() << " " << vtxfit->wtrk(0).x().y() << " " << vtxfit->wtrk(0).x().z() << endl;
+  //cout << "After vertex fit: x: " << vtxfit->wtrk(1).x().x() << " " << vtxfit->wtrk(1).x().y() << " " << vtxfit->wtrk(1).x().z() << endl;
+  //cout << "After vertex fit: x: " << vtxfit->wtrk(2).x().x() << " " << vtxfit->wtrk(2).x().y() << " " << vtxfit->wtrk(2).x().z() << endl;
+  //cout << "After vertex fit: x: " << vtxfit->wtrk(3).x().x() << " " << vtxfit->wtrk(3).x().y() << " " << vtxfit->wtrk(3).x().z() << endl;
+  //cout << endl;
+  //cout << "After vertex fit: x: " << vtxfit->wtrk(0).p().px() << " " << vtxfit->wtrk(0).p().py() << " " << vtxfit->wtrk(0).p().pz() << endl;
+  //cout << "After vertex fit: x: " << vtxfit->wtrk(1).p().px() << " " << vtxfit->wtrk(1).p().py() << " " << vtxfit->wtrk(1).p().pz() << endl;
+  //cout << "After vertex fit: x: " << vtxfit->wtrk(2).p().px() << " " << vtxfit->wtrk(2).p().py() << " " << vtxfit->wtrk(2).p().pz() << endl;
+  //cout << "After vertex fit: x: " << vtxfit->wtrk(3).p().px() << " " << vtxfit->wtrk(3).p().py() << " " << vtxfit->wtrk(3).p().pz() << endl;
 
   //KinematicFit * kmfit = KinematicFit::instance();
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
@@ -724,14 +730,15 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
     chi2  = kmfit->chisq();
     for(int i=0;i<4;i++)
     {
-      //WTP[i] = kmfit->
-      P[i] = kmfit->pfit(i);
+      WTP[i] = kmfit->infit(i);
+      //P[i] = kmfit->pfit(i);
     }
   }
   return oksq;
 }
 
-bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  other_pairs, std::vector<HepLorentzVector> & P, double & chi2, TrackPair_t & result_pion_pair, TrackPair_t & result_other_pair)
+bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  other_pairs, std::vector<WTrackParameter> & P, double & chi2, TrackPair_t & result_pion_pair, TrackPair_t & result_other_pair)
+//bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  other_pairs, std::vector<HepLorentzVector> & P, double & chi2, TrackPair_t & result_pion_pair, TrackPair_t & result_other_pair)
 {
   chi2=std::numeric_limits<double>::max();
   if(pion_pairs.empty() || other_pairs.empty()) return false;
@@ -740,7 +747,8 @@ bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  ot
   for(TrackPairList_t::iterator pion_pair=pion_pairs.begin(); pion_pair!=pion_pairs.end();pion_pair++)
     for(TrackPairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
     {
-      std::vector<HepLorentzVector> P_tmp;
+      //std::vector<HepLorentzVector> P_tmp;
+      std::vector<WTrackParameter> P_tmp;
       double chi2_tmp=std::numeric_limits<double>::max();
       bool oksq=kinematic_fit(PID, *pion_pair, *other_pair, P_tmp, chi2_tmp);
       if(oksq) 
@@ -1098,7 +1106,8 @@ StatusCode JpsiKK::execute()
   std::vector<WTrackParameter>  PWkf(4);
   for(int pid = 0;pid<2;pid++)
   {
-    std::vector<HepLorentzVector> P_tmp(4);
+    //std::vector<HepLorentzVector> P_tmp(4);
+    std::vector<WTrackParameter> P_tmp(4);
     TrackPair_t pion_pr;
     TrackPair_t other_pr;
     double chi2_tmp;
@@ -1115,7 +1124,8 @@ StatusCode JpsiKK::execute()
         channel = pid;
         //kinematic_chi2 = chi2_tmp+pchi2[pid];
         kinematic_chi2 = chi2_tmp;
-        Pkf=P_tmp;
+        Pkf=P_tmp.p();
+        PWkf = P_tmp;
       }
     }
   }
@@ -1400,7 +1410,12 @@ StatusCode JpsiKK::execute()
   for(int i=0;i<5;i++)
   {
     fPid.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
-  }
+    PWkf[2].setMass(XMASS[pid]);
+    PWkf[3].setMass(XMASS[pid]);
+    HepLorentzVector p1 = PWkf[2].p();
+    HepLorentzVector p2 = PWkf[2].p();
+    fPid.kM[i] = (p1+p2).m();
+  };
 
 
 

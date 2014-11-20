@@ -130,7 +130,8 @@ class JpsiKK : public Algorithm
 
   struct RootPid : public RootTuple
   {
-    NTuple::Item<double>  M[5]; //invariant mass of highmomentum track 
+    NTuple::Item<double>  M[5]; //invariant mass of highmomentum track  based on Mdc
+    NTuple::Item<double>  kM[5]; //invariant mass of highmomentum track  based on kinematic recons
     NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
     NTuple::Array<double> prob[5]; //probability of track to be e,mu,pi,k or p
     NTuple::Array<double> chi2[5];  
