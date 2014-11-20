@@ -684,7 +684,7 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   //if(!vtxfit->Fit(1)) return false;
   vtxfit->Fit();
   vtxfit->Swim(0);
-  cout << "After vertex fit: x: " << PionWTrk[0].x().x() << " " << PionWTrk[0].x().y() << " " << PionWTrk[0].x().z() << endl;
+  cout << "After vertex fit: x: " << vtxfit->wtrk(i).x().x() << " " << vtxfit->wtrk(i).x().y() << " " << vtxfit->wtrk(i).x().z() << endl;
 
   //KinematicFit * kmfit = KinematicFit::instance();
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
