@@ -700,6 +700,9 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
 
   //KinematicFit * kmfit = KinematicFit::instance();
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
+  kmfit->setIterNumber(10000);
+  kmfit->setChisqCut(10000);
+
   kmfit->init();
   for(int i=0;i<4;i++)
   {
