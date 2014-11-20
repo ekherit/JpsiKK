@@ -1102,6 +1102,7 @@ StatusCode JpsiKK::execute()
     cout << fit_result << " " << pid << " " << P_tmp[0].rho() << " " << P_tmp[1].rho() << " " << P_tmp[2].rho() << " " << P_tmp[3].rho() << endl;
     if(fit_result)
     {
+      vector<double> pchi2 = get_chi2(other_pr);
       good_kinematic_fit++;
       GoodKinematikFit = true;
       if(chi2_tmp<kinematic_chi2)
@@ -1110,7 +1111,7 @@ StatusCode JpsiKK::execute()
         pion_pair=pion_pr;
         result_pair = other_pr;
         channel = pid;
-        kinematic_chi2 = chi2_tmp;
+        kinematic_chi2 = chi2_tmp+pchi2[pid];
         Pkf=P_tmp;
       }
     }
