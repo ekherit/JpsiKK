@@ -635,7 +635,24 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
     PionKalTrk[i] = (*PionTrk[i])->mdcKalTrack();
     OtherKalTrk[i] = (*OtherTrk[i])->mdcKalTrack();
     PionWTrk[i] = WTrackParameter(PION_MASS, PionKalTrk[i]->getZHelix(), PionKalTrk[i]->getZError());
-    OtherWTrk[i] = WTrackParameter(XMASS[PID], OtherKalTrk[i]->getZHelix(), OtherKalTrk[i]->getZError());
+    switch(PID)
+    {
+      case ID_KAON:
+        OtherWTrk[i] = WTrackParameter(XMASS[PID], OtherKalTrk[i]->getZHelixK(), OtherKalTrk[i]->getZErrorK());
+        break;
+      case ID_MUON:
+        OtherWTrk[i] = WTrackParameter(XMASS[PID], OtherKalTrk[i]->getZHelixMu(), OtherKalTrk[i]->getZErrorMu());
+        break;
+      case ID_ELECTRON:
+        OtherWTrk[i] = WTrackParameter(XMASS[PID], OtherKalTrk[i]->getZHelixE(), OtherKalTrk[i]->getZErrorE());
+        break;
+      case ID_PION:
+        OtherWTrk[i] = WTrackParameter(XMASS[PID], OtherKalTrk[i]->getZHelix(), OtherKalTrk[i]->getZError());
+        break;
+      case ID_PROTON:
+        OtherWTrk[i] = WTrackParameter(XMASS[PID], OtherKalTrk[i]->getZHelixP(), OtherKalTrk[i]->getZErrorP());
+        break;
+    }
   }
   //now try the kinematic fit
   //initial vertex
