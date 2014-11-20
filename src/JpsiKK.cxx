@@ -1092,7 +1092,7 @@ StatusCode JpsiKK::execute()
   bool GoodKinematikFit=false;
   double kinematic_chi2=2e100;
   std::vector<HepLorentzVector> Pkf(4);
-  for(int pid = 0;pid<5;pid++)
+  for(int pid = 0;pid<2;pid++)
   {
     std::vector<HepLorentzVector> P_tmp(4);
     TrackPair_t pion_pr;
@@ -1111,7 +1111,8 @@ StatusCode JpsiKK::execute()
         pion_pair=pion_pr;
         result_pair = other_pr;
         channel = pid;
-        kinematic_chi2 = chi2_tmp+pchi2[pid];
+        //kinematic_chi2 = chi2_tmp+pchi2[pid];
+        kinematic_chi2 = chi2_tmp;
         Pkf=P_tmp;
       }
     }
