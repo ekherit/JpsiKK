@@ -679,7 +679,7 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   vtxfit->AddTrack(2,  OtherWTrk[0]);
   vtxfit->AddTrack(3,  OtherWTrk[1]);
   vtxfit->AddVertex(0, vxpar,0, 1, 2,3);
-  if(!vtxfit->Fit(0)) return false;
+  //if(!vtxfit->Fit(0)) return false;
   //if(!vtxfit->Fit(1)) return false;
   vtxfit->Fit();
   vtxfit->Swim(0);
@@ -696,10 +696,7 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   //kmfit->AddResonance(0, PSIP_MASS, 0, 1, 2,3);
   //kmfit->AddResonance(1, JPSI_MASS, 2, 3);
   //if(!kmfit->Fit(0)) return false;
-  kmfit->Fit(0);
-  kmfit->Fit(1);
-  kmfit->Fit(2);
-  kmfit->Fit(3);
+  //kmfit->Fit(0);
   bool oksq = kmfit->Fit();
   if(oksq) 
   {
