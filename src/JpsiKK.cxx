@@ -1143,6 +1143,7 @@ StatusCode JpsiKK::execute()
         fEvent.uu=0;
         event_with_kaons++;
       }
+      else return StatusCode::SUCCESS;
       break;
     case ID_MUON:
       if(pchi2[ID_MUON] < pchi2[ID_KAON]
@@ -1153,6 +1154,7 @@ StatusCode JpsiKK::execute()
         fEvent.uu=1;
         event_with_muons++;
       }
+      else return StatusCode::SUCCESS;
       break;
     case ID_ELECTRON:
       event_with_electrons++;
