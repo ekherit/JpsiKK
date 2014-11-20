@@ -184,6 +184,7 @@ StatusCode JpsiKK::initialize(void)
   event_write = 0;
   event_with_kaons=0;
   event_with_muons=0;
+  good_kinematic_fit=0;
 
   StatusCode status;
   status = init_tuple(this, fEvent,  "FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
@@ -748,6 +749,7 @@ bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  ot
   return GoodKinematikFit;
 }
 
+
 StatusCode JpsiKK::execute()
 {
   MsgStream log(msgSvc(), name());
@@ -768,7 +770,8 @@ StatusCode JpsiKK::execute()
     std::cout << "proceed event: " << setw(15) << event_proceed<<", ";
     std::cout << "event write: "   << setw(15) << event_write<< ",  ";
     std::cout << "kaons: "   << setw(15) << event_with_kaons << ",  ";
-    std::cout << "muons "   << setw(15) << event_with_muons;
+    std::cout << "muons "   << setw(15) << event_with_muons << ",  ";
+    std::cout << "good knm fit "   << setw(15) << good_kinematic_fit;
     std::cout << std::endl;
   }
   event_proceed++;
@@ -1093,6 +1096,7 @@ StatusCode JpsiKK::execute()
     cout << fit_result << " " << pid << " " << P_tmp[0].rho() << " " << P_tmp[1].rho() << " " << P_tmp[2].rho() << " " << P_tmp[3].rho() << endl;
     if(fit_result)
     {
+      good_kinematic_fit++;
       GoodKinematikFit = true;
       if(chi2_tmp<kinematic_chi2)
       {
@@ -1397,5 +1401,6 @@ StatusCode JpsiKK::finalize()
   std::cout << "Event selected: " << event_write << std::endl;
   std::cout << "Event with kaons: " << event_with_kaons << std::endl;
   std::cout << "Event with muons: " << event_with_muons << std::endl;
+  std::cout << "Good kinematic fits: " << good_kinematic_fit << std::endl;
   return StatusCode::SUCCESS;
 }
