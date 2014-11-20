@@ -1078,8 +1078,8 @@ StatusCode JpsiKK::execute()
     TrackPair_t other_pr;
     double chi2_tmp;
     bool fit_result = kinematic_fit(pid, pion_pairs, other_pairs, P_tmp, chi2_tmp, pion_pr, other_pr);
-    if(fit_result)
-    {
+    //if(fit_result)
+    //{
       GoodKinematikFit = true;
       if(chi2_tmp<kinematic_chi2)
       {
@@ -1090,7 +1090,7 @@ StatusCode JpsiKK::execute()
         kinematic_chi2 = chi2_tmp;
         Pkf=P_tmp;
       }
-    }
+    //}
   }
   if(!GoodKinematikFit) return StatusCode::SUCCESS;
   switch(channel)
