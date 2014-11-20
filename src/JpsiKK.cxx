@@ -669,7 +669,7 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   //now try the kinematic fit
   //initial vertex
   HepPoint3D vx(0., 0., 0.);
-  cout << "x: " << PionWTrk[0].x().x() << " " << PionWTrk[0].x().y() << " " << PionWTrk[0].x().z() << endl;
+  //cout << "x: " << PionWTrk[0].x().x() << " " << PionWTrk[0].x().y() << " " << PionWTrk[0].x().z() << endl;
   //error matrix inital valu
   HepSymMatrix Evx(3, 0);
   double bx = 1E+6;
