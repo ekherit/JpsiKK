@@ -1106,8 +1106,6 @@ StatusCode JpsiKK::execute()
     cout << fit_result << " " << pid << " " << P_tmp[0].rho() << " " << P_tmp[1].rho() << " " << P_tmp[2].rho() << " " << P_tmp[3].rho() << endl;
     if(fit_result)
     {
-      vector<double> pchi2 = get_chi2(other_pr);
-      good_kinematic_fit++;
       GoodKinematikFit = true;
       if(chi2_tmp<kinematic_chi2)
       {
@@ -1121,18 +1119,30 @@ StatusCode JpsiKK::execute()
       }
     }
   }
+  vector<double> pchi2 = get_chi2(result_pair);
   if(!GoodKinematikFit) return StatusCode::SUCCESS;
+  good_kinematic_fit++;
   switch(channel)
   {
     case ID_KAON:
-      fEvent.KK=1;
-      fEvent.uu=0;
-      event_with_kaons++;
+      if(pchi2[ID_KAON] < pchi2[ID_MUON]
+          && pchi2[ID_KAON] < pchi2[ID_PION]
+          )
+      {
+        fEvent.KK=1;
+        fEvent.uu=0;
+        event_with_kaons++;
+      }
       break;
     case ID_MUON:
-      fEvent.KK=0;
-      fEvent.uu=1;
-      event_with_muons++;
+      if(pchi2[ID_MUON] < pchi2[ID_KAON]
+          && pchi2[ID_MUON] < pchi2[ID_KAON]
+        )
+      {
+        fEvent.KK=0;
+        fEvent.uu=1;
+        event_with_muons++;
+      }
       break;
     case ID_ELECTRON:
       event_with_electrons++;
