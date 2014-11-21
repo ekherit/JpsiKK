@@ -705,8 +705,8 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
 
   //KinematicFit * kmfit = KinematicFit::instance();
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
-  kmfit->setIterNumber(10000);
-  kmfit->setChisqCut(10000);
+  //kmfit->setIterNumber(10000);
+  //kmfit->setChisqCut(10000);
 
   kmfit->init();
   for(int i=0;i<4;i++)
@@ -714,8 +714,8 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
     kmfit->AddTrack(i,vtxfit->wtrk(i));
   }
   HepLorentzVector Pcmf(PSIP_MASS*sin(0.011) /* 40.546 MeV*/,0,0,PSIP_MASS); //initial vector of center of mass frame
-  //kmfit->AddTotalEnergy(0,PSIP_MASS,0,1,2,3);
   kmfit->AddFourMomentum(0,  Pcmf);
+  //kmfit->AddTotalEnergy(0,PSIP_MASS,0,1,2,3);
   //kmfit->AddResonance(1, JPSI_MASS, 2, 3);
   //kmfit->AddResonance(1, PSIP_MASS, 0, 1, 2,3);
   if(!kmfit->Fit(0)) return false;
@@ -1118,12 +1118,15 @@ StatusCode JpsiKK::execute()
       }
     }
   }
-  vector<double> pchi2 = get_chi2(result_pair);
+  //SELECTION CODE
   if(!GoodKinematikFit) return StatusCode::SUCCESS;
+  if(kinematic_chi2>200) return StatusCode::SUCCESS;
+  vector<double> pchi2 = get_chi2(result_pair);
   good_kinematic_fit++;
   switch(channel)
   {
     case ID_KAON:
+      if(pchi2[ID_KAON] > 200) return StatusCode::SUCCESS;
       if(pchi2[ID_KAON] < pchi2[ID_MUON]
           && pchi2[ID_KAON] < pchi2[ID_PION]
           )
@@ -1135,6 +1138,7 @@ StatusCode JpsiKK::execute()
       else return StatusCode::SUCCESS;
       break;
     case ID_MUON:
+      if(pchi2[ID_MUON] > 200) return StatusCode::SUCCESS;
       if(pchi2[ID_MUON] < pchi2[ID_KAON]
           && pchi2[ID_MUON] < pchi2[ID_KAON]
         )
