@@ -1459,7 +1459,7 @@ StatusCode JpsiKK::execute()
   fDedx.tuple->write();
   fTof.tuple->write();
   fNeutral.tuple->write();
-  //if(fEvent.run < 0) fMC.tuple->write();
+  if(fEvent.run < 0) fMC.tuple->write();
   event_write++;
   return StatusCode::SUCCESS;
 }
