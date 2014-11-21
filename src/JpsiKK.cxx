@@ -1402,6 +1402,8 @@ StatusCode JpsiKK::execute()
     else
     {
       bool psipDecay(false);
+      bool pi_minus(false);
+      bool pi_plus(false);
       int rootIndex(-1);
       fMC.psip_decay = 0;
       fMC.jpsi_decay = 0;
@@ -1426,12 +1428,15 @@ StatusCode JpsiKK::execute()
           fMC.jpsi_decay=1;
         }
         if (fMC.jpsi_decay!=1) continue;
+        if((*iter_mc)->particleProperty() == +211) pi_plus=true;
+        if((*iter_mc)->particleProperty() == -211) pi_minus=true;
+        if( ! pi_plus && !pi_minus) continue; //keep only psip to Jpsi pi pi decay
+        int pdgid = (*iter_mc)->particleProperty();
+        cout << pdgid << " ";
         if((*iter_mc)->leafParticle()) 
         {
           if((*iter_mc)->particleProperty() == -211) MCPpion[0] = (*iter_mc)->initialFourMomentum();
           if((*iter_mc)->particleProperty() ==  211) MCPpion[1] = (*iter_mc)->initialFourMomentum();
-          int pdgid = (*iter_mc)->particleProperty();
-          cout << pdgid << " ";
         }
         //int mcidx = ((*iter_mc)->mother()).trackIndex() - rootIndex;
         //m_pdgid[m_numParticle] = pdgid;
