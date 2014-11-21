@@ -1403,29 +1403,35 @@ StatusCode JpsiKK::execute()
     {
       bool psipDecay(false);
       int rootIndex(-1);
+      fMC.psip_decay = 0;
+      fMC.jpsi_decay = 0;
+      fMC.KK = 0;
+      fMC.uu = 0;
+      fMC.oo = 0;
       Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
       for (; iter_mc != mcParticleCol->end(); iter_mc++)
       {
         if ((*iter_mc)->primaryParticle()) continue;
         if (!(*iter_mc)->decayFromGenerator()) continue;
-        int pdgid = (*iter_mc)->particleProperty();
-        cout << pdgid << " ";
         //if ( ((*iter_mc)->mother()).trackIndex()<3 ) continue;
         if ((*iter_mc)->particleProperty()==100443)
         {
           psipDecay = true;
-          //fMC.psip_decay=true;
+          fMC.psip_decay=1;
           rootIndex = (*iter_mc)->trackIndex();
         }
         if (!psipDecay) continue;
+        if ((*iter_mc)->particleProperty()==443)
+        {
+          fMC.jpsi_decay=1;
+        }
+        if (fMC.jpsi_decay!=1) continue;
+        int pdgid = (*iter_mc)->particleProperty();
+        cout << pdgid << " ";
         if((*iter_mc)->leafParticle()) 
         {
           if((*iter_mc)->particleProperty() == -211) MCPpion[0] = (*iter_mc)->initialFourMomentum();
           if((*iter_mc)->particleProperty() ==  211) MCPpion[1] = (*iter_mc)->initialFourMomentum();
-        }
-        if ((*iter_mc)->particleProperty()==443)
-        {
-          fMC.jpsi_decay=true;
         }
         //int mcidx = ((*iter_mc)->mother()).trackIndex() - rootIndex;
         //m_pdgid[m_numParticle] = pdgid;
