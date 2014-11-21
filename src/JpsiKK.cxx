@@ -1482,23 +1482,55 @@ StatusCode JpsiKK::execute()
     }
     if(fMC.KK==1 && fMC.uu==1) fMC.oo=1;
     if(mytrack!=4) fMC.oo=1;
-
-    vector<HepLorentzVector> P(4);
-    P[0]=MCPpion[0];
-    P[1]=MCPpion[1];
-    P[2]=MCPkaon_or_muon[0];
-    P[3]=MCPkaon_or_muon[1];
-    for(int i=0;i<4;i++)
+    if(fMC.KK==1 || fMC.uu==1)
     {
-      fMC.q[i] = 0; 
-      fMC.E[i] = P[i].e();
-      fMC.p[i] = P[i].rho();
-      fMC.px[i]= P[i].px();
-      fMC.py[i]= P[i].py();
-      fMC.pz[i]= P[i].pz();
-      fMC.pt[i]= P[i].perp();
-      fMC.theta[i]= P[i].theta();
-      fMC.phi[i] = P[i].phi();
+      vector<HepLorentzVector> P(4);
+      P[0]=MCPpion[0];
+      P[1]=MCPpion[1];
+      P[2]=MCPkaon_or_muon[0];
+      P[3]=MCPkaon_or_muon[1];
+      for(int i=0;i<4;i++)
+      {
+        fMC.q[i] = 0; 
+        fMC.E[i] = P[i].e();
+        fMC.p[i] = P[i].rho();
+        fMC.px[i]= P[i].px();
+        fMC.py[i]= P[i].py();
+        fMC.pz[i]= P[i].pz();
+        fMC.pt[i]= P[i].perp();
+        fMC.theta[i]= P[i].theta();
+        fMC.phi[i] = P[i].phi();
+      }
+    }
+    else
+    {
+      Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
+      for (; iter_mc != mcParticleCol->end(); iter_mc++)
+      {
+        if ((*iter_mc)->primaryParticle()) continue;
+        if (!(*iter_mc)->decayFromGenerator()) continue;
+        HepLorentzVector P = (*iter_mc)->initialFourMomentum();
+        int pid = (*iter_mc)->particleProperty();
+        Hep3Vector p_mc = P.vect();
+        for(int i=0;i<4;i++)
+        {
+          Hep3Vector p_rec = Pkf[i].vect();
+          Hep3Vector dp = p_rec - p_mc;
+          if(dp.mag()/std::min(p_rec.mag(), p_mc.mag()) < 0.05)
+          {
+            fMC.pid[i] = pid;
+            //fMC.q[i] = 0; 
+            fMC.E[i] = P.e();
+            fMC.p[i] = P.rho();
+            fMC.px[i]= P.px();
+            fMC.py[i]= P.py();
+            fMC.pz[i]= P.pz();
+            fMC.pt[i]= P.perp();
+            fMC.theta[i]= P.theta();
+            fMC.phi[i] = P.phi();
+          }
+        }
+      }
     }
   }
 
