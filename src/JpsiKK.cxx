@@ -1392,8 +1392,7 @@ StatusCode JpsiKK::execute()
     fMC.ntrack=4;
     int m_numParticle(0), m_true_pid(0);
     HepLorentzVector MCPpion[2];
-    HepLorentzVector MCPkaon[2];
-    HepLorentzVector MCPmuon[2];
+    HepLorentzVector MCPkaon_or_muon[2];
     if(!mcParticleCol)
     {
       log << MSG::ERROR << "Could not retrieve McParticelCol" << endreq;
@@ -1404,6 +1403,11 @@ StatusCode JpsiKK::execute()
       bool psipDecay(false);
       bool pi_minus(false);
       bool pi_plus(false);
+      bool K_minus(false);
+      bool K_plus(false);
+      bool mu_minus(false);
+      bool mu_plus(false);
+      int mytrack=0;
       int rootIndex(-1);
       fMC.psip_decay = 0;
       fMC.jpsi_decay = 0;
@@ -1428,25 +1432,79 @@ StatusCode JpsiKK::execute()
           fMC.jpsi_decay=1;
         }
         if (fMC.jpsi_decay!=1) continue;
-        if((*iter_mc)->particleProperty() == +211) pi_plus=true;
-        if((*iter_mc)->particleProperty() == -211) pi_minus=true;
-        if( ! pi_plus && !pi_minus) continue; //keep only psip to Jpsi pi pi decay
-        int pdgid = (*iter_mc)->particleProperty();
-        cout << pdgid << " ";
-        if((*iter_mc)->leafParticle()) 
+        if((*iter_mc)->particleProperty() == +211) 
         {
-          if((*iter_mc)->particleProperty() == -211) MCPpion[0] = (*iter_mc)->initialFourMomentum();
-          if((*iter_mc)->particleProperty() ==  211) MCPpion[1] = (*iter_mc)->initialFourMomentum();
+          pi_plus=true;
+          MCPpion[1] = (*iter_mc)->initialFourMomentum();
+          fMC.pid[1]=211;
         }
-        //int mcidx = ((*iter_mc)->mother()).trackIndex() - rootIndex;
-        //m_pdgid[m_numParticle] = pdgid;
-        //m_motheridx[m_numParticle] = mcidx;
-        //m_numParticle ++;    
-
+        if((*iter_mc)->particleProperty() == -211) 
+        {
+          MCPpion[0] = (*iter_mc)->initialFourMomentum();
+          pi_minus=true;
+          fMC.pid[0]=-211;
+        }
+        if( ! pi_plus && !pi_minus) continue; //keep only psip to Jpsi pi pi decay
+        switch((*iter_mc)->particleProperty())
+        {
+          case +321:
+            MCPkaon_or_muon[1] = (*iter_mc)->initialFourMomentum();
+            mytrack++;
+            k_plus = true;
+            fMC.pid[3]=321;
+            break;
+          case -321:
+            MCPkaon_or_muon[0] = (*iter_mc)->initialFourMomentum();
+            k_minus=true;
+            mytrack++;
+            fMC.pid[2]=-321;
+            break;
+          case +13:
+            MCPkaon_or_muon[1] = (*iter_mc)->initialFourMomentum();
+            muon_plus = true;
+            mytrack++;
+            fMC.pid[3]=13;
+            break;
+          case -13:
+            MCPkaon_or_muon[0] = (*iter_mc)->initialFourMomentum();
+            muon_minus = true;
+            mytrack++;
+            fMC.pid[2]=-13;
+            break;
+        };
       }
-      //m_idxmc = m_numParticle;
+      if(k_plus && k_minus) 
+      {
+        fMC.KK=1;
+        fMC.oo=0;
+      }
+      if(mu_plus && mu_minus) 
+      {
+        fMC.uu=1;
+        fMC.oo=0;
+      }
+      if(fMC.KK==1 && fMC.uu==1) fMC.oo=1;
+      if(mytrack!=4) fMC.oo=1;
+
+      vector<HepLorentzVector> P(4);
+      P[0]=MCPpion[0];
+      P[1]=MCPpion[1];
+      P[2]=MCPkaon_or_muon[0];
+      P[3]=MCPkaon_or_muon[1];
+      for(int i=0;i<4;i++)
+      {
+        fMC.q[i] = 0; 
+        fMC.E[i] = P[i].e();
+        fMC.p[i] = P[i].rho();
+        fMC.px[i]= P[i].px();
+        fMC.py[i]= P[i].py();
+        fMC.pz[i]= P[i].pz();
+        fMC.pt[i]= P[i].perp();
+        fMC.theta[i]= P[i].theta();
+        fMC.phi[i] = P[i].phi();
+      }
     }
-    cout << endl;
+    //cout << endl;
   }
 
 
