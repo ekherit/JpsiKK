@@ -1419,8 +1419,8 @@ StatusCode JpsiKK::execute()
         if (!psipDecay) continue;
         if((*iter_mc)->leafParticle()) 
         {
-          if((*iter_mc)->particleProperty() == -211) MCPpion[0] = (*iter_mc)->initialFourMomentum().vect().mag();
-          if((*iter_mc)->particleProperty() ==  211) MCPpion[1] = (*iter_mc)->initialFourMomentum().vect().mag();
+          if((*iter_mc)->particleProperty() == -211) MCPpion[0] = (*iter_mc)->initialFourMomentum();
+          if((*iter_mc)->particleProperty() ==  211) MCPpion[1] = (*iter_mc)->initialFourMomentum();
         }
         if ((*iter_mc)->particleProperty()==443)
         {
