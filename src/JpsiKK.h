@@ -227,6 +227,8 @@ class JpsiKK : public Algorithm
     NTuple::Array<double> px,py,pz; //momentum
     NTuple::Array<double> pt; //transvese momentum
     NTuple::Array<double> theta,phi;
+    virtual void init(void);
+    virtual StatusCode init_tuple(void);
   };
 
 
