@@ -1386,7 +1386,7 @@ StatusCode JpsiKK::execute()
   };
 
 
-  if(fEvent.run<0 )
+  if(fEvent.run<0 && false)
   {
     fMC.ntrack=4;
     int m_numParticle(0), m_true_pid(0);
