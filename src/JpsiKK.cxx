@@ -726,6 +726,7 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   kmfit->Fit(1);
   kmfit->Fit(2);
   kmfit->Fit(3);
+  kmfit->Swim(0);
   bool oksq = kmfit->Fit();
   if(oksq) 
   {
