@@ -530,9 +530,9 @@ SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk, bool
   {
     unsigned int st = (*tofTrk)->status();
     hitst->setStatus(st);
-    //if( !hitst->is_claster() ) continue;
+    if( !hitst->is_cluster() ) continue;
     //if(  (hitst->is_barrel()) ) continue;
-    if( !(hitst->is_counter()) ) continue;
+    //if( !(hitst->is_counter()) ) continue;
     tofecount.push_back(goodtofetrk);
   }
   delete hitst;
@@ -664,11 +664,8 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
         break;
     }
   }
-  //now try the kinematic fit
   //initial vertex
   HepPoint3D vx(0., 0., 0.);
-  //cout << "x: " << PionWTrk[0].x().x() << " " << PionWTrk[0].x().y() << " " << PionWTrk[0].x().z() << endl;
-  //error matrix inital valu
   HepSymMatrix Evx(3, 0);
   double bx = 1E+6;
   double by = 1E+6;
@@ -693,15 +690,6 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   if(!vtxfit->Fit(0)) return false;
   vtxfit->Fit();
   vtxfit->Swim(0);
-  //cout << "After vertex fit: x: " << vtxfit->wtrk(0).x().x() << " " << vtxfit->wtrk(0).x().y() << " " << vtxfit->wtrk(0).x().z() << endl;
-  //cout << "After vertex fit: x: " << vtxfit->wtrk(1).x().x() << " " << vtxfit->wtrk(1).x().y() << " " << vtxfit->wtrk(1).x().z() << endl;
-  //cout << "After vertex fit: x: " << vtxfit->wtrk(2).x().x() << " " << vtxfit->wtrk(2).x().y() << " " << vtxfit->wtrk(2).x().z() << endl;
-  //cout << "After vertex fit: x: " << vtxfit->wtrk(3).x().x() << " " << vtxfit->wtrk(3).x().y() << " " << vtxfit->wtrk(3).x().z() << endl;
-  //cout << endl;
-  //cout << "After vertex fit: x: " << vtxfit->wtrk(0).p().px() << " " << vtxfit->wtrk(0).p().py() << " " << vtxfit->wtrk(0).p().pz() << endl;
-  //cout << "After vertex fit: x: " << vtxfit->wtrk(1).p().px() << " " << vtxfit->wtrk(1).p().py() << " " << vtxfit->wtrk(1).p().pz() << endl;
-  //cout << "After vertex fit: x: " << vtxfit->wtrk(2).p().px() << " " << vtxfit->wtrk(2).p().py() << " " << vtxfit->wtrk(2).p().pz() << endl;
-  //cout << "After vertex fit: x: " << vtxfit->wtrk(3).p().px() << " " << vtxfit->wtrk(3).p().py() << " " << vtxfit->wtrk(3).p().pz() << endl;
 
   //KinematicFit * kmfit = KinematicFit::instance();
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
