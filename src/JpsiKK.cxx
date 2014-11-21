@@ -191,12 +191,13 @@ StatusCode JpsiKK::initialize(void)
 
   StatusCode status;
   status = init_tuple(this, fEvent,  "FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
-  status = init_tuple(this, fPid,  "FILE1/pid","particle id",log);
+  status = init_tuple(this, fPid,    "FILE1/pid","particle id",log);
   status = init_tuple(this, fMdc,    "FILE1/mdc","Mdc info for signal",log);
   status = init_tuple(this, fDedx,   "FILE1/dedx","Dedx info for signal",log);
   status = init_tuple(this, fEmc,    "FILE1/emc","Emc info for signal",log);
   status = init_tuple(this, fTof,    "FILE1/tof","Tof info for signal",log);
   status = init_tuple(this, fNeutral,"FILE1/neutral","Good neutral tracks",log);
+  status = init_tuple(this, fMC,     "FILE1/mc","Monte Carlo truth information",log);
 
   return status;
 }
@@ -418,6 +419,31 @@ void JpsiKK::RootTof::init(void)
   }
 }
 
+StatusCode JpsiKK::RootMC::init_tuple(void)
+{
+  StatusCode status;
+  status = tuple->addItem ("psip_decay", psip_decay); //flag for psip decay
+  status = tuple->addItem ("jpsi_decay", jpsi_decay); //flag for jpsi decay 
+  status = tuple->addItem ("KK", KK);               //KK event
+  status = tuple->addItem ("uu", uu);               //mu mu event
+  status = tuple->addItem ("oo", oo);               //other event
+  status = tuple->addIndexedItem ("id",    ntrack, pid);
+  status = tuple->addIndexedItem ("q",     ntrack, q);
+  status = tuple->addIndexedItem ("E",     ntrack, E);
+  status = tuple->addIndexedItem ("p",     ntrack, p);
+  status = tuple->addIndexedItem ("px",    ntrack, px);
+  status = tuple->addIndexedItem ("py",    ntrack, py);
+  status = tuple->addIndexedItem ("pz",    ntrack, pz);
+  status = tuple->addIndexedItem ("pt",    ntrack, pt);
+  status = tuple->addIndexedItem ("theta", ntrack, theta);
+  status = tuple->addIndexedItem ("phi",   ntrack, phi);
+  return status;
+}
+
+void JpsiKK::RootMC::init(void)
+{
+  ntrack=4;
+}
 
 void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
 {
@@ -1331,45 +1357,6 @@ StatusCode JpsiKK::execute()
         }
       }
     }
-    if(fEvent.run<0 && false)
-    {
-      int m_numParticle(0), m_true_pid(0);
-      if(!mcParticleCol)
-      {
-        log << MSG::ERROR << "Could not retrieve McParticelCol" << endreq;
-        return StatusCode::FAILURE;
-      }
-      else
-      {
-        bool psipDecay(false);
-        int rootIndex(-1);
-        Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
-        for (; iter_mc != mcParticleCol->end(); iter_mc++)
-        {
-          if ((*iter_mc)->primaryParticle()) continue;
-          if (!(*iter_mc)->decayFromGenerator()) continue;
-          //if ( ((*iter_mc)->mother()).trackIndex()<3 ) continue;
-          if ((*iter_mc)->particleProperty()==100443)
-          {
-            psipDecay = true;
-            rootIndex = (*iter_mc)->trackIndex();
-          }
-          if (!psipDecay) continue;
-          int mcidx = ((*iter_mc)->mother()).trackIndex() - rootIndex;
-          int pdgid = (*iter_mc)->particleProperty();
-          cout << pdgid << " ";
-          //m_pdgid[m_numParticle] = pdgid;
-          //m_motheridx[m_numParticle] = mcidx;
-          //m_numParticle ++;    
-
-          //if(!(*iter_mc)->leafParticle()) continue;
-          //if((*iter_mc)->particleProperty() == 211) m_true_pionp = (*iter_mc)->initialFourMomentum().vect().mag();
-          //if((*iter_mc)->particleProperty() == -211) m_true_pionm = (*iter_mc)->initialFourMomentum().vect().mag();
-        }
-        //m_idxmc = m_numParticle;
-      }
-      cout << endl;
-    }
 
     //fill particle id
 
@@ -1399,6 +1386,57 @@ StatusCode JpsiKK::execute()
   };
 
 
+  if(fEvent.run<0 )
+  {
+    fMC.ntrack=4;
+    int m_numParticle(0), m_true_pid(0);
+    HepLorentzVector MCPpion[2];
+    HepLorentzVector MCPkaon[2];
+    HepLorentzVector MCPmuon[2];
+    if(!mcParticleCol)
+    {
+      log << MSG::ERROR << "Could not retrieve McParticelCol" << endreq;
+      return StatusCode::FAILURE;
+    }
+    else
+    {
+      bool psipDecay(false);
+      int rootIndex(-1);
+      Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
+      for (; iter_mc != mcParticleCol->end(); iter_mc++)
+      {
+        int pdgid = (*iter_mc)->particleProperty();
+        cout << pdgid << " ";
+        if ((*iter_mc)->primaryParticle()) continue;
+        if (!(*iter_mc)->decayFromGenerator()) continue;
+        //if ( ((*iter_mc)->mother()).trackIndex()<3 ) continue;
+        if ((*iter_mc)->particleProperty()==100443)
+        {
+          psipDecay = true;
+          fMC.psip_decay=true;
+          rootIndex = (*iter_mc)->trackIndex();
+        }
+        if (!psipDecay) continue;
+        if((*iter_mc)->leafParticle()) 
+        {
+          if((*iter_mc)->particleProperty() == -211) MCPpion[0] = (*iter_mc)->initialFourMomentum().vect().mag();
+          if((*iter_mc)->particleProperty() ==  211) MCPpion[1] = (*iter_mc)->initialFourMomentum().vect().mag();
+        }
+        if ((*iter_mc)->particleProperty()==443)
+        {
+          fMC.jpsi_decay=true;
+        }
+        //int mcidx = ((*iter_mc)->mother()).trackIndex() - rootIndex;
+        //m_pdgid[m_numParticle] = pdgid;
+        //m_motheridx[m_numParticle] = mcidx;
+        //m_numParticle ++;    
+
+      }
+      //m_idxmc = m_numParticle;
+    }
+    cout << endl;
+  }
+
 
   fNeutral.ntrack=std::min(good_neutral_tracks.size(), size_t(RootEmc::ARRAY_SIZE));
   int idx=0;
@@ -1420,6 +1458,7 @@ StatusCode JpsiKK::execute()
   fDedx.tuple->write();
   fTof.tuple->write();
   fNeutral.tuple->write();
+  if(fEvent.run < 0) fMC.tuple->write();
   event_write++;
   return StatusCode::SUCCESS;
 }

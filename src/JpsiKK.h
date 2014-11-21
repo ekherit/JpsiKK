@@ -213,6 +213,23 @@ class JpsiKK : public Algorithm
   };
 
 
+  struct RootMC : public RootTuple
+  {
+    NTuple::Item<long>    psip_decay; //is event from psip decay
+    NTuple::Item<long>    jpsi_decay; //is event from jpsi decay
+    NTuple::Item<long>    KK; //is event KK
+    NTuple::Item<long>    uu; //is event mumu
+    NTuple::Item<long>    oo; //other other particle
+    NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
+    NTuple::Array<double> pid; //particle id
+    NTuple::Array<double> q; //charge of the track
+    NTuple::Array<double> E,p; //energy and momentum
+    NTuple::Array<double> px,py,pz; //momentum
+    NTuple::Array<double> pt; //transvese momentum
+    NTuple::Array<double> theta,phi;
+  };
+
+
   private:
 
   RootEvent fEvent;   //signal event essential information
@@ -221,6 +238,7 @@ class JpsiKK : public Algorithm
   RootDedx  fDedx;    //DeDx for the event
   RootEmc   fEmc;     //Emc infromation for the event
   RootTof   fTof;     //TOF infromation for the event
+  RootMC    fMC;     //Monte Carlo truth
   RootEmc   fNeutral; //neutral tracks
 };
 
