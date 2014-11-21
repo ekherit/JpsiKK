@@ -734,7 +734,7 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
     {
       WTP[i] = kmfit->infit(i);
       //P[i] = kmfit->pfit(i);
-      cout << "WTP.p = " << WTP[i].p().rho() << ",  pfit = " << kmfit->pfit(i).rho() << endl;
+      cout << "WTP.p = " << WTP[i].p().rho() << ",  pfit.p = " << kmfit->pfit(i).rho() << " worig.p=" << kmfit->origin(i).p().rho() << endl;
     }
   }
   return oksq;
