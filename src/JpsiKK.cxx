@@ -1450,12 +1450,12 @@ StatusCode JpsiKK::execute()
           case +321:
             MCPkaon_or_muon[1] = (*iter_mc)->initialFourMomentum();
             mytrack++;
-            k_plus = true;
+            K_plus = true;
             fMC.pid[3]=321;
             break;
           case -321:
             MCPkaon_or_muon[0] = (*iter_mc)->initialFourMomentum();
-            k_minus=true;
+            K_minus=true;
             mytrack++;
             fMC.pid[2]=-321;
             break;
@@ -1473,7 +1473,7 @@ StatusCode JpsiKK::execute()
             break;
         };
       }
-      if(k_plus && k_minus) 
+      if(K_plus && K_minus) 
       {
         fMC.KK=1;
         fMC.oo=0;
