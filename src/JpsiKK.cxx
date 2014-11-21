@@ -1461,13 +1461,13 @@ StatusCode JpsiKK::execute()
             break;
           case +13:
             MCPkaon_or_muon[1] = (*iter_mc)->initialFourMomentum();
-            muon_plus = true;
+            mu_plus = true;
             mytrack++;
             fMC.pid[3]=13;
             break;
           case -13:
             MCPkaon_or_muon[0] = (*iter_mc)->initialFourMomentum();
-            muon_minus = true;
+            mu_minus = true;
             mytrack++;
             fMC.pid[2]=-13;
             break;
