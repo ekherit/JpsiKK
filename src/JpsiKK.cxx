@@ -197,7 +197,7 @@ StatusCode JpsiKK::initialize(void)
   status = init_tuple(this, fEmc,    "FILE1/emc","Emc info for signal",log);
   status = init_tuple(this, fTof,    "FILE1/tof","Tof info for signal",log);
   status = init_tuple(this, fNeutral,"FILE1/neutral","Good neutral tracks",log);
-  status = init_tuple(this, fMC,     "FILE1/mc","Monte Carlo truth information",log);
+  //status = init_tuple(this, fMC,     "FILE1/mc","Monte Carlo truth information",log);
 
   return status;
 }
