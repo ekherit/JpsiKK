@@ -1406,10 +1406,10 @@ StatusCode JpsiKK::execute()
       Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
       for (; iter_mc != mcParticleCol->end(); iter_mc++)
       {
-        int pdgid = (*iter_mc)->particleProperty();
-        cout << pdgid << " ";
         if ((*iter_mc)->primaryParticle()) continue;
         if (!(*iter_mc)->decayFromGenerator()) continue;
+        int pdgid = (*iter_mc)->particleProperty();
+        cout << pdgid << " ";
         //if ( ((*iter_mc)->mother()).trackIndex()<3 ) continue;
         if ((*iter_mc)->particleProperty()==100443)
         {
