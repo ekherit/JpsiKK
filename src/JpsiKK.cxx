@@ -1426,12 +1426,12 @@ StatusCode JpsiKK::execute()
           fMC.jpsi_decay=1;
         }
         if (fMC.jpsi_decay!=1) continue;
-        int pdgid = (*iter_mc)->particleProperty();
-        cout << pdgid << " ";
         if((*iter_mc)->leafParticle()) 
         {
           if((*iter_mc)->particleProperty() == -211) MCPpion[0] = (*iter_mc)->initialFourMomentum();
           if((*iter_mc)->particleProperty() ==  211) MCPpion[1] = (*iter_mc)->initialFourMomentum();
+          int pdgid = (*iter_mc)->particleProperty();
+          cout << pdgid << " ";
         }
         //int mcidx = ((*iter_mc)->mother()).trackIndex() - rootIndex;
         //m_pdgid[m_numParticle] = pdgid;
