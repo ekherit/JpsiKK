@@ -1413,7 +1413,7 @@ StatusCode JpsiKK::execute()
         if ((*iter_mc)->particleProperty()==100443)
         {
           psipDecay = true;
-          fMC.psip_decay=true;
+          //fMC.psip_decay=true;
           rootIndex = (*iter_mc)->trackIndex();
         }
         if (!psipDecay) continue;
