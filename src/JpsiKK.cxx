@@ -427,6 +427,7 @@ StatusCode JpsiKK::RootMC::init_tuple(void)
   status = tuple->addItem ("KK", KK);               //KK event
   status = tuple->addItem ("uu", uu);               //mu mu event
   status = tuple->addItem ("oo", oo);               //other event
+  status = tuple->addItem ("ntrack", ntrack,0,4); 
   status = tuple->addIndexedItem ("id",    ntrack, pid);
   status = tuple->addIndexedItem ("q",     ntrack, q);
   status = tuple->addIndexedItem ("E",     ntrack, E);
