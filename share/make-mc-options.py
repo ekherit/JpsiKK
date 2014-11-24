@@ -10,15 +10,17 @@ import sys
 import re
 
 if len(sys.argv)<3:
-    print "Usage: make-batch.py <data_source_dir> <template_dir> [<target_dir>] [<prefix>]"
+    print "Usage: make-mc-options.py <data_source_dir>"
     exit(1)
 
 TEMPLATE_FILE="selection.cfg"
 JOB_PREFIX = "mcjpKK"
 
 DATA_SOURCE_DIR = os.path.abspath(sys.argv[1])
-TEMPLATE_DIR = os.path.abspath(sys.argv[2])
 TARGET_DIR = os.path.abspath(os.curdir)
+
+JPSIKKROOT_DIR = os.environ['JPSIKKROOT']
+TEMPLATE_DIR = os.path.join(JPSIKKROOT_DIR, "share/template")
 
 if len(sys.argv)>=4:
     TARGET_DIR = os.path.abspath(sys.argv[3])
