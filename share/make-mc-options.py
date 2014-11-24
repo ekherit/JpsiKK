@@ -57,7 +57,7 @@ def create_dst_file_list(filelist, directory, files):
 
 #filter dst files. Now it is not used
 def dst_filter(files):
-    r = ".*run_.+\.dst"
+    r = ".*run.+\.dst"
     filtered_file_list = []
     for file in files:
         if re.match(r,file):
