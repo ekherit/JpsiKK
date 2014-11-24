@@ -1,0 +1,11 @@
+#
+Decay  psi(2S) 
+1.0000    J/psi  pi+ pi-                   JPIPI;
+Enddecay
+#
+Decay J/psi
+1.0000    mu+  mu-               PHOTOS  VLL;
+Enddecay
+ 
+  
+End
