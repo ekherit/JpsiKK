@@ -19,7 +19,7 @@ JOB_PREFIX = "mcjpKK"
 DATA_SOURCE_DIR = os.path.abspath(sys.argv[1])
 TARGET_DIR = os.path.abspath(os.curdir)
 
-JPSIKKROOT_DIR = os.environ['JPSIKKROOT']
+JPSIKKROOT_DIR = os.path.abspath(os.environ['JPSIKKROOT'])
 TEMPLATE_DIR = os.path.join(JPSIKKROOT_DIR, "share/template")
 
 if len(sys.argv)>=4:
