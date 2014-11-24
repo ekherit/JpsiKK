@@ -49,10 +49,11 @@ def create_file_list(filelist, directory, files):
 
 #create dst filtered file list
 def create_dst_file_list(filelist, directory, files):
-    r = re.compile("run_.+\.dst")
+    r = re.compile(".*run.*\.dst")
     for file in files:
-        if re.match(r,file):
-            filelist += [os.path.join(directory,file)]
+			if re.match(r,file):
+				print file
+				filelist += [os.path.join(directory,file)]
     filelist.sort()
 
 #filter dst files. Now it is not used
