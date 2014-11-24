@@ -65,7 +65,7 @@ def dst_filter(files):
 
 def create_run_dict(files):
     RunMap = {}
-    r = re.compile(".*run(\d\d\d\d\d\d\d).+.dst")
+    r = re.compile(".*run(\d\d\d\d).+.dst")
     for file in files:
         m = re.match(r,file)
         if m:
