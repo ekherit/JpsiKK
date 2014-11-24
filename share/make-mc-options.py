@@ -9,9 +9,9 @@ import os
 import sys
 import re
 
-if len(sys.argv)<3:
+#if len(sys.argv)<3:
 #    print "Usage: make-mc-options.py <data_source_dir>"
-    exit(1)
+#    exit(1)
 
 TEMPLATE_FILE="selection.cfg"
 JOB_PREFIX = "mcjpKK"
