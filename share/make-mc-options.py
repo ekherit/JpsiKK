@@ -10,7 +10,7 @@ import sys
 import re
 
 if len(sys.argv)<3:
-    print "Usage: make-mc-options.py <data_source_dir>"
+#    print "Usage: make-mc-options.py <data_source_dir>"
     exit(1)
 
 TEMPLATE_FILE="selection.cfg"
