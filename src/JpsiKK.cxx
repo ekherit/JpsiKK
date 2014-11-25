@@ -1550,8 +1550,6 @@ StatusCode JpsiKK::execute()
 
   if(fEvent.run<0) 
   {
-    cout << fEvent.run << endl;
-    cout << "In tuple write" << endl;
     fMC.tuple->write();
   }
   fEvent.tuple->write();
