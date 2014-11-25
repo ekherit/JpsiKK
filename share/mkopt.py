@@ -4,6 +4,7 @@ import sys
 import OptionMaker
 
 
+from OptionMaker import OptionMaker
 from optparse import OptionParser
 
 opt = OptionParser()
@@ -26,9 +27,9 @@ TEMPLATE_FILE = os.path.join(TEMPLATE_DIR, 'selection.cfg')
 
 print options.selection
 print args
-DATA_SOURCE_DIR = os.path.abspath(args[0])
+DATA_SOURCE_DIR = os.path.realpath(os.path.abspath(args[0]))
 
-optMaker = mkbopt.OptionMaker(DATA_SOURCE_DIR)
+optMaker = OptionMaker(DATA_SOURCE_DIR)
 #optMaker.group(".*run_(\d\d\d\d\d\d\d).*.dst")
 optMaker.group()
-optMaker.make(TEMPLATE_FILE,"tmp","test")
+optMaker.make(TEMPLATE_FILE,"tmp","TTTTT")
