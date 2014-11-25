@@ -1555,7 +1555,12 @@ StatusCode JpsiKK::execute()
   fDedx.tuple->write();
   fTof.tuple->write();
   fNeutral.tuple->write();
-  if(fEvent.run<0) fMC.tuple->write();
+  cout << fEvent.run << endl;
+  if(fEvent.run<0) 
+  {
+    cout << "In tuple write" << endl;
+    fMC.tuple->write();
+  }
   event_write++;
   return StatusCode::SUCCESS;
 }
