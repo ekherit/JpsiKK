@@ -1444,17 +1444,11 @@ StatusCode JpsiKK::execute()
       if( ! pi_plus && !pi_minus) continue; //keep only psip to Jpsi pi pi decay
       switch((*iter_mc)->particleProperty())
       {
-        case +321:
-          MCPkaon_or_muon[1] = (*iter_mc)->initialFourMomentum();
-          mytrack++;
-          K_plus = true;
-          fMC.pid[3]=321;
-          break;
-        case -321:
+        case -13:
           MCPkaon_or_muon[0] = (*iter_mc)->initialFourMomentum();
-          K_minus=true;
+          mu_minus = true;
           mytrack++;
-          fMC.pid[2]=-321;
+          fMC.pid[2]=-13;
           break;
         case +13:
           MCPkaon_or_muon[1] = (*iter_mc)->initialFourMomentum();
@@ -1462,11 +1456,17 @@ StatusCode JpsiKK::execute()
           mytrack++;
           fMC.pid[3]=13;
           break;
-        case -13:
+        case -321:
           MCPkaon_or_muon[0] = (*iter_mc)->initialFourMomentum();
-          mu_minus = true;
+          K_minus=true;
           mytrack++;
-          fMC.pid[2]=-13;
+          fMC.pid[2]=-321;
+          break;
+        case +321:
+          MCPkaon_or_muon[1] = (*iter_mc)->initialFourMomentum();
+          mytrack++;
+          K_plus = true;
+          fMC.pid[3]=321;
           break;
       };
     }
