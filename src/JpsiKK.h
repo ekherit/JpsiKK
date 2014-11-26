@@ -232,16 +232,28 @@ class JpsiKK : public Algorithm
   };
 
 
+  struct RootMCTopo : public RootTuple
+  {
+    NTuple::Item  <int>  m_idxmc;
+    NTuple::Array <int>  m_pdgid;
+    NTuple::Array <int>  m_motheridx;
+    virtual void init(void);
+    virtual StatusCode init_tuple(void);
+  };
+
+
+
   private:
 
-  RootEvent fEvent;   //signal event essential information
-  RootPid fPid;   //Paritlce id information
-  RootMdc   fMdc;     //Mdc information
-  RootDedx  fDedx;    //DeDx for the event
-  RootEmc   fEmc;     //Emc infromation for the event
-  RootTof   fTof;     //TOF infromation for the event
-  RootMC    fMC;     //Monte Carlo truth
-  RootEmc   fNeutral; //neutral tracks
+  RootEvent  fEvent;   //signal event essential information
+  RootPid    fPid;     //Paritlce id information
+  RootMdc    fMdc;     //Mdc information
+  RootDedx   fDedx;    //DeDx for the event
+  RootEmc    fEmc;    //Emc infromation for the event
+  RootTof    fTof;    //TOF infromation for the event
+  RootMC     fMC;     //Monte Carlo truth
+  RootMCTopo fMCTopo; //Monte Carlo topology
+  RootEmc    fNeutral; //neutral tracks
 };
 
 #endif

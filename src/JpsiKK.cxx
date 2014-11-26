@@ -198,6 +198,7 @@ StatusCode JpsiKK::initialize(void)
   status = init_tuple(this, fTof,    "FILE1/tof","Tof info for signal",log);
   status = init_tuple(this, fNeutral,"FILE1/neutral","Good neutral tracks",log);
   status = init_tuple(this, fMC,     "FILE1/mc","Monte Carlo truth information",log);
+  status = init_tuple(this, fMC,     "FILE1/mctopo","Monte Carlo truth information topology",log);
 
   return status;
 }
@@ -444,6 +445,19 @@ StatusCode JpsiKK::RootMC::init_tuple(void)
 void JpsiKK::RootMC::init(void)
 {
   ntrack=4;
+}
+
+StatusCode JpsiKK::RootMCTopo::init_tuple(void)
+{
+  StatusCode status;
+  status = tuple->addItem("indexmc", m_idxmc, 0, 100);
+  status = tuple->addIndexedItem("pdgid", m_idxmc, m_pdgid);
+  status = tuple->addIndexedItem("motheridx", m_idxmc, m_motheridx);
+  return status;
+}
+
+void JpsiKK::RootMCTopo::init(void)
+{
 }
 
 void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
@@ -1389,14 +1403,27 @@ StatusCode JpsiKK::execute()
 
   if(fEvent.run<0)
   {
-    fMC.ntrack=4;
-    HepLorentzVector MCPpion[2];
-    HepLorentzVector MCPkaon_or_muon[2];
+    //check the MC information
     if(!mcParticleCol)
     {
       log << MSG::ERROR << "Could not retrieve McParticelCol" << endreq;
       return StatusCode::FAILURE;
     }
+    //Fill MC TOPO INFORMATION
+    Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
+    int m_numParticle = 0;
+    for (; iter_mc != mcParticleCol->end(); iter_mc++)
+    {
+      fMCTopo.m_pdgid[m_numParticle] = pdgid;
+      fMCTopo.m_motheridx[m_numParticle] = mcidx;
+      fMCTopo.m_numParticle += 1;
+    }
+    fMCTopo.m_idxmc = m_numParticle;
+
+    //Fill my mc truth information
+    fMC.ntrack=4;
+    HepLorentzVector MCPpion[2];
+    HepLorentzVector MCPkaon_or_muon[2];
     bool psipDecay(false);
     bool pi_minus(false);
     bool pi_plus(false);
@@ -1551,6 +1578,7 @@ StatusCode JpsiKK::execute()
   if(fEvent.run<0) 
   {
     fMC.tuple->write();
+    fMCTopo.tuple->write();
   }
   fEvent.tuple->write();
   fPid.tuple->write();
