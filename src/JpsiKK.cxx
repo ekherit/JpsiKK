@@ -1410,12 +1410,24 @@ StatusCode JpsiKK::execute()
       return StatusCode::FAILURE;
     }
     //Fill MC TOPO INFORMATION
+    bool psipDecay(false);
+    int rootIndex=-1;
     Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
     int m_numParticle = 0;
     for (; iter_mc != mcParticleCol->end(); iter_mc++)
     {
-      fMCTopo.m_pdgid[m_numParticle] = (*iter_mc)->particleProperty();
-      fMCTopo.m_motheridx[m_numParticle] = iter_mc - mcParticleCol->begin();
+      if ((*iter_mc)->primaryParticle()) continue;
+      if (!(*iter_mc)->decayFromGenerator()) continue;
+      if ((*iter_mc)->particleProperty()==100443)
+      {
+        psipDecay = true;
+        rootIndex = (*iter_mc)->trackIndex();
+      }
+      if (!psipDecay) continue;
+      int pdgid = (*iter_mc)->particleProperty();
+      int mcidx = ((*iter_mc)->mother()).trackIndex() - rootIndex;
+      fMCTopo.m_pdgid[m_numParticle] = pdgid;
+      fMCTopo.m_motheridx[m_numParticle] = mcidx;
       m_numParticle += 1;
     }
     fMCTopo.m_idxmc = m_numParticle;
@@ -1424,7 +1436,6 @@ StatusCode JpsiKK::execute()
     fMC.ntrack=4;
     HepLorentzVector MCPpion[2];
     HepLorentzVector MCPkaon_or_muon[2];
-    bool psipDecay(false);
     bool pi_minus(false);
     bool pi_plus(false);
     bool K_minus(false);
@@ -1438,6 +1449,7 @@ StatusCode JpsiKK::execute()
     fMC.KK = 0;
     fMC.uu = 0;
     fMC.oo = 0;
+    psipDecay=false;
     Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
     for (; iter_mc != mcParticleCol->end(); iter_mc++)
     {
