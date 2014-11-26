@@ -1410,8 +1410,8 @@ StatusCode JpsiKK::execute()
       return StatusCode::FAILURE;
     }
     //Fill MC TOPO INFORMATION
-    bool psipDecay(false);
-    int rootIndex=-1;
+    bool psipDecay = false;
+    int rootIndex = -1;
     Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
     int m_numParticle = 0;
     for (; iter_mc != mcParticleCol->end(); iter_mc++)
@@ -1443,13 +1443,13 @@ StatusCode JpsiKK::execute()
     bool mu_minus(false);
     bool mu_plus(false);
     int mytrack=0;
-    int rootIndex(-1);
     fMC.psip_decay = 0;
     fMC.jpsi_decay = 0;
     fMC.KK = 0;
     fMC.uu = 0;
     fMC.oo = 0;
     psipDecay=false;
+    rootIndex=-1;
     Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
     for (; iter_mc != mcParticleCol->end(); iter_mc++)
     {
