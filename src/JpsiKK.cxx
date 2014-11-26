@@ -1450,8 +1450,7 @@ StatusCode JpsiKK::execute()
     fMC.oo = 0;
     psipDecay=false;
     rootIndex=-1;
-    Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
-    for (; iter_mc != mcParticleCol->end(); iter_mc++)
+    for (iter_mc = mcParticleCol->begin(); iter_mc != mcParticleCol->end(); iter_mc++)
     {
       if ((*iter_mc)->primaryParticle()) continue;
       if (!(*iter_mc)->decayFromGenerator()) continue;
