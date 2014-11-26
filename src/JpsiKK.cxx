@@ -1472,12 +1472,14 @@ StatusCode JpsiKK::execute()
         pi_plus=true;
         MCPpion[1] = (*iter_mc)->initialFourMomentum();
         fMC.pid[1]=211;
+        mytrack++;
       }
       if((*iter_mc)->particleProperty() == -211) 
       {
         MCPpion[0] = (*iter_mc)->initialFourMomentum();
         pi_minus=true;
         fMC.pid[0]=-211;
+        mytrack++;
       }
       if( ! pi_plus && !pi_minus) continue; //keep only psip to Jpsi pi pi decay
       switch((*iter_mc)->particleProperty())
