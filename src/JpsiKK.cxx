@@ -1416,7 +1416,7 @@ StatusCode JpsiKK::execute()
     {
       fMCTopo.m_pdgid[m_numParticle] = pdgid;
       fMCTopo.m_motheridx[m_numParticle] = mcidx;
-      fMCTopo.m_numParticle += 1;
+      m_numParticle += 1;
     }
     fMCTopo.m_idxmc = m_numParticle;
 
