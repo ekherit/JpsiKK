@@ -111,6 +111,11 @@ class JpsiKK : public Algorithm
     NTuple::Item<double>  Minv; //invariant mass two charged particles
     NTuple::Item<double>  kin_chi2; //kinematic chi2
     NTuple::Item<double>  pid_chi2; //my prob  chi2
+    NTuple::Item<double>  M012; //invariant mass of  two pion and negative Kaon
+    NTuple::Item<double>  M013; //invariant mass of  two pion and positive Kaon
+    NTuple::Item<double>  M03; //invariant mass of Kaon and pion
+    NTuple::Item<double>  M12; //invariant mass of kaon and pion
+    NTuple::Item<double>  M01; //invariant mass of pion
 
     NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
     NTuple::Array<double> q; //charge of the track

@@ -222,6 +222,11 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("uu", uu); //mu-mu decay channel of the J/psi
   status = tuple->addItem ("Mrec", Mrecoil); 
   status = tuple->addItem ("Minv", Minv); 
+  status = tuple->addItem ("M012", M012); 
+  status = tuple->addItem ("M013", M013); 
+  status = tuple->addItem ("M03", M03); 
+  status = tuple->addItem ("M12", M12); 
+  status = tuple->addItem ("M01", M01); 
   status = tuple->addItem ("kin_chi2", kin_chi2); 
   status = tuple->addItem ("pid_chi2", pid_chi2); 
 
@@ -1213,6 +1218,11 @@ StatusCode JpsiKK::execute()
   fEvent.kin_chi2 = kinematic_chi2;
   fEvent.pid_chi2 = get_chi2(result_pair)[channel];
   fEvent.Minv = (Pkf[2]+Pkf[3]).m();
+  fEvent.M012 = (Pkf[0]+Pkf[1]+Pkf[2]).m();
+  fEvent.M013 = (Pkf[0]+Pkf[1]+Pkf[3]).m();
+  fEvent.M03 =  (Pkf[0]+Pkf[3]).m();
+  fEvent.M12 =  (Pkf[1]+Pkf[2]).m();
+  fEvent.M01 =  (Pkf[0]+Pkf[1]).m();
   HepLorentzVector P_psip(0.040546,0,0,PSIP_MASS); //initial vector of psip
   fEvent.Mrecoil = (P_psip - Pkf[0] - Pkf[1]).m();
 
