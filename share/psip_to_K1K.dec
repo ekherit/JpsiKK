@@ -7824,8 +7824,8 @@ Decay J/psi
 Enddecay
 
 Decay psi(2S)
-0.001       K_1+ K-   PHSP;
-0.001       K_1- K+   PHSP;
+0.5       K_1+ K-   PHSP;
+0.5       K_1- K+   PHSP;
 #0.000335    K+ anti-K*0 pi- PHSP;
 #0.000335    K- K*0 pi+ PHSP;
 #0.00005045   K*0 anti-K0 HELAMP 1.0 0.0 0.0 0.0 -1.0 0.0;
