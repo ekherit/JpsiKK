@@ -70,7 +70,7 @@ class OptionMaker:
         self.fileList = filter_file_list(create_file_list(self.dataDir), self.fileFilter)
 
     #def group(self, run_filter=".*run_(\d\d\d\d\d\d\d).*.dst", run_number=1):
-    def group(self, run_filter=".*run_(\d{4,7})[^\d]+.*.dst", run_number=1):
+    def group(self, run_filter=".*run.*(\d{4,7})[^\d]+.*.dst", run_number=1):
         self.runFilter=run_filter
         self.runNumber = run_number
         self.runMap = create_run_dict(self.fileList, run_filter)
@@ -83,11 +83,13 @@ class OptionMaker:
         self.targetDir  = target_dir
         if not os.path.exists(self.targetDir):
             os.mkdir(self.targetDir)
+        else:
+					print "Target dir ",  self.targetDir,  " already exists, exiting"
+					sys.exit(1)
         for run, files in self.runMap.items():
             #define input and output files in joboptions
             TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s-%07d.root" % (self.jobPrefix,run)))
             TemplateInputFile = make_files_string(files)
-            print TemplateInputFile
             #define the name of cfg file
             target_file_name = os.path.join(self.targetDir,"%s-%07d.cfg" % (self.jobPrefix, run))
             source_file = open(self.templateFile, 'r')
