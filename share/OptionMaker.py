@@ -60,9 +60,16 @@ class OptionMaker:
     runFilter=""   #regexp run grouping
     eventNumber=-1 #Event number per job
     runNumber=1    #Run number per job
+    jobNumber=1    #number of jobs
     Seed=1         #the random seed
     fileList=[]
     runMap={}
+    decayFile=""
+
+    def __init__(self, decay_file, jobs_number):
+        self.jobNumber=jobs_number
+        self.decayFile = os.path.realpath(os.path.abspath(decay_file))
+
 
     def __init__(self, data_dir, file_filter=".+.dst$"):
         self.dataDir = os.path.abspath(data_dir)
@@ -75,8 +82,7 @@ class OptionMaker:
         self.runNumber = run_number
         self.runMap = create_run_dict(self.fileList, run_filter)
 
-    def make(self, template_file, target_dir, job_prefix):
-        self.jobPrefix = job_prefix
+    def setup_template_file(self, template_file, target_dir):
         self.templateFile  = template_file
         if not os.path.exists(self.templateFile):
             print "Template file ", self.templateFile, " does not exists"
@@ -84,8 +90,14 @@ class OptionMaker:
         if not os.path.exists(self.targetDir):
             os.mkdir(self.targetDir)
         else:
-					print "Target dir ",  self.targetDir,  " already exists, exiting"
-					sys.exit(1)
+            print "Target dir ",  self.targetDir,  " already exists, exiting"
+            sys.exit(1)
+
+
+    def make(self, template_file, target_dir, job_prefix):
+        self.jobPrefix = job_prefix
+        setup_template_file(template_file, target_dir)
+
         for run, files in self.runMap.items():
             #define input and output files in joboptions
             TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s-%07d.root" % (self.jobPrefix,run)))
@@ -99,6 +111,31 @@ class OptionMaker:
                 line = re.sub("TEMPLATE_INPUT_FILE", TemplateInputFile, line)
                 line = re.sub("TEMPLATE_OUTPUT_FILE",TemplateOutputFile, line)
                 line = re.sub("TEMPLATE_RANDOM_SEED",TemplateRandomSeed, line)
+                line = re.sub("TEMPLATE_EVENT_NUMBER",self.eventNumber, line)
+                line = re.sub("TEMPLATE_RUN_NUMBER",self.runNumber, line)
+                target_file.write(line)
+            source_file.close()
+            target_file.close()
+
+    def make_sim(self, template_file, target_dir, job_prefix):
+        self.jobPrefix = job_prefix
+        setup_template_file(template_file, target_dir)
+        for job in range(0, self.jobNumber):
+            #define input and output files in joboptions
+            TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s-%07d.rtraw" % (self.jobPrefix,self.jobNumber)))
+            TemplateInputFile =  self.decayFile 
+            #define the name of cfg file
+            target_file_name = os.path.join(self.targetDir,"%s-sim-%07d.cfg" % (self.jobPrefix, self.jobNumber))
+            target_file_name_rec = os.path.join(self.targetDir,"%s-rec-%07d.cfg" % (self.jobPrefix, self.jobNumber))
+            source_file = open(self.templateFile, 'r')
+            target_file = open(target_file_name, 'w')
+            TemplateRandomSeed = str(random.randint(0,2**32))
+            for line in source_file:
+                line = re.sub("TEMPLATE_INPUT_FILE", TemplateInputFile, line)
+                line = re.sub("TEMPLATE_OUTPUT_FILE",TemplateOutputFile, line)
+                line = re.sub("TEMPLATE_RANDOM_SEED",TemplateRandomSeed, line)
+                line = re.sub("TEMPLATE_EVENT_NUMBER",self.eventNumber, line)
+                line = re.sub("TEMPLATE_RUN_NUMBER",-run, line)
                 target_file.write(line)
             source_file.close()
             target_file.close()

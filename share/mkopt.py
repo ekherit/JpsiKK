@@ -19,6 +19,9 @@ opt.add_option("-p", "--prefix", dest="job_prefix",
 opt.add_option("-j", "--jobs", dest="jobs_number",
                   help="The jobs number")
 
+opt.add_option("-N", "--events", dest="event_number","default=100"
+                  help="The jobs number")
+
 
 (options, args) = opt.parse_args()
 
@@ -64,10 +67,11 @@ if not os.path.exists(TEMPLATE_FILE):
 print "Setup template file: ",  TEMPLATE_FILE
 
 if SimulationMode:
-	if len(args) < 2:
-		print 'Specify decay file of the simulation'
+	if len(args) < 3:
+		print 'Specify decay file of the simulation and event number'
 		sys.exit(1)
 	TEMPLATE_DECAY_FILE = args[1]
+        TEMPLATE_EVENT_NUMBER=int(args[2])
 	if not os.path.exists(TEMPLATE_DECAY_FILE):
 		TEMPLATE_DECAY_FILE = os.path.join(TEMPLATE_DIR, TEMPLATE_DECAY_FILE)
 		if not os.path.exists(TEMPLATE_DECAY_FILE):
@@ -76,6 +80,7 @@ if SimulationMode:
 	else:
 		TEMPLATE_DECAY_FILE = os.path.realpath(os.path.abspath(TEMPLATE_DECAY_FILE))
 	print "Use decay file: ",  TEMPLATE_DECAY_FILE
+        optMaker = OptionMaker(TEMPLATE_DECAY_FILE, TEMPLATE_EVENT_NUMBER, options.jobs_number)
 
 
 
