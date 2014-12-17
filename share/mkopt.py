@@ -81,6 +81,10 @@ if SimulationMode:
 		TEMPLATE_DECAY_FILE = os.path.realpath(os.path.abspath(TEMPLATE_DECAY_FILE))
 	print "Use decay file: ",  TEMPLATE_DECAY_FILE
         optMaker = OptionMaker(TEMPLATE_DECAY_FILE, TEMPLATE_EVENT_NUMBER, options.jobs_number)
+	TARGET_DIR="."
+	if len(args) == 3:
+		TARGET_DIR = os.path.realpath(os.path.abspath(args[2]))
+        optMaker.make_sim(TEMPLATE_FILE, TARGET_DIR, options.job_prefix)
 
 
 
