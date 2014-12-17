@@ -19,8 +19,8 @@ opt.add_option("-p", "--prefix", dest="job_prefix",
 opt.add_option("-j", "--jobs", dest="jobs_number",
                   help="The jobs number")
 
-opt.add_option("-N", "--events", dest="event_number","default=100"
-                  help="The jobs number")
+opt.add_option("-N", "--events", dest="event_number","default=100", 
+                  help="Event number")
 
 
 (options, args) = opt.parse_args()
