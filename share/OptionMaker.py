@@ -183,7 +183,6 @@ class OptionMaker:
             TemplateInputFile =  self.decayFile 
             #define the name of cfg file
             target_file_name = os.path.join(self.targetDir,"%s-sim-%07d.cfg" % (self.jobPrefix, job))
-            target_file_name_rec = os.path.join(self.targetDir,"%s-rec-%07d-sim.cfg" % (self.jobPrefix, job))
             source_file = open(self.templateFile, 'r')
             target_file = open(target_file_name, 'w')
             TemplateRandomSeed = str(random.randint(0,2**32))
