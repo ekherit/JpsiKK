@@ -70,7 +70,7 @@ class OptionMaker:
     runMap={}
     SelectionMode = True
     SimulationMode = False
-    Reconstruction = False
+    ReconstructionMode = False
 
 
     def __init__(self, options, args):
@@ -146,6 +146,7 @@ class OptionMaker:
     def make(self):
         if self.SimulationMode:
             self.make_sim()
+
         if self.ReconstructionMode:
             self.make_rec()
 
