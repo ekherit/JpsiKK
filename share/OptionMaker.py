@@ -179,7 +179,7 @@ class OptionMaker:
     def make_sim(self):
         for job in range(0, self.jobNumber):
             #define input and output files in joboptions
-            TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s-%07d.rtraw" % (self.jobPrefix,self.jobNumber)))
+            TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s-%07d.rtraw" % (self.jobPrefix,job)))
             TemplateInputFile =  self.decayFile 
             #define the name of cfg file
             target_file_name = os.path.join(self.targetDir,"%s-sim-%07d.cfg" % (self.jobPrefix, job))
