@@ -16,10 +16,10 @@ opt.add_option("-t", "--template_file", dest="template_file", default="selection
 opt.add_option("-p", "--job_prefix", dest="job_prefix",
                   help="Prefix for the pbs job", default="test")
 
-opt.add_option("-J", "--job_number", dest="job_number",default=1, 
+opt.add_option("-J", "--job_number", dest="job_number",type="int", default=1, 
                   help="The jobs number")
 
-opt.add_option("-N", "--event_number", dest="event_number",default=100, 
+opt.add_option("-N", "--event_number", type="int", dest="event_number",default=100, 
                   help="Event number per job")
 
 opt.add_option("-r", "--run", dest="runs",default="-8093", 

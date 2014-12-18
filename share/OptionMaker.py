@@ -59,7 +59,7 @@ class OptionMaker:
     decayFile=""   #the decay file
     targetDir="."   #the folder where options file will be located
     jobPrefix=""   #prefix of the job
-    fileFilter=""  #dst regex filter
+    fileFilter=".*run_(\d\d\d\d\d\d\d).*.dst"  #dst regex filter
     runFilter=""   #regexp run grouping
     eventNumber=-1 #Event number per job
     runNumber=1    #Run number per job
@@ -87,7 +87,7 @@ class OptionMaker:
 
         if(args[0] == "selection" or args[0]=="sel"):
             self.SelectionMode=True
-            self.fileFilter=file_filter
+            self.fileFilter=".*run_(\d\d\d\d\d\d\d).*.dst"
             self.fileList = filter_file_list(create_file_list(self.dataDir), self.fileFilter)
             self.templateFile = "selection.cfg"
 
@@ -99,7 +99,11 @@ class OptionMaker:
         if args[0] == "reconstruction" or args[0] == "rec":
             self.ReconstructionMode = True
             self.templateFile = "reconstruction.cfg"
+            self.fileFilter = ".*(\d\d\d\d\d\d\d).*.rtraw"
+            self.fileList =filter_file_list(create_file_list(self.dataDir),  self.fileFilter)
+            #print self.fileList
             print "Making reconstruction config files."
+            self.group(".*(\d{5,7}).rtraw")
 
 
         if not os.path.exists(self.templateFile):
@@ -142,6 +146,8 @@ class OptionMaker:
     def make(self):
         if self.SimulationMode:
             self.make_sim()
+        if self.ReconstructionMode:
+            self.make_rec()
 
 
 
@@ -155,7 +161,7 @@ class OptionMaker:
             TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s-%07d.root" % (self.jobPrefix,run)))
             TemplateInputFile = make_files_string(files)
             #define the name of cfg file
-            target_file_name = os.path.join(self.targetDir,"%s-%07d.cfg" % (self.jobPrefix, run))
+            target_file_name = os.path.join(self.targetDir,"%s-%07d-sel.cfg" % (self.jobPrefix, run))
             source_file = open(self.templateFile, 'r')
             target_file = open(target_file_name, 'w')
             TemplateRandomSeed = str(random.randint(0,2**32))
@@ -176,7 +182,7 @@ class OptionMaker:
             TemplateInputFile =  self.decayFile 
             #define the name of cfg file
             target_file_name = os.path.join(self.targetDir,"%s-sim-%07d.cfg" % (self.jobPrefix, job))
-            target_file_name_rec = os.path.join(self.targetDir,"%s-rec-%07d.cfg" % (self.jobPrefix, job))
+            target_file_name_rec = os.path.join(self.targetDir,"%s-rec-%07d-sim.cfg" % (self.jobPrefix, job))
             source_file = open(self.templateFile, 'r')
             target_file = open(target_file_name, 'w')
             TemplateRandomSeed = str(random.randint(0,2**32))
@@ -186,6 +192,27 @@ class OptionMaker:
                 line = re.sub("TEMPLATE_RANDOM_SEED",TemplateRandomSeed, line)
                 line = re.sub("TEMPLATE_EVENT_NUMBER",str(self.eventNumber), line)
                 line = re.sub("TEMPLATE_RUN_NUMBER",self.runs, line)
+                target_file.write(line)
+            source_file.close()
+            target_file.close()
+
+    def make_rec(self):
+        for run, files in self.runMap.items():
+            #define input and output files in joboptions
+            TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s-%07d.dst" % (self.jobPrefix,run)))
+            TemplateInputFile = make_files_string(files)
+            #define the name of cfg file
+            #print run
+            target_file_name = os.path.join(self.targetDir,"%s-%07d-rec.cfg" % (self.jobPrefix, run))
+            source_file = open(self.templateFile, 'r')
+            target_file = open(target_file_name, 'w')
+            TemplateRandomSeed = str(random.randint(0,2**32))
+            for line in source_file:
+                line = re.sub("TEMPLATE_INPUT_FILE",  TemplateInputFile, line)
+                line = re.sub("TEMPLATE_OUTPUT_FILE", TemplateOutputFile, line)
+                line = re.sub("TEMPLATE_RANDOM_SEED", TemplateRandomSeed, line)
+                line = re.sub("TEMPLATE_EVENT_NUMBER",str(self.eventNumber), line)
+                line = re.sub("TEMPLATE_RUN_NUMBER",  str(self.runNumber), line)
                 target_file.write(line)
             source_file.close()
             target_file.close()
