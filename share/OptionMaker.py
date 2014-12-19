@@ -118,7 +118,7 @@ class OptionMaker:
             print "Making reconstruction config files."
             self.group(".*(\d{5,7}).rtraw")
 
-        lookup(self.templateFile,  TEMPLATE_DIR)
+        lookup(self.templateFile,  self.TEMPLATE_DIR)
         print "Setup template file: ",  self.templateFile
 
         #if not os.path.exists(self.templateFile):
