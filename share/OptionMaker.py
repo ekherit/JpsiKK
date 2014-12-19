@@ -106,7 +106,7 @@ class OptionMaker:
         if args[0] == "simulation" or args[0] == "sim":
             self.SimulationMode = True
             self.templateFile = "simulation.cfg"
-            lookup(self.decayFile,  SHARE_DIR)
+            lookup(self.decayFile,  self.SHARE_DIR)
             print "Making simulation config files."
 
         if args[0] == "reconstruction" or args[0] == "rec":
