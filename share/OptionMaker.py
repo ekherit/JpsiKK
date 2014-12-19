@@ -163,12 +163,15 @@ class OptionMaker:
     def make(self):
         if self.SimulationMode:
             self.make_sim()
+            return
 
         if self.ReconstructionMode:
             self.make_rec()
+            return
 
         if self.SelectionMode:
             self.make_sel()
+            return
 
 
 
