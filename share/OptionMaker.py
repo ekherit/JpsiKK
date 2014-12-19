@@ -165,19 +165,19 @@ class OptionMaker:
         if self.ReconstructionMode:
             self.make_rec()
 
+        if self.SelectionMode:
+            self.make_sel()
+
 
 
 
     def make_sel(self, template_file, target_dir, job_prefix):
-        #self.jobPrefix = job_prefix
-        #self.setup_template_file(template_file, target_dir)
-
         for run, files in self.runMap.items():
             #define input and output files in joboptions
             TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s-%07d.root" % (self.jobPrefix,run)))
             TemplateInputFile = make_files_string(files)
             #define the name of cfg file
-            target_file_name = os.path.join(self.targetDir,"%s-%07d-sel.cfg" % (self.jobPrefix, run))
+            target_file_name = os.path.join(self.targetDir,"%s-sel-%07d.cfg" % (self.jobPrefix, run))
             source_file = open(self.templateFile, 'r')
             target_file = open(target_file_name, 'w')
             TemplateRandomSeed = str(random.randint(0,2**32))
