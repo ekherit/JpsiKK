@@ -56,7 +56,7 @@ def lookup( f, d):
     if os.path.exists(f):
         f = os.path.realpath(os.path.abspath(f))
         print f
-    else
+    else :
         print 'File ',  f,  ' doest exists'
         sys.exit(1)
 
