@@ -171,7 +171,7 @@ class OptionMaker:
 
 
 
-    def make_sel(self, template_file, target_dir, job_prefix):
+    def make_sel(self):
         for run, files in self.runMap.items():
             #define input and output files in joboptions
             TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s-%07d.root" % (self.jobPrefix,run)))
