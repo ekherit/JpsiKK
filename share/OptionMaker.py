@@ -100,9 +100,11 @@ class OptionMaker:
 
         if(args[0] == "selection" or args[0]=="sel"):
             self.SelectionMode=True
-            self.fileFilter=".*run_(\d\d\d\d\d\d\d).*.dst"
+            #self.fileFilter=".*run_(\d\d\d\d\d\d\d).*.dst"
+            self.fileFilter = ".*(\d{5, 7}).*.dst"
             self.fileList = filter_file_list(create_file_list(self.dataDir), self.fileFilter)
             self.templateFile = "selection.cfg"
+            self.group(".*(\d{5,7}).dst")
 
         if args[0] == "simulation" or args[0] == "sim":
             self.SimulationMode = True
@@ -172,6 +174,7 @@ class OptionMaker:
 
 
     def make_sel(self):
+        print self.runMap
         for run, files in self.runMap.items():
             #define input and output files in joboptions
             TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s-%07d.root" % (self.jobPrefix,run)))
