@@ -59,6 +59,7 @@ def lookup( f, d):
     else :
         print 'File ',  f,  ' doest exists'
         sys.exit(1)
+    return f
 
 
 
@@ -106,7 +107,7 @@ class OptionMaker:
         if args[0] == "simulation" or args[0] == "sim":
             self.SimulationMode = True
             self.templateFile = "simulation.cfg"
-            lookup(self.decayFile,  self.SHARE_DIR)
+            self.decayFile = lookup(self.decayFile,  self.SHARE_DIR)
             print "Making simulation config files."
 
         if args[0] == "reconstruction" or args[0] == "rec":
@@ -118,7 +119,7 @@ class OptionMaker:
             print "Making reconstruction config files."
             self.group(".*(\d{5,7}).rtraw")
 
-        lookup(self.templateFile,  self.TEMPLATE_DIR)
+        self.templateFile = lookup(self.templateFile,  self.TEMPLATE_DIR)
         print "Setup template file: ",  self.templateFile
 
         #if not os.path.exists(self.templateFile):
