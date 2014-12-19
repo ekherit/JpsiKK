@@ -50,10 +50,22 @@ def make_files_string(files):
     return files_string
 
 
+def lookup( f, d):
+    if not os.path.exists(f):
+        f = os.path.join(d,f)
+    if os.path.exists(f):
+        f = os.path.realpath(os.path.abspath(f))
+        print f
+    else
+        print 'File ',  f,  ' doest exists'
+        sys.exit(1)
+
+
 
 class OptionMaker:
     JPSIKKROOT_DIR       = os.path.abspath(os.environ['JPSIKKROOT'])
     TEMPLATE_DIR         = os.path.join(JPSIKKROOT_DIR, 'share/template')
+    SHARE_DIR            = os.path.join(JPSIKKROOT_DIR, 'share')
     dataDir = ""   #folder where data files will be searched
     templateFile=""# the path to the template file
     decayFile=""   #the decay file
@@ -74,7 +86,7 @@ class OptionMaker:
 
 
     def __init__(self, options, args):
-        self.decayFile = os.path.realpath(os.path.abspath(args[1]))
+        self.decayFile = args[1]
         self.dataDir   = os.path.realpath(os.path.abspath(args[1]))
         self.eventNumber=options.event_number
         self.jobNumber=int(options.job_number)
@@ -94,6 +106,7 @@ class OptionMaker:
         if args[0] == "simulation" or args[0] == "sim":
             self.SimulationMode = True
             self.templateFile = "simulation.cfg"
+            lookup(self.decayFile,  SHARE_DIR)
             print "Making simulation config files."
 
         if args[0] == "reconstruction" or args[0] == "rec":
@@ -105,17 +118,18 @@ class OptionMaker:
             print "Making reconstruction config files."
             self.group(".*(\d{5,7}).rtraw")
 
-
-        if not os.path.exists(self.templateFile):
-            self.templateFile = os.path.join(self.TEMPLATE_DIR, self.templateFile)
-            print self.templateFile
-        else:
-            self.templateFile = os.path.realpath(os.path.abspath(self.templateFile))
-            print self.templateFile
-        if not os.path.exists(self.templateFile):
-            print 'Template file ',  options.template_file,  ' doest exists'
-            sys.exit(1)
+        lookup(self.templateFile,  TEMPLATE_DIR)
         print "Setup template file: ",  self.templateFile
+
+        #if not os.path.exists(self.templateFile):
+        #    self.templateFile = os.path.join(self.TEMPLATE_DIR, self.templateFile)
+        #    print self.templateFile
+        #else:
+        #    self.templateFile = os.path.realpath(os.path.abspath(self.templateFile))
+        #    print self.templateFile
+        #if not os.path.exists(self.templateFile):
+        #    print 'Template file ',  options.template_file,  ' doest exists'
+        #    sys.exit(1)
 	if len(args) >= 2:
 		self.targetDir = os.path.realpath(os.path.abspath(args[2]))
         if not os.path.exists(self.targetDir):
