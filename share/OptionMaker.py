@@ -101,7 +101,7 @@ class OptionMaker:
         if(args[0] == "selection" or args[0]=="sel"):
             self.SelectionMode=True
             #self.fileFilter=".*run_(\d\d\d\d\d\d\d).*.dst"
-            self.fileFilter = ".*(\d{5, 7}).*.dst"
+            self.fileFilter = ".*(\d{5,7}).*.dst"
             self.fileList = filter_file_list(create_file_list(self.dataDir), self.fileFilter)
             self.templateFile = "selection.cfg"
             self.group(".*(\d{5,7}).dst")
