@@ -104,7 +104,7 @@ class OptionMaker:
             self.fileFilter = ".*(\d{5,7}).*.dst"
             self.fileList = filter_file_list(create_file_list(self.dataDir), self.fileFilter)
             self.templateFile = "selection.cfg"
-            self.group(".*(\d{5,7}).dst")
+            self.group(".*(\d{5,7}).*.dst")
 
         if args[0] == "simulation" or args[0] == "sim":
             self.SimulationMode = True
