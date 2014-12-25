@@ -244,6 +244,7 @@ class OptionMaker:
         range_list = []
         Range = []
         for run, files in self.runMap.items():
+            print "run=", run,  "prev_run=",  prev_run
             if prev_run==0 :
                 prev_run=run
                 continue
