@@ -180,7 +180,7 @@ class OptionMaker:
 
     def make_sel(self):
         #print self.runMap
-        self.run_string()
+        #self.run_string()
         for run, files in self.runMap.items():
             print run
             #define input and output files in joboptions
