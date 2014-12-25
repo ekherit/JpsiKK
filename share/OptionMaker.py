@@ -257,11 +257,16 @@ class OptionMaker:
             else:
                 #range_list.append[Range]
                 #range_list.append[Range[0]]
-                Range.sort()
-                range_list.append(Range.pop(0))
-                range_list.append(0)
-                range_list.append(Rnage.pop())
-                Range=[]
+                #continouse run range
+                if len(Range) > 0:
+                    Range.sort()
+                    range_list.append(Range.pop(0))
+                    range_list.append(0)
+                    range_list.append(Rnage.pop())
+                    Range=[]
+                #signle run
+                else:
+                    range_list.append(run)
             prev_run=run
         for r in range_list:
             print r
