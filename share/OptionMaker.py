@@ -148,6 +148,7 @@ class OptionMaker:
         self.runFilter=run_filter
         self.runNumber = run_number
         self.runMap = create_run_dict(self.fileList, run_filter)
+        self.runMap.sort()
 
     def setup_template_file(self, template_file, target_dir):
         self.templateFile  = template_file
