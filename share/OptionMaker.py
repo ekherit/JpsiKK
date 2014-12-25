@@ -252,7 +252,7 @@ class OptionMaker:
             else:
                 range_list.append[Range]
                 Range=[]
-
+            prev_run=run
         for r in range_list:
             print r
 
