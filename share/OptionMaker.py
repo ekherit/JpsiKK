@@ -177,7 +177,8 @@ class OptionMaker:
 
 
     def make_sel(self):
-        print self.runMap
+        #print self.runMap
+        self.run_string()
         for run, files in self.runMap.items():
             #define input and output files in joboptions
             TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s-%07d.root" % (self.jobPrefix,run)))
@@ -237,3 +238,22 @@ class OptionMaker:
                 target_file.write(line)
             source_file.close()
             target_file.close()
+
+    def run_string(self):
+        prev_run=0
+        range_list = []
+        Range = []
+        for run, files in self.runMap.items():
+            if prev_run==0 :
+                prev_run=run
+                continue
+            if run-prev_run==1:
+                Range.append(run)
+            else:
+                range_list.append[Range]
+                Range=[]
+
+        for r in range_list:
+            print r
+
+
