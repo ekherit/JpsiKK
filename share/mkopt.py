@@ -33,6 +33,6 @@ opt.add_option("-f", "--force", action="store_true", dest="force",
 
 
 optMaker = OptionMaker(options, args)
-optMaker.make();
+optMaker.make()
 
 ##optMaker.group(".*run_(\d\d\d\d\d\d\d).*.dst")
