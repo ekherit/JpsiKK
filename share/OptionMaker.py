@@ -250,7 +250,12 @@ class OptionMaker:
             if run-prev_run==1:
                 Range.append(run)
             else:
-                range_list.append[Range]
+                #range_list.append[Range]
+                #range_list.append[Range[0]]
+                Range.sort()
+                range_list.append(Range.pop(0))
+                range_list.append(0)
+                range_list.append(Rnage.pop())
                 Range=[]
             prev_run=run
         for r in range_list:
