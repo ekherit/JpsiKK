@@ -34,7 +34,7 @@ def create_run_dict(files,reg):
             #g = int(m.group(1))
             #run = "%07d" % int(m.group(1))
             run = int(m.group(1))
-            print run
+            #print run
             if run in RunMap:
                 RunMap[run]+=[file]
             else:
