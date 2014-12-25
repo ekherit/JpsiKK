@@ -242,32 +242,32 @@ class OptionMaker:
             target_file.close()
 
     def run_string(self):
+        first_run=0
+        last_run=0
         prev_run=0
         range_list = []
-        Range = []
         runs = self.runMap.keys();
         runs.sort()
         for run in runs:
             print "run=", run,  "prev_run=",  prev_run
-            if prev_run==0 :
+            if prev_run==0 : #initialization
                 prev_run=run
+                first_run=run
+                last_run=run
                 continue
-            if run-prev_run==1:
-                Range.append(run)
-            else:
-                #range_list.append[Range]
-                #range_list.append[Range[0]]
-                #continouse run range
-                if len(Range) > 0:
-                    Range.sort()
-                    range_list.append(Range.pop(0))
-                    range_list.append(0)
-                    range_list.append(Rnage.pop())
-                    Range=[]
-                #signle run
-                else:
-                    range_list.append(run)
-            prev_run=run
+            if run-last_run==1: #expand continouse range
+                last_run = run
+                continue
+
+            if first_run < last_run: #fill range
+                range_list.append(first_run)
+                range_list.append(0)
+                range_list.append(last_run)
+            else: #fill single run
+                range_list.append(first_run)
+            #reset range
+            first_run=run
+            last_run=run
         for r in range_list:
             print r
 
