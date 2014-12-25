@@ -246,6 +246,7 @@ class OptionMaker:
         range_list = []
         Range = []
         runs = self.runMap.keys();
+        runs.sort()
         for run in runs:
             print "run=", run,  "prev_run=",  prev_run
             if prev_run==0 :
