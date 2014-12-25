@@ -180,9 +180,8 @@ class OptionMaker:
 
     def make_sel(self):
         #print self.runMap
-        #self.run_string()
+        self.run_string()
         for run, files in self.runMap.items():
-            print run
             #define input and output files in joboptions
             TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s-%07d.root" % (self.jobPrefix,run)))
             TemplateInputFile = make_files_string(files)
@@ -246,7 +245,8 @@ class OptionMaker:
         prev_run=0
         range_list = []
         Range = []
-        for run, files in self.runMap.items():
+        runs = self.runMap.keys();
+        for run in runs:
             print "run=", run,  "prev_run=",  prev_run
             if prev_run==0 :
                 prev_run=run
