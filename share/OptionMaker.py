@@ -149,7 +149,7 @@ class OptionMaker:
         self.runFilter=run_filter
         self.runNumber = run_number
         self.runMap = create_run_dict(self.fileList, run_filter)
-        self.runMap.sort()
+        #self.runMap.sort()
 
     def setup_template_file(self, template_file, target_dir):
         self.templateFile  = template_file
@@ -182,6 +182,7 @@ class OptionMaker:
         #print self.runMap
         self.run_string()
         for run, files in self.runMap.items():
+            print run
             #define input and output files in joboptions
             TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s-%07d.root" % (self.jobPrefix,run)))
             TemplateInputFile = make_files_string(files)
