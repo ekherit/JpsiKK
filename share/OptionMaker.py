@@ -102,10 +102,10 @@ class OptionMaker:
         if(args[0] == "selection" or args[0]=="sel"):
             self.SelectionMode=True
             #self.fileFilter=".*run_(\d\d\d\d\d\d\d).*.dst"
-            self.fileFilter = ".*(\d{5,7}).*.dst"
+            self.fileFilter = ".*(\d{4,7}).*.dst"
             self.fileList = filter_file_list(create_file_list(self.dataDir), self.fileFilter)
             self.templateFile = "selection.cfg"
-            self.group(".*(\d{5,7}).*.dst")
+            self.group(".*(\d{4,7}).*.dst")
 
         if args[0] == "simulation" or args[0] == "sim":
             self.SimulationMode = True
@@ -244,14 +244,11 @@ class OptionMaker:
     def run_string(self):
         first_run=0
         last_run=0
-        prev_run=0
         range_list = []
         runs = self.runMap.keys();
         runs.sort()
         for run in runs:
-            print "run=", run,  "prev_run=",  prev_run
-            if prev_run==0 : #initialization
-                prev_run=run
+            if first_run==0 : #initialization
                 first_run=run
                 last_run=run
                 continue
