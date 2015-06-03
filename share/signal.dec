@@ -4,8 +4,8 @@ Decay  psi(2S)
 Enddecay
 #
 Decay J/psi
-1.0000    K+ K-                         PHSP;
-#0.0593    mu+  mu-               PHOTOS  VLL;
+0.5    K+  K-                        VSS;
+0.5    mu+ mu-               PHOTOS  VLL;
 Enddecay
  
   
