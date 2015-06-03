@@ -17,6 +17,7 @@
 #ifndef IBN_CRYSTAL_BALL_H
 #define IBN_CRYSTAL_BALL_H
 
+#include <vector>
 
 // ===  FUNCTION  ======================================================================
 //         
@@ -45,27 +46,8 @@ extern double ModifiedDoubleCrystalBall(const double* X, const double* P);
 
 class CrystalBallFitter2;
 
-//class MDCB
-//{
-//	public:
-//		TH1F * his;
-//		MDCB(TH1F * h) 
-//		{
-//			his = h;
-//		}
-//		double operator()(Int_t & n, Double_t * gout, Double_t & result, Double_t * par, Int_t flg)
-//		{
-//			return 0;
-//		}
-//
-//		double operator()(double *par)
-//		{
-//			return 0;
-//		}
-//};
-//
 
 extern const double * Fit(TH1F * his);
-extern const double * Fit2(TH1F * his);
+extern std::vector<double> Fit2(TH1F * his);
 
 #endif

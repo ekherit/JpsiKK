@@ -37,3 +37,8 @@ x86_64-slc5-gcc43-opt
 
 # Python precompiled
 *.pyc
+
+#ROOT
+AutoDict*
+*_cpp.d
+*_C.d

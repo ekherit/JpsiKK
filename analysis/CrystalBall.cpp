@@ -478,6 +478,8 @@ const  double * Fit(TH1F * his)
 
 using namespace ROOT::Minuit2;
 
+using namespace ROOT::Minuit2;
+
 namespace ibn
 {
 	class regulator
@@ -733,7 +735,7 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 		//}
 		Print(minimum);
 		Draw();
-		Scan(minpar);
+		//Scan(minpar);
 	}
 
 	double operator()( const std::vector<double> & par) const 
@@ -1002,13 +1004,23 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 		//cout << setw(15) << result << endl;
 		return result;
 	}
+
+  std::vector<double> get_result(void) const 
+  {
+    std::vector<double> buf(3);
+    buf[0] = fit_result[0];
+    double psig =  fit_result[0]/N0;
+    buf[1] = sqrt(sq(par_error[0].first) + psig*psig*N0);
+    buf[2] = sqrt(sq(par_error[0].second) + psig*psig*N0);
+    return buf;
+  }
 };
 
 
 
-const double * Fit2(TH1F * his)
+std::vector<double> Fit2(TH1F * his)
 {
 	CrystalBallFitter2 cb(his);
 	cb.Fit();
-	return 0;
+	return cb.get_result();
 }

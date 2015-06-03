@@ -23,16 +23,20 @@
 // Root > T->Process("analize.C+")
 //
 
+#include <iostream>
+
 #include "analize.h"
 #include <TH2.h>
+#include <TCanvas.h>
 #include <TStyle.h>
 
 
-#include "mctopo.h"
+//#include "mctopo.h"
+#include "CrystalBall.h"
 
 //mctopo mct;
 
-void analize::Begin(TTree * tree)
+void analize::Begin(TTree * )
 {
    // The Begin() function is called at the start of the query.
    // When running with PROOF Begin() is only called on the client.
@@ -72,21 +76,28 @@ Bool_t analize::Process(Long64_t entry)
    // Use fStatus to set the return value of TTree::Process().
    //
    // The return value is currently not used.
-   selector::GetEntry(entry);
+   analize::GetEntry(entry);
    N0++; //count total number of events proceed
-   if(3.08 <= Mrec && Mrec <= 3.105)
-   {
-     if(KK==1 && uu==0) 
-     {
-       NKK++;
-       hMrecKK->Fill(Mrec);
-     }
-     if(uu==1 && KK==0) 
-     {
-       hMrecUU->Fill(Mrec);
-       Nuu++;
-     }
-   }
+
+   if(MIN_RECOIL_MASS <= Mrec && Mrec <= MAX_RECOIL_MASS)
+     if(pid_chi2 <= PID_CHI2)
+       if(kin_chi2 <= KIN_CHI2)
+       {
+         if(KK==1 && uu==0) 
+         {
+           NKK++;
+           hMrecKK->Fill(mshift(Mrec));
+           hpid_chi2KK->Fill(pid_chi2);
+           hkin_chi2KK->Fill(kin_chi2);
+         }
+         if(uu==1 && KK==0) 
+         {
+           hMrecUU->Fill(mshift(Mrec));
+           hpid_chi2UU->Fill(pid_chi2);
+           hkin_chi2UU->Fill(kin_chi2);
+           Nuu++;
+         }
+       }
    return kTRUE;
 }
 
@@ -97,6 +108,8 @@ void analize::SlaveTerminate()
    // on each slave server.
 
 }
+
+using namespace std;
 
 void analize::Terminate()
 {
@@ -111,6 +124,27 @@ void analize::Terminate()
    c->Divide(2,1);
    c->cd(1);
    hMrecKK->Draw();
+   auto resKK  =  Fit2(hMrecKK);
    c->cd(2);
    hMrecUU->Draw();
+   auto resUU  =  Fit2(hMrecUU);
+
+
+  cout << "Number of selected KK events: " << resKK[0] << " " << -resKK[1] << " +" << resKK[2] << endl;
+  cout << "Number of selected UU events: " << resUU[0] << " " << -resUU[1] << " +" << resUU[2] << endl;
+  double eps = resKK[0]/resUU[0];
+  cout << "epsKK/epsUU = " << eps  << "  " << -sqrt( pow(resKK[1]/resKK[0],2) +  pow(resUU[1]/resUU[0],2)) << "  " <<  sqrt( pow(resKK[2]/resKK[0],2) +  pow(resUU[2]/resUU[0],2)) << endl;
+	//CrystalBallFitter2 cbKK(hMrecKK);
+	//CrystalBallFitter2 cbUU(hMrecUU);
+	//cbKK.Fit();
+  TCanvas * cchi2 = new TCanvas;
+  cchi2->Divide(2,2);
+  cchi2->cd(1);
+  hpid_chi2KK->Draw();
+  cchi2->cd(2);
+  hkin_chi2KK->Draw();
+  cchi2->cd(3);
+  hpid_chi2UU->Draw();
+  cchi2->cd(4);
+  hkin_chi2UU->Draw();
 }

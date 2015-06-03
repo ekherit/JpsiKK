@@ -1287,6 +1287,16 @@ void  fitE2CB2Norm5(const char * dir="mcjpkk2009", const char * channel="KK",  i
 void load(void)
 {
 	gROOT->Reset();
-	RANDOM = new TRandom;
+	//RANDOM = new TRandom;
 	gSystem->CompileMacro("CrystalBall.cpp","kO");
+	gSystem->CompileMacro("analize.C","kO");
 }
+
+
+void analize(const char * dir)
+{
+	TChain * c = load_tree(dir);
+  analize an;
+  c->Process(&an);
+}
+
