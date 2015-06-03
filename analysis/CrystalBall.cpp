@@ -1,0 +1,1014 @@
+// =====================================================================================
+//
+//       Filename:  CrystalBall.cpp
+//
+//    Description:   Implementation Modified Double Crystal Ball function
+//
+//        Version:  1.0
+//        Created:  10.03.2015 16:07:29
+//       Revision:  none
+//       Compiler:  g++
+//
+//         Author:  Ivan B. Nikolaev (ekherit), I.B.Nikolaev@inp.nsk.su
+//   Organization:  Budker Institute of Nuclear Physics
+//
+// =====================================================================================
+
+
+#include <TMath.h>
+#include <TF1.h>
+#include <TGraph.h>
+#include <TCanvas.h>
+#include "CrystalBall.h"
+
+
+#include <memory>
+#include <iostream>
+#include <iomanip>
+#include <limits>
+#include <vector>
+#include <list>
+#include <algorithm>
+
+
+#include <cmath>
+using namespace std;
+
+
+#include <TVirtualFitter.h>
+
+inline double sq(double x) {return x*x;}
+inline double cb(double x) {return x*x*x;}
+inline double qd(double x) {return sq(sq(x));}
+
+// ===  FUNCTION  ======================================================================
+//         
+//         Name:  ModifiedDoubleCrystalBall
+//
+//  Description:   Parameters:
+//  P0  - number of signal event
+//  P1  - mean of the gauss
+//  P2  - dispersion of the gaus
+//  P3  - left shift of the exp tait
+//  P4  - left shift of the power tail relative to exp shift (P3)
+//  P5  - power of power tail
+//  P6  - right shift of the exp tait
+//  P7  - right shift of the power tail relative to exp shift (P6)
+//  P8  - power of right power tail
+//  P9  - number of background event
+//  P10 - slope of the background event
+//  P11 - minimum fit range
+//  P12 - maxinum fit range
+//  P13 - number of bins in histogram
+// =====================================================================================
+//
+
+double ModifiedDoubleCrystalBall(const double* X, const double* P)
+{
+	double x    = X[0];
+	double Nsig  = P[0];
+	double mu    = P[1];//mean of the gaus
+	double sigma = P[2]; //sigma of the gaus
+
+
+	//tails 0 - left tail,  1 - right tail
+	//double beta[2] = {TMath::Abs(P[3]),           TMath::Abs(P[6])};
+	//double alfa[2] = {TMath::Abs(P[4]) + beta[0], TMath::Abs(P[7]) + beta[1]};
+	//double n[2] =    {TMath::Abs(P[5]),           TMath::Abs(P[8])};
+	double beta[2] = {P[3],           P[6]};
+	double alfa[2] = {P[4] + beta[0], P[7] + beta[1]};
+	double n[2] =    {P[5],P[8]};
+
+	//background
+	double NBG = P[9] - Nsig;
+	double pbg = P[10]; //background slope in sigma units
+
+	double xmin = P[11];
+	double xmax = P[12];
+	double Nbins = P[13];
+
+	//some constants
+	double C[2]; //correspond exp tail
+	double A[2]; //correspond stepennoi tail
+	double B[2]; //correspon stepennoi tail handy coef
+	for(int i=0;i<2;i++)
+	{
+		C[i] = TMath::Exp(0.5*beta[i]*beta[i]);
+		A[i] = C[i]*pow(n[i]/beta[i], n[i]) * TMath::Exp(- beta[i]*alfa[i]);
+		B[i] = n[i]/beta[i] - alfa[i];
+	}
+
+	//scale and shift the x
+	x = (x-mu)/sigma;
+
+	double xrange[2] = {-(xmin-mu)/sigma, (xmax-mu)/sigma };
+
+	int t = x < 0 ? 0 : 1; //tail index
+	double y = TMath::Abs(x);
+	double cb=0; //crystal ball function result gaus is 1
+
+	if(y >= 0  && y <= beta[t]) cb = TMath::Exp( - 0.5*y*y);
+	if(y > beta[t] && y <= alfa[t]) cb = C[t]*TMath::Exp(- beta[t] * y);
+	if(y > alfa[t]) cb = A[t]*pow(B[t] + y,  - n[t]);
+
+	double Igaus[2]; //gauss part of integral
+	double Iexp[2]; //exp part of integral
+	double Ipow[2]; //power part of integral
+	double I=0; //sum of previouse one
+
+	for(int i=0;i<2;i++)
+	{
+		//calculate partial integral
+		if( xrange[i] <= beta[i] ) //only gause in range
+		{
+			Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(xrange[i]/sqrt(2.0));
+			Iexp[i] = 0;
+			Ipow[i] = 0;
+		}
+		if( beta[i] <  xrange[i] && xrange[i] <= alfa[i]) //gaus and part of exp tail in range
+		{
+			Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
+			Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*xrange[i]) );
+			Ipow[i] =0;
+		}
+		if(alfa[i] < xrange[i]) //all part of function inside the range
+		{
+			Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
+			Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*alfa[i]));
+			if(n[i]==1.0) Ipow[i] = A[i]*log((B[i] + xrange[i])/(B[i] + alfa[i]));
+			else Ipow[i] = A[i]/(n[i]-1.0)*(pow( B[i] + alfa[i], - n[i] + 1.)  - pow( B[i] + xrange[i], - n[i] + 1.));
+		}
+		//calculate total integral
+		I+=Igaus[i] + Iexp[i] +Ipow[i];
+	}
+	//calculate the scale
+	double dx = (xrange[0] + xrange[1])/Nbins;
+
+	//the amplitude of signal
+	double Ns = Nsig/I*dx;
+
+	//the amplitude of background
+	double Nbg =  NBG*dx/(xrange[0]+xrange[1])/(1.0 + 0.5*pbg*(xrange[1]-xrange[0]));
+
+	//result of my double crystal ball function
+	double result = Ns*cb + Nbg*(1.0 + pbg*x);
+
+	//test the result to suppress bad calculation
+	//if(TMath::IsNaN(result) || !TMath::Finite(result)) return std::numeric_limits<double>::max();
+	if(TMath::IsNaN(result) || result <= 0) return 0;
+	if(!TMath::Finite(result)) return 1e100;
+	cout << Nsig << " result = " << result << endl;
+	return result;
+}
+
+
+
+#include "Math/ParamFunctor.h"
+#include "Math/Minimizer.h"
+#include "Math/Factory.h"
+#include "Math/Functor.h"
+#include "TRandom2.h"
+#include "TError.h"
+
+
+
+
+class CrystalBallFitter 
+{ 
+	const TH1F * his;
+	ROOT::Math::Functor functor;
+	ROOT::Math::Minimizer * min;
+	TF1 * fun;
+	mutable double xmin; //minimum fit range
+	mutable double xmax; //maximum fit range
+	mutable double Nbins; //number of bins
+	mutable double N0; //total number of events in his
+	bool debug;
+	public: 
+	CrystalBallFitter(const TH1F * h) 
+	{
+		debug =false;
+		his = h;
+		xmin = his->GetXaxis()->GetXmin();
+		xmax = his->GetXaxis()->GetXmax();
+		Nbins = his->GetNbinsX();
+		N0 = his->GetEntries();
+		min =0;
+		fun =0;
+	}
+
+	~CrystalBallFitter(void)
+	{
+		//delete min;
+		//delete fun;
+	}
+
+	void Minos(void)
+	{
+		for(unsigned i=0;i<min->NDim();i++)
+		{
+			double  errLow,  errUp;
+			min->GetMinosError(i, errLow, errUp);
+			cout << setw(5) << i << setw(10) << setw(10)<< min->VariableName(i) << setw(10) << min->X()[i] << setw(15) <<errLow << setw(15) << errUp << endl;
+		}
+	}
+
+	void Fit(void)
+	{
+		//if(min) delete min;
+		min = ROOT::Math::Factory::CreateMinimizer("Minuit", "");
+
+		// set tolerance , etc...
+		min->SetMaxFunctionCalls((unsigned)1e10); // for Minuit/Minuit2 
+		min->SetMaxIterations((unsigned)1e10);  // for GSL 
+		min->SetTolerance(1e-2);
+		min->SetStrategy(2);
+		min->SetPrintLevel(0);
+
+		functor = ROOT::Math::Functor(*this, 10); 
+		min->SetFunction(functor);
+		min->SetLimitedVariable(0, "Nsig", N0, N0/2., 0, N0);
+		min->SetVariable(1, "mean", -0.1,  1);
+		min->SetVariable(2, "sigma", 1.279,  1);
+		min->SetLowerLimitedVariable(3, "bl", 1.876, 1, 0);
+		//min->SetLowerLimitedVariable(4, "al-bl", 0, 1, 0);
+		min->SetFixedVariable(4, "al-bl", 0);
+		min->SetLowerLimitedVariable(5, "nl", 1, 1, 1);
+		min->SetLowerLimitedVariable(6, "br", 1.09, 1, 0);
+		min->SetLowerLimitedVariable(7, "ar-br",1.663,  1, 0);
+		min->SetLowerLimitedVariable(8, "nr", 0.1789, 1, 1);
+	 //min->SetLimitedVariable(3, "bl", 1.876, 10, 0, 100);
+	 //min->SetLimitedVariable(4, "al-bl", 0, 10, 0, 10);
+	 //min->SetLimitedVariable(5, "nl", 2, 10, 0, 100);
+	 //min->SetLimitedVariable(6, "br", 1.09, 10, 0, 100);
+	 //min->SetLimitedVariable(7, "ar-br",1.663,  10, 0, 10);
+	 //min->SetLimitedVariable(8, "nr", 2, 10, 0, 100);
+		min->SetVariable(9, "kbg", 0, 1);
+		// do the minimization
+		min->Minimize(); 
+		min->Minimize(); 
+		min->Minimize(); 
+		//min->Hesse();
+		min->PrintResults();
+		Minos();
+		//if(fun) delete fun;
+		fun = new TF1("cbf",*this,  xmin, xmax, min->NDim());
+		fun->SetLineColor(kRed);
+		fun->SetParameters(min->X());
+		debug = true;
+		fun->Draw("same");
+	}
+
+	//this is fcn function
+	double operator()(const double * par) const 
+	{ 
+		double chi2=0;
+		for(int i=0; i<his->GetNbinsX(); i++)
+		{
+			double x = his->GetBinCenter(i);
+			double n = his->GetBinContent(i);
+			double mu = ModifiedDoubleCrystalBall(&x, par);
+			//cout << x << " " << n << " " << mu <<  " " << par[0]<< " " << par[1] << " " << par[2] << " " << par[3] << endl;
+			double dchi2;
+			if(n!=0)
+			{
+				//if(mu!=0) 
+				//{
+				//	dchi2 = 2*(mu - n + n*log(n/mu));
+				//}
+				//if(mu==0)
+				//{
+				//	return 1e100;
+				//}
+				dchi2 = 2*(mu - n + n*log(n/mu));
+			}
+			else
+			{
+				dchi2 = 2*(mu-n);
+			}
+			//cout << i << " " << x << " n=" << n << " mu=" << mu << " f-n=" << mu-n << "  dchi2 = " << dchi2 << endl;
+			chi2+=dchi2;
+		}
+		//if(isnan(chi2) || isinf(chi2)) return std::numeric_limits<double>::max();
+		//if(std::isnan(chi2) || std::isinf(chi2)) chi2= 1e100;
+		//cout << chi2 << endl;
+		return chi2;
+	} 
+
+	//this is parameterized function
+	double operator()(const double * x ,  double * p) const 
+	{ 
+		return ModifiedDoubleCrystalBall(x, p);
+	} 
+
+	double ModifiedDoubleCrystalBall(const double* X, const double* P) const
+	{
+		double x    =  X[0];
+		double Nsig  = P[0];
+		double mean    = P[1];//mean of the gaus
+		double sigma = P[2]; //sigma of the gaus
+
+
+
+		//tails 0 - left tail,  1 - right tail
+		double beta[2] = {P[3],           P[6]};
+		double alfa[2] = {P[4] + beta[0], P[7] + beta[1]};
+		double n[2] =    {P[5],P[8]};
+
+		double pbg = P[9]; //background slope in sigma units
+
+		//background
+		double NBG = N0 - Nsig;
+
+
+		//some constants
+		double C[2]; //correspond exp tail
+		double A[2]; //correspond stepennoi tail
+		double B[2]; //correspon stepennoi tail handy coef
+		for(int i=0;i<2;i++)
+		{
+			C[i] = TMath::Exp(0.5*beta[i]*beta[i]);
+			A[i] = C[i]*pow(n[i]/beta[i], n[i]) * TMath::Exp(- beta[i]*alfa[i]);
+			B[i] = n[i]/beta[i] - alfa[i];
+		}
+
+		//scale and shift the x
+		x = (x-mean)/sigma;
+
+		double xrange[2] = {-(xmin-mean)/sigma, (xmax-mean)/sigma };
+
+		int t = x < 0 ? 0 : 1; //tail index
+		double y = TMath::Abs(x); //abs of x
+		double cb=0; //crystal ball function result gaus is 1
+
+		if(y >= 0  && y <= beta[t]) cb = TMath::Exp( - 0.5*y*y);
+		if(y > beta[t] && y <= alfa[t]) cb = C[t]*TMath::Exp(- beta[t] * y);
+		if(y > alfa[t]) cb = A[t]*pow(B[t] + y,  - n[t]);
+
+
+		double Igaus[2]; //gauss part of integral
+		double Iexp[2]; //exp part of integral
+		double Ipow[2]; //power part of integral
+		double I=0; //sum of previouse one
+
+		for(int i=0;i<2;i++)
+		{
+			//calculate partial integral
+			if( xrange[i] <= beta[i] ) //only gause in range
+			{
+				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(xrange[i]/sqrt(2.0));
+				Iexp[i] = 0;
+				Ipow[i] = 0;
+			}
+			if( beta[i] <  xrange[i] && xrange[i] <= alfa[i]) //gaus and part of exp tail in range
+			{
+				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
+				Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*xrange[i]) );
+				Ipow[i] =0;
+			}
+			if(alfa[i] < xrange[i]) //all part of function inside the range
+			{
+				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
+				Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*alfa[i]));
+				if(n[i]==1.0) Ipow[i] = A[i]*log((B[i] + xrange[i])/(B[i] + alfa[i]));
+				else Ipow[i] = A[i]/(n[i]-1.0)*(pow( B[i] + alfa[i], - n[i] + 1.)  - pow( B[i] + xrange[i], - n[i] + 1.));
+			}
+			//calculate total integral
+			I+=Igaus[i] + Iexp[i] +Ipow[i];
+		}
+		//calculate the scale
+		double dx = (xrange[0] + xrange[1])/Nbins;
+
+
+		//the amplitude of signal
+		double Ns = Nsig/I*dx;
+
+		//the amplitude of background
+		double Nbg =  NBG*dx/(xrange[0]+xrange[1])/(1.0 + 0.5*pbg*(xrange[1]-xrange[0]));
+
+		//result of my double crystal ball function
+		double result = Ns*cb + Nbg*(1.0 + pbg*x);
+
+		//test the result to suppress bad calculation
+		//if(TMath::IsNaN(result) || result <=0) return 0;
+		//if(!TMath::Finite(result)) return 1e100;
+		return result;
+	}
+};
+
+const  double * Fit(TH1F * his)
+{
+
+	// create minimizer giving a name and a name (optionally) for the specific
+   // algorithm
+   // possible choices are: 
+   //     minName                  algoName
+   // Minuit /Minuit2             Migrad, Simplex,Combined,Scan  (default is Migrad)
+   //  Minuit2                     Fumili2
+   //  Fumili
+   //  GSLMultiMin                ConjugateFR, ConjugatePR, BFGS, 
+   //                              BFGS2, SteepestDescent
+   //  GSLMultiFit
+   //   GSLSimAn
+   //   Genetic
+	 const char * minName = "Minuit2";
+	 const char * algoName = "";
+   ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer(minName, algoName);
+
+   // set tolerance , etc...
+   min->SetMaxFunctionCalls((unsigned)1e10); // for Minuit/Minuit2 
+   min->SetMaxIterations((unsigned)1e10);  // for GSL 
+   //min->SetTolerance(1e-6);
+	 min->SetStrategy(2);
+   min->SetPrintLevel(0);
+
+   // create funciton wrapper for minmizer
+   // a IMultiGenFunction type 
+	 CrystalBallFitter cb(his);
+   //ROOT::Math::Functor f(&RosenBrock2,14); 
+   ROOT::Math::Functor f(cb, 10); 
+ 
+   min->SetFunction(f);
+ 
+
+	 double N0 = his->GetEntries(); //total number of event in histogram
+	 //min->SetVariable(0, "Nsig", N0, N0/2);
+	 cout << "N0 = " << N0 << endl;
+	 min->SetLimitedVariable(0, "Nsig", N0, N0/2., 0, N0);
+	 min->SetVariable(1, "mean", -0.1,  1);
+	 min->SetVariable(2, "sigma", 1.279,  2);
+	 //min->SetLowerLimitedVariable(3, "bl", 1.876, 10, 0);
+	 //min->SetLowerLimitedVariable(4, "al-bl", 0, 10, 0);
+	 //min->SetLowerLimitedVariable(5, "nl", 1, 100, 1);
+	 //min->SetLowerLimitedVariable(6, "br", 1.09, 10, 0);
+	 //min->SetLowerLimitedVariable(7, "ar-br",1.663,  10, 0);
+	 //min->SetLowerLimitedVariable(8, "nr", 0.1789, 100, 1);
+	 min->SetLimitedVariable(3, "bl", 1.876, 10, 0, 10000);
+	 min->SetLimitedVariable(4, "al-bl", 0, 10, 0, 10000);
+	 min->SetLimitedVariable(5, "nl", 1, 100, 1, 10000);
+	 min->SetLimitedVariable(6, "br", 1.09, 10, 0, 10000);
+	 min->SetLimitedVariable(7, "ar-br",1.663,  10, 0, 10000);
+	 min->SetLimitedVariable(8, "nr", 0.1789, 100, 1, 10000);
+	 min->SetFixedVariable(9, "kbg", 0);
+	 //min->SetFixedVariable(9, "N0", N0);
+	 //min->SetFixedVariable(11, "xmin", his->GetXaxis()->GetXmin());
+	 //min->SetFixedVariable(12, "xmax", his->GetXaxis()->GetXmax());
+	 //min->SetFixedVariable(13, "Nbins", his->GetNbinsX());
+ 
+   // do the minimization
+   min->Minimize(); 
+
+	 for(unsigned i=0;i<min->NDim();i++)
+	 {
+		 double errLow,  errUp;
+		 bool flag = min->GetMinosError(i, errLow, errUp);
+		 cout << flag << " " << min->X()[i] << " "<<errLow << " +"<< errUp << endl;
+	 }
+	 min->PrintResults();
+	 return min->X();
+}
+#include <Minuit2/MnUserParameters.h>
+#include <Minuit2/FCNBase.h>
+#include <Minuit2/MnMigrad.h>
+#include <Minuit2/MnMinos.h>
+#include <Minuit2/MnScan.h>
+#include <Minuit2/MnApplication.h>
+#include <Minuit2/MnPrint.h>
+#include <Minuit2/FunctionMinimum.h>
+
+using namespace ROOT::Minuit2;
+
+namespace ibn
+{
+	class regulator
+	{
+		double maximum=1e100;
+		vector <double> par;
+		bool hit=false;
+		bool bad(double v) const 
+		{
+			return std::isnan(v) ||  std::isinf(v);
+		}
+
+		bool good(double v) const 
+		{
+			return !std::isnan(v)  && !std::isinf(v);
+		}
+
+		public:
+		regulator(void)
+		{
+		}
+
+		regulator(double fmax)
+		{
+			maximum = fmax;
+		}
+
+		regulator & operator=(const regulator &r )
+		{
+			maximum = r.maximum;
+			hit = r.hit;
+			par  = r.par;
+			return *this;
+		}
+
+		double operator()(double x,  const vector<double> & p)
+		{
+			//cout << "chi2 = " << setw(10) << x;
+			//for(auto pp : p) cout << setw(12) << pp;
+			//cout << endl;
+			if(good(x) && x<=maximum) 
+			{
+			//	cout << "good x " << endl;
+				return x;
+			}
+			if(hit)
+			{
+				double old = x;
+				x=maximum;
+				for(unsigned i=0;i<par.size();i++)
+				{
+					if(good(p[i])) x+= pow(p[i]-par[i], 2.0);
+				}
+			//	cout << "raw chi2 = " << old << " regular chi2 = "<< x << endl;
+				return x;
+			}
+			else
+			{
+				if(good(x) && x>maximum)
+				{
+			//		cout << "save hit chi2 " << x << endl;
+					hit=true;
+					par=p;
+					//maximum = x;
+				}
+			//	cout << "no hit: return maximum" << endl;
+				return maximum;
+			}
+		}
+	};
+};
+
+class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
+{ 
+	TH1F * his;
+	TF1 * fun;
+	mutable double xmin; //minimum fit range
+	mutable double xmax; //maximum fit range
+	mutable double Nbins; //number of bins
+	mutable double N0; //total number of events in his
+	bool debug;
+
+	ROOT::Minuit2::MnUserParameters inipar;
+	ROOT::Minuit2::MnUserParameters minpar;
+
+	vector<double> fit_result;
+	vector< std::pair<double, double> > par_error;
+
+	list<TGraph *> graph_list;
+	
+
+	mutable ibn::regulator reg;
+
+
+	public: 
+	CrystalBallFitter2(TH1F * h) 
+	{
+		debug =false;
+		his = h;
+		xmin = his->GetXaxis()->GetXmin();
+		xmax = his->GetXaxis()->GetXmax();
+		Nbins = his->GetNbinsX();
+		N0 = his->GetEntries();
+		fun =0;
+    inipar.Add("Nsig",  N0,   -N0*0.05); 
+    inipar.Add("mean",  -0.368,   1); 
+    inipar.Add("sigma",  1.258,   1); 
+    inipar.Add("bl",     1.75,   1); 
+    inipar.Add("al-bl",  1,     0.1);
+    inipar.Add("nl",     3.1,   0.5);
+    inipar.Add("br",     1.2,   0.1);
+    inipar.Add("ar-br",  2.0,   0.1);
+    inipar.Add("nr",     2.4,   0.1);
+    inipar.Add("kbg",    0,    1.0/(xmax-xmin));
+
+		inipar.SetLimits("Nsig",  0, N0);
+		inipar.SetLimits("mean", xmin, xmax);
+		inipar.SetLowerLimit("nl",    1);
+		inipar.SetLowerLimit("nr",    1);
+		inipar.SetLowerLimit("bl",    0);
+		inipar.SetLowerLimit("br",    0);
+		inipar.SetLowerLimit("al-bl", 0);
+		inipar.SetLowerLimit("ar-br", 0);
+		inipar.SetLowerLimit("sigma", 0.1);
+		inipar.SetLimits("kbg", -2.0/(xmax-xmin), 2.0/(xmax-xmin));
+		inipar.Fix("kbg");
+		//inipar.Fix("al-bl");
+		//inipar.Fix("ar-br");
+		//inipar.Fix("nr");
+		//inipar.Fix("nl");
+		//inipar.SetLimits("nl", 1, 10);
+		//inipar.SetLimits("nr", 1, 10);
+		double sigma_min = 1;
+		//inipar.SetLimits("sigma", sigma_min,  xmax - xmin);
+		//inipar.SetLimits("bl", 0.01, 3);
+		//inipar.SetLimits("br", 0.01, 3);
+		//inipar.SetLimits("al-bl", 0, 3);
+		//inipar.SetLimits("ar-br", 0, 3);
+	}
+
+	~CrystalBallFitter2(void)
+	{
+		//delete min;
+		//delete fun;
+		//for(auto g : graph_list) delete g;
+	}
+
+	void Minos(FunctionMinimum & minimum)
+	{
+		minpar = minimum.UserParameters();
+		MnMinos minos(*this, minimum);
+		par_error.resize(inipar.Params().size());
+		fit_result.resize(inipar.Params().size());
+		for (unsigned i=0;i<par_error.size();i++)
+		{
+			MinuitParameter p  = minpar.Parameter(i);
+			fit_result[i] = minpar.Parameter(i).Value();
+			if(!p.IsFixed())
+			{
+				par_error[i] = minos(i, (unsigned)1e9);
+				if(p.HasLowerLimit()  &&  p.Value() + par_error[i].first < p.LowerLimit()) par_error[i].first = p.LowerLimit() -p.Value();  
+				if(p.HasUpperLimit()  &&  p.Value() + par_error[i].second > p.UpperLimit()) par_error[i].second = p.UpperLimit() - p.Value();  
+			}
+		}
+	}
+
+	void Print(FunctionMinimum & minimum)
+	{
+		cout << "fcn = " << minimum.Fval() << endl;
+		for(unsigned i=0;i<par_error.size();i++)
+		{
+			cout << setw(5) << i << setw(10) << inipar.Name(i) << setw(15) << fit_result[i] << setw(15) << par_error[i].first << setw(15) << par_error[i].second << endl;
+		}
+		cout << "Total number of events: " <<  N0 << endl;
+		double psig = fit_result[0]/N0;
+		cout << setw(25) << "Number of signal events: " <<  setw(15) << fit_result[0] << setw(15) << -sqrt(sq(par_error[0].first) + psig*psig*N0)   << setw(15) << sqrt(sq(par_error[0].second) + psig*psig*N0) << endl;
+		cout << setw(25) << "Number of signal events(2): " <<  setw(15) << fit_result[0] << setw(15) << -sqrt(N0*psig)  << setw(15) << sqrt(N0*psig) << endl;
+		cout << setw(25) << "Number of background events: " << setw(15) << N0 - fit_result[0] << setw(5) << "+-"   << setw(15) << sqrt(N0-fit_result[0]) << endl;
+	}
+
+	void Draw(void)
+	{
+		fun = new TF1("cbf",*this,  xmin, xmax, inipar.Params().size());
+		fun->SetLineColor(kRed);
+		fun->SetParameters(&minpar.Params()[0]);
+		fun->Draw("same");
+	}
+
+
+	TGraph*  DrawGraph(std::vector<std::pair<double, double>> & v, const char * name = "")
+	{
+		auto canvas = new TCanvas(name, name);
+		TGraph * g = new TGraph;
+		sort(begin(v), end(v), [](const pair<double, double> & p1,  const pair<double, double> & p2) { return p1.first < p2.first;});
+		for(unsigned i=0;i<v.size();i++) g->SetPoint(i, v[i].first,  v[i].second);
+		g->Draw("al");
+		g->SetName(name);
+		g->SetTitle(name);
+		graph_list.push_back(g);
+		return g;
+	}
+
+
+	void Scan(const ROOT::Minuit2::MnUserParameters &  upar)
+	{
+		MnScan scan(*this, upar, 2);
+		//vector<double> e(10, 1);
+		//vector<double> p = {2663.75,  -0.365978,    1.27853,    1.57638 ,   1.87204,    1.00001,     1.3674,    4.56482,    3.14814,  0.0396767};
+		//MnScan scan(*this, p, e);
+		for(unsigned i=0;i<upar.Params().size();i++)
+		{
+			auto v = scan.Scan(i, 1000);
+			auto g = DrawGraph(v, upar.Name(i));
+		}
+	}
+
+	void Fit(void)
+	{
+		//MnStrategy strategy(2);
+		//strategy.SetGradientNCycles(1000000);
+		//strategy.SetHessianGradientNCycles(1000000);
+		//Scan(inipar);
+		//new TCanvas;
+		his->Draw();
+    MnMigrad migrad(*this, inipar, 2);
+		auto minimum = migrad(unsigned(1e9));
+    //FunctionMinimum minimum = migrad(unsigned(1e9));
+		cout << "NumCall: " << migrad.NumOfCalls() << endl;
+		cout << "Nfcn: " << minimum.NFcn() << endl;
+		if(!minimum.IsValid()) 
+		{
+			cout << "Minimum invalid " << endl;
+			cout << minimum << endl;
+			minpar = minimum.UserParameters();
+			Scan(minpar);
+			Draw();
+			return;
+		}
+		Minos(minimum);
+		//MnMinos minos(*this, minimum);
+		//par_error.resize(inipar.Params().size());
+		//fit_result.resize(inipar.Params().size());
+		//for (unsigned i=0;i<par_error.size();i++)
+		//{
+		//	MinuitParameter p  = minpar.Parameter(i);
+		//	fit_result[i] = minpar.Parameter(i).Value();
+		//	if(!p.IsFixed())
+		//	{
+		//		par_error[i] = minos(i, (unsigned)1e9);
+		//		if(p.HasLowerLimit()  &&  p.Value() + par_error[i].first < p.LowerLimit()) par_error[i].first = p.LowerLimit() -p.Value();  
+		//		if(p.HasUpperLimit()  &&  p.Value() + par_error[i].second > p.UpperLimit()) par_error[i].second = p.UpperLimit() - p.Value();  
+		//	}
+		//}
+		Print(minimum);
+		Draw();
+		Scan(minpar);
+	}
+
+	double operator()( const std::vector<double> & par) const 
+	{
+		double chi2=0;
+		for(int i=0; i<his->GetNbinsX(); i++)
+		{
+			double x = his->GetBinCenter(i);
+			double n = his->GetBinContent(i);
+			double mu = ModifiedDoubleCrystalBall(&x, &par[0]);
+			double dchi2;
+			if(n!=0)
+			{
+				//if(mu<=0) return 1e100;
+				dchi2 = 2*(mu - n + n*log(n/mu));
+			}
+			else
+			{
+				dchi2 = 2*(mu-n);
+			}
+			chi2+=dchi2;
+		}
+		//add limits for beta and alfa
+		double mean =  par[1];
+		double sigma =  par[2];
+		double beta[2] = {par[3], par[6]};
+		double alfa[2] = {par[4] + beta[0], par[7] + beta[1]};
+		double n[2] = {par[5],  par[8]};
+		beta[0] = mean - beta[0]*sigma; 
+		beta[1] = mean + beta[1]*sigma; 
+		alfa[0] = mean - alfa[0]*sigma; 
+		alfa[1] = mean + alfa[1]*sigma; 
+
+		//if(alfa[0] <= xmin) 
+		//{
+		//	chi2 *= exp(pow((alfa[0]-xmin)/sigma, 2.0)); 
+		//	//chi2 += pow(n[0]-1, 2);
+		//}
+		//if(alfa[1] >= xmax) 
+		//{
+		//	chi2 *= exp(pow((alfa[1]-xmax)/sigma, 2.0)); 
+		//	//chi2 += pow(n[1]-1, 2);
+		//}
+		//if(alfa[0] <= xmin) return 1e100;
+		//if(alfa[1] >= xmax) return 1e100;
+
+
+		//if(isnan(chi2) || isinf(chi2)) return 0.5*std::numeric_limits<double>::max();
+		//if(std::isnan(chi2) || std::isinf(chi2)) chi2= 1e100;
+		//cout << chi2 << endl;
+		//for(int i=0;i<10;i++) cout << setw(15) << par[i];
+		//cout << setw(15) << result << endl;
+		return reg(chi2, par);
+		return chi2;
+	}
+
+	double Up(void) const { return 1.0;}
+
+	//this is parameterized function
+	double operator()(const double * x ,  double * p) const 
+	{ 
+		return ModifiedDoubleCrystalBall(x, p);
+	} 
+
+
+
+	double ModifiedDoubleCrystalBall(const double* X, const double* P) const
+	{
+		double x    =  X[0];
+		double Nsig  = P[0];
+		double mean    = P[1];//mean of the gaus
+		double sigma = P[2]; //sigma of the gaus
+
+
+
+		//tails 0 - left tail,  1 - right tail
+		double beta[2] = {P[3],           P[6]};
+		double alfa[2] = {P[4] + beta[0], P[7] + beta[1]};
+		double n[2] =    {P[5],P[8]};
+
+		double pbg = P[9]; //background slope in sigma units
+
+		//background
+		double NBG = N0 - Nsig;
+
+
+		//some constants
+		double C[2]; //correspond exp tail
+		double A[2]; //correspond stepennoi tail
+		double B[2]; //correspon stepennoi tail handy coef
+		for(int i=0;i<2;i++)
+		{
+			C[i] = TMath::Exp(0.5*beta[i]*beta[i]);
+			A[i] = C[i]*pow(n[i]/beta[i], n[i]) * TMath::Exp(- beta[i]*alfa[i]);
+			B[i] = n[i]/beta[i] - alfa[i];
+		}
+
+		//scale and shift the x
+		x = (x-mean)/sigma;
+
+		double xrange[2] = {-(xmin-mean)/sigma, (xmax-mean)/sigma };
+
+		int t = x < 0 ? 0 : 1; //tail index
+		double y = TMath::Abs(x); //abs of x
+		double cb=0; //crystal ball function result gaus is 1
+
+		if(y >= 0  && y <= beta[t]) cb = TMath::Exp( - 0.5*y*y);
+		if(y > beta[t] && y <= alfa[t]) cb = C[t]*TMath::Exp(- beta[t] * y);
+		if(y > alfa[t]) cb = A[t]*pow(B[t] + y,  - n[t]);
+
+
+		double Igaus[2]; //gauss part of integral
+		double Iexp[2]; //exp part of integral
+		double Ipow[2]; //power part of integral
+		double I=0; //sum of previouse one
+
+		for(int i=0;i<2;i++)
+		{
+			//calculate partial integral
+			if( xrange[i] <= beta[i] ) //only gause in range
+			{
+				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(xrange[i]/sqrt(2.0));
+				Iexp[i] = 0;
+				Ipow[i] = 0;
+			}
+			if( beta[i] <  xrange[i] && xrange[i] <= alfa[i]) //gaus and part of exp tail in range
+			{
+				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
+				Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*xrange[i]) );
+				Ipow[i] =0;
+			}
+			if(alfa[i] < xrange[i]) //all part of function inside the range
+			{
+				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
+				Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*alfa[i]));
+				if(n[i]==1.0) Ipow[i] = A[i]*log((B[i] + xrange[i])/(B[i] + alfa[i]));
+				else Ipow[i] = A[i]/(n[i]-1.0)*(pow( B[i] + alfa[i], - n[i] + 1.)  - pow( B[i] + xrange[i], - n[i] + 1.));
+			}
+			//calculate total integral
+			I+=Igaus[i] + Iexp[i] +Ipow[i];
+		}
+		//calculate the scale
+		double dx = (xrange[0] + xrange[1])/Nbins;
+
+
+		//the amplitude of signal
+		double Ns = Nsig/I*dx;
+
+		//the amplitude of background
+		//double Nbg =  NBG*dx/(xrange[0]+xrange[1])/(1.0 + 0.5*pbg*(xrange[1]-xrange[0]));
+		double Nbg =  NBG/Nbins;
+		//cout << Nbg << " " << xrange[1] - xrange[0] << endl;
+
+		//result of my double crystal ball function
+		double result = Ns*cb + Nbg*(1.0 + pbg* (X[0] - 0.5*(xmax+xmin)));
+
+		//test the result to suppress bad calculation
+		//if(TMath::IsNaN(result) || result <=0) return 0;
+		//if(!TMath::Finite(result)) return 1e100;
+		//for(int i=0;i<10;i++) cout << setw(15) << P[i];
+		//cout << setw(15) << result << endl;
+		return result;
+	}
+
+	double ModifiedDoubleCrystalBall2(const double* X, const double* P) const
+	{
+		double x    =  X[0];
+		double Nsig  = P[0];
+		double mean    = P[1];//mean of the gaus
+		double sigma = P[2]; //sigma of the gaus
+
+
+
+		//tails 0 - left tail,  1 - right tail
+		double beta[2] = {P[3],           P[6]};
+		double alfa[2] = {P[4], P[7]};
+		double n[2] =    {P[5], P[8]};
+		
+		//transform
+		//scale and shift the x
+		x = (x-mean)/sigma;
+		for(unsigned i=0;i<2;i++)
+		{
+			beta[i] = fabs(beta[i]-mean)/sigma;
+			alfa[i] = fabs(alfa[i]-mean)/sigma;
+		}
+
+		double pbg = P[9]; //background slope in sigma units
+
+		//background
+		double NBG = N0 - Nsig;
+
+
+		//some constants
+		double C[2]; //correspond exp tail
+		double A[2]; //correspond stepennoi tail
+		double B[2]; //correspon stepennoi tail handy coef
+		for(int i=0;i<2;i++)
+		{
+			C[i] = TMath::Exp(0.5*beta[i]*beta[i]);
+			A[i] = C[i]*pow(n[i]/beta[i], n[i]) * TMath::Exp(- beta[i]*alfa[i]);
+			B[i] = n[i]/beta[i] - alfa[i];
+		}
+
+
+		double xrange[2] = {-(xmin-mean)/sigma, (xmax-mean)/sigma };
+
+		int t = x < 0 ? 0 : 1; //tail index
+		double y = TMath::Abs(x); //abs of x
+		double cb=0; //crystal ball function result gaus is 1
+
+		if(y >= 0  && y <= beta[t]) cb = TMath::Exp( - 0.5*y*y);
+		if(y > beta[t] && y <= alfa[t]) cb = C[t]*TMath::Exp(- beta[t] * y);
+		if(y > alfa[t]) cb = A[t]*pow(B[t] + y,  - n[t]);
+
+
+		double Igaus[2]; //gauss part of integral
+		double Iexp[2]; //exp part of integral
+		double Ipow[2]; //power part of integral
+		double I=0; //sum of previouse one
+
+		for(int i=0;i<2;i++)
+		{
+			//calculate partial integral
+			if( xrange[i] <= beta[i] ) //only gause in range
+			{
+				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(xrange[i]/sqrt(2.0));
+				Iexp[i] = 0;
+				Ipow[i] = 0;
+			}
+			if( beta[i] <  xrange[i] && xrange[i] <= alfa[i]) //gaus and part of exp tail in range
+			{
+				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
+				Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*xrange[i]) );
+				Ipow[i] =0;
+			}
+			if(alfa[i] < xrange[i]) //all part of function inside the range
+			{
+				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
+				Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*alfa[i]));
+				if(n[i]==1.0) Ipow[i] = A[i]*log((B[i] + xrange[i])/(B[i] + alfa[i]));
+				else Ipow[i] = A[i]/(n[i]-1.0)*(pow( B[i] + alfa[i], - n[i] + 1.)  - pow( B[i] + xrange[i], - n[i] + 1.));
+			}
+			//calculate total integral
+			I+=Igaus[i] + Iexp[i] +Ipow[i];
+		}
+		//calculate the scale
+		double dx = (xrange[0] + xrange[1])/Nbins;
+
+
+		//the amplitude of signal
+		double Ns = Nsig/I*dx;
+
+		//the amplitude of background
+		//double Nbg =  NBG*dx/(xrange[0]+xrange[1])/(1.0 + 0.5*pbg*(xrange[1]-xrange[0]));
+		double Nbg =  NBG/Nbins;
+		//cout << Nbg << " " << xrange[1] - xrange[0] << endl;
+
+		//result of my double crystal ball function
+		double result = Ns*cb + Nbg*(1.0 + pbg* (X[0] - 0.5*(xmax+xmin)));
+
+		//test the result to suppress bad calculation
+		//if(TMath::IsNaN(result) || result <=0) return 0;
+		//if(!TMath::Finite(result)) return 1e100;
+		//for(int i=0;i<10;i++) cout << setw(15) << P[i];
+		//cout << setw(15) << result << endl;
+		return result;
+	}
+};
+
+
+
+const double * Fit2(TH1F * his)
+{
+	CrystalBallFitter2 cb(his);
+	cb.Fit();
+	return 0;
+}
