@@ -30,6 +30,8 @@
 #include <list>
 #include <algorithm>
 
+#include <ibn/integral.h>
+
 
 #include <cmath>
 using namespace std;
@@ -256,6 +258,7 @@ class CrystalBallFitter
 		fun->SetLineColor(kRed);
 		fun->SetParameters(min->X());
 		debug = true;
+    fun->SetLineWidth(1);
 		fun->Draw("same");
 	}
 
@@ -527,7 +530,7 @@ namespace ibn
 			}
 			if(hit)
 			{
-				double old = x;
+				//double old = x;
 				x=maximum;
 				for(unsigned i=0;i<par.size();i++)
 				{
@@ -561,6 +564,7 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 	mutable double Nbins; //number of bins
 	mutable double N0; //total number of events in his
 	bool debug;
+  bool opt_integrate;
 
 	ROOT::Minuit2::MnUserParameters inipar;
 	ROOT::Minuit2::MnUserParameters minpar;
@@ -577,6 +581,7 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 	public: 
 	CrystalBallFitter2(TH1F * h) 
 	{
+    opt_integrate = false;
 		debug =false;
 		his = h;
 		xmin = his->GetXaxis()->GetXmin();
@@ -612,7 +617,7 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 		//inipar.Fix("nl");
 		//inipar.SetLimits("nl", 1, 10);
 		//inipar.SetLimits("nr", 1, 10);
-		double sigma_min = 1;
+		//double sigma_min = 1;
 		//inipar.SetLimits("sigma", sigma_min,  xmax - xmin);
 		//inipar.SetLimits("bl", 0.01, 3);
 		//inipar.SetLimits("br", 0.01, 3);
@@ -620,12 +625,15 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 		//inipar.SetLimits("ar-br", 0, 3);
 	}
 
+
 	~CrystalBallFitter2(void)
 	{
 		//delete min;
 		//delete fun;
 		//for(auto g : graph_list) delete g;
 	}
+  
+  void SetIntegrate(bool b) { opt_integrate = b; }
 
 	void Minos(FunctionMinimum & minimum)
 	{
@@ -672,6 +680,7 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 	TGraph*  DrawGraph(std::vector<std::pair<double, double>> & v, const char * name = "")
 	{
 		auto canvas = new TCanvas(name, name);
+    canvas->cd();
 		TGraph * g = new TGraph;
 		sort(begin(v), end(v), [](const pair<double, double> & p1,  const pair<double, double> & p2) { return p1.first < p2.first;});
 		for(unsigned i=0;i<v.size();i++) g->SetPoint(i, v[i].first,  v[i].second);
@@ -692,7 +701,7 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 		for(unsigned i=0;i<upar.Params().size();i++)
 		{
 			auto v = scan.Scan(i, 1000);
-			auto g = DrawGraph(v, upar.Name(i));
+			DrawGraph(v, upar.Name(i));
 		}
 	}
 
@@ -743,9 +752,22 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 		double chi2=0;
 		for(int i=0; i<his->GetNbinsX(); i++)
 		{
-			double x = his->GetBinCenter(i);
 			double n = his->GetBinContent(i);
-			double mu = ModifiedDoubleCrystalBall(&x, &par[0]);
+      double mu;
+
+      if(opt_integrate)
+      {
+        double xbin_low=his->GetBinLowEdge(i);
+        double xbin_up = xbin_low + his->GetBinWidth(i);
+        auto f = [&par,this](double z) { return ModifiedDoubleCrystalBall(&z, &par[0]); };
+        mu = ibn::dgaus(f, xbin_low, xbin_up,1e-10);
+      }
+      else
+      {
+        double x = his->GetBinCenter(i);
+        mu = ModifiedDoubleCrystalBall(&x, &par[0]);
+      }
+
 			double dchi2;
 			if(n!=0)
 			{
@@ -759,16 +781,16 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 			chi2+=dchi2;
 		}
 		//add limits for beta and alfa
-		double mean =  par[1];
-		double sigma =  par[2];
-		double beta[2] = {par[3], par[6]};
-		double alfa[2] = {par[4] + beta[0], par[7] + beta[1]};
-		double n[2] = {par[5],  par[8]};
-		beta[0] = mean - beta[0]*sigma; 
-		beta[1] = mean + beta[1]*sigma; 
-		alfa[0] = mean - alfa[0]*sigma; 
-		alfa[1] = mean + alfa[1]*sigma; 
+		//double mean =  par[1];
+		//double sigma =  par[2];
+		//double beta[2] = {par[3], par[6]};
+		//double alfa[2] = {par[4] + beta[0], par[7] + beta[1]};
+		//beta[0] = mean - beta[0]*sigma; 
+		//beta[1] = mean + beta[1]*sigma; 
+		//alfa[0] = mean - alfa[0]*sigma; 
+		//alfa[1] = mean + alfa[1]*sigma; 
 
+		///double n[2] = {par[5],  par[8]};
 		//if(alfa[0] <= xmin) 
 		//{
 		//	chi2 *= exp(pow((alfa[0]-xmin)/sigma, 2.0)); 

@@ -25,7 +25,7 @@ struct SelectionResult
 
   void Init(void)
   {
-    MRANGE=0.04;
+    MRANGE=0.02;
     PID_CHI2=20;
     KIN_CHI2=40;
     MAX_RECOIL_MASS=MJPSI_SHIFT+MRANGE*0.5;
@@ -39,9 +39,9 @@ struct SelectionResult
     hMrecKK = new TH1F("hMrecKK","#pi^{+}#pi^{-} recoil mass for KK channel",300,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
     hMrecUU = new TH1F("hMrecUU","#pi^{+}#pi^{-} recoil mass for uu channel",300,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
     hpid_chi2KK = new TH1F("hpid_chi2KK","pid chi2 KK channel",300,0, PID_CHI2);
-    hpid_chi2UU = new TH1F("hpid_chi2UU","pid chi2 UU channel",300,0,PID_CHI2);
+    hpid_chi2UU = new TH1F("hpid_chi2UU","pid chi2 UU channel",300,0, PID_CHI2);
     hkin_chi2KK = new TH1F("hkin_chi2KK","kin chi2 KK channel",300,0, KIN_CHI2);
-    hkin_chi2UU = new TH1F("hkin_chi2UU","kin chi2 UU channel",300,0,KIN_CHI2);
+    hkin_chi2UU = new TH1F("hkin_chi2UU","kin chi2 UU channel",300,0, KIN_CHI2);
   }
 
   double mshift(double m) const

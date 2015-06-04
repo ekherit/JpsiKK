@@ -35,7 +35,6 @@
 #include "CrystalBall.h"
 
 //mctopo mct;
-
 void analize::Begin(TTree * )
 {
    // The Begin() function is called at the start of the query.
@@ -123,15 +122,25 @@ void analize::Terminate()
    TCanvas * c =new TCanvas;
    c->Divide(2,1);
    c->cd(1);
-   hMrecKK->Draw();
-   auto resKK  =  Fit2(hMrecKK);
+   hMrecKK->Draw("E");
+   char xaxis_title[1024];
+   sprintf(xaxis_title,"M_{rec}(#pi^{+}#pi^{-}) - %6.1f, MeV", MJPSI_SHIFT*MSCALE);
+   hMrecKK->GetXaxis()->SetTitle(xaxis_title);
+   vector<double> resKK(3), resUU(3);
+   if(NKK>20)
+   {
+     resKK  =  Fit2(hMrecKK);
+     cout << "Number of selected KK events: " << resKK[0] << " " << -resKK[1] << " +" << resKK[2] << endl;
+   }
    c->cd(2);
-   hMrecUU->Draw();
-   auto resUU  =  Fit2(hMrecUU);
+   hMrecUU->Draw("E");
+   hMrecUU->GetXaxis()->SetTitle(xaxis_title);
+   if(Nuu>20) 
+   {
+     resUU  =  Fit2(hMrecUU);
+     cout << "Number of selected #mu#mu events: " << resUU[0] << " " << -resUU[1] << " +" << resUU[2] << endl;
+   }
 
-
-  cout << "Number of selected KK events: " << resKK[0] << " " << -resKK[1] << " +" << resKK[2] << endl;
-  cout << "Number of selected UU events: " << resUU[0] << " " << -resUU[1] << " +" << resUU[2] << endl;
   double eps = resKK[0]/resUU[0];
   cout << "epsKK/epsUU = " << eps  << "  " << -sqrt( pow(resKK[1]/resKK[0],2) +  pow(resUU[1]/resUU[0],2)) << "  " <<  sqrt( pow(resKK[2]/resKK[0],2) +  pow(resUU[2]/resUU[0],2)) << endl;
 	//CrystalBallFitter2 cbKK(hMrecKK);
@@ -142,9 +151,9 @@ void analize::Terminate()
   cchi2->cd(1);
   hpid_chi2KK->Draw();
   cchi2->cd(2);
-  hkin_chi2KK->Draw();
-  cchi2->cd(3);
   hpid_chi2UU->Draw();
+  cchi2->cd(3);
+  hkin_chi2KK->Draw();
   cchi2->cd(4);
   hkin_chi2UU->Draw();
 }

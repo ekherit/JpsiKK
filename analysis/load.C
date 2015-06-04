@@ -1287,16 +1287,16 @@ void  fitE2CB2Norm5(const char * dir="mcjpkk2009", const char * channel="KK",  i
 void load(void)
 {
 	gROOT->Reset();
-	//RANDOM = new TRandom;
-	gSystem->CompileMacro("CrystalBall.cpp","kO");
-	gSystem->CompileMacro("analize.C","kO");
+  gSystem->AddIncludePath("-I$HOME/work");
+	gSystem->CompileMacro("CrystalBall.cpp","kO","","/tmp");
+	gSystem->CompileMacro("analize.C","kO","","/tmp");
 }
 
 
-void analize(const char * dir)
+void analize(const char * dir, Long64_t N=5e4)
 {
 	TChain * c = load_tree(dir);
   analize an;
-  c->Process(&an);
+  c->Process(&an,"",N);
 }
 
