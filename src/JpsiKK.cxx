@@ -459,6 +459,7 @@ StatusCode JpsiKK::RootMCTopo::init_tuple(void)
   status = tuple->addItem("indexmc", m_idxmc, 0, 100);
   status = tuple->addIndexedItem("pdgid", m_idxmc, m_pdgid);
   status = tuple->addIndexedItem("motheridx", m_idxmc, m_motheridx);
+  status = tuple->addIndexedItem("idx", m_idxmc, idx);
   return status;
 }
 
@@ -1439,6 +1440,7 @@ StatusCode JpsiKK::execute()
       int mcidx = ((*iter_mc)->mother()).trackIndex() - rootIndex;
       fMCTopo.m_pdgid[m_numParticle] = pdgid;
       fMCTopo.m_motheridx[m_numParticle] = mcidx;
+      fMCTopo.m_idx[m_numParticle] = (*iter_mc)->trackIndex()-rootIndex;
       m_numParticle += 1;
     }
     fMCTopo.m_idxmc = m_numParticle;
