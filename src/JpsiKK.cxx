@@ -678,7 +678,14 @@ vector<double> get_chi2(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> & pa
   return chi2;
 }
 
-bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair, std::vector<HepLorentzVector> & P, double & chi2)
+/* Kinematic fit for specific pairs */
+bool kinematic_fit(
+    int PID,  // hypotezies 0 - kaon, 1 - muon
+    TrackPair_t  &  pion_pair,  //pion pair
+    TrackPair_t  & other_pair,  // other pair (kaon or muon)
+    std::vector<HepLorentzVector> & P,  //4momentum fit result
+    double & chi2 //chi2 result of the fit
+    )
 {
   P.resize(4);
   EvtRecTrackIterator  PionTrk[2] = {pion_pair.first, pion_pair.second};
@@ -688,11 +695,15 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   WTrackParameter PionWTrk[2];
   WTrackParameter OtherWTrk[2];
 
+  //For positive and negative charged pair create track parameters (WTrackParameter)
+  //in different hyptoizies scpecified by PID
   for(int i=0;i<2;i++)
   {
     PionKalTrk[i] = (*PionTrk[i])->mdcKalTrack();
     OtherKalTrk[i] = (*OtherTrk[i])->mdcKalTrack();
+    //pions have to be only pions
     PionWTrk[i] = WTrackParameter(PION_MASS, PionKalTrk[i]->getZHelix(), PionKalTrk[i]->getZError());
+    //create other
     switch(PID)
     {
       case ID_KAON:
@@ -712,6 +723,7 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
         break;
     }
   }
+  //vertex fit - уточним вершины
   //initial vertex
   HepPoint3D vx(0., 0., 0.);
   HepSymMatrix Evx(3, 0);
@@ -767,7 +779,15 @@ bool kinematic_fit(int PID, TrackPair_t  & pion_pair, TrackPair_t &  other_pair,
   return oksq;
 }
 
-bool kinematic_fit(int PID, TrackPairList_t  & pion_pairs, TrackPairList_t &  other_pairs, std::vector<HepLorentzVector> & P, double & chi2, TrackPair_t & result_pion_pair, TrackPair_t & result_other_pair)
+bool kinematic_fit(
+    int PID, //hypotizes 0 -- KAONS, 1 - MUONS
+    TrackPairList_t  & pion_pairs,  //list of pion pairs  (signle pair in simple case)
+    TrackPairList_t &  other_pairs, //list of other pairs  (signle pair in simple case)
+    std::vector<HepLorentzVector> & P, //?
+    double & chi2,  //result of the fit
+    TrackPair_t & result_pion_pair,  //best pion pair
+    TrackPair_t & result_other_pair  //best other pair
+    )
 {
   chi2=std::numeric_limits<double>::max();
   if(pion_pairs.empty() || other_pairs.empty()) return false;
@@ -1034,7 +1054,7 @@ StatusCode JpsiKK::execute()
           }
         }
       }
-      //SELECTION CODE
+      //SELECTION CODE MUON CASE
       if(MIN_INVARIANT_MASS <  M[1]   && M[1]  < MAX_INVARIANT_MASS)
       {
         if(Ep[0] < MAX_MUON_EP_RATIO && Ep[1] < MAX_MUON_EP_RATIO)
@@ -1307,23 +1327,6 @@ StatusCode JpsiKK::execute()
     fMdc.vz[i]  = rvz; 
     fMdc.vphi[i] = rvphi; 
 
-    //McParticleVector particles = navigator->getMcParticles((*itTrk[i])->mdcKalTrack());
-    //if(!particles.empty())
-    //{
-    //  cout <<"REC: " << fEvent.channel << " MC: ";
-    //  for(int k = 0;k<particles.size();k++)
-    //  {
-    //     cout << particles[k]->particleProperty() << " "; 
-    //  }
-    //  cout << endl;
-    //  //cout << "Retrieved " << particles.size() << " McParticles for for MdcKalTrack # " 
-    //  //  << mdcTrk->trackId() << " of reconstructed momentum " << mdcTrk->p() << " GeV/c (PID=" 
-    //  //  << endl;
-    //}
-    //  //<< particles.front()->particleProperty() << endl;
-    
-
-    
 
     //dedx information
     if((*itTrk[i])->isMdcDedxValid())
