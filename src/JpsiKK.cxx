@@ -78,7 +78,7 @@ const double ELECTRON_MASS = 0.000510999;//GeV
 const double PROTON_MASS   = 0.93827231;//GeV
 
 const double JPSI_MASS = 3.096916; //GeV
-const double PSIP_MASS = 3.686093; //GeV 
+//const double PSIP_MASS = 3.686093; //GeV 
 const double PSIP_MASS = 3.686109; //GeV PDG-2014
 
 enum              {ID_KAON=0, ID_MUON=1, ID_ELECTRON=2, ID_PION=3, ID_PROTON=4};
@@ -459,7 +459,7 @@ StatusCode JpsiKK::RootMCTopo::init_tuple(void)
   status = tuple->addItem("indexmc", m_idxmc, 0, 100);
   status = tuple->addIndexedItem("pdgid", m_idxmc, m_pdgid);
   status = tuple->addIndexedItem("motheridx", m_idxmc, m_motheridx);
-  status = tuple->addIndexedItem("idx", m_idxmc, idx);
+  status = tuple->addIndexedItem("idx", m_idxmc, m_idx);
   return status;
 }
 
