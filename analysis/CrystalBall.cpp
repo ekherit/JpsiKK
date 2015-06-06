@@ -258,7 +258,6 @@ class CrystalBallFitter
 		fun->SetLineColor(kRed);
 		fun->SetParameters(min->X());
 		debug = true;
-    fun->SetLineWidth(1);
 		fun->Draw("same");
 	}
 
@@ -593,12 +592,12 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
     inipar.Add("mean",  -0.368,   1); 
     inipar.Add("sigma",  1.258,   1); 
     inipar.Add("bl",     1.75,   1); 
-    inipar.Add("al-bl",  1,     0.1);
+    inipar.Add("al-bl",  0,     0.1);
     inipar.Add("nl",     3.1,   0.5);
     inipar.Add("br",     1.2,   0.1);
     inipar.Add("ar-br",  2.0,   0.1);
     inipar.Add("nr",     2.4,   0.1);
-    inipar.Add("kbg",    0,    1.0/(xmax-xmin));
+    inipar.Add("kbg",    -0.003746,    1.0/(xmax-xmin));
 
 		inipar.SetLimits("Nsig",  0, N0);
 		inipar.SetLimits("mean", xmin, xmax);
@@ -611,7 +610,7 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 		inipar.SetLowerLimit("sigma", 0.1);
 		inipar.SetLimits("kbg", -2.0/(xmax-xmin), 2.0/(xmax-xmin));
 		inipar.Fix("kbg");
-		//inipar.Fix("al-bl");
+		inipar.Fix("al-bl");
 		//inipar.Fix("ar-br");
 		//inipar.Fix("nr");
 		//inipar.Fix("nl");
@@ -673,6 +672,7 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 		fun = new TF1("cbf",*this,  xmin, xmax, inipar.Params().size());
 		fun->SetLineColor(kRed);
 		fun->SetParameters(&minpar.Params()[0]);
+    fun->SetLineWidth(1);
 		fun->Draw("same");
 	}
 

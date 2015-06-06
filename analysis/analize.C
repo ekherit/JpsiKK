@@ -31,8 +31,8 @@
 #include <TStyle.h>
 
 
-//#include "mctopo.h"
 #include "CrystalBall.h"
+#define mctopo_cxx
 
 //mctopo mct;
 void analize::Begin(TTree * )
@@ -43,6 +43,7 @@ void analize::Begin(TTree * )
 
    TString option = GetOption();
    SelectionResult::Init();
+   output_file_name = option;
 
 }
 
@@ -76,8 +77,36 @@ Bool_t analize::Process(Long64_t entry)
    //
    // The return value is currently not used.
    analize::GetEntry(entry);
+   //std::cout << "entry = " << entry << std::endl;
+   if(event_treeKK==0) 
+   {
+     std::cout << "Init event_treeKK" << std::endl;
+     event_treeKK=fChain->CloneTree(0);
+     event_treeKK->SetName("eventKK");
+     event_treeKK->SetTitle("KK events");
+   }
+   if(mctopo_treeKK==0)
+   {
+     std::cout << "Init mctopo_treeKK" << std::endl;
+     mctopo_treeKK=fChain->GetFriend("mctopo")->CloneTree(0);
+     mctopo_treeKK->SetName("mctopoKK");
+     mctopo_treeKK->SetTitle("mcTopo KK events");
+   }
+   if(event_treeUU==0) 
+   {
+     std::cout << "Init event_treeUU" << std::endl;
+     event_treeUU=fChain->CloneTree(0);
+     event_treeUU->SetName("eventUU");
+     event_treeUU->SetTitle("UU events");
+   }
+   if(mctopo_treeUU==0)
+   {
+     std::cout << "Init mctopo_treeUU" << std::endl;
+     mctopo_treeUU=fChain->GetFriend("mctopo")->CloneTree(0);
+     mctopo_treeUU->SetName("mctopoUU");
+     mctopo_treeUU->SetTitle("mcTopo UU events");
+   }
    N0++; //count total number of events proceed
-
    if(MIN_RECOIL_MASS <= Mrec && Mrec <= MAX_RECOIL_MASS)
      if(pid_chi2 <= PID_CHI2)
        if(kin_chi2 <= KIN_CHI2)
@@ -88,12 +117,16 @@ Bool_t analize::Process(Long64_t entry)
            hMrecKK->Fill(mshift(Mrec));
            hpid_chi2KK->Fill(pid_chi2);
            hkin_chi2KK->Fill(kin_chi2);
+           event_treeKK->Fill();
+           mctopo_treeKK->Fill();
          }
          if(uu==1 && KK==0) 
          {
            hMrecUU->Fill(mshift(Mrec));
            hpid_chi2UU->Fill(pid_chi2);
            hkin_chi2UU->Fill(kin_chi2);
+           event_treeUU->Fill();
+           mctopo_treeUU->Fill();
            Nuu++;
          }
        }
@@ -119,10 +152,11 @@ void analize::Terminate()
    cout << "Number of KK candidates: " << NKK  << endl;
    cout << "Number of uu candidates: " << Nuu  << endl;
 
-   TCanvas * c =new TCanvas;
+   TCanvas * c =new TCanvas("cMrec","pions recoil mass");
    c->Divide(2,1);
    c->cd(1);
    hMrecKK->Draw("E");
+   hMrecKK->SetDrawOption("E");
    char xaxis_title[1024];
    sprintf(xaxis_title,"M_{rec}(#pi^{+}#pi^{-}) - %6.1f, MeV", MJPSI_SHIFT*MSCALE);
    hMrecKK->GetXaxis()->SetTitle(xaxis_title);
@@ -134,6 +168,7 @@ void analize::Terminate()
    }
    c->cd(2);
    hMrecUU->Draw("E");
+   hMrecUU->SetDrawOption("E");
    hMrecUU->GetXaxis()->SetTitle(xaxis_title);
    if(Nuu>20) 
    {
@@ -143,10 +178,7 @@ void analize::Terminate()
 
   double eps = resKK[0]/resUU[0];
   cout << "epsKK/epsUU = " << eps  << "  " << -sqrt( pow(resKK[1]/resKK[0],2) +  pow(resUU[1]/resUU[0],2)) << "  " <<  sqrt( pow(resKK[2]/resKK[0],2) +  pow(resUU[2]/resUU[0],2)) << endl;
-	//CrystalBallFitter2 cbKK(hMrecKK);
-	//CrystalBallFitter2 cbUU(hMrecUU);
-	//cbKK.Fit();
-  TCanvas * cchi2 = new TCanvas;
+  TCanvas * cchi2 = new TCanvas("cchi2","pid and kinematic chi2");
   cchi2->Divide(2,2);
   cchi2->cd(1);
   hpid_chi2KK->Draw();
@@ -156,4 +188,18 @@ void analize::Terminate()
   hkin_chi2KK->Draw();
   cchi2->cd(4);
   hkin_chi2UU->Draw();
+  file = new TFile(output_file_name.c_str(),"RECREATE");
+  file->WriteObject(c,"cMrec");
+  file->WriteObject(cchi2,"cchi2");
+  file->WriteObject(hMrecKK,"hMrecKK");
+  file->WriteObject(hMrecUU,"hMrecUU");
+  file->WriteObject(hpid_chi2KK,"hpid_chi2KK");
+  file->WriteObject(hpid_chi2UU,"hpid_chi2UU");
+  file->WriteObject(hkin_chi2KK,"hkin_chi2KK");
+  file->WriteObject(hkin_chi2UU,"hkin_chi2UU");
+  file->WriteObject(event_treeKK,"eventKK");
+  file->WriteObject(mctopo_treeKK,"mctopoKK");
+  file->WriteObject(event_treeUU,"eventUU");
+  file->WriteObject(mctopo_treeUU,"mctopoUU");
+  //event_tree->Print();
 }

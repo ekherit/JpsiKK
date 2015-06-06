@@ -17,10 +17,12 @@
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
+#include "mctopo.h"
 #include "SelectionResult.h"
 class analize : public TSelector , public SelectionResult {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
+   mctopo   mctp;
 
    // Declaration of leaf types
    Int_t           run;
@@ -180,6 +182,7 @@ void analize::Init(TTree *tree)
    fChain->SetBranchAddress("vxy", vxy, &b_vxy);
    fChain->SetBranchAddress("vz", vz, &b_vz);
    fChain->SetBranchAddress("vphi", vphi, &b_vphi);
+   mctp.Init(fChain->GetFriend("mctopo"));//->GetFriend("mctop");
 }
 
 Bool_t analize::Notify()

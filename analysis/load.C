@@ -32,9 +32,9 @@ list<string> list_files(const char *dirname=".", const char *ext=".root")
 	return flist;
 }
 //TChain * load_tree(const char *dirname=".", const char *ext=".root")
-TChain * load_tree(string dirname=".", string ext=".root")
+TChain * load_tree(string dirname=".", string ext=".root",const char * treename="event")
 {
-	TChain * event = new TChain("event", "event");
+	TChain * event = new TChain(treename, treename);
 	TString pwd(gSystem->pwd());
 	TSystemDirectory dir(dirname.c_str(), dirname.c_str());
 	TList *files = dir.GetListOfFiles();
@@ -1268,20 +1268,6 @@ void  fitE2CB2Norm5(const char * dir="mcjpkk2009", const char * channel="KK",  i
 	cout << "Number of selected events: " << N0 << endl;
 	TH1F * his = c->GetHistogram();
 	Fit2(his);
-	//const  double * par = Fit(his);
-	////TF1 *fun = new TF1(fun_name, &ModifiedDoubleCrystalBall, SCALE*(xmin-shift),  SCALE*(xmax-shift), 14);
-	////fun->SetParameters(par);
-	////fun->SetLineColor(kRed);
-	////fun->Draw("same");
-	//CrystalBall cb(his);
-	////ROOT::Math::ParamFunctor pf;
-	////pf.SetFunction(cb,CrystalBall::Eval);
-	//TF1 * fun2 = new TF1("test_fun",  &cb, CrystalBall::Eval,   SCALE*(xmin-shift),  SCALE*(xmax-shift), 10, "CrystalBall", "Eval");
-	//////TF1 * fun2 = new TF1("test_fun",  pf,   SCALE*(xmin-shift),  SCALE*(xmax-shift), 14);
-	//fun2->SetLineColor(kBlue);
-	//fun2->SetParameters(par);
-	//fun2->Draw("same");
-	//return fun;
 }
 
 void load(void)
@@ -1289,14 +1275,26 @@ void load(void)
 	gROOT->Reset();
   gSystem->AddIncludePath("-I$HOME/work");
 	gSystem->CompileMacro("CrystalBall.cpp","kO","","/tmp");
+	//gSystem->CompileMacro("Event.C","kO","","/tmp");
+	gSystem->CompileMacro("mctopo.C","kO","","/tmp");
 	gSystem->CompileMacro("analize.C","kO","","/tmp");
 }
 
 
-void analize(const char * dir, Long64_t N=5e4)
+void analize(const char * dir, const char * file="analize_result.root", Long64_t N=0)
 {
-	TChain * c = load_tree(dir);
+	TChain * event = load_tree(dir,".root","event");
+	TChain * mctopo = load_tree(dir,".root","mctopo");
+  event->AddFriend(mctopo);
   analize an;
-  c->Process(&an,"",N);
+  //an.output_file_name = file;
+  if(N==0) event->Process(&an,file);
+  else event->Process(&an,file,N);
+}
+
+
+void draw_by_topo(TTree *t, vector<double> pdgid)
+{
+  for(auto v: pdgid) cout << v << endl;
 }
 
