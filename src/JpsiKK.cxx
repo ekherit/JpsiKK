@@ -1095,7 +1095,8 @@ StatusCode JpsiKK::execute()
       //}
     }
   }
-
+  int channel = -1;
+  TrackPair_t result_pair;
   if(other_pairs.empty()) return StatusCode::SUCCESS;
   bool GoodKinematikFit=false;
   double kinematic_chi2=2e100;

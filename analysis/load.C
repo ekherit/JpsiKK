@@ -1318,7 +1318,6 @@ void show_cuts(void)
   hmcKKp->SetTitle("Pion momentum");
   mc_event->GetHistogram()->GetXaxis()->SetTitle("p, GeV/c");
   data_event->Draw("p[0]>>hdataKKp(100,0,0.45)","KK" && main_cut ,"ENORMSAME");
-  TCut main_cut = "kin_chi2<40 && pid_chi2<20 && 3.08 < Mrec && Mrec<3.114";
   mc_event->SetLineColor(kBlue);
   data_event->SetLineColor(kBlue);
   data_event->SetMarkerStyle(8);
@@ -1333,7 +1332,8 @@ void show_cuts(void)
   l->AddEntry(hdataUUp,"data2009 #mu^{+}#mu^{-}","l");
   l->Draw();
   TCanvas * Mrec_canvas = new TCanvas("canvas_pion_Mrec","Pion recoil invariant mass");
-  main_cut = "kin_chi2<40 && pid_chi2<20";
+  //main_cut = "kin_chi2<40 && pid_chi2<20";
+  main_cut = "";
   mc_event->SetLineColor(kRed);
   data_event->SetLineColor(kRed);
   data_event->SetMarkerStyle(8);
@@ -1342,7 +1342,6 @@ void show_cuts(void)
   hmcKKp->SetTitle("Pion momentum");
   mc_event->GetHistogram()->GetXaxis()->SetTitle("p, GeV/c");
   data_event->Draw("Mrec>>hdataKKMrec(100,3.0,3.2)","KK" && main_cut ,"ENORMSAME");
-  TCut main_cut = "kin_chi2<40 && pid_chi2<20 && 3.08 < Mrec && Mrec<3.114";
   mc_event->SetLineColor(kBlue);
   data_event->SetLineColor(kBlue);
   data_event->SetMarkerStyle(8);
