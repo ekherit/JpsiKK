@@ -1298,3 +1298,62 @@ void draw_by_topo(TTree *t, vector<double> pdgid)
   for(auto v: pdgid) cout << v << endl;
 }
 
+
+void show_cuts(void)
+{
+  TChain * mc_event   =  load_tree("../../mc09",".root","event");
+  TChain * mc_mdc     =  load_tree("../../mc09",".root","mdc");
+  TChain * mc_emc     =  load_tree("../../mc09",".root","emc");
+
+  TChain * data_event =  load_tree("../../2009",".root","event");
+  TChain * data_mdc   =  load_tree("../../2009",".root","mdc");
+  TChain * data_emc   =  load_tree("../../2009",".root","emc");
+  TCanvas * cp = new TCanvas("pion_cuts_canvas","Pion momentum cuts");
+  TCut main_cut = "kin_chi2<40 && pid_chi2<20 && 3.08 < Mrec && Mrec<3.114";
+  mc_event->SetLineColor(kRed);
+  data_event->SetLineColor(kRed);
+  data_event->SetMarkerStyle(8);
+  data_event->SetMarkerColor(kRed);
+  mc_event->Draw("p[0]>>hmcKKp(100,0,0.45)","KK" && main_cut ,"NORM");
+  hmcKKp->SetTitle("Pion momentum");
+  mc_event->GetHistogram()->GetXaxis()->SetTitle("p, GeV/c");
+  data_event->Draw("p[0]>>hdataKKp(100,0,0.45)","KK" && main_cut ,"ENORMSAME");
+  TCut main_cut = "kin_chi2<40 && pid_chi2<20 && 3.08 < Mrec && Mrec<3.114";
+  mc_event->SetLineColor(kBlue);
+  data_event->SetLineColor(kBlue);
+  data_event->SetMarkerStyle(8);
+  data_event->SetMarkerColor(kBlue);
+  mc_event->Draw("p[0]>>hmcUUp(100,0,0.45)","uu" && main_cut ,"NORMSAME");
+  mc_event->GetHistogram()->GetXaxis()->SetTitle("p, GeV/c");
+  data_event->Draw("p[0]>>hdataUUp(100,0,0.45)","uu" && main_cut ,"ENORMSAME");
+  TLegend *l = new TLegend(0.8,0.8,1.0,1.0);
+  l->AddEntry(hmcKKp,"MC2009 K^{+}K^{-}","p");
+  l->AddEntry(hdataKKp,"data2009 K^{+}K^{-}","l");
+  l->AddEntry(hmcUUp,"MC2009 #mu^{+}#mu^{-}","p");
+  l->AddEntry(hdataUUp,"data2009 #mu^{+}#mu^{-}","l");
+  l->Draw();
+  TCanvas * Mrec_canvas = new TCanvas("canvas_pion_Mrec","Pion recoil invariant mass");
+  main_cut = "kin_chi2<40 && pid_chi2<20";
+  mc_event->SetLineColor(kRed);
+  data_event->SetLineColor(kRed);
+  data_event->SetMarkerStyle(8);
+  data_event->SetMarkerColor(kRed);
+  mc_event->Draw("Mrec>>hmcKKMrec(100,3.0,3.2)","KK" && main_cut ,"NORM");
+  hmcKKp->SetTitle("Pion momentum");
+  mc_event->GetHistogram()->GetXaxis()->SetTitle("p, GeV/c");
+  data_event->Draw("Mrec>>hdataKKMrec(100,3.0,3.2)","KK" && main_cut ,"ENORMSAME");
+  TCut main_cut = "kin_chi2<40 && pid_chi2<20 && 3.08 < Mrec && Mrec<3.114";
+  mc_event->SetLineColor(kBlue);
+  data_event->SetLineColor(kBlue);
+  data_event->SetMarkerStyle(8);
+  data_event->SetMarkerColor(kBlue);
+  mc_event->Draw("Mrec>>hmcUUMrec(100,3.0,3.2)","uu" && main_cut ,"NORMSAME");
+  mc_event->GetHistogram()->GetXaxis()->SetTitle("p, GeV/c");
+  data_event->Draw("Mrec>>hdataUUMrec(100,3.0,3.2)","uu" && main_cut ,"ENORMSAME");
+  TLegend *lMrec = new TLegend(0.8,0.8,1.0,1.0);
+  lMrec->AddEntry(hmcKKMrec,"MC2009 K^{+}K^{-}","p");
+  lMrec->AddEntry(hdataKKMrec,"data2009 K^{+}K^{-}","l");
+  lMrec->AddEntry(hmcUUMrec,"MC2009 #mu^{+}#mu^{-}","p");
+  lMrec->AddEntry(hdataUUMrec,"data2009 #mu^{+}#mu^{-}","l");
+  lMrec->Draw();
+}
