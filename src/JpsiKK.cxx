@@ -132,9 +132,13 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("EMC_BARREL_MIN_ENERGY", EMC_BARREL_MIN_ENERGY = 0.025);
 
   declareProperty("MAX_MUON_EP_RATIO", MAX_MUON_EP_RATIO = 0.26);
+  declareProperty("MIN_MUON_EP_RATIO", MAX_MUON_EP_RATIO = 0);
   declareProperty("MAX_KAON_EP_RATIO", MAX_KAON_EP_RATIO = 0.8);
+  declareProperty("MIN_KAON_EP_RATIO", MAX_KAON_EP_RATIO = 0);
 
   declareProperty("MAX_PION_MOMENTUM", MAX_PION_MOMENTUM = 0.45); //GeV
+  declareProperty("MIN_PION_MOMENTUM", MAX_PION_MOMENTUM = 0); //GeV
+
   declareProperty("MIN_KAON_MOMENTUM", MIN_KAON_MOMENTUM = 1.0); //GeV
   declareProperty("MAX_KAON_MOMENTUM", MAX_KAON_MOMENTUM = 2.0); //GeV
   declareProperty("MIN_MUON_MOMENTUM", MIN_MUON_MOMENTUM = 1.0); //GeV
@@ -1006,146 +1010,91 @@ StatusCode JpsiKK::execute()
     if(fabs(get_recoil__mass(*p,PION_MASS) - JPSI_MASS) <  fabs(get_recoil__mass(pion_pair,PION_MASS) - JPSI_MASS)) pion_pair = *p;
   }
 
-  //make kaon or muon pairs
-  TrackPairList_t muon_pairs;
-  TrackPairList_t kaon_pairs;
+  //make other pairs
+  //TrackPairList_t muon_pairs;
+  //TrackPairList_t kaon_pairs;
   TrackPairList_t other_pairs;
   for(TrackList_t::iterator i=other_negative_tracks.begin(); i!=other_negative_tracks.end(); ++i)
+  {
+    EvtRecTrackIterator first_track = *i;
+    //first track in pair must has mdc and emc information
+    if(!(*first_track)->isMdcTrackValid()) continue;
+    if(!(*first_track)->isEmcShowerValid()) continue;
     for(TrackList_t::iterator j=other_positive_tracks.begin(); j!=other_positive_tracks.end(); ++j)
     {
-      TrackPair_t pair(*i,*j);
-      EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
-      double Ep[2]; // E/p ratio
-      double E[2];
-      double p[2];
-      for(int k=0;k<2;k++)
-      {
-        if(!(*itTrk[k])->isMdcTrackValid() || ! (*itTrk[k])->isEmcShowerValid()) 
-        {
-          log << MSG::ERROR << "Invalid mdc info for track.Exiting" << endmsg;
-          return StatusCode::FAILURE;
-        }
-        //SELECTION CODE:
-        RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
-        RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
-        E[k] = emcTrk->energy();
-        p[k] = mdcTrk->p();
-        if(p[k]!=0) Ep[k] = E[k]/p[k];
-        else Ep[k]=999999;
-      }
-      double M[5]={0,0,0,0,0};
-      for(int pid=0;pid<5;pid++)
-      {
-        M[pid]=get_invariant_mass2(pair,XMASS[pid]);
-        if(M[pid]>0) M[pid] = sqrt(M[pid]);
-        else M[pid] = 0;
-      }
-      //SELECTION CODE KAON CASE
-      if(MIN_INVARIANT_MASS <  M[0]   && M[0]  < MAX_INVARIANT_MASS)
-      {
-        if(Ep[0] < MAX_KAON_EP_RATIO && Ep[1] < MAX_KAON_EP_RATIO)
-        {
-          if(MIN_KAON_MOMENTUM < p[0] && p[0] < MAX_KAON_MOMENTUM)
-          {
-            if(MIN_KAON_MOMENTUM < p[1] && p[1] < MAX_KAON_MOMENTUM)
-            {
-              kaon_pairs.push_back(pair);
-            }
-          }
-        }
-      }
-      //SELECTION CODE MUON CASE
-      if(MIN_INVARIANT_MASS <  M[1]   && M[1]  < MAX_INVARIANT_MASS)
-      {
-        if(Ep[0] < MAX_MUON_EP_RATIO && Ep[1] < MAX_MUON_EP_RATIO)
-        {
-          if(MIN_MUON_MOMENTUM < p[0] && p[0] < MAX_MUON_MOMENTUM)
-          {
-            if(MIN_MUON_MOMENTUM < p[1] && p[1] < MAX_MUON_MOMENTUM)
-            {
-              muon_pairs.push_back(pair);
-            }
-          }
-        }
-      }
-      //SELECT ANY OTHER PAIRS
-      //suppress electron case
-      if(Ep[0] < MAX_KAON_EP_RATIO && Ep[1] < MAX_KAON_EP_RATIO)
-      {
-        if(MIN_MUON_MOMENTUM < p[0] && p[0] < MAX_MUON_MOMENTUM)
-        {
-          if(MIN_MUON_MOMENTUM < p[1] && p[1] < MAX_MUON_MOMENTUM)
-          {
-            other_pairs.push_back(pair);
-          }
-        }
-      }
+      EvtRecTrackIterator second_track = *j;
+      //second track in pair must has mdc and emc information
+      if(!(*second_track)->isMdcTrackValid()) continue;
+      if(!(*second_track)->isEmcShowerValid()) continue;
+      TrackPair_t pair(first_track,second_track);
+      other_pairs.push_back(pair);
+      //double Ep[2]; // E/p ratio
+      //double E[2];
+      //double p[2];
+      //for(int k=0;k<2;k++)
+      //{
+      //  if(!(*itTrk[k])->isMdcTrackValid() || ! (*itTrk[k])->isEmcShowerValid()) 
+      //  {
+      //    log << MSG::ERROR << "Invalid mdc info for track.Exiting" << endmsg;
+      //    return StatusCode::FAILURE;
+      //  }
+      //  //SELECTION CODE:
+      //  RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
+      //  RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
+      //  E[k] = emcTrk->energy();
+      //  p[k] = mdcTrk->p();
+      //  if(p[k]!=0) Ep[k] = E[k]/p[k];
+      //  else Ep[k]=999999;
+      //}
+      //double M[5]={0,0,0,0,0};
+      //for(int pid=0;pid<5;pid++)
+      //{
+      //  M[pid]=get_invariant_mass2(pair,XMASS[pid]);
+      //  if(M[pid]>0) M[pid] = sqrt(M[pid]);
+      //  else M[pid] = 0;
+      //}
+      ////SELECTION CODE KAON CASE
+      //if(MIN_INVARIANT_MASS <  M[0]   && M[0]  < MAX_INVARIANT_MASS)
+      //{
+      //  if(Ep[0] < MAX_KAON_EP_RATIO && Ep[1] < MAX_KAON_EP_RATIO)
+      //  {
+      //    if(MIN_KAON_MOMENTUM < p[0] && p[0] < MAX_KAON_MOMENTUM)
+      //    {
+      //      if(MIN_KAON_MOMENTUM < p[1] && p[1] < MAX_KAON_MOMENTUM)
+      //      {
+      //        kaon_pairs.push_back(pair);
+      //      }
+      //    }
+      //  }
+      //}
+      ////SELECTION CODE MUON CASE
+      //if(MIN_INVARIANT_MASS <  M[1]   && M[1]  < MAX_INVARIANT_MASS)
+      //{
+      //  if(Ep[0] < MAX_MUON_EP_RATIO && Ep[1] < MAX_MUON_EP_RATIO)
+      //  {
+      //    if(MIN_MUON_MOMENTUM < p[0] && p[0] < MAX_MUON_MOMENTUM)
+      //    {
+      //      if(MIN_MUON_MOMENTUM < p[1] && p[1] < MAX_MUON_MOMENTUM)
+      //      {
+      //        muon_pairs.push_back(pair);
+      //      }
+      //    }
+      //  }
+      //}
+      ////SELECT ANY OTHER PAIRS
+      ////suppress electron case
+      //if(Ep[0] < MAX_KAON_EP_RATIO && Ep[1] < MAX_KAON_EP_RATIO)
+      //{
+      //  if(MIN_MUON_MOMENTUM < p[0] && p[0] < MAX_MUON_MOMENTUM)
+      //  {
+      //    if(MIN_MUON_MOMENTUM < p[1] && p[1] < MAX_MUON_MOMENTUM)
+      //    {
+      //      other_pairs.push_back(pair);
+      //    }
+      //  }
+      //}
     }
-
-  int channel=-1; //default no channel
-  TrackPair_t result_pair;
-  //SELECTION CODE
-  if(!muon_pairs.empty() || !kaon_pairs.empty()) 
-  {
-    //the best pair which is closer to JPSI
-    if(!kaon_pairs.empty()) result_pair = kaon_pairs.front();
-    if(!muon_pairs.empty()) result_pair = muon_pairs.front();
-    for(TrackPairList_t::iterator p=kaon_pairs.begin();p!=kaon_pairs.end();p++)
-    {
-      if(fabs(sqrt(get_invariant_mass2(*p,KAON_MASS)) - JPSI_MASS) 
-          <=  fabs(sqrt(get_invariant_mass2(result_pair,KAON_MASS)) - JPSI_MASS)) 
-      {
-        result_pair = *p;
-        channel=ID_KAON; //setup kaon channel
-      }
-    }
-    for(TrackPairList_t::iterator p=muon_pairs.begin();p!=muon_pairs.end();p++)
-    {
-      if(fabs(sqrt(get_invariant_mass2(*p,MUON_MASS)) - JPSI_MASS) 
-          <=  fabs(sqrt(get_invariant_mass2(result_pair,MUON_MASS)) - JPSI_MASS)) 
-      {
-        result_pair = *p;
-        channel=ID_MUON; //setup muon channel
-      }
-    }
-    if(channel<0) 
-    {
-      log << MSG::ERROR << "Must be some channel but it's not" << endmsg;
-      return StatusCode::FAILURE; 
-    }
-    vector<double> chi2 = get_chi2(result_pair);
-    bool muon_probable=true;
-    bool kaon_probable=true;
-    for(int i=0;i<5;i++)
-    {
-      if(i!=ID_KAON) kaon_probable = kaon_probable && chi2[ID_KAON] < chi2[i];
-      if(i!=ID_MUON) muon_probable = muon_probable && chi2[ID_MUON] < chi2[i];
-    }
-    //switch(channel)
-    //{
-    //  case ID_KAON:
-    //    if(kaon_probable)
-    //    {
-    //      fEvent.KK=1;
-    //      fEvent.uu=0;
-    //      event_with_kaons++;
-    //    }
-    //    break;
-    //  case ID_MUON:
-    //    if(muon_probable)
-    //    {
-    //      fEvent.KK=0;
-    //      fEvent.uu=1;
-    //      event_with_muons++;
-    //    }
-    //    break;
-    //}
   }
-  else
-  {
-    return StatusCode::SUCCESS;
-  }
-
 
   if(other_pairs.empty()) return StatusCode::SUCCESS;
   bool GoodKinematikFit=false;
@@ -1179,12 +1128,24 @@ StatusCode JpsiKK::execute()
   if(kinematic_chi2>200) return StatusCode::SUCCESS;
   vector<double> pchi2 = get_chi2(result_pair);
   good_kinematic_fit++;
+  RecMdcTrack  *mdcTrk[2] = {(*result_pair.first)->mdcTrack(), (*result_pair.second)->mdcTrack()};
+  RecEmcShower *emcTrk[2] = {(*result_pair.first)->emcShower(), (*result_pair.second)->emcShower()};
   switch(channel)
   {
     case ID_KAON:
       if(pchi2[ID_KAON] > 200) return StatusCode::SUCCESS;
-      if(pchi2[ID_KAON] < pchi2[ID_MUON]
-          && pchi2[ID_KAON] < pchi2[ID_PION]
+      if(
+          pchi2[ID_KAON] < pchi2[ID_MUON]
+          && 
+          pchi2[ID_KAON] < pchi2[ID_PION]
+          &&
+          emcTrk[0]->energy()/mdcTrk[0]->p() < MAX_KAON_EP_RATIO
+          &&
+          emcTrk[1]->energy()/mdcTrk[1]->p() < MAX_KAON_EP_RATIO
+          &&
+          MIN_KAON_MOMENTUM < mdcTrk[0]->p()  && mdcTrk[0]->p() <  MAX_KAON_MOMENTUM
+          &&
+          MIN_KAON_MOMENTUM < mdcTrk[1]->p()  && mdcTrk[1]->p() <  MAX_KAON_MOMENTUM
           )
       {
         fEvent.KK=1;
@@ -1195,8 +1156,18 @@ StatusCode JpsiKK::execute()
       break;
     case ID_MUON:
       if(pchi2[ID_MUON] > 200) return StatusCode::SUCCESS;
-      if(pchi2[ID_MUON] < pchi2[ID_KAON]
-          && pchi2[ID_MUON] < pchi2[ID_KAON]
+      if(
+          pchi2[ID_MUON] < pchi2[ID_KAON]
+          && 
+          pchi2[ID_MUON] < pchi2[ID_KAON]
+          &&
+          emcTrk[0]->energy()/mdcTrk[0]->p() < MAX_MUON_EP_RATIO
+          &&
+          emcTrk[1]->energy()/mdcTrk[1]->p() < MAX_MUON_EP_RATIO
+          &&
+          MIN_MUON_MOMENTUM < mdcTrk[0]->p()  && mdcTrk[0]->p() <  MAX_MUON_MOMENTUM
+          &&
+          MIN_MUON_MOMENTUM < mdcTrk[1]->p()  && mdcTrk[1]->p() <  MAX_MUON_MOMENTUM
         )
       {
         fEvent.KK=0;

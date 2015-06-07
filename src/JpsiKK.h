@@ -50,7 +50,11 @@ class JpsiKK : public Algorithm
   double MAX_MUON_EP_RATIO;
   double MAX_KAON_EP_RATIO;
 
+  double MIN_MUON_EP_RATIO;
+  double MIN_KAON_EP_RATIO;
+
   double MAX_PION_MOMENTUM; //maximum pion momentum
+  double MIN_PION_MOMENTUM; //maximum pion momentum
 
   double MIN_RECOIL_MASS; //minimum recoil mass cut
   double MAX_RECOIL_MASS; //minimum recoil mass cut
