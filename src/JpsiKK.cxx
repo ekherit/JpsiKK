@@ -464,11 +464,13 @@ StatusCode JpsiKK::RootMCTopo::init_tuple(void)
   status = tuple->addIndexedItem("pdgid", m_idxmc, m_pdgid);
   status = tuple->addIndexedItem("motheridx", m_idxmc, m_motheridx);
   status = tuple->addIndexedItem("idx", m_idxmc, m_idx);
+  status = tuple->addIndexedItem("hash", m_idxmc, m_hash);
   return status;
 }
 
 void JpsiKK::RootMCTopo::init(void)
 {
+  m_idxmc=0;
 }
 
 void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
@@ -1416,6 +1418,7 @@ StatusCode JpsiKK::execute()
       fMCTopo.m_pdgid[m_numParticle] = pdgid;
       fMCTopo.m_motheridx[m_numParticle] = mcidx;
       fMCTopo.m_idx[m_numParticle] = (*iter_mc)->trackIndex()-rootIndex;
+      fMCTopo.hash=0; //no hash calculation now
       m_numParticle += 1;
     }
     fMCTopo.m_idxmc = m_numParticle;

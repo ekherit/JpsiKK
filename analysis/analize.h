@@ -17,12 +17,16 @@
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
-#include "mctopo.h"
+//#include "mctopo.h"
+
+#include "../../mctop/McTopo.h"
+
 #include "SelectionResult.h"
 class analize : public TSelector , public SelectionResult {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
-   mctopo   mctp;
+   //mctopo   mctp;
+   McTopo  mctp;
 
    // Declaration of leaf types
    Int_t           run;

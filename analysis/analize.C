@@ -24,6 +24,7 @@
 //
 
 #include <iostream>
+#include <iomanip>
 
 #include "analize.h"
 #include <TH2.h>
@@ -32,7 +33,8 @@
 
 
 #include "CrystalBall.h"
-#define mctopo_cxx
+#include "../../mctop/MyEvent.h"
+//#define mctopo_cxx
 
 //mctopo mct;
 void analize::Begin(TTree * )
@@ -107,18 +109,22 @@ Bool_t analize::Process(Long64_t entry)
      mctopo_treeUU->SetTitle("mcTopo UU events");
    }
    N0++; //count total number of events proceed
+   M12 =  test_hash2(&mctp);
    if(MIN_RECOIL_MASS <= Mrec && Mrec <= MAX_RECOIL_MASS)
      if(pid_chi2 <= PID_CHI2)
        if(kin_chi2 <= KIN_CHI2)
        {
          if(KK==1 && uu==0) 
          {
-           NKK++;
-           hMrecKK->Fill(mshift(Mrec));
-           hpid_chi2KK->Fill(pid_chi2);
-           hkin_chi2KK->Fill(kin_chi2);
-           event_treeKK->Fill();
-           mctopo_treeKK->Fill();
+           if(fabs(M012 -1.27)>0.1 && fabs(M013 -1.27)>0.1)
+           {
+             NKK++;
+             hMrecKK->Fill(mshift(Mrec));
+             hpid_chi2KK->Fill(pid_chi2);
+             hkin_chi2KK->Fill(kin_chi2);
+             event_treeKK->Fill();
+             mctopo_treeKK->Fill();
+           }
          }
          if(uu==1 && KK==0) 
          {
@@ -130,6 +136,16 @@ Bool_t analize::Process(Long64_t entry)
            Nuu++;
          }
        }
+   int p = log(N0)/log(10)-1;
+   if(p<1) p=1;
+   int P = pow(10,p);
+   if(N0 % P == 0) 
+   {
+     std::cout << setw(15) << N0 << setw(15) << NKK << setw(15) << Nuu;
+     std::cout << "  hash = " << setw(10) << test_hash2(&mctp) << "    " << info(&mctp) << std::endl;
+   }
+
+   //if(N0 % 10 == 0) std::cout << setw(15) << N0 << setw(15) << NKK << setw(15) << Nuu;
    return kTRUE;
 }
 
@@ -174,10 +190,14 @@ void analize::Terminate()
    {
      resUU  =  Fit2(hMrecUU);
      cout << "Number of selected #mu#mu events: " << resUU[0] << " " << -resUU[1] << " +" << resUU[2] << endl;
+     double eps = resKK[0]/resUU[0];
+     cout << "epsKK/epsUU = " << eps  << "  " << -sqrt( pow(resKK[1]/resKK[0],2) +  pow(resUU[1]/resUU[0],2)) << "  " <<  sqrt( pow(resKK[2]/resKK[0],2) +  pow(resUU[2]/resUU[0],2)) << endl;
+   }
+   else
+   {
+     cout << "Too small number of mu mu events: " << Nuu << endl;
    }
 
-  double eps = resKK[0]/resUU[0];
-  cout << "epsKK/epsUU = " << eps  << "  " << -sqrt( pow(resKK[1]/resKK[0],2) +  pow(resUU[1]/resUU[0],2)) << "  " <<  sqrt( pow(resKK[2]/resKK[0],2) +  pow(resUU[2]/resUU[0],2)) << endl;
   TCanvas * cchi2 = new TCanvas("cchi2","pid and kinematic chi2");
   cchi2->Divide(2,2);
   cchi2->cd(1);

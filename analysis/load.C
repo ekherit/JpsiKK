@@ -1270,21 +1270,13 @@ void  fitE2CB2Norm5(const char * dir="mcjpkk2009", const char * channel="KK",  i
 	Fit2(his);
 }
 
-void load(void)
-{
-	gROOT->Reset();
-  gSystem->AddIncludePath("-I$HOME/work");
-	gSystem->CompileMacro("CrystalBall.cpp","kO","","/tmp");
-	//gSystem->CompileMacro("Event.C","kO","","/tmp");
-	gSystem->CompileMacro("mctopo.C","kO","","/tmp");
-	gSystem->CompileMacro("analize.C","kO","","/tmp");
-}
 
 
 void analize(const char * dir, const char * file="analize_result.root", Long64_t N=0)
 {
 	TChain * event = load_tree(dir,".root","event");
 	TChain * mctopo = load_tree(dir,".root","mctopo");
+  cout << "Total number of events: " << event->GetEntriesFast() << std::endl;
   event->AddFriend(mctopo);
   analize an;
   //an.output_file_name = file;
@@ -1355,4 +1347,63 @@ void show_cuts(void)
   lMrec->AddEntry(hmcUUMrec,"MC2009 #mu^{+}#mu^{-}","p");
   lMrec->AddEntry(hdataUUMrec,"data2009 #mu^{+}#mu^{-}","l");
   lMrec->Draw();
+}
+
+
+void show_radcor(const char * filename, const char * topo_name="mctopoKK", const char *event_name="eventKK", const char * cut="")
+{
+  TChain * mctopKK = new TChain(topo_name,topo_name);
+  TChain * eventKK = new TChain(event_name,event_name);
+  eventKK->AddFriend(mctopKK);
+  mctopKK->AddFile(filename);
+  eventKK->AddFile(filename);
+
+  TCut main_cut(cut);
+
+  char buf[1024];
+  sprintf(buf,"%s.indexmc",topo_name);
+  eventKK->SetAlias("indexmc",buf);
+  sprintf(buf,"%s.pdgid",topo_name);
+  eventKK->SetAlias("pdgid",buf);
+
+  new TCanvas;
+  eventKK->Draw("indexmc");
+  eventKK->Draw("Mrec>>h0","mctopoKK.indexmc==6");
+
+  gStyle->SetOptStat(kFALSE);
+  TCanvas * c =  new TCanvas;
+  c->SetLogy();
+  eventKK->SetLineColor(kMagenta); 
+  eventKK->Draw("Mrec>>h0",main_cut && "indexmc==6");
+  eventKK->GetHistogram()->GetXaxis()->SetTitle("M_{rec}(#pi^{+}#pi^{-}), GeV");
+  eventKK->GetHistogram()->SetTitle("Pion recoil mass");
+  eventKK->SetLineColor(kBlue); 
+  eventKK->Draw("Mrec>>hpi1",main_cut && "indexmc==7&& pdgid[4]==-22","same");
+  eventKK->SetLineColor(kGreen); 
+  eventKK->Draw("Mrec>>hK1",main_cut && "indexmc==7&& pdgid[6]==-22","same");
+  eventKK->SetLineColor(kRed); 
+  eventKK->Draw("Mrec>>hK2",main_cut && "indexmc==8","same");
+  eventKK->SetLineColor(kBlack); 
+  eventKK->Draw("Mrec>>htot",main_cut,"Esame");
+  TLegend * l = new TLegend(0.8,0.8,1.0,1.0);
+  l->AddEntry(h0,"#psi(2S)#rightarrow#pi^{+}#pi^{-} J/#psi #rightarrow K^{+}K^{-}","l");
+  l->AddEntry(hpi1,"#psi(2S)#rightarrow#pi^{+}#pi^{-}#gamma J/#psi #rightarrow K^{+}K^{-}","l");
+  l->AddEntry(hK1,"#psi(2S)#rightarrow#pi^{+}#pi^{-} J/#psi #rightarrow K^{+}K^{-} #gamma","l");
+  l->AddEntry(hK2,"#psi(2S)#rightarrow#pi^{+}#pi^{-} J/#psi #rightarrow K^{+}K^{-} #gamma #gamma","l");
+  l->AddEntry(htot,"#psi(2S)#rightarrow#pi^{+}#pi^{-} (#gamma)J/#psi #rightarrow K^{+}K^{-} (#gamma)","l");
+  //eventKK->SetLineColor(kPink); 
+  //eventKK->Draw("Minv>>hinv","","same");
+  l->Draw();
+}
+
+void load(void)
+{
+	gROOT->Reset();
+  //std::cout << gSystem->GetMakeSharedLib() << endl;
+  //gSystem->SetMakeSharedLib("-std=c++11");
+  gSystem->AddIncludePath("-I$HOME/work");
+	gSystem->CompileMacro("CrystalBall.cpp","kO","","/tmp");
+	//gSystem->CompileMacro("mctopo.C","kO","","/tmp");
+  gSystem->Load("../../mctop/libMyEvent.so");
+	gSystem->CompileMacro("analize.C","kO","","/tmp");
 }

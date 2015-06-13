@@ -597,7 +597,8 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
     inipar.Add("br",     1.2,   0.1);
     inipar.Add("ar-br",  2.0,   0.1);
     inipar.Add("nr",     2.4,   0.1);
-    inipar.Add("kbg",    -0.003746,    1.0/(xmax-xmin));
+    //inipar.Add("kbg",    -0.003746,    1.0/(xmax-xmin));
+    inipar.Add("kbg",    0,    1.0/(xmax-xmin));
 
 		inipar.SetLimits("Nsig",  0, N0);
 		inipar.SetLimits("mean", xmin, xmax);

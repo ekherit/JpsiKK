@@ -49,6 +49,7 @@ struct SelectionResult
   void Init(void)
   {
     MRANGE=0.09;
+    //MRANGE=0.040;
     PID_CHI2=20;
     KIN_CHI2=40;
     MAX_RECOIL_MASS=MJPSI_SHIFT+MRANGE*0.5;
