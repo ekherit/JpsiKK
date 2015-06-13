@@ -1418,7 +1418,7 @@ StatusCode JpsiKK::execute()
       fMCTopo.m_pdgid[m_numParticle] = pdgid;
       fMCTopo.m_motheridx[m_numParticle] = mcidx;
       fMCTopo.m_idx[m_numParticle] = (*iter_mc)->trackIndex()-rootIndex;
-      fMCTopo.hash=0; //no hash calculation now
+      fMCTopo.m_hash=0; //no hash calculation now
       m_numParticle += 1;
     }
     fMCTopo.m_idxmc = m_numParticle;
