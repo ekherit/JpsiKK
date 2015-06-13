@@ -247,7 +247,7 @@ class JpsiKK : public Algorithm
     NTuple::Array <int>  m_pdgid;
     NTuple::Array <int>  m_motheridx;
     NTuple::Array <int>  m_idx;
-    NTuple::Array <unsigned long>  m_hash;
+    NTuple::Item <unsigned long>  m_hash;
     virtual void init(void);
     virtual StatusCode init_tuple(void);
   };

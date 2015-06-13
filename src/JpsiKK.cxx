@@ -464,7 +464,7 @@ StatusCode JpsiKK::RootMCTopo::init_tuple(void)
   status = tuple->addIndexedItem("pdgid", m_idxmc, m_pdgid);
   status = tuple->addIndexedItem("motheridx", m_idxmc, m_motheridx);
   status = tuple->addIndexedItem("idx", m_idxmc, m_idx);
-  status = tuple->addIndexedItem("hash", m_idxmc, m_hash);
+  status = tuple->addItem("hash", m_hash);
   return status;
 }
 
