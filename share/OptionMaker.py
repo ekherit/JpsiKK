@@ -145,7 +145,7 @@ class OptionMaker:
 
 
 
-    def group(self, run_filter=".*run.*(\d{4,7})[^\d]+.*.dst", run_number=1):
+    def group(self, run_filter=".*run.*[^\d](\d{4,7})[^\d]+.*.dst", run_number=1):
         self.runFilter=run_filter
         self.runNumber = run_number
         self.runMap = create_run_dict(self.fileList, run_filter)
