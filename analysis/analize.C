@@ -109,22 +109,19 @@ Bool_t analize::Process(Long64_t entry)
      mctopo_treeUU->SetTitle("mcTopo UU events");
    }
    N0++; //count total number of events proceed
-   M12 =  test_hash2(&mctp);
+   nptrack =  test_hash2(&mctp);
    if(MIN_RECOIL_MASS <= Mrec && Mrec <= MAX_RECOIL_MASS)
      if(pid_chi2 <= PID_CHI2)
        if(kin_chi2 <= KIN_CHI2)
        {
          if(KK==1 && uu==0) 
          {
-           if(fabs(M012 -1.27)>0.1 && fabs(M013 -1.27)>0.1)
-           {
              NKK++;
              hMrecKK->Fill(mshift(Mrec));
              hpid_chi2KK->Fill(pid_chi2);
              hkin_chi2KK->Fill(kin_chi2);
              event_treeKK->Fill();
              mctopo_treeKK->Fill();
-           }
          }
          if(uu==1 && KK==0) 
          {
@@ -142,7 +139,7 @@ Bool_t analize::Process(Long64_t entry)
    if(N0 % P == 0) 
    {
      std::cout << setw(15) << N0 << setw(15) << NKK << setw(15) << Nuu;
-     std::cout << "  hash = " << setw(10) << test_hash2(&mctp) << "    " << info(&mctp) << std::endl;
+     std::cout << "  hash = " << setw(10) << std::hex << test_hash2(&mctp) << "    " << std::dec << info(&mctp) << std::endl;
    }
 
    //if(N0 % 10 == 0) std::cout << setw(15) << N0 << setw(15) << NKK << setw(15) << Nuu;

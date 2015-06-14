@@ -1,0 +1,41 @@
+fcn = 252.434
+    0      Nsig        3585.67       -18.8097        18.6823
+    1      mean     -0.0940146     -0.0372106      0.0373349
+    2     sigma        1.34676     -0.0672217      0.0542092
+    3        bl        1.39912      -0.187751       0.175635
+    4     al-bl              0              0              0
+    5        nl        6.04194       -2.07626        5.37731
+    6        br        1.03575     -0.0846417      0.0951171
+    7     ar-br        1.75967      -0.734263       0.572512
+    8        nr        2.69969      -0.547575        0.79035
+    9       kbg              0              0              0
+Total number of events: 3747
+Number of signal events:         3585.67       -61.5231        61.4843
+Number of signal events(2):         3585.67       -59.8805        59.8805
+Number of background events:         161.328   +-        12.7015
+Number of selected KK events: 3585.67 -61.5231 +61.4843
+Info in <Minuit2>: matrix forced pos-def by adding to diagonal : padd = 3.20212
+Info in <Minuit2>: MnHesse: matrix was forced pos. def. 
+NumCall: 886
+Nfcn: 886
+Info in <Minuit2>: MnMinos Parameter is at Upper limit. : par_name = Nsig
+fcn = 1095.24
+    0      Nsig         659534       -11.4932    3.71365e-07
+    1      mean      -0.118474    -0.00272167     0.00272417
+    2     sigma        1.45115    -0.00346615     0.00344081
+    3        bl        1.59198    -0.00776949     0.00773302
+    4     al-bl              0              0              0
+    5        nl        3.20173     -0.0314344      0.0319507
+    6        br         1.1639     -0.0074313     0.00757685
+    7     ar-br        1.53759     -0.0461966      0.0461177
+    8        nr         2.5168     -0.0341028       0.034277
+    9       kbg              0              0              0
+Total number of events: 659534
+Number of signal events:          659534       -812.198        812.117
+Number of signal events(2):          659534       -812.117        812.117
+Number of background events:     3.71365e-07   +-    0.000609397
+Number of selected #mu#mu events: 659534 -812.198 +812.117
+epsKK/epsUU = 0.00543667  -0.0172022  0.0171914
+root [2] -0.0172022*5.43667
+(const double)(-9.35226846740000034e-02)
+
