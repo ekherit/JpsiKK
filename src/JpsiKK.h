@@ -73,6 +73,9 @@ class JpsiKK : public Algorithm
   double MIN_MUON_MISSING_MASS;   //minimum muon missing mass
   double MAX_MUON_MISSING_MASS;   //minimum muon missing mass
 
+
+	double CENTER_MASS_ENERGY;      //center mass energy
+
   double MIN_MISSING_MASS; 
   double MAX_MISSING_MASS; 
 

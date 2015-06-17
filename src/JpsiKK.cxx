@@ -113,9 +113,10 @@ TrackVector_t make_track_vector(TrackPair_t & pair1)
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
 {
+  declareProperty("CENTER_MASS_ENERGY", CENTER_MASS_ENERGY = 0); //GeV
   declareProperty("MAX_CHARGED_TRACKS", MAX_CHARGED_TRACKS=4); //maximum number of charged tracks in selection
   declareProperty("MIN_CHARGED_TRACKS", MIN_CHARGED_TRACKS=4); //minimum number of charged tracks in selection
-  declareProperty("MAX_NEUTRAL_TRACKS", MAX_NEUTRAL_TRACKS=0); //maximum number of good charged tracks in selection
+  declareProperty("MAX_NEUTRAL_TRACKS", MAX_NEUTRAL_TRACKS=1000); //maximum number of good charged tracks in selection
 
   //good charged track configuration
   declareProperty("IP_MAX_Z", IP_MAX_Z = 10.0); //cm
@@ -141,6 +142,7 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
 
   declareProperty("MIN_KAON_MOMENTUM", MIN_KAON_MOMENTUM = 1.0); //GeV
   declareProperty("MAX_KAON_MOMENTUM", MAX_KAON_MOMENTUM = 2.0); //GeV
+
   declareProperty("MIN_MUON_MOMENTUM", MIN_MUON_MOMENTUM = 1.0); //GeV
   declareProperty("MAX_MUON_MOMENTUM", MAX_MUON_MOMENTUM = 2.0); //GeV
 
@@ -152,6 +154,7 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("MAX_KAON_MISSING_MASS", MAX_KAON_MISSING_MASS = 0.6); //GeV^2
   declareProperty("MIN_MUON_MISSING_MASS", MIN_MUON_MISSING_MASS = 0); //GeV^2
   declareProperty("MAX_MUON_MISSING_MASS", MAX_MUON_MISSING_MASS = 0.1); //GeV^2
+
 
   declareProperty("MIN_MISSING_MASS", MIN_MISSING_MASS = -0.1); //GeV^2
   declareProperty("MAX_MISSING_MASS", MAX_MISSING_MASS = +0.1); //GeV^2
@@ -193,6 +196,7 @@ StatusCode JpsiKK::initialize(void)
   event_with_electrons=0;
   event_with_protons=0;
   good_kinematic_fit=0;
+	if(CENTER_MASS_ENERGY == 0) CENTER_MASS_ENERGY = PSIP_MASS;
 
   StatusCode status;
   status = init_tuple(this, fEvent,  "FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
@@ -536,7 +540,7 @@ double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, 
     RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
     P[k] = mdcTrk->p4(mass);
   }
-  HepLorentzVector P_psip(0.040546,0,0,PSIP_MASS); //initial vector of psip
+  HepLorentzVector P_psip(0.040546,0,0,CENTER_MASS_ENERGY); //initial vector of psip
   HepLorentzVector P_sum = P[0]+P[1];
   HepLorentzVector P_recoil = P_psip - P_sum;
   return P_recoil.m();
@@ -552,7 +556,7 @@ double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pion
 {
   EvtRecTrackIterator  PionTrk[2] = {pions.first, pions.second};
   EvtRecTrackIterator  KaonTrk[2] = {kaons.first, kaons.second};
-  HepLorentzVector P_psip(0.040546,0,0,PSIP_MASS); //initial vector of psip
+  HepLorentzVector P_psip(0.040546,0,0,CENTER_MASS_ENERGY); //initial vector of psip
   HepLorentzVector  pionP[2];
   HepLorentzVector  kaonP[2];
   for(int k=0;k<2;k++)
@@ -757,7 +761,6 @@ bool kinematic_fit(
   vtxfit->Fit();
   vtxfit->Swim(0);
 
-  //KinematicFit * kmfit = KinematicFit::instance();
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
   //kmfit->setIterNumber(10000);
   //kmfit->setChisqCut(10000);
@@ -767,7 +770,7 @@ bool kinematic_fit(
   {
     kmfit->AddTrack(i,vtxfit->wtrk(i));
   }
-  HepLorentzVector Pcmf(PSIP_MASS*sin(0.011) /* 40.546 MeV*/,0,0,PSIP_MASS); //initial vector of center of mass frame
+  HepLorentzVector Pcmf(CENTER_MASS_ENERGY*sin(0.011) /* 40.546 MeV*/,0,0,CENTER_MASS_ENERGY); //initial vector of center of mass frame
   kmfit->AddFourMomentum(0,  Pcmf);
   //kmfit->AddTotalEnergy(0,PSIP_MASS,0,1,2,3);
   //kmfit->AddResonance(1, JPSI_MASS, 2, 3);
@@ -1219,7 +1222,7 @@ StatusCode JpsiKK::execute()
   fEvent.M03 =  (Pkf[0]+Pkf[3]).m();
   fEvent.M12 =  (Pkf[1]+Pkf[2]).m();
   fEvent.M01 =  (Pkf[0]+Pkf[1]).m();
-  HepLorentzVector P_psip(0.040546,0,0,PSIP_MASS); //initial vector of psip
+  HepLorentzVector P_psip(0.040546,0,0,CENTER_MASS_ENERGY); //initial vector of psip
   fEvent.Mrecoil = (P_psip - Pkf[0] - Pkf[1]).m();
 
   fEvent.ntrack = 4;

@@ -33,7 +33,7 @@
 
 
 #include "CrystalBall.h"
-#include "../../mctop/MyEvent.h"
+#include <mctop/MyEvent.h>
 //#define mctopo_cxx
 
 //mctopo mct;

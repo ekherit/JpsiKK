@@ -19,7 +19,7 @@
 
 //#include "mctopo.h"
 
-#include "../../mctop/McTopo.h"
+#include <mctop/McTopo.h>
 
 #include "SelectionResult.h"
 class analize : public TSelector , public SelectionResult {
