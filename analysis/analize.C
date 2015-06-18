@@ -176,7 +176,7 @@ void analize::Terminate()
    vector<double> resKK(3), resUU(3);
    if(NKK>20)
    {
-     resKK  =  Fit2(hMrecKK);
+     resKK  =  Fit(hMrecKK);
      cout << "Number of selected KK events: " << resKK[0] << " " << -resKK[1] << " +" << resKK[2] << endl;
    }
    c->cd(2);
@@ -185,7 +185,7 @@ void analize::Terminate()
    hMrecUU->GetXaxis()->SetTitle(xaxis_title);
    if(Nuu>20) 
    {
-     resUU  =  Fit2(hMrecUU);
+     resUU  =  Fit(hMrecUU);
      cout << "Number of selected #mu#mu events: " << resUU[0] << " " << -resUU[1] << " +" << resUU[2] << endl;
      double eps = resKK[0]/resUU[0];
      cout << "epsKK/epsUU = " << eps  << "  " << -sqrt( pow(resKK[1]/resKK[0],2) +  pow(resUU[1]/resUU[0],2)) << "  " <<  sqrt( pow(resKK[2]/resKK[0],2) +  pow(resUU[2]/resUU[0],2)) << endl;
