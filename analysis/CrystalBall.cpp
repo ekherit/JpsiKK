@@ -164,311 +164,6 @@ double ModifiedDoubleCrystalBall(const double* X, const double* P)
 }
 
 
-
-#include "Math/ParamFunctor.h"
-#include "Math/Minimizer.h"
-#include "Math/Factory.h"
-#include "Math/Functor.h"
-#include "TRandom2.h"
-#include "TError.h"
-
-
-
-
-class CrystalBallFitter 
-{ 
-	const TH1F * his;
-	ROOT::Math::Functor functor;
-	ROOT::Math::Minimizer * min;
-	TF1 * fun;
-	mutable double xmin; //minimum fit range
-	mutable double xmax; //maximum fit range
-	mutable double Nbins; //number of bins
-	mutable double N0; //total number of events in his
-	bool debug;
-	public: 
-	CrystalBallFitter(const TH1F * h) 
-	{
-		debug =false;
-		his = h;
-		xmin = his->GetXaxis()->GetXmin();
-		xmax = his->GetXaxis()->GetXmax();
-		Nbins = his->GetNbinsX();
-		N0 = his->GetEntries();
-		min =0;
-		fun =0;
-	}
-
-	~CrystalBallFitter(void)
-	{
-		//delete min;
-		//delete fun;
-	}
-
-	void Minos(void)
-	{
-		for(unsigned i=0;i<min->NDim();i++)
-		{
-			double  errLow,  errUp;
-			min->GetMinosError(i, errLow, errUp);
-			cout << setw(5) << i << setw(10) << setw(10)<< min->VariableName(i) << setw(10) << min->X()[i] << setw(15) <<errLow << setw(15) << errUp << endl;
-		}
-	}
-
-	void Fit(void)
-	{
-		//if(min) delete min;
-		min = ROOT::Math::Factory::CreateMinimizer("Minuit", "");
-
-		// set tolerance , etc...
-		min->SetMaxFunctionCalls((unsigned)1e10); // for Minuit/Minuit2 
-		min->SetMaxIterations((unsigned)1e10);  // for GSL 
-		min->SetTolerance(1e-2);
-		min->SetStrategy(2);
-		min->SetPrintLevel(0);
-
-		functor = ROOT::Math::Functor(*this, 10); 
-		min->SetFunction(functor);
-		min->SetLimitedVariable(0, "Nsig", N0, N0/2., 0, N0);
-		min->SetVariable(1, "mean", -0.1,  1);
-		min->SetVariable(2, "sigma", 1.279,  1);
-		min->SetLowerLimitedVariable(3, "bl", 1.876, 1, 0);
-		//min->SetLowerLimitedVariable(4, "al-bl", 0, 1, 0);
-		min->SetFixedVariable(4, "al-bl", 0);
-		min->SetLowerLimitedVariable(5, "nl", 1, 1, 1);
-		min->SetLowerLimitedVariable(6, "br", 1.09, 1, 0);
-		min->SetLowerLimitedVariable(7, "ar-br",1.663,  1, 0);
-		min->SetLowerLimitedVariable(8, "nr", 0.1789, 1, 1);
-	 //min->SetLimitedVariable(3, "bl", 1.876, 10, 0, 100);
-	 //min->SetLimitedVariable(4, "al-bl", 0, 10, 0, 10);
-	 //min->SetLimitedVariable(5, "nl", 2, 10, 0, 100);
-	 //min->SetLimitedVariable(6, "br", 1.09, 10, 0, 100);
-	 //min->SetLimitedVariable(7, "ar-br",1.663,  10, 0, 10);
-	 //min->SetLimitedVariable(8, "nr", 2, 10, 0, 100);
-		min->SetVariable(9, "kbg", 0, 1);
-		// do the minimization
-		min->Minimize(); 
-		min->Minimize(); 
-		min->Minimize(); 
-		//min->Hesse();
-		min->PrintResults();
-		Minos();
-		//if(fun) delete fun;
-		fun = new TF1("cbf",*this,  xmin, xmax, min->NDim());
-		fun->SetLineColor(kRed);
-		fun->SetParameters(min->X());
-		debug = true;
-		fun->Draw("same");
-	}
-
-	//this is fcn function
-	double operator()(const double * par) const 
-	{ 
-		double chi2=0;
-		for(int i=0; i<his->GetNbinsX(); i++)
-		{
-			double x = his->GetBinCenter(i);
-			double n = his->GetBinContent(i);
-			double mu = ModifiedDoubleCrystalBall(&x, par);
-			//cout << x << " " << n << " " << mu <<  " " << par[0]<< " " << par[1] << " " << par[2] << " " << par[3] << endl;
-			double dchi2;
-			if(n!=0)
-			{
-				//if(mu!=0) 
-				//{
-				//	dchi2 = 2*(mu - n + n*log(n/mu));
-				//}
-				//if(mu==0)
-				//{
-				//	return 1e100;
-				//}
-				dchi2 = 2*(mu - n + n*log(n/mu));
-			}
-			else
-			{
-				dchi2 = 2*(mu-n);
-			}
-			//cout << i << " " << x << " n=" << n << " mu=" << mu << " f-n=" << mu-n << "  dchi2 = " << dchi2 << endl;
-			chi2+=dchi2;
-		}
-		//if(isnan(chi2) || isinf(chi2)) return std::numeric_limits<double>::max();
-		//if(std::isnan(chi2) || std::isinf(chi2)) chi2= 1e100;
-		//cout << chi2 << endl;
-		return chi2;
-	} 
-
-	//this is parameterized function
-	double operator()(const double * x ,  double * p) const 
-	{ 
-		return ModifiedDoubleCrystalBall(x, p);
-	} 
-
-	double ModifiedDoubleCrystalBall(const double* X, const double* P) const
-	{
-		double x    =  X[0];
-		double Nsig  = P[0];
-		double mean    = P[1];//mean of the gaus
-		double sigma = P[2]; //sigma of the gaus
-
-
-
-		//tails 0 - left tail,  1 - right tail
-		double beta[2] = {P[3],           P[6]};
-		double alfa[2] = {P[4] + beta[0], P[7] + beta[1]};
-		double n[2] =    {P[5],P[8]};
-
-		double pbg = P[9]; //background slope in sigma units
-
-		//background
-		double NBG = N0 - Nsig;
-
-
-		//some constants
-		double C[2]; //correspond exp tail
-		double A[2]; //correspond stepennoi tail
-		double B[2]; //correspon stepennoi tail handy coef
-		for(int i=0;i<2;i++)
-		{
-			C[i] = TMath::Exp(0.5*beta[i]*beta[i]);
-			A[i] = C[i]*pow(n[i]/beta[i], n[i]) * TMath::Exp(- beta[i]*alfa[i]);
-			B[i] = n[i]/beta[i] - alfa[i];
-		}
-
-		//scale and shift the x
-		x = (x-mean)/sigma;
-
-		double xrange[2] = {-(xmin-mean)/sigma, (xmax-mean)/sigma };
-
-		int t = x < 0 ? 0 : 1; //tail index
-		double y = TMath::Abs(x); //abs of x
-		double cb=0; //crystal ball function result gaus is 1
-
-		if(y >= 0  && y <= beta[t]) cb = TMath::Exp( - 0.5*y*y);
-		if(y > beta[t] && y <= alfa[t]) cb = C[t]*TMath::Exp(- beta[t] * y);
-		if(y > alfa[t]) cb = A[t]*pow(B[t] + y,  - n[t]);
-
-
-		double Igaus[2]; //gauss part of integral
-		double Iexp[2]; //exp part of integral
-		double Ipow[2]; //power part of integral
-		double I=0; //sum of previouse one
-
-		for(int i=0;i<2;i++)
-		{
-			//calculate partial integral
-			if( xrange[i] <= beta[i] ) //only gause in range
-			{
-				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(xrange[i]/sqrt(2.0));
-				Iexp[i] = 0;
-				Ipow[i] = 0;
-			}
-			if( beta[i] <  xrange[i] && xrange[i] <= alfa[i]) //gaus and part of exp tail in range
-			{
-				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
-				Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*xrange[i]) );
-				Ipow[i] =0;
-			}
-			if(alfa[i] < xrange[i]) //all part of function inside the range
-			{
-				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
-				Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*alfa[i]));
-				if(n[i]==1.0) Ipow[i] = A[i]*log((B[i] + xrange[i])/(B[i] + alfa[i]));
-				else Ipow[i] = A[i]/(n[i]-1.0)*(pow( B[i] + alfa[i], - n[i] + 1.)  - pow( B[i] + xrange[i], - n[i] + 1.));
-			}
-			//calculate total integral
-			I+=Igaus[i] + Iexp[i] +Ipow[i];
-		}
-		//calculate the scale
-		double dx = (xrange[0] + xrange[1])/Nbins;
-
-
-		//the amplitude of signal
-		double Ns = Nsig/I*dx;
-
-		//the amplitude of background
-		double Nbg =  NBG*dx/(xrange[0]+xrange[1])/(1.0 + 0.5*pbg*(xrange[1]-xrange[0]));
-
-		//result of my double crystal ball function
-		double result = Ns*cb + Nbg*(1.0 + pbg*x);
-
-		//test the result to suppress bad calculation
-		//if(TMath::IsNaN(result) || result <=0) return 0;
-		//if(!TMath::Finite(result)) return 1e100;
-		return result;
-	}
-};
-
-const  double * Fit(TH1F * his)
-{
-
-	// create minimizer giving a name and a name (optionally) for the specific
-   // algorithm
-   // possible choices are: 
-   //     minName                  algoName
-   // Minuit /Minuit2             Migrad, Simplex,Combined,Scan  (default is Migrad)
-   //  Minuit2                     Fumili2
-   //  Fumili
-   //  GSLMultiMin                ConjugateFR, ConjugatePR, BFGS, 
-   //                              BFGS2, SteepestDescent
-   //  GSLMultiFit
-   //   GSLSimAn
-   //   Genetic
-	 const char * minName = "Minuit2";
-	 const char * algoName = "";
-   ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer(minName, algoName);
-
-   // set tolerance , etc...
-   min->SetMaxFunctionCalls((unsigned)1e10); // for Minuit/Minuit2 
-   min->SetMaxIterations((unsigned)1e10);  // for GSL 
-   //min->SetTolerance(1e-6);
-	 min->SetStrategy(2);
-   min->SetPrintLevel(0);
-
-   // create funciton wrapper for minmizer
-   // a IMultiGenFunction type 
-	 CrystalBallFitter cb(his);
-   //ROOT::Math::Functor f(&RosenBrock2,14); 
-   ROOT::Math::Functor f(cb, 10); 
- 
-   min->SetFunction(f);
- 
-
-	 double N0 = his->GetEntries(); //total number of event in histogram
-	 //min->SetVariable(0, "Nsig", N0, N0/2);
-	 cout << "N0 = " << N0 << endl;
-	 min->SetLimitedVariable(0, "Nsig", N0, N0/2., 0, N0);
-	 min->SetVariable(1, "mean", -0.1,  1);
-	 min->SetVariable(2, "sigma", 1.279,  2);
-	 //min->SetLowerLimitedVariable(3, "bl", 1.876, 10, 0);
-	 //min->SetLowerLimitedVariable(4, "al-bl", 0, 10, 0);
-	 //min->SetLowerLimitedVariable(5, "nl", 1, 100, 1);
-	 //min->SetLowerLimitedVariable(6, "br", 1.09, 10, 0);
-	 //min->SetLowerLimitedVariable(7, "ar-br",1.663,  10, 0);
-	 //min->SetLowerLimitedVariable(8, "nr", 0.1789, 100, 1);
-	 min->SetLimitedVariable(3, "bl", 1.876, 10, 0, 10000);
-	 min->SetLimitedVariable(4, "al-bl", 0, 10, 0, 10000);
-	 min->SetLimitedVariable(5, "nl", 1, 100, 1, 10000);
-	 min->SetLimitedVariable(6, "br", 1.09, 10, 0, 10000);
-	 min->SetLimitedVariable(7, "ar-br",1.663,  10, 0, 10000);
-	 min->SetLimitedVariable(8, "nr", 0.1789, 100, 1, 10000);
-	 min->SetFixedVariable(9, "kbg", 0);
-	 //min->SetFixedVariable(9, "N0", N0);
-	 //min->SetFixedVariable(11, "xmin", his->GetXaxis()->GetXmin());
-	 //min->SetFixedVariable(12, "xmax", his->GetXaxis()->GetXmax());
-	 //min->SetFixedVariable(13, "Nbins", his->GetNbinsX());
- 
-   // do the minimization
-   min->Minimize(); 
-
-	 for(unsigned i=0;i<min->NDim();i++)
-	 {
-		 double errLow,  errUp;
-		 bool flag = min->GetMinosError(i, errLow, errUp);
-		 cout << flag << " " << min->X()[i] << " "<<errLow << " +"<< errUp << endl;
-	 }
-	 min->PrintResults();
-	 return min->X();
-}
 #include <Minuit2/MnUserParameters.h>
 #include <Minuit2/FCNBase.h>
 #include <Minuit2/MnMigrad.h>
@@ -554,7 +249,7 @@ namespace ibn
 	};
 };
 
-class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
+class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 { 
 	TH1F * his;
 	TF1 * fun;
@@ -578,7 +273,7 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 
 
 	public: 
-	CrystalBallFitter2(TH1F * h) 
+	CrystalBallFitter(TH1F * h) 
 	{
     opt_integrate = false;
 		debug =false;
@@ -595,7 +290,7 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
     inipar.Add("al-bl",  0,     0.1);
     inipar.Add("nl",     3.1,   0.5);
     inipar.Add("br",     1.2,   0.1);
-    inipar.Add("ar-br",  2.0,   0.1);
+    inipar.Add("ar-br",  0,   0.1);
     inipar.Add("nr",     2.4,   0.1);
     //inipar.Add("kbg",    -0.003746,    1.0/(xmax-xmin));
     inipar.Add("kbg",    0,    1.0/(xmax-xmin));
@@ -612,7 +307,7 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 		inipar.SetLimits("kbg", -2.0/(xmax-xmin), 2.0/(xmax-xmin));
 		inipar.Fix("kbg");
 		inipar.Fix("al-bl");
-		//inipar.Fix("ar-br");
+		inipar.Fix("ar-br");
 		//inipar.Fix("nr");
 		//inipar.Fix("nl");
 		//inipar.SetLimits("nl", 1, 10);
@@ -626,7 +321,7 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 	}
 
 
-	~CrystalBallFitter2(void)
+	~CrystalBallFitter(void)
 	{
 		//delete min;
 		//delete fun;
@@ -923,110 +618,6 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 		return result;
 	}
 
-	double ModifiedDoubleCrystalBall2(const double* X, const double* P) const
-	{
-		double x    =  X[0];
-		double Nsig  = P[0];
-		double mean    = P[1];//mean of the gaus
-		double sigma = P[2]; //sigma of the gaus
-
-
-
-		//tails 0 - left tail,  1 - right tail
-		double beta[2] = {P[3],           P[6]};
-		double alfa[2] = {P[4], P[7]};
-		double n[2] =    {P[5], P[8]};
-		
-		//transform
-		//scale and shift the x
-		x = (x-mean)/sigma;
-		for(unsigned i=0;i<2;i++)
-		{
-			beta[i] = fabs(beta[i]-mean)/sigma;
-			alfa[i] = fabs(alfa[i]-mean)/sigma;
-		}
-
-		double pbg = P[9]; //background slope in sigma units
-
-		//background
-		double NBG = N0 - Nsig;
-
-
-		//some constants
-		double C[2]; //correspond exp tail
-		double A[2]; //correspond stepennoi tail
-		double B[2]; //correspon stepennoi tail handy coef
-		for(int i=0;i<2;i++)
-		{
-			C[i] = TMath::Exp(0.5*beta[i]*beta[i]);
-			A[i] = C[i]*pow(n[i]/beta[i], n[i]) * TMath::Exp(- beta[i]*alfa[i]);
-			B[i] = n[i]/beta[i] - alfa[i];
-		}
-
-
-		double xrange[2] = {-(xmin-mean)/sigma, (xmax-mean)/sigma };
-
-		int t = x < 0 ? 0 : 1; //tail index
-		double y = TMath::Abs(x); //abs of x
-		double cb=0; //crystal ball function result gaus is 1
-
-		if(y >= 0  && y <= beta[t]) cb = TMath::Exp( - 0.5*y*y);
-		if(y > beta[t] && y <= alfa[t]) cb = C[t]*TMath::Exp(- beta[t] * y);
-		if(y > alfa[t]) cb = A[t]*pow(B[t] + y,  - n[t]);
-
-
-		double Igaus[2]; //gauss part of integral
-		double Iexp[2]; //exp part of integral
-		double Ipow[2]; //power part of integral
-		double I=0; //sum of previouse one
-
-		for(int i=0;i<2;i++)
-		{
-			//calculate partial integral
-			if( xrange[i] <= beta[i] ) //only gause in range
-			{
-				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(xrange[i]/sqrt(2.0));
-				Iexp[i] = 0;
-				Ipow[i] = 0;
-			}
-			if( beta[i] <  xrange[i] && xrange[i] <= alfa[i]) //gaus and part of exp tail in range
-			{
-				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
-				Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*xrange[i]) );
-				Ipow[i] =0;
-			}
-			if(alfa[i] < xrange[i]) //all part of function inside the range
-			{
-				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
-				Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*alfa[i]));
-				if(n[i]==1.0) Ipow[i] = A[i]*log((B[i] + xrange[i])/(B[i] + alfa[i]));
-				else Ipow[i] = A[i]/(n[i]-1.0)*(pow( B[i] + alfa[i], - n[i] + 1.)  - pow( B[i] + xrange[i], - n[i] + 1.));
-			}
-			//calculate total integral
-			I+=Igaus[i] + Iexp[i] +Ipow[i];
-		}
-		//calculate the scale
-		double dx = (xrange[0] + xrange[1])/Nbins;
-
-
-		//the amplitude of signal
-		double Ns = Nsig/I*dx;
-
-		//the amplitude of background
-		//double Nbg =  NBG*dx/(xrange[0]+xrange[1])/(1.0 + 0.5*pbg*(xrange[1]-xrange[0]));
-		double Nbg =  NBG/Nbins;
-		//cout << Nbg << " " << xrange[1] - xrange[0] << endl;
-
-		//result of my double crystal ball function
-		double result = Ns*cb + Nbg*(1.0 + pbg* (X[0] - 0.5*(xmax+xmin)));
-
-		//test the result to suppress bad calculation
-		//if(TMath::IsNaN(result) || result <=0) return 0;
-		//if(!TMath::Finite(result)) return 1e100;
-		//for(int i=0;i<10;i++) cout << setw(15) << P[i];
-		//cout << setw(15) << result << endl;
-		return result;
-	}
 
   std::vector<double> get_result(void) const 
   {
@@ -1041,9 +632,9 @@ class CrystalBallFitter2  : public ROOT::Minuit2::FCNBase
 
 
 
-std::vector<double> Fit2(TH1F * his)
+std::vector<double> Fit(TH1F * his)
 {
-	CrystalBallFitter2 cb(his);
+	CrystalBallFitter cb(his);
 	cb.Fit();
 	return cb.get_result();
 }
