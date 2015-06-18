@@ -1285,6 +1285,23 @@ void analize(const char * dir, const char * file="analize_result.root", Long64_t
 }
 
 
+void fit(TH1F * his)
+{
+  vector<double> res(3);
+  Fit(his);
+  cout << "Number of selected events" << res[0] << " " << -res[1] << " +" << res[2] << endl;
+}
+
+void fit(const char * rootfile, const char * hisname)
+{
+  TFile * f = new TFile(rootfile);
+  f->ls();
+  TH1F * h = (TH1F*)f->Get(hisname);
+  h->Draw("E");
+  fit(h);
+}
+
+
 void draw_by_topo(TTree *t, vector<double> pdgid)
 {
   for(auto v: pdgid) cout << v << endl;
