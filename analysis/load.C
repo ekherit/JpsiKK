@@ -1516,9 +1516,9 @@ void load(void)
 	gROOT->Reset();
   //std::cout << gSystem->GetMakeSharedLib() << endl;
   //gSystem->SetMakeSharedLib("-std=c++11");
-  gSystem->AddIncludePath("-I$HOME/work");
+  gSystem->AddIncludePath("-I$HOME/work -I./mctop");
 	gSystem->CompileMacro("CrystalBall.cpp","kO","","/tmp");
 	//gSystem->CompileMacro("mctopo.C","kO","","/tmp");
-  gSystem->Load("../../mctop/libMyEvent.so");
+  gSystem->Load("mctop/libMyEvent.so");
 	gSystem->CompileMacro("analize.C","kO","","/tmp");
 }
