@@ -259,6 +259,7 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 	mutable double N0; //total number of events in his
 	bool debug;
   bool opt_integrate;
+	int fit_status;
 
 	ROOT::Minuit2::MnUserParameters inipar;
 	ROOT::Minuit2::MnUserParameters minpar;
@@ -273,10 +274,12 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 
 
 	public: 
+	/*  
 	CrystalBallFitter(TH1F * h) 
 	{
-    opt_integrate = false;
+    opt_integrate = true;
 		debug =false;
+		fit_status=-1; //0 - OK,  -1 - BAD
 		his = h;
 		xmin = his->GetXaxis()->GetXmin();
 		xmax = his->GetXaxis()->GetXmax();
@@ -293,9 +296,11 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
     inipar.Add("ar-br",  0,   0.1);
     inipar.Add("nr",     2.4,   0.1);
     //inipar.Add("kbg",    -0.003746,    1.0/(xmax-xmin));
-    inipar.Add("kbg",    0,    1.0/(xmax-xmin));
+    //inipar.Add("kbg",    0,    1.0/(xmax-xmin));
+    inipar.Add("gl-al",    10,   100);
+    inipar.Add("gr-ar",    10,   100);
 
-		inipar.SetLimits("Nsig",  0, N0);
+		//inipar.SetLimits("Nsig",  0, N0);
 		inipar.SetLimits("mean", xmin, xmax);
 		inipar.SetLowerLimit("nl",    1);
 		inipar.SetLowerLimit("nr",    1);
@@ -303,11 +308,68 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 		inipar.SetLowerLimit("br",    0);
 		inipar.SetLowerLimit("al-bl", 0);
 		inipar.SetLowerLimit("ar-br", 0);
+		inipar.SetLowerLimit("gl-al", 0);
+		inipar.SetLowerLimit("gr-ar", 0);
 		inipar.SetLowerLimit("sigma", 0.1);
-		inipar.SetLimits("kbg", -2.0/(xmax-xmin), 2.0/(xmax-xmin));
-		inipar.Fix("kbg");
-		inipar.Fix("al-bl");
-		inipar.Fix("ar-br");
+		//inipar.SetLimits("kbg", -2.0/(xmax-xmin), 2.0/(xmax-xmin));
+		//inipar.Fix("kbg");
+		//inipar.Fix("al-bl");
+		//inipar.Fix("gl-al");
+		//inipar.Fix("ar-br");
+		//inipar.Fix("nr");
+		//inipar.Fix("nl");
+		//inipar.SetLimits("nl", 1, 10);
+		//inipar.SetLimits("nr", 1, 10);
+		//double sigma_min = 1;
+		//inipar.SetLimits("sigma", sigma_min,  xmax - xmin);
+		//inipar.SetLimits("bl", 0.01, 3);
+		//inipar.SetLimits("br", 0.01, 3);
+		//inipar.SetLimits("al-bl", 0, 3);
+		//inipar.SetLimits("ar-br", 0, 3);
+	}
+	*/
+
+	CrystalBallFitter(TH1F * h) 
+	{
+    opt_integrate = true;
+		debug =false;
+		fit_status=-1; //0 - OK,  -1 - BAD
+		his = h;
+		xmin = his->GetXaxis()->GetXmin();
+		xmax = his->GetXaxis()->GetXmax();
+		Nbins = his->GetNbinsX();
+		N0 = his->GetEntries();
+		fun =0;
+    inipar.Add("Nsig",  N0,   -N0*0.05); 
+    inipar.Add("mean",  -0.368,   1); 
+    inipar.Add("sigma",  1.258,   1); 
+    inipar.Add("bl",     1.75,   1); 
+    inipar.Add("al",     2,     0.1);
+    inipar.Add("nl",     3.1,   0.5);
+    inipar.Add("br",     1.2,   0.1);
+    inipar.Add("ar",       2,   0.1);
+    inipar.Add("nr",     2.4,   0.1);
+    //inipar.Add("kbg",    -0.003746,    1.0/(xmax-xmin));
+    //inipar.Add("kbg",    0,    1.0/(xmax-xmin));
+    inipar.Add("gl",    10,   100);
+    inipar.Add("gr",    10,   100);
+
+		//inipar.SetLimits("Nsig",  0, N0);
+		inipar.SetLimits("mean", xmin, xmax);
+		inipar.SetLowerLimit("nl",    1);
+		inipar.SetLowerLimit("nr",    1);
+		inipar.SetLimits("gr", 0,  xmax/1.5);
+		inipar.SetLimits("gl", 0,  xmax/1.5);
+		inipar.SetLimits("ar", 0,  xmax/1.5);
+		inipar.SetLimits("al", 0,  xmax/1.5);
+		inipar.SetLimits("br", 0,  xmax/1.5);
+		inipar.SetLimits("bl", 0,  xmax/1.5);
+		inipar.SetLowerLimit("sigma", 0.1);
+		//inipar.SetLimits("kbg", -2.0/(xmax-xmin), 2.0/(xmax-xmin));
+		//inipar.Fix("kbg");
+		//inipar.Fix("al-bl");
+		//inipar.Fix("gl-al");
+		//inipar.Fix("ar-br");
 		//inipar.Fix("nr");
 		//inipar.Fix("nl");
 		//inipar.SetLimits("nl", 1, 10);
@@ -356,11 +418,11 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 		{
 			cout << setw(5) << i << setw(10) << inipar.Name(i) << setw(15) << fit_result[i] << setw(15) << par_error[i].first << setw(15) << par_error[i].second << endl;
 		}
-		cout << "Total number of events: " <<  N0 << endl;
+		cout << "Total number of events: " <<  (Long64_t) N0 << endl;
 		double psig = fit_result[0]/N0;
-		cout << setw(25) << "Number of signal events: " <<  setw(15) << fit_result[0] << setw(15) << -sqrt(sq(par_error[0].first) + psig*psig*N0)   << setw(15) << sqrt(sq(par_error[0].second) + psig*psig*N0) << endl;
-		cout << setw(25) << "Number of signal events(2): " <<  setw(15) << fit_result[0] << setw(15) << -sqrt(N0*psig)  << setw(15) << sqrt(N0*psig) << endl;
-		cout << setw(25) << "Number of background events: " << setw(15) << N0 - fit_result[0] << setw(5) << "+-"   << setw(15) << sqrt(N0-fit_result[0]) << endl;
+		cout << setw(25) << "Number of signal events: "     <<  setw(15) << setprecision(10) << fit_result[0] << setw(15) << -sqrt(sq(par_error[0].first) + psig*psig*N0)   << setw(15) << sqrt(sq(par_error[0].second) + psig*psig*N0) << endl;
+		cout << setw(25) << "Number of signal events(2): "  <<  setw(15) << setprecision(10) << fit_result[0] << setw(15) << -sqrt(N0*psig)  << setw(15) << sqrt(N0*psig) << endl;
+		cout << setw(25) << "Number of background events: " <<  setw(15) << N0 - fit_result[0] << setw(5) << "+-"   << setw(15) << sqrt(N0-fit_result[0]) << endl;
 	}
 
 	void Draw(void)
@@ -369,6 +431,7 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 		fun->SetLineColor(kRed);
 		fun->SetParameters(&minpar.Params()[0]);
     fun->SetLineWidth(1);
+		fun->SetNpx(1000);
 		fun->Draw("same");
 	}
 
@@ -401,14 +464,14 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 		}
 	}
 
-	void Fit(void)
+	bool Fit(void)
 	{
 		//MnStrategy strategy(2);
 		//strategy.SetGradientNCycles(1000000);
 		//strategy.SetHessianGradientNCycles(1000000);
 		//Scan(inipar);
 		//new TCanvas;
-		his->Draw();
+		//his->Draw();
     MnMigrad migrad(*this, inipar, 2);
 		auto minimum = migrad(unsigned(1e9));
     //FunctionMinimum minimum = migrad(unsigned(1e9));
@@ -421,26 +484,13 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 			minpar = minimum.UserParameters();
 			Scan(minpar);
 			Draw();
-			return;
+			fit_status = -1;
+			return false;
 		}
+		fit_status=0;
 		Minos(minimum);
-		//MnMinos minos(*this, minimum);
-		//par_error.resize(inipar.Params().size());
-		//fit_result.resize(inipar.Params().size());
-		//for (unsigned i=0;i<par_error.size();i++)
-		//{
-		//	MinuitParameter p  = minpar.Parameter(i);
-		//	fit_result[i] = minpar.Parameter(i).Value();
-		//	if(!p.IsFixed())
-		//	{
-		//		par_error[i] = minos(i, (unsigned)1e9);
-		//		if(p.HasLowerLimit()  &&  p.Value() + par_error[i].first < p.LowerLimit()) par_error[i].first = p.LowerLimit() -p.Value();  
-		//		if(p.HasUpperLimit()  &&  p.Value() + par_error[i].second > p.UpperLimit()) par_error[i].second = p.UpperLimit() - p.Value();  
-		//	}
-		//}
 		Print(minimum);
 		Draw();
-		//Scan(minpar);
 	}
 
 	double operator()( const std::vector<double> & par) const 
@@ -521,6 +571,130 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 
 
 	double ModifiedDoubleCrystalBall(const double* X, const double* P) const
+	{
+		double x    =  X[0];
+		double Nsig  = P[0];
+		double mean    = P[1];//mean of the gaus
+		double sigma = P[2]; //sigma of the gaus
+
+
+
+		double left[3]  = {P[3],  P[4],  P[9]};
+		double right[3] = {P[6],  P[7],  P[10]};
+		sort(begin(left), end(left));
+		sort(begin(right), end(right));
+		double beta[2] = { left[0],  right[0]};
+		double alfa[2] = { left[1],  right[1]};
+		double gamma[2] = { left[2],  right[2]};
+
+		//tails 0 - left tail,  1 - right tail
+		//double beta[2] = {P[3],           P[6]};
+		//double alfa[2] = {P[4] + beta[0], P[7] + beta[1]};
+		double n[2] =    {P[5],P[8]};
+
+		double pbg = 0; //background slope in sigma units
+		//double gamma[2] = {alfa[0]+P[9], alfa[1] + P[10]}; //background slope in sigma units
+
+		//background
+		double NBG = N0 - Nsig;
+
+
+		double kappa[2];
+		//some constants
+		double C[2]; //correspond exp tail
+		double A[2]; //correspond stepennoi tail
+		double B[2]; //correspon stepennoi tail handy coef
+		double D[2]; //exp tail
+		for(int i=0;i<2;i++)
+		{
+			C[i] = TMath::Exp(0.5*beta[i]*beta[i]);
+			A[i] = C[i]*pow(n[i]/beta[i], n[i]) * TMath::Exp(- beta[i]*alfa[i]);
+			B[i] = n[i]/beta[i] - alfa[i];
+			kappa[i] = n[i]/(B[i]+gamma[i]);
+			D[i] = A[i]*exp(kappa[i]*gamma[i])/pow( B[i] + gamma[i],  n[i]);
+		}
+
+		//scale and shift the x
+		x = (x-mean)/sigma;
+
+		double xrange[2] = {-(xmin-mean)/sigma, (xmax-mean)/sigma };
+
+		int t = x < 0 ? 0 : 1; //tail index
+		double y = TMath::Abs(x); //abs of x
+		double cb=0; //crystal ball function result gaus is 1
+
+		if(y >= 0  && y <= beta[t]) cb = TMath::Exp( - 0.5*y*y);
+		if(y > beta[t] && y <= alfa[t]) cb = C[t]*TMath::Exp(- beta[t] * y);
+		if(y > alfa[t] && y <= gamma[t]) cb = A[t]*pow(B[t] + y,  - n[t]);
+		if(y > gamma[t]) cb = D[t]*TMath::Exp(-kappa[t]*y);
+
+
+		double Igaus[2]; //gauss part of integral
+		double Iexp[2]; //exp part of integral
+		double Ipow[2]; //power part of integral
+		double Iexp2[2]; //exp tail part of integral
+		double I=0; //sum of previouse one
+
+		for(int i=0;i<2;i++)
+		{
+			//calculate partial integral
+			if( xrange[i] <= beta[i] ) //only gause in range
+			{
+				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(xrange[i]/sqrt(2.0));
+				Iexp[i] = 0;
+				Ipow[i] = 0;
+				Iexp2[i] = 0;
+			}
+			if( beta[i] <  xrange[i] && xrange[i] <= alfa[i]) //gaus and part of exp tail in range
+			{
+				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
+				Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*xrange[i]) );
+				Ipow[i] =0;
+				Iexp2[i] =0;
+			}
+			if(alfa[i] < xrange[i] && xrange[i] <= gamma[i]) //all part of function inside the range
+			{
+				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
+				Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*alfa[i]));
+				if(n[i]==1.0) Ipow[i] = A[i]*log((B[i] + xrange[i])/(B[i] + alfa[i]));
+				else Ipow[i] = A[i]/(n[i]-1.0)*(pow( B[i] + alfa[i], - n[i] + 1.)  - pow( B[i] + xrange[i], - n[i] + 1.));
+				Iexp2[i]=0;
+			}
+			if(gamma[i] < xrange[i]) //all part of function inside the range
+			{
+				Igaus[i] = sqrt(TMath::Pi()*0.5)*TMath::Erf(beta[i]/sqrt(2.0));
+				Iexp[i] =  C[i]/beta[i]*( TMath::Exp(-beta[i]*beta[i]) -  TMath::Exp(-beta[i]*alfa[i]));
+				if(n[i]==1.0) Ipow[i] = A[i]*log((B[i] + gamma[i])/(B[i] + alfa[i]));
+				else Ipow[i] = A[i]/(n[i]-1.0)*(pow( B[i] + alfa[i], - n[i] + 1.)  - pow( B[i] + gamma[i], - n[i] + 1.));
+				Iexp2[i]=D[i]/kappa[i]*(TMath::Exp(-kappa[i]*gamma[i]) - TMath::Exp(-kappa[i]*xrange[i]));
+			}
+			//calculate total integral
+			I+=Igaus[i] + Iexp[i] +Ipow[i]+Iexp2[i];
+		}
+		//calculate the scale
+		double dx = (xrange[0] + xrange[1])/Nbins;
+
+
+		//the amplitude of signal
+		double Ns = Nsig/I*dx;
+
+		//the amplitude of background
+		//double Nbg =  NBG*dx/(xrange[0]+xrange[1])/(1.0 + 0.5*pbg*(xrange[1]-xrange[0]));
+		double Nbg =  NBG/Nbins;
+		//cout << Nbg << " " << xrange[1] - xrange[0] << endl;
+
+		//result of my double crystal ball function
+		double result = Ns*cb + Nbg*(1.0 + pbg* (X[0] - 0.5*(xmax+xmin)));
+
+		//test the result to suppress bad calculation
+		//if(TMath::IsNaN(result) || result <=0) return 0;
+		//if(!TMath::Finite(result)) return 1e100;
+		//for(int i=0;i<10;i++) cout << setw(15) << P[i];
+		//cout << setw(15) << result << endl;
+		return result;
+	}
+
+	double ModifiedDoubleCrystalBallOld(const double* X, const double* P) const
 	{
 		double x    =  X[0];
 		double Nsig  = P[0];
@@ -621,19 +795,23 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 
   std::vector<double> get_result(void) const 
   {
-    std::vector<double> buf(3);
-    buf[0] = fit_result[0];
-    double psig =  fit_result[0]/N0;
-    buf[1] = sqrt(sq(par_error[0].first) + psig*psig*N0);
-    buf[2] = sqrt(sq(par_error[0].second) + psig*psig*N0);
+		std::vector<double> buf(3);
+		if(fit_status==0)
+		{
+			buf[0] = fit_result[0];
+			double psig =  fit_result[0]/N0;
+			buf[1] = sqrt(sq(par_error[0].first) + psig*psig*N0);
+			buf[2] = sqrt(sq(par_error[0].second) + psig*psig*N0);
+		}
     return buf;
   }
 };
 
 
 
-std::vector<double> Fit(TH1F * his)
+std::vector<double> Fit(TH1F * his, const char * gopt)
 {
+	his->Draw(gopt);
 	CrystalBallFitter cb(his);
 	cb.Fit();
 	return cb.get_result();
