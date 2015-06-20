@@ -331,7 +331,7 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 
 	CrystalBallFitter(TH1F * h) 
 	{
-    opt_integrate = true;
+    opt_integrate = false;
 		debug =false;
 		fit_status=-1; //0 - OK,  -1 - BAD
 		his = h;
@@ -358,12 +358,12 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 		inipar.SetLimits("mean", xmin, xmax);
 		inipar.SetLowerLimit("nl",    1);
 		inipar.SetLowerLimit("nr",    1);
-		inipar.SetLimits("gr", 0,  xmax/1.5);
-		inipar.SetLimits("gl", 0,  xmax/1.5);
-		inipar.SetLimits("ar", 0,  xmax/1.5);
-		inipar.SetLimits("al", 0,  xmax/1.5);
-		inipar.SetLimits("br", 0,  xmax/1.5);
-		inipar.SetLimits("bl", 0,  xmax/1.5);
+		inipar.SetLimits("gr", 0,  xmax);
+		inipar.SetLimits("gl", 0,  xmax);
+		inipar.SetLimits("ar", 0,  xmax);
+		inipar.SetLimits("al", 0,  xmax);
+		inipar.SetLimits("br", 0,  xmax);
+		inipar.SetLimits("bl", 0,  xmax);
 		inipar.SetLowerLimit("sigma", 0.1);
 		//inipar.SetLimits("kbg", -2.0/(xmax-xmin), 2.0/(xmax-xmin));
 		//inipar.Fix("kbg");
@@ -579,8 +579,8 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 
 
 
-		double left[3]  = {P[3],  P[4],  P[9]};
-		double right[3] = {P[6],  P[7],  P[10]};
+		double left[3]  = {P[3]/sigma,  P[4]/sigma,  P[9]/sigma};
+		double right[3] = {P[6]/sigma,  P[7]/sigma,  P[10]/sigma};
 		sort(begin(left), end(left));
 		sort(begin(right), end(right));
 		double beta[2] = { left[0],  right[0]};
