@@ -344,15 +344,15 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
     inipar.Add("mean",  -0.368,   1); 
     inipar.Add("sigma",  1.258,   1); 
     inipar.Add("bl",     1.75,   1); 
-    inipar.Add("al",     2,     0.1);
-    inipar.Add("nl",     3.1,   0.5);
+    inipar.Add("al",     2,      1);
+    inipar.Add("nl",     3.1,   0.5); 
     inipar.Add("br",     1.2,   0.1);
     inipar.Add("ar",       2,   0.1);
     inipar.Add("nr",     2.4,   0.1);
     //inipar.Add("kbg",    -0.003746,    1.0/(xmax-xmin));
     //inipar.Add("kbg",    0,    1.0/(xmax-xmin));
-    inipar.Add("gl",    10,   100);
-    inipar.Add("gr",    10,   100);
+    inipar.Add("gl",    40,   10);
+    inipar.Add("gr",    40,   10);
 
 		//inipar.SetLimits("Nsig",  0, N0);
 		inipar.SetLimits("mean", xmin, xmax);
@@ -368,8 +368,9 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 		//inipar.SetLimits("kbg", -2.0/(xmax-xmin), 2.0/(xmax-xmin));
 		//inipar.Fix("kbg");
 		//inipar.Fix("al-bl");
-		//inipar.Fix("gl-al");
-		//inipar.Fix("ar-br");
+		inipar.Fix("gl");
+		//inipar.Fix("gr");
+		//inipar.Fix("gl");
 		//inipar.Fix("nr");
 		//inipar.Fix("nl");
 		//inipar.SetLimits("nl", 1, 10);
@@ -380,6 +381,20 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 		//inipar.SetLimits("br", 0.01, 3);
 		//inipar.SetLimits("al-bl", 0, 3);
 		//inipar.SetLimits("ar-br", 0, 3);
+	}
+
+	CrystalBallFitter(TH1F * h, ROOT::Minuit2::MnUserParameters par) 
+	{
+    opt_integrate = false;
+		debug =false;
+		fit_status=-1; //0 - OK,  -1 - BAD
+		his = h;
+		xmin = his->GetXaxis()->GetXmin();
+		xmax = his->GetXaxis()->GetXmax();
+		Nbins = his->GetNbinsX();
+		N0 = his->GetEntries();
+		fun =0;
+    inipar = par;
 	}
 
 
@@ -482,7 +497,7 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 			cout << "Minimum invalid " << endl;
 			cout << minimum << endl;
 			minpar = minimum.UserParameters();
-			Scan(minpar);
+			//Scan(minpar);
 			Draw();
 			fit_status = -1;
 			return false;
@@ -491,6 +506,7 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 		Minos(minimum);
 		Print(minimum);
 		Draw();
+    return true;
 	}
 
 	double operator()( const std::vector<double> & par) const 

@@ -334,7 +334,7 @@ double DoubleExpCrystalBall(double* X, double* P)//left and right
 	{
 		result =  N*A_r*pow(B_r + x,  - n_r);
 	}
-	if(TMath::IsNaN(result) || !TMath::Finite(result)) return 1e500;
+	if(TMath::IsNaN(result) || !TMath::Finite(result)) return 1e300;
 	return result+bg0*(1.0 + bg1*(X[0]-mu));
 }
 
@@ -448,7 +448,7 @@ double DoubleExpCrystalBallNorm(double* X, double* P)//left and right
 		result =  N*A_r*pow(B_r + x,  - n_r);
 	}
 	result+=bg0*(1.0 + bg1*(X[0]-mu));
-	if(TMath::IsNaN(result) || !TMath::Finite(result)) return 1e500;
+	if(TMath::IsNaN(result) || !TMath::Finite(result)) return 1e300;
 	return result;
 }
 
@@ -540,9 +540,9 @@ double fitfun_fitMrecKK(double *X,  double *p)
 	MeanG2=MeanG+p[7];
 	double x = *X;
 	double gaus = AG*TMath::Gaus(x, MeanG, SigmaG);
-	double koshi = AG*AK/(1.0 + ((x-MeanK)/SigmaK)**2.0);
+	double koshi = AG*AK/(1.0 + pow((x-MeanK)/SigmaK,2));
 	double gaus2 = AG*AG2*TMath::Gaus(x, MeanG2, SigmaG2);
-	//return gaus + gaus2 + koshi;
+	return gaus + gaus2 + koshi;
 	//return gaus*(1.0 + gaus2);
 	//return gaus*(1.0 + koshi);
 }
@@ -566,6 +566,7 @@ void fitMrecKK(void)
 	TChain * c = load_tree("mcjpkk2009");
 	TCut cut = "KK && Mrec > 3.09 && Mrec < 3.104 && kin_chi2<40 && pid_chi2<20";
 	c->Draw("Mrec>>hfitMrecKK(2000)",cut,"");
+  TH1F * hfitMrecKK  = (TH1F*)gDirectory->Get("hfitMrecKK");
 	TF1 *fitfun_fitMrecKK = new TF1("fitfun_fitMrecKK", &fitfun_fitMrecKK, 3.09,  3.104, 9);
 	fitfun_fitMrecKK->SetParameter(0, 1569);
 	fitfun_fitMrecKK->SetParameter(1, 3.09661);
@@ -598,6 +599,7 @@ void fitMrecKK2(void)
 	TChain * c = load_tree("mcjpkk2009");
 	TCut cut = "KK && Mrec > 3.09 && Mrec < 3.104 && kin_chi2<40 && pid_chi2<20";
 	c->Draw("Mrec>>hfitMrecKK(2000)",cut,"");
+  TH1F * hfitMrecKK  = (TH1F*)gDirectory->Get("hfitMrecKK");
 	TF1 *fun = new TF1("fitfun_fitMrecKK2", &tailgaus_fitMrecKK, 3.09,  3.104, 4);
 	fun->SetParameter(0, 1569);
 	fun->SetParameter(1, 3.09661);
@@ -619,6 +621,7 @@ void fitCB(void)
 	TChain * c = load_tree("mcjpkk2009");
 	TCut cut = "KK && Mrec > 3.09 && Mrec < 3.104 && kin_chi2<40 && pid_chi2<20";
 	c->Draw("Mrec>>hfitMrecKK(2000)",cut,"");
+  TH1F * hfitMrecKK  = (TH1F*)gDirectory->Get("hfitMrecKK");
 	TF1 *fun = new TF1("crystal_ball_fun", &CrystalBall, 3.09,  3.104, 5);
 	fun->SetParameter(0, 1);
 	fun->SetParameter(1, 1);
@@ -636,6 +639,7 @@ void fitCB2(void)
 	//TCut cut = "KK && Mrec > 3.09 && Mrec < 3.104 && kin_chi2<40 && pid_chi2<20";
 	TCut cut = "KK && Mrec > 3.08 && Mrec < 3.114 && kin_chi2<40 && pid_chi2<20";
 	c->Draw("Mrec>>hfitMrecKK(2000)",cut,"");
+  TH1F * hfitMrecKK  = (TH1F*)gDirectory->Get("hfitMrecKK");
 	//TF1 *fun = new TF1("double_crystal_ball_fun", &DoulbeCrystalBall, 3.09,  3.104, 8);
 	TF1 *fun = new TF1("double_crystal_ball_fun", &DoulbeCrystalBall, 3.08,  3.114, 8);
 	//gaus
@@ -666,6 +670,7 @@ void fitCB3(const char * dir="mcjpkk2009", int Nbins=1000)
 	char  selection_buf[1024];
 	sprintf(selection_buf, "Mrec>>hfitMrecKK3(%d)", Nbins);
 	c->Draw(selection_buf,cut,"");
+  TH1F * hfitMrecKK3  = (TH1F*)gDirectory->Get("hfitMrecKK");
 	//TF1 *fun = new TF1("triple_crystal_ball_fun", &DoulbeCrystalBall, 3.09,  3.104, 8);
 	TF1 *fun = new TF1("triple_crystal_ball_fun", &TripleCrystalBall, 3.08,  3.114, 10);
 	//gaus
@@ -719,7 +724,7 @@ void fitECB2(const char * dir="mcjpkk2009", int Nbins=1000,  double xmin=3.09,  
 	char  selection_buf[1024];
 	sprintf(selection_buf, "Mrec-%f>>%s(%d)", shift, his_name,  Nbins);
 	c->Draw(selection_buf,cut,"");
-	TH1F * his = c->GetHistogram();
+	TH1 * his = c->GetHistogram();
 	TF1 *fun = new TF1(fun_name, &ExpCrystalBall, xmin-shift,  xmax-shift, 9);
 	//gaus
 	fun->SetParName(0, "N");
