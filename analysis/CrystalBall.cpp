@@ -32,6 +32,7 @@
 
 #include <ibn/integral.h>
 
+#include <boost/format.hpp>
 
 #include <cmath>
 using namespace std;
@@ -251,7 +252,7 @@ namespace ibn
 
 class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 { 
-	TH1F * his;
+	TH1 * his;
 	TF1 * fun;
 	mutable double xmin; //minimum fit range
 	mutable double xmax; //maximum fit range
@@ -329,7 +330,7 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 	}
 	*/
 
-	CrystalBallFitter(TH1F * h) 
+	CrystalBallFitter(TH1 * h) 
 	{
     opt_integrate = false;
 		debug =false;
@@ -354,7 +355,7 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
     inipar.Add("gl",    40,   10);
     inipar.Add("gr",    40,   10);
 
-		//inipar.SetLimits("Nsig",  0, N0);
+		inipar.SetLimits("Nsig",  0, N0);
 		inipar.SetLimits("mean", xmin, xmax);
 		inipar.SetLowerLimit("nl",    1);
 		inipar.SetLowerLimit("nr",    1);
@@ -368,7 +369,7 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 		//inipar.SetLimits("kbg", -2.0/(xmax-xmin), 2.0/(xmax-xmin));
 		//inipar.Fix("kbg");
 		//inipar.Fix("al-bl");
-		inipar.Fix("gl");
+		//inipar.Fix("gl");
 		//inipar.Fix("gr");
 		//inipar.Fix("gl");
 		//inipar.Fix("nr");
@@ -435,9 +436,11 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 		}
 		cout << "Total number of events: " <<  (Long64_t) N0 << endl;
 		double psig = fit_result[0]/N0;
-		cout << setw(25) << "Number of signal events: "     <<  setw(15) << setprecision(10) << fit_result[0] << setw(15) << -sqrt(sq(par_error[0].first) + psig*psig*N0)   << setw(15) << sqrt(sq(par_error[0].second) + psig*psig*N0) << endl;
-		cout << setw(25) << "Number of signal events(2): "  <<  setw(15) << setprecision(10) << fit_result[0] << setw(15) << -sqrt(N0*psig)  << setw(15) << sqrt(N0*psig) << endl;
-		cout << setw(25) << "Number of background events: " <<  setw(15) << N0 - fit_result[0] << setw(5) << "+-"   << setw(15) << sqrt(N0-fit_result[0]) << endl;
+		boost::format  fmt("%-30s %10.1f    %-+10.1f %-+10.1f");
+		boost::format fmt2("%-30s %10.1f +/- %-10.1f ( +/- %.2f%%)");
+		cout << fmt % "Number of signal events:"       %  fit_result[0]       % -sqrt(sq(par_error[0].first) + psig*psig*N0) %  sqrt(sq(par_error[0].second) + psig*psig*N0) << endl;
+		cout << fmt2 % "Number of signal events(2):"   %  fit_result[0]       % sqrt(N0*psig)         %  (100*sqrt(N0*psig)/fit_result[0]) << endl;
+		cout << fmt2 % "Number of background events:"  %  (N0-fit_result[0])  % sqrt(N0-fit_result[0])%  (100*sqrt(N0-fit_result[0])/(N0-fit_result[0])) << endl;
 	}
 
 	void Draw(void)
@@ -825,7 +828,7 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 
 
 
-std::vector<double> Fit(TH1F * his, const char * gopt)
+std::vector<double> Fit(TH1 * his, const char * gopt)
 {
 	his->Draw(gopt);
 	CrystalBallFitter cb(his);

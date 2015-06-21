@@ -45,6 +45,6 @@
 extern double ModifiedDoubleCrystalBall(const double* X, const double* P);
 
 class CrystalBallFitter;
-extern std::vector<double> Fit(TH1F * his,  const char * gopt="E");
+extern std::vector<double> Fit(TH1 * his,  const char * gopt="E");
 
 #endif
