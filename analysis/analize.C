@@ -34,77 +34,6 @@
 
 #include "CrystalBall.h"
 #include <mctopo/libMcTopo.h>
-//#define mctopo_cxx
-#ifdef analize_cxx
-void analize::Init(TTree *tree)
-{
-   // The Init() function is called when the selector needs to initialize
-   // a new tree or chain. Typically here the branch addresses and branch
-   // pointers of the tree will be set.
-   // It is normally not necessary to make changes to the generated
-   // code, but the routine can be extended by the user if needed.
-   // Init() will be called many times when running on PROOF
-   // (once per file to be processed).
-
-   // Set branch addresses and branch pointers
-   if (!tree) return;
-   fChain = tree;
-   fChain->SetMakeClass(1);
-
-   fChain->SetBranchAddress("run", &run, &b_run);
-   fChain->SetBranchAddress("event", &event, &b_event);
-   fChain->SetBranchAddress("time", &time, &b_time);
-   fChain->SetBranchAddress("ngtrack", &ngtrack, &b_ngtrack);
-   fChain->SetBranchAddress("ngntrack", &ngntrack, &b_ngntrack);
-   fChain->SetBranchAddress("nptrack", &nptrack, &b_nptrack);
-   fChain->SetBranchAddress("nntrack", &nntrack, &b_nntrack);
-   fChain->SetBranchAddress("nppions", &nppions, &b_nppions);
-   fChain->SetBranchAddress("nnpions", &nnpions, &b_nnpions);
-   fChain->SetBranchAddress("npion_pairs", &npion_pairs, &b_npion_pairs);
-   fChain->SetBranchAddress("channel", &channel, &b_channel);
-   fChain->SetBranchAddress("KK", &KK, &b_KK);
-   fChain->SetBranchAddress("uu", &uu, &b_uu);
-   fChain->SetBranchAddress("Mrec", &Mrec, &b_Mrec);
-   fChain->SetBranchAddress("Minv", &Minv, &b_Minv);
-   fChain->SetBranchAddress("M012", &M012, &b_M012);
-   fChain->SetBranchAddress("M013", &M013, &b_M013);
-   fChain->SetBranchAddress("M03", &M03, &b_M03);
-   fChain->SetBranchAddress("M12", &M12, &b_M12);
-   fChain->SetBranchAddress("M01", &M01, &b_M01);
-   fChain->SetBranchAddress("kin_chi2", &kin_chi2, &b_kin_chi2);
-   fChain->SetBranchAddress("pid_chi2", &pid_chi2, &b_pid_chi2);
-   fChain->SetBranchAddress("ntrack", &ntrack, &b_ntrack);
-   fChain->SetBranchAddress("q", q, &b_q);
-   fChain->SetBranchAddress("E", E, &b_E);
-   fChain->SetBranchAddress("p", p, &b_p);
-   fChain->SetBranchAddress("px", px, &b_px);
-   fChain->SetBranchAddress("py", py, &b_py);
-   fChain->SetBranchAddress("pz", pz, &b_pz);
-   fChain->SetBranchAddress("pt", pt, &b_pt);
-   fChain->SetBranchAddress("theta", theta, &b_theta);
-   fChain->SetBranchAddress("phi", phi, &b_phi);
-   fChain->SetBranchAddress("x", x, &b_x);
-   fChain->SetBranchAddress("y", y, &b_y);
-   fChain->SetBranchAddress("z", z, &b_z);
-   fChain->SetBranchAddress("r", r, &b_r);
-   fChain->SetBranchAddress("vxy", vxy, &b_vxy);
-   fChain->SetBranchAddress("vz", vz, &b_vz);
-   fChain->SetBranchAddress("vphi", vphi, &b_vphi);
-   mctp.Init(fChain->GetFriend("mctopo"));//->GetFriend("mctop");
-}
-
-Bool_t analize::Notify()
-{
-   // The Notify() function is called when a new file is opened. This
-   // can be either for a new TTree in a TChain or when when a new TTree
-   // is started when using PROOF. It is normally not necessary to make changes
-   // to the generated code, but the routine can be extended by the
-   // user if needed. The return value is currently not used.
-
-   return kTRUE;
-}
-
-#endif // #ifdef analize_cxx
 
 //mctopo mct;
 void analize::Begin(TTree * )
@@ -179,7 +108,7 @@ Bool_t analize::Process(Long64_t entry)
      mctopo_treeUU->SetTitle("mcTopo UU events");
    }
    N0++; //count total number of events proceed
-   nptrack =  test_hash2(&mctp);
+   mctp.hash =  topology_hash(&mctp);
    if(MIN_RECOIL_MASS <= Mrec && Mrec <= MAX_RECOIL_MASS)
      if(pid_chi2 <= PID_CHI2)
        if(kin_chi2 <= KIN_CHI2)
@@ -193,15 +122,15 @@ Bool_t analize::Process(Long64_t entry)
              event_treeKK->Fill();
              mctopo_treeKK->Fill();
          }
-         if(uu==1 && KK==0) 
-         {
-           hMrecUU->Fill(mshift(Mrec));
-           hpid_chi2UU->Fill(pid_chi2);
-           hkin_chi2UU->Fill(kin_chi2);
-           event_treeUU->Fill();
-           mctopo_treeUU->Fill();
-           Nuu++;
-         }
+				 if(uu==1 && KK==0) 
+				 {
+					 hMrecUU->Fill(mshift(Mrec));
+					 hpid_chi2UU->Fill(pid_chi2);
+					 hkin_chi2UU->Fill(kin_chi2);
+					 event_treeUU->Fill();
+					 mctopo_treeUU->Fill();
+					 Nuu++;
+				 }
        }
    int p = log(N0)/log(10)-1;
    if(p<1) p=1;
@@ -209,10 +138,8 @@ Bool_t analize::Process(Long64_t entry)
    if(N0 % P == 0) 
    {
      std::cout << setw(15) << N0 << setw(15) << NKK << setw(15) << Nuu;
-     std::cout << "  hash = " << setw(10) << std::hex << test_hash2(&mctp) << "    " << std::dec << info(&mctp) << std::endl;
+     std::cout << "  hash = " << setw(10) << std::hex << topology_hash(&mctp) << "    " << std::dec << topology_info(&mctp) << std::endl;
    }
-
-   //if(N0 % 10 == 0) std::cout << setw(15) << N0 << setw(15) << NKK << setw(15) << Nuu;
    return kTRUE;
 }
 
@@ -275,7 +202,6 @@ void analize::Terminate()
   hkin_chi2KK->Draw();
   cchi2->cd(4);
   hkin_chi2UU->Draw();
-  file = new TFile(output_file_name.c_str(),"RECREATE");
   file->WriteObject(c,"cMrec");
   file->WriteObject(cchi2,"cchi2");
   file->WriteObject(hMrecKK,"hMrecKK");

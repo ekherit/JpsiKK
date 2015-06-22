@@ -19,14 +19,14 @@
 
 //#include "mctopo.h"
 
-#include <mctopo/McTopo.h>
+#include <mctopo/McTopoBase.h>
 
 #include "SelectionResult.h"
 class analize : public TSelector , public SelectionResult {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
-   //mctopo   mctp;
-   McTopo  mctp;
+   McTopoBase     mctp;
+	 TFile * file;
 
    // Declaration of leaf types
    Int_t           run;
@@ -128,6 +128,80 @@ public :
 
    ClassDef(analize,0);
 };
+
+//#define mctopo_cxx
+#ifdef analize_cxx
+void analize::Init(TTree *tree)
+{
+   // The Init() function is called when the selector needs to initialize
+   // a new tree or chain. Typically here the branch addresses and branch
+   // pointers of the tree will be set.
+   // It is normally not necessary to make changes to the generated
+   // code, but the routine can be extended by the user if needed.
+   // Init() will be called many times when running on PROOF
+   // (once per file to be processed).
+
+   // Set branch addresses and branch pointers
+   if (!tree) return;
+   fChain = tree;
+   fChain->SetMakeClass(1);
+	 file = new TFile(output_file_name.c_str(),"RECREATE");
+
+   fChain->SetBranchAddress("run", &run, &b_run);
+   fChain->SetBranchAddress("event", &event, &b_event);
+   fChain->SetBranchAddress("time", &time, &b_time);
+   fChain->SetBranchAddress("ngtrack", &ngtrack, &b_ngtrack);
+   fChain->SetBranchAddress("ngntrack", &ngntrack, &b_ngntrack);
+   fChain->SetBranchAddress("nptrack", &nptrack, &b_nptrack);
+   fChain->SetBranchAddress("nntrack", &nntrack, &b_nntrack);
+   fChain->SetBranchAddress("nppions", &nppions, &b_nppions);
+   fChain->SetBranchAddress("nnpions", &nnpions, &b_nnpions);
+   fChain->SetBranchAddress("npion_pairs", &npion_pairs, &b_npion_pairs);
+   fChain->SetBranchAddress("channel", &channel, &b_channel);
+   fChain->SetBranchAddress("KK", &KK, &b_KK);
+   fChain->SetBranchAddress("uu", &uu, &b_uu);
+   fChain->SetBranchAddress("Mrec", &Mrec, &b_Mrec);
+   fChain->SetBranchAddress("Minv", &Minv, &b_Minv);
+   fChain->SetBranchAddress("M012", &M012, &b_M012);
+   fChain->SetBranchAddress("M013", &M013, &b_M013);
+   fChain->SetBranchAddress("M03", &M03, &b_M03);
+   fChain->SetBranchAddress("M12", &M12, &b_M12);
+   fChain->SetBranchAddress("M01", &M01, &b_M01);
+   fChain->SetBranchAddress("kin_chi2", &kin_chi2, &b_kin_chi2);
+   fChain->SetBranchAddress("pid_chi2", &pid_chi2, &b_pid_chi2);
+   fChain->SetBranchAddress("ntrack", &ntrack, &b_ntrack);
+   fChain->SetBranchAddress("q", q, &b_q);
+   fChain->SetBranchAddress("E", E, &b_E);
+   fChain->SetBranchAddress("p", p, &b_p);
+   fChain->SetBranchAddress("px", px, &b_px);
+   fChain->SetBranchAddress("py", py, &b_py);
+   fChain->SetBranchAddress("pz", pz, &b_pz);
+   fChain->SetBranchAddress("pt", pt, &b_pt);
+   fChain->SetBranchAddress("theta", theta, &b_theta);
+   fChain->SetBranchAddress("phi", phi, &b_phi);
+   fChain->SetBranchAddress("x", x, &b_x);
+   fChain->SetBranchAddress("y", y, &b_y);
+   fChain->SetBranchAddress("z", z, &b_z);
+   fChain->SetBranchAddress("r", r, &b_r);
+   fChain->SetBranchAddress("vxy", vxy, &b_vxy);
+   fChain->SetBranchAddress("vz", vz, &b_vz);
+   fChain->SetBranchAddress("vphi", vphi, &b_vphi);
+   mctp.Init(fChain->GetFriend("mctopo"));//->GetFriend("mctop");
+	 mctp.fChain->SetBranchStatus("hash", 0);
+}
+
+Bool_t analize::Notify()
+{
+   // The Notify() function is called when a new file is opened. This
+   // can be either for a new TTree in a TChain or when when a new TTree
+   // is started when using PROOF. It is normally not necessary to make changes
+   // to the generated code, but the routine can be extended by the
+   // user if needed. The return value is currently not used.
+
+   return kTRUE;
+}
+
+#endif // #ifdef analize_cxx
 
 #endif
 

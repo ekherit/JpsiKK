@@ -83,6 +83,7 @@ void Analize(const char * dir, const char * file="analize_result.root", Long64_t
   //an.output_file_name = file;
   if(N==0) event->Process(&an,file);
   else event->Process(&an,file,N);
+	cout << "After process" << endl;
 }
 
 

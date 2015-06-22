@@ -43,7 +43,7 @@ struct SelectionResult
 
   ~SelectionResult(void)
   {
-    delete file;
+    //delete file;
   }
 
   void Init(void)
