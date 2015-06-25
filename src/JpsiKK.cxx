@@ -114,8 +114,8 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
 {
   declareProperty("CENTER_MASS_ENERGY", CENTER_MASS_ENERGY = 0); //GeV
-  declareProperty("MAX_CHARGED_TRACKS", MAX_CHARGED_TRACKS=4); //maximum number of charged tracks in selection
   declareProperty("MIN_CHARGED_TRACKS", MIN_CHARGED_TRACKS=4); //minimum number of charged tracks in selection
+  declareProperty("MAX_CHARGED_TRACKS", MAX_CHARGED_TRACKS=4); //maximum number of charged tracks in selection
   declareProperty("MAX_NEUTRAL_TRACKS", MAX_NEUTRAL_TRACKS=1000); //maximum number of good charged tracks in selection
 
   //good charged track configuration
@@ -135,10 +135,10 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("MAX_MUON_EP_RATIO", MAX_MUON_EP_RATIO = 0.26);
   declareProperty("MIN_MUON_EP_RATIO", MAX_MUON_EP_RATIO = 0);
   declareProperty("MAX_KAON_EP_RATIO", MAX_KAON_EP_RATIO = 0.8);
-  declareProperty("MIN_KAON_EP_RATIO", MAX_KAON_EP_RATIO = 0);
+  declareProperty("MIN_KAON_EP_RATIO", MIN_KAON_EP_RATIO = 0);
 
   declareProperty("MAX_PION_MOMENTUM", MAX_PION_MOMENTUM = 0.45); //GeV
-  declareProperty("MIN_PION_MOMENTUM", MAX_PION_MOMENTUM = 0); //GeV
+  declareProperty("MIN_PION_MOMENTUM", MIN_PION_MOMENTUM = 0); //GeV
 
   declareProperty("MIN_KAON_MOMENTUM", MIN_KAON_MOMENTUM = 1.0); //GeV
   declareProperty("MAX_KAON_MOMENTUM", MAX_KAON_MOMENTUM = 2.0); //GeV
@@ -955,7 +955,7 @@ StatusCode JpsiKK::execute()
       if(q>0) 
       {
         positive_charged_tracks.push_back(itTrk);
-        if(p<MAX_PION_MOMENTUM) 
+        if(MIN_PION_MOMENTUM < p && p<MAX_PION_MOMENTUM) 
         {
           positive_pion_tracks.push_back(itTrk);
         }
@@ -970,7 +970,7 @@ StatusCode JpsiKK::execute()
       if(q<0) 
       {
         negative_charged_tracks.push_back(itTrk);
-        if(p<MAX_PION_MOMENTUM) 
+        if(MIN_PION_MOMENTUM < p &&  p<MAX_PION_MOMENTUM) 
         {
           negative_pion_tracks.push_back(itTrk);
         }
