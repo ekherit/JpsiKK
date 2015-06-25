@@ -910,6 +910,9 @@ StatusCode JpsiKK::execute()
     }
   }
 
+
+	cout << "CENTER_MASS_ENERGY = " << CENTER_MASS_ENERGY << endl;
+
   //print good charged track index
   //cout << "Good charged track: ";
   //for(list<EvtRecTrackIterator>::iterator i=good_charged_tracks.begin();i!=good_charged_tracks.end();i++)

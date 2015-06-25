@@ -347,3 +347,112 @@ void load(void)
 	////gSystem->CompileMacro("mctopo.C","kO","","/tmp");
 	//gSystem->CompileMacro("analize.C","kO","","/tmp");
 }
+
+//add n to every bin of histogram
+void add_uniform_events(TH1 * h,  double n)
+{
+	int nbins = h->GetNbinsX();
+	for(int i=0;i<nbins;i++)
+	{
+		h->SetBinContent(i,  h->GetBinContent(i) + n/nbins);
+	}
+}
+
+
+
+//#include <RooFit.h>
+#include <RooRealVar.h>
+#include <RooPolynomial.h>
+#include <RooDataSet.h>
+#include <RooGaussian.h>
+#include <RooAddPdf.h>
+#include <TCanvas.h>
+#include <RooPlot.h>
+#include <TAxis.h>
+#include <RooBukinPdf.h>
+
+using namespace RooFit;
+
+void roofit(TTree *tree)
+{
+	gSystem->Load("libRooFit") ;
+	//using namespace RooFit ;
+
+  // S e t u p   m o d e l 
+  // ---------------------
+
+  // Declare variables x,mean,sigma with associated name, title, initial value and allowed range
+  RooRealVar Mrec("Mrec","Mrec",3.06,3.14) ;
+  RooRealVar mean("mean","mean of gaussian",3.097,3.0,3.2) ;
+  RooRealVar sigma("sigma","width of gaussian",0.001,0.0001,0.005) ;
+
+  RooRealVar lambda("lambda","asymetry",0.001, -1, 1);
+  RooRealVar rho_left("rho_left","left tail",0.001, 0, 100);
+  RooRealVar rho_right("rho_right","right tail",0.001, 0, 100);
+
+  // Build gaussian p.d.f in terms of x,mean and sigma
+  //RooGaussian gauss("gauss","gaussian PDF",Mrec,mean,sigma) ;  
+  RooBukinPdf gauss("bukin","bukin PDF",Mrec,mean,sigma, lambda, rho_left, rho_right) ;  
+
+	RooRealVar poly_c1("poly_c1","coefficient of x^1 term",0,-10,10);
+	RooPolynomial bkgd_poly("bkgd_poly", "linear function for background", Mrec, RooArgList(poly_c1));	
+
+  // Construct plot frame in 'x'
+  RooPlot* xframe = Mrec.frame(Title("Gaussian p.d.f.")) ;
+
+	RooRealVar peak_yield("peak_yield", "yield signal peak", 3000, 0, 1000000);
+	RooRealVar bkgd_yield("bkgd_yield", "yield of background", 500, 0, 1000000);
+	RooArgList shapes;
+	RooArgList yields;
+	shapes.add(bkgd_poly);      yields.add(bkgd_yield);
+	shapes.add(gauss);  yields.add(peak_yield);
+	RooAddPdf  totalPdf("totalPdf", "sum of signal and background PDF's", shapes, yields);
+
+
+  // P l o t   m o d e l   a n d   c h a n g e   p a r a m e t e r   v a l u e s
+  // ---------------------------------------------------------------------------
+
+  // Plot gauss in frame (i.e. in x) 
+  gauss.plotOn(xframe) ;
+
+  // Change the value of sigma to 3
+  //sigma.setVal(3) ;
+
+  // Plot gauss in frame (i.e. in x) and draw frame on canvas
+  gauss.plotOn(xframe,LineColor(kRed)) ;
+  
+
+  // G e n e r a t e   e v e n t s 
+  // -----------------------------
+
+  // Generate a dataset of 1000 events in x from gauss
+  //RooDataSet* data = gauss.generate(x,10000) ;  
+	RooArgSet ntupleVarSet(Mrec);
+	RooDataSet * data = new RooDataSet("tree", "tree",  tree,  ntupleVarSet);
+  
+  // Make a second plot frame in x and draw both the 
+  // data and the p.d.f in the frame
+  RooPlot* xframe2 = Mrec.frame(Title("Gaussian p.d.f. with data")) ;
+  data->plotOn(xframe2) ;
+  totalPdf.plotOn(xframe2) ;
+	totalPdf.plotOn(xframe2,Components(bkgd_poly),LineStyle(kDashed)) ;
+  
+
+  // F i t   m o d e l   t o   d a t a
+  // -----------------------------
+
+  // Fit pdf to data
+  //gauss.fitTo(*data) ;
+	totalPdf.fitTo(*data, Extended());
+
+  // Print values of mean and sigma (that now reflect fitted values and errors)
+  mean.Print() ;
+  sigma.Print() ;
+
+  // Draw all frames on a canvas
+  TCanvas* c = new TCanvas("rf101_basics","rf101_basics",800,400) ;
+  c->Divide(2) ;
+  c->cd(1) ; gPad->SetLeftMargin(0.15) ; xframe->GetYaxis()->SetTitleOffset(1.6) ; xframe->Draw() ;
+  c->cd(2) ; gPad->SetLeftMargin(0.15) ; xframe2->GetYaxis()->SetTitleOffset(1.6) ; xframe2->Draw() ;
+	
+}
