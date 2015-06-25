@@ -133,7 +133,8 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("EMC_BARREL_MIN_ENERGY", EMC_BARREL_MIN_ENERGY = 0.025);
 
   declareProperty("MAX_MUON_EP_RATIO", MAX_MUON_EP_RATIO = 0.26);
-  declareProperty("MIN_MUON_EP_RATIO", MAX_MUON_EP_RATIO = 0);
+  declareProperty("MIN_MUON_EP_RATIO", MIN_MUON_EP_RATIO = 0);
+
   declareProperty("MAX_KAON_EP_RATIO", MAX_KAON_EP_RATIO = 0.8);
   declareProperty("MIN_KAON_EP_RATIO", MIN_KAON_EP_RATIO = 0);
 
@@ -1137,72 +1138,60 @@ StatusCode JpsiKK::execute()
   //SELECTION CODE
   if(!GoodKinematikFit) return StatusCode::SUCCESS;
   if(kinematic_chi2>200) return StatusCode::SUCCESS;
-  vector<double> pchi2 = get_chi2(result_pair);
   good_kinematic_fit++;
+
   RecMdcTrack  *mdcTrk[2] = {(*result_pair.first)->mdcTrack(), (*result_pair.second)->mdcTrack()};
   RecEmcShower *emcTrk[2] = {(*result_pair.first)->emcShower(), (*result_pair.second)->emcShower()};
-  switch(channel)
-  {
-    case ID_KAON:
-      if(pchi2[ID_KAON] > 200) return StatusCode::SUCCESS;
-      if(
-          pchi2[ID_KAON] < pchi2[ID_MUON]
-          && 
-          pchi2[ID_KAON] < pchi2[ID_PION]
-          &&
-          emcTrk[0]->energy()/mdcTrk[0]->p() < MAX_KAON_EP_RATIO
-          &&
-          emcTrk[1]->energy()/mdcTrk[1]->p() < MAX_KAON_EP_RATIO
-          &&
-          MIN_KAON_MOMENTUM < mdcTrk[0]->p()  && mdcTrk[0]->p() <  MAX_KAON_MOMENTUM
-          &&
-          MIN_KAON_MOMENTUM < mdcTrk[1]->p()  && mdcTrk[1]->p() <  MAX_KAON_MOMENTUM
-          )
-      {
-        fEvent.KK=1;
-        fEvent.uu=0;
-        event_with_kaons++;
-      }
-      else return StatusCode::SUCCESS;
-      break;
-    case ID_MUON:
-      if(pchi2[ID_MUON] > 200) return StatusCode::SUCCESS;
-      if(
-          pchi2[ID_MUON] < pchi2[ID_KAON]
-          && 
-          pchi2[ID_MUON] < pchi2[ID_KAON]
-          &&
-          emcTrk[0]->energy()/mdcTrk[0]->p() < MAX_MUON_EP_RATIO
-          &&
-          emcTrk[1]->energy()/mdcTrk[1]->p() < MAX_MUON_EP_RATIO
-          &&
-          MIN_MUON_MOMENTUM < mdcTrk[0]->p()  && mdcTrk[0]->p() <  MAX_MUON_MOMENTUM
-          &&
-          MIN_MUON_MOMENTUM < mdcTrk[1]->p()  && mdcTrk[1]->p() <  MAX_MUON_MOMENTUM
-        )
-      {
-        fEvent.KK=0;
-        fEvent.uu=1;
-        event_with_muons++;
-      }
-      else return StatusCode::SUCCESS;
-      break;
-    case ID_ELECTRON:
-      event_with_electrons++;
-      return StatusCode::SUCCESS;
-      break;
-    case ID_PION:
-      event_with_pions++;
-      return StatusCode::SUCCESS;
-      break;
-    case ID_PROTON:
-      event_with_protons++;
-      return StatusCode::SUCCESS;
-      break;
-    default:
-      return StatusCode::SUCCESS;
-      break;
-  }
+	double EpRatio[2] = {emcTrk[0]->energy()/mdcTrk[0]->p(), emcTrk[1]->energy()/mdcTrk[1]->p()};
+	double MIN_MOMENTUM[5] = { MIN_KAON_MOMENTUM,  MIN_MUON_MOMENTUM,  0, 0, 0}; 
+	double MAX_MOMENTUM[5] = { MAX_KAON_MOMENTUM,  MAX_MUON_MOMENTUM,  0, 0, 0}; 
+	double MIN_EP_RATIO[5] = { MIN_KAON_EP_RATIO,  MIN_MUON_EP_RATIO,  0, 0, 0}; 
+	double MAX_EP_RATIO[5] = { MAX_KAON_EP_RATIO,  MAX_MUON_EP_RATIO,  0, 0, 0}; 
+	//SELECTION CODE for momentum and EP ratio
+	for(int i=0;i<2;i++)
+	{
+		if( EpRatio[i] < MIN_EP_RATIO[channel]      || MAX_EP_RATIO[channel] < EpRatio[i] )     return StatusCode::SUCCESS;
+		if( mdcTrk[i]->p() < MIN_MOMENTUM[channel]  || MAX_MOMENTUM[channel] < mdcTrk[i]->p() ) return StatusCode::SUCCESS;
+	}
+
+	//SELECTION CODE for pid chi2
+  vector<double> pchi2 = get_chi2(result_pair);
+	if( pchi2[channel] > 200 ) return StatusCode::SUCCESS;
+	if( pchi2[channel] > pchi2[ID_KAON] )     return StatusCode::SUCCESS;
+	if( pchi2[channel] > pchi2[ID_MUON] )     return StatusCode::SUCCESS;
+	//if( pchi2[channel] > pchi2[ID_PION] )     return StatusCode::SUCCESS;
+	//if( pchi2[channel] > pchi2[ID_PROTON] )   return StatusCode::SUCCESS;
+	//if( pchi2[channel] > pchi2[ID_ELECTRON] ) return StatusCode::SUCCESS;
+
+	switch(channel)
+	{
+		case ID_KAON:
+			if( pchi2[channel] > pchi2[ID_PION] )     return StatusCode::SUCCESS;
+			fEvent.KK=1;
+			fEvent.uu=0;
+			event_with_kaons++;
+			break;
+		case ID_MUON:
+			fEvent.KK=0;
+			fEvent.uu=1;
+			event_with_muons++;
+			break;
+		case ID_ELECTRON:
+			event_with_electrons++;
+			return StatusCode::SUCCESS;
+			break;
+		case ID_PION:
+			event_with_pions++;
+			return StatusCode::SUCCESS;
+			break;
+		case ID_PROTON:
+			event_with_protons++;
+			return StatusCode::SUCCESS;
+			break;
+		default:
+			return StatusCode::SUCCESS;
+			break;
+	}
   //now we have best pion_pair, best kaon/muon pair (result_pair), four-momentum
   //of all particles after kinematik fit
 
