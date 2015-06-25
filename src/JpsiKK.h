@@ -35,6 +35,7 @@ class JpsiKK : public Algorithm
 
 
 	private:
+	double CENTER_MASS_ENERGY;      //center mass energy
 	int MIN_CHARGED_TRACKS; //minimum good charged tracks in selection
 	int MAX_CHARGED_TRACKS; //maximum good charged tracks in selection
 	int MAX_NEUTRAL_TRACKS; //maximum good neutral tracks in selection
@@ -74,7 +75,6 @@ class JpsiKK : public Algorithm
   double MAX_MUON_MISSING_MASS;   //minimum muon missing mass
 
 
-	double CENTER_MASS_ENERGY;      //center mass energy
 
   double MIN_MISSING_MASS; 
   double MAX_MISSING_MASS; 

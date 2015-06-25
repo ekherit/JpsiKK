@@ -530,7 +530,7 @@ double get_invariant_mass2(TrackPair_t & pair, double mass)
   return P_sum.m2();
 }
 
-double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, double mass)
+double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, double mass,  double W /*  total energy */)
 {
   EvtRecTrackIterator  itTrk[2] = {trk1, trk2};
   HepLorentzVector  P[2];
@@ -540,23 +540,23 @@ double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, 
     RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
     P[k] = mdcTrk->p4(mass);
   }
-  HepLorentzVector P_psip(0.040546,0,0,CENTER_MASS_ENERGY); //initial vector of psip
+  HepLorentzVector P_psip(W*sin(0.011),0,0,W); //initial vector of psip
   HepLorentzVector P_sum = P[0]+P[1];
   HepLorentzVector P_recoil = P_psip - P_sum;
   return P_recoil.m();
 }
 
-double get_recoil__mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> p, double mass)
+double get_recoil__mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> p, double mass,  double W)
 {
-  return get_recoil__mass(p.first, p.second, mass);
+  return get_recoil__mass(p.first, p.second, mass,  W);
 }
 
 
-double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pions, std::pair<EvtRecTrackIterator, EvtRecTrackIterator> kaons)
+double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pions, std::pair<EvtRecTrackIterator, EvtRecTrackIterator> kaons,  double W)
 {
   EvtRecTrackIterator  PionTrk[2] = {pions.first, pions.second};
   EvtRecTrackIterator  KaonTrk[2] = {kaons.first, kaons.second};
-  HepLorentzVector P_psip(0.040546,0,0,CENTER_MASS_ENERGY); //initial vector of psip
+  HepLorentzVector P_psip(W*sin(0.011),0,0,W); //initial vector of psip
   HepLorentzVector  pionP[2];
   HepLorentzVector  kaonP[2];
   for(int k=0;k<2;k++)
@@ -694,7 +694,8 @@ bool kinematic_fit(
     TrackPair_t  &  pion_pair,  //pion pair
     TrackPair_t  & other_pair,  // other pair (kaon or muon)
     std::vector<HepLorentzVector> & P,  //4momentum fit result
-    double & chi2 //chi2 result of the fit
+    double & chi2,  //chi2 result of the fit, 
+		double W
     )
 {
   P.resize(4);
@@ -770,7 +771,7 @@ bool kinematic_fit(
   {
     kmfit->AddTrack(i,vtxfit->wtrk(i));
   }
-  HepLorentzVector Pcmf(CENTER_MASS_ENERGY*sin(0.011) /* 40.546 MeV*/,0,0,CENTER_MASS_ENERGY); //initial vector of center of mass frame
+  HepLorentzVector Pcmf(W*sin(0.011) /* 40.546 MeV*/,0,0,W); //initial vector of center of mass frame
   kmfit->AddFourMomentum(0,  Pcmf);
   //kmfit->AddTotalEnergy(0,PSIP_MASS,0,1,2,3);
   //kmfit->AddResonance(1, JPSI_MASS, 2, 3);
@@ -795,7 +796,8 @@ bool kinematic_fit(
     std::vector<HepLorentzVector> & P, //?
     double & chi2,  //result of the fit
     TrackPair_t & result_pion_pair,  //best pion pair
-    TrackPair_t & result_other_pair  //best other pair
+    TrackPair_t & result_other_pair,   //best other pair
+		double W
     )
 {
   chi2=std::numeric_limits<double>::max();
@@ -807,7 +809,7 @@ bool kinematic_fit(
     {
       std::vector<HepLorentzVector> P_tmp;
       double chi2_tmp=std::numeric_limits<double>::max();
-      bool oksq=kinematic_fit(PID, *pion_pair, *other_pair, P_tmp, chi2_tmp);
+      bool oksq=kinematic_fit(PID, *pion_pair, *other_pair, P_tmp, chi2_tmp, W);
       if(oksq) 
       {
         if(chi2_tmp < chi2)
@@ -995,7 +997,7 @@ StatusCode JpsiKK::execute()
     for(TrackList_t::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
     {
       TrackPair_t pair(*i,*j);
-      double M_recoil = get_recoil__mass(pair, PION_MASS);
+      double M_recoil = get_recoil__mass(pair, PION_MASS,  CENTER_MASS_ENERGY);
       if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
       {
         pion_pairs.push_back(pair);
@@ -1012,7 +1014,7 @@ StatusCode JpsiKK::execute()
   TrackPair_t pion_pair = pion_pairs.front();
   for(TrackPairList_t::iterator p=pion_pairs.begin();p!=pion_pairs.end();p++)
   {
-    if(fabs(get_recoil__mass(*p,PION_MASS) - JPSI_MASS) <  fabs(get_recoil__mass(pion_pair,PION_MASS) - JPSI_MASS)) pion_pair = *p;
+    if(fabs(get_recoil__mass(*p,PION_MASS, CENTER_MASS_ENERGY) - JPSI_MASS) <  fabs(get_recoil__mass(pion_pair,PION_MASS,  CENTER_MASS_ENERGY) - JPSI_MASS)) pion_pair = *p;
   }
 
   //make other pairs
@@ -1112,7 +1114,7 @@ StatusCode JpsiKK::execute()
     TrackPair_t pion_pr;
     TrackPair_t other_pr;
     double chi2_tmp;
-    bool fit_result = kinematic_fit(pid, pion_pairs, other_pairs, P_tmp, chi2_tmp, pion_pr, other_pr);
+    bool fit_result = kinematic_fit(pid, pion_pairs, other_pairs, P_tmp, chi2_tmp, pion_pr, other_pr,  CENTER_MASS_ENERGY);
     //cout << fit_result << " " << pid << " " << P_tmp[0].rho() << " " << P_tmp[1].rho() << " " << P_tmp[2].rho() << " " << P_tmp[3].rho() << endl;
     if(fit_result)
     {
@@ -1260,7 +1262,7 @@ StatusCode JpsiKK::execute()
   fDedx.ntrack=4;
   fEmc.ntrack=4;
   fTof.ntrack=4;
-  fMdc.Mrecoil = get_recoil__mass(pion_pair, PION_MASS);
+  fMdc.Mrecoil = get_recoil__mass(pion_pair, PION_MASS,  CENTER_MASS_ENERGY);
   fMdc.Minv    = sqrt(get_invariant_mass2(result_pair,XMASS[channel]));
   EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
   for(int i=0;i<4;i++)
