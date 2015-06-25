@@ -911,7 +911,7 @@ StatusCode JpsiKK::execute()
   }
 
 
-	cout << "CENTER_MASS_ENERGY = " << CENTER_MASS_ENERGY << endl;
+	//cout << "CENTER_MASS_ENERGY = " << CENTER_MASS_ENERGY << endl;
 
   //print good charged track index
   //cout << "Good charged track: ";
@@ -1227,7 +1227,7 @@ StatusCode JpsiKK::execute()
   fEvent.M03 =  (Pkf[0]+Pkf[3]).m();
   fEvent.M12 =  (Pkf[1]+Pkf[2]).m();
   fEvent.M01 =  (Pkf[0]+Pkf[1]).m();
-  HepLorentzVector P_psip(0.040546,0,0,CENTER_MASS_ENERGY); //initial vector of psip
+  HepLorentzVector P_psip(CENTER_MASS_ENERGY*sin(0.011),0,0,CENTER_MASS_ENERGY); //initial vector of psip
   fEvent.Mrecoil = (P_psip - Pkf[0] - Pkf[1]).m();
 
   fEvent.ntrack = 4;
