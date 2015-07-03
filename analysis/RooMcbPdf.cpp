@@ -31,8 +31,6 @@ RooMcbPdf::RooMcbPdf(const char *name, const char *title,
 				RooAbsReal & _s7,   //staple 
 				RooAbsReal & _n1,   //staple 
 				RooAbsReal & _n2   //staple 
-				//std::vector<RooRealVar> & _Staple, //Staple points
-	      //std::vector<RooRealVar> & _N 
 				) : RooAbsPdf(name,title), 
    			fX("x","x",this,_X),
    			fSigma("sigma","sigma",this,_Sigma), 
@@ -46,8 +44,34 @@ RooMcbPdf::RooMcbPdf(const char *name, const char *title,
    			fN1("nl","nl",this,_n1), 
    			fN2("nr","nr",this,_n2) 
 {
+	fType = TYPE_GEPE;
 }
 
+RooMcbPdf::RooMcbPdf(const char *name, const char *title,
+	      RooAbsReal & _X, //invariant mass 
+				RooAbsReal & _Sigma,   //Common sigma
+				RooAbsReal & _s1,   //staple
+				RooAbsReal & _s2,   //staple 
+				RooAbsReal & _s3,   //staple 
+				RooAbsReal & _s4,   //staple 
+				RooAbsReal & _s5,   //staple 
+				RooAbsReal & _n1,   //staple 
+				RooAbsReal & _n2   //staple 
+				) : RooAbsPdf(name,title), 
+   			fX("x","x",this,_X),
+   			fSigma("sigma","sigma",this,_Sigma), 
+   			fStaple1("staple1","staple1",this,_s1), 
+   			fStaple2("staple2","staple2",this,_s2), 
+   			fStaple3("staple3","staple3",this,_s3), 
+   			fStaple4("staple4","staple4",this,_s4), 
+   			fStaple5("staple5","staple5",this,_s5), 
+   			fN1("nl","nl",this,_n1), 
+   			fN2("nr","nr",this,_n2) 
+{
+	fType = TYPE_GPE;
+}
+
+	
 
 
 //_____________________________________________________________________________
@@ -65,6 +89,7 @@ RooMcbPdf::RooMcbPdf(const RooMcbPdf& other, const char* name) :
 	 fN1("nl",this,other.fN1), 
 	 fN2("nr",this,other.fN2) 
 {
+	fType = other.fType;
 }
 
 
@@ -88,17 +113,30 @@ Double_t RooMcbPdf::evaluate() const
 
 void RooMcbPdf::initArgs(void) const
 {
+	switch(fType)
+	{
+		case TYPE_GPE:
+			mean_index = 2;
+			staple.resize(5);
+			break;
+		case TYPE_GEPE:
+			mean_index = 3;
+			staple.resize(7);
+			break;
+	};
 	//init staple points
 	staple[0] = fStaple1;
 	staple[1] = fStaple2;
 	staple[2] = fStaple3;
 	staple[3] = fStaple4;
 	staple[4] = fStaple5;
-	staple[5] = fStaple6;
-	staple[6] = fStaple7;
+	if(fType == TYPE_GEPE)
+	{
+		staple[5] = fStaple6;
+		staple[6] = fStaple7;
+	}
 	//sort them
 	std::sort(std::begin(staple), std::end(staple));
-	int mean_index = 3;
 	mean = staple[mean_index];
 	for(auto & s : staple)
 	{
@@ -112,11 +150,17 @@ void RooMcbPdf::initArgs(void) const
 	{
 		int sign = i ==0 ? -1 : +1;
 		a[i] = std::abs(staple[mean_index+1*sign]); 
-		b[i] = std::abs(staple[mean_index+2*sign]);
-		c[i] = std::abs(staple[mean_index+3*sign]);
-		//cout << "a = " <<  a[i] << endl;
-		//cout << " b= " << b[i] << endl;
-		//cout << " c = " << c[i] << endl;
+		switch(fType)
+		{
+			case TYPE_GPE:
+				b[i]=a[i];
+				c[i] = std::abs(staple[mean_index+2*sign]);
+				break;
+			case TYPE_GEPE:
+				b[i] = std::abs(staple[mean_index+2*sign]);
+				c[i] = std::abs(staple[mean_index+3*sign]);
+				break;
+		}
 	}
 
 	for(int i=0;i<2;i++)

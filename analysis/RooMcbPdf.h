@@ -33,6 +33,19 @@ public:
 				RooAbsReal & _n2   //staple 
 			);
 
+  RooMcbPdf(const char *name, const char *title, 
+	      RooAbsReal& _X, //invariant mass 
+				RooAbsReal & _Sigma,   //Common sigma
+				RooAbsReal & _s1,   //staple
+				RooAbsReal & _s2,   //staple 
+				RooAbsReal & _s3,   //staple 
+				RooAbsReal & _s4,   //staple 
+				RooAbsReal & _s5,   //staple 
+				RooAbsReal & _n1,   //staple 
+				RooAbsReal & _n2   //staple 
+			);
+
+
   RooMcbPdf(const RooMcbPdf& other,const char* name=0) ;
 
   virtual TObject* clone(const char* newname) const { return new RooMcbPdf(*this,newname); }
@@ -65,7 +78,8 @@ protected:
 private:
 	void initArgs(void) const;
 	mutable double mean;
-	mutable double staple[7]; 
+	mutable int mean_index;
+	mutable std::vector<double> staple; 
 	mutable double n[2]; //power of tail
 
 	mutable double A[2]; //first exp tail amplitude
@@ -80,6 +94,8 @@ private:
 	mutable double a[2]; 
 	mutable double b[2]; 
 	mutable double c[2]; 
+	
+	enum { TYPE_GPE,  TYPE_GEPE,  } fType;
 //  ClassDef(RooMcbPdf,1) // Argus background shape PDF
 };
  
