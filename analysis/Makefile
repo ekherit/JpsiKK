@@ -1,12 +1,12 @@
-all : libFit.so test
+all : testMcbFit
 
 LIBS = `root-config --libs` -lMinuit  -lboost_program_options -lRooFit -lMinuit -lRooFitCore
 CXXFLAGS = `root-config --cflags`  -std=c++1y -fPIC
 
 BINDIR=$(HOME)/work/bin
 
-test : test.cpp RooMcbPdf.h   RooMcbPdf.o
-		g++ $(LIBS) -o test   RooMcbPdf.o test.cpp $(CXXFLAGS)
+testMcbFit : testMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o
+		g++ $(LIBS) -o testMcbFit   RooMcbPdf.o testMcbFit.cpp $(CXXFLAGS)
 
 libFit.so : RooMcbPdf.o libFitDict.o 
 		g++ -fPIC -shared  RooMcbPdf.o -o libFit.so libFitDict.o $(LIBS)
