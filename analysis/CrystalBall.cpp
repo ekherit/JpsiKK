@@ -352,8 +352,8 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
     inipar.Add("nr",     2.4,   0.1);
     //inipar.Add("kbg",    -0.003746,    1.0/(xmax-xmin));
     //inipar.Add("kbg",    0,    1.0/(xmax-xmin));
-    inipar.Add("gl",    40,   10);
-    inipar.Add("gr",    40,   10);
+    inipar.Add("gl",    20,   10);
+    inipar.Add("gr",    20,   10);
 
 		inipar.SetLimits("Nsig",  0, N0);
 		inipar.SetLimits("mean", xmin, xmax);
@@ -369,6 +369,7 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 		//inipar.SetLimits("kbg", -2.0/(xmax-xmin), 2.0/(xmax-xmin));
 		//inipar.Fix("kbg");
 		//inipar.Fix("al-bl");
+		//inipar.Fix("ar-br");
 		//inipar.Fix("gl");
 		//inipar.Fix("gr");
 		//inipar.Fix("gl");
@@ -437,7 +438,7 @@ class CrystalBallFitter  : public ROOT::Minuit2::FCNBase
 		cout << "Total number of events: " <<  (Long64_t) N0 << endl;
 		double psig = fit_result[0]/N0;
 		boost::format  fmt("%-30s %10.1f    %-+10.1f %-+10.1f");
-		boost::format fmt2("%-30s %10.1f +/- %-10.1f ( +/- %.2f%%)");
+		boost::format fmt2("%-30s %10.1f ± %-10.1f ( ± %.2f%%)");
 		cout << fmt % "Number of signal events:"       %  fit_result[0]       % -sqrt(sq(par_error[0].first) + psig*psig*N0) %  sqrt(sq(par_error[0].second) + psig*psig*N0) << endl;
 		cout << fmt2 % "Number of signal events(2):"   %  fit_result[0]       % sqrt(N0*psig)         %  (100*sqrt(N0*psig)/fit_result[0]) << endl;
 		cout << fmt2 % "Number of background events:"  %  (N0-fit_result[0])  % sqrt(N0-fit_result[0])%  (100*sqrt(N0-fit_result[0])/(N0-fit_result[0])) << endl;

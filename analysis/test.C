@@ -21,6 +21,7 @@
 void test(void)
 {
 	gROOT->Reset();
+	gSystem->Load("libFit.so");
   gSystem->Load("mctopo/libMcTopo.so");
   gSystem->AddIncludePath("-I$HOME/work -I./mctop");
 	gSystem->CompileMacro("CrystalBall.cpp","kO","","/tmp");

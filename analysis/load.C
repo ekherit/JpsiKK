@@ -20,6 +20,9 @@
 #include <TTree.h>
 #include <TH2F.h>
 
+
+#include "libFit.h"
+
 list<string> list_files(const char *dirname=".", const char *ext=".root")
 {
 
@@ -46,6 +49,32 @@ list<string> list_files(const char *dirname=".", const char *ext=".root")
 }
 //TChain * load_tree(const char *dirname=".", const char *ext=".root")
 TChain * load_tree(string dirname=".", string ext=".root",const char * treename="event")
+{
+	TChain * event = new TChain(treename, treename);
+	TString pwd(gSystem->pwd());
+	TSystemDirectory dir(dirname.c_str(), dirname.c_str());
+	TList *files = dir.GetListOfFiles();
+	gSystem->cd(pwd.Data());
+	if (files) 
+	{
+		TSystemFile *file;
+		TString fname;
+		TIter next(files);
+		while ((file=(TSystemFile*)next()))
+		{
+			fname = file->GetName();
+			if (!file->IsDirectory() && fname.EndsWith(ext.c_str()))
+			{
+				string f = dirname + "/" + fname.Data();
+				event->AddFile(f.c_str());
+				//flist.push_back(fname.Data());
+			}
+		}
+	}
+	return event;
+}
+
+TChain * load_tree2(string dirname=".", string ext=".root",const char * treename="event")
 {
 	TChain * event = new TChain(treename, treename);
 	TString pwd(gSystem->pwd());
@@ -112,13 +141,13 @@ void draw_by_topo(TTree *t, vector<double> pdgid)
 
 void show_cuts(void)
 {
-  TChain * mc_event   =  load_tree("../../mc09-2",".root","event");
-  TChain * mc_mdc     =  load_tree("../../mc09-2",".root","mdc");
-  TChain * mc_emc     =  load_tree("../../mc09-2",".root","emc");
+  TChain * mc_event   =  load_tree("../data/mc09",".root","event");
+  TChain * mc_mdc     =  load_tree("../data/mc09",".root","mdc");
+  TChain * mc_emc     =  load_tree("../data/mc09",".root","emc");
 
-  TChain * data_event =  load_tree("../../2009",".root","event");
-  TChain * data_mdc   =  load_tree("../../2009",".root","mdc");
-  TChain * data_emc   =  load_tree("../../2009",".root","emc");
+  TChain * data_event =  load_tree("../data/data09",".root","event");
+  TChain * data_mdc   =  load_tree("../data/data09",".root","mdc");
+  TChain * data_emc   =  load_tree("../data/data09",".root","emc");
   TCanvas * cp = new TCanvas("pion_cuts_canvas","Pion momentum cuts");
   TCut main_cut = "kin_chi2<40 && pid_chi2<20 && 3.08 < Mrec && Mrec<3.114";
   mc_event->SetLineColor(kRed);
@@ -174,6 +203,58 @@ void show_cuts(void)
   lMrec->AddEntry(hmcUUMrec,"MC2009 #mu^{+}#mu^{-}","lp");
   lMrec->AddEntry(hdataUUMrec,"data2009 #mu^{+}#mu^{-}","lp");
   lMrec->Draw();
+
+}
+
+void show_chi2(void)
+{
+  TChain * mc_event   =  load_tree("../data/mc09",".root","event");
+  TChain * mc_mdc     =  load_tree("../data/mc09",".root","mdc");
+  TChain * mc_emc     =  load_tree("../data/mc09",".root","emc");
+
+  TChain * data_event =  load_tree("../data/data09",".root","event");
+  TChain * data_mdc   =  load_tree("../data/data09",".root","mdc");
+  TChain * data_emc   =  load_tree("../data/data09",".root","emc");
+	TCanvas * c = new TCanvas;
+  TCut main_cut = "abs(Mrec-3.097)<0.45";
+	//data_event->SetLineColor(kBlack);
+	//data_event->Draw("pid_chi2>>hdpidKK(100, 0, 30)", main_cut && "KK" && "pid_chi2<30 && kin_chi2<40", "NORME");
+	//mc_event->SetLineColor(kBlue);
+	//mc_event->Draw("pid_chi2>>hmcpidKK(100, 0, 30)",  main_cut && "KK"  && "pid_chi2<30 && kin_chi2<40", "NORMSAME");
+	//data_event->SetLineColor(kMagenta);
+	//data_event->Draw("pid_chi2>>hdpiduu(100, 0, 30)", main_cut && "uu" && "pid_chi2<30 && kin_chi2<40", "NORMESAME");
+	//mc_event->SetLineColor(kRed);
+	//mc_event->Draw("pid_chi2>>hmcpiduu(100, 0, 30)",  main_cut && "uu" && "pid_chi2<30 && kin_chi2<40", "NORMSAME");
+  //TLegend *l = new TLegend(0.8,0.8,1.0,1.0);
+	//TH1 * hdpidKK = (TH1*)gDirectory->Get("hdpidKK");
+	//TH1 * hmcpidKK = (TH1*)gDirectory->Get("hmcpidKK");
+	//TH1 * hdpiduu = (TH1*)gDirectory->Get("hdpiduu");
+	//TH1 * hmcpiduu = (TH1*)gDirectory->Get("hmcpiduu");
+  //l->AddEntry(hdpidKK,"data2009 K^{+}K^{-}","lp");
+  //l->AddEntry(hmcpidKK,"mc2009 K^{+}K^{-}","lp");
+  //l->AddEntry(hdpiduu,"data2009 #mu^{+}#mu^{-}","lp");
+  //l->AddEntry(hmcpiduu,"mc2009 #mu^{+}#mu^{-}","lp");
+
+	new TCanvas;
+	data_event->SetLineColor(kBlack);
+	data_event->Draw("kin_chi2>>hdkinKK(100, 0, 50)", main_cut && "KK" && "kin_chi2<50  && pid_chi2<20", "NORME");
+	TH1 * hdkinKK = (TH1*)gDirectory->Get("hdkinKK");
+	mc_event->SetLineColor(kBlue);
+	mc_event->Draw("kin_chi2>>hmckinKK(100, 0, 50)",  main_cut && "KK"  && "kin_chi2<50 && pid_chi2<20", "NORMSAME");
+	TH1 * hmckinKK = (TH1*)gDirectory->Get("hmckinKK");
+	data_event->SetLineColor(kMagenta);
+	data_event->Draw("kin_chi2>>hdkinuu(100, 0, 50)", main_cut && "uu" && "kin_chi2<50  && pid_chi2<20", "NORMESAME");
+	TH1 * hdkinuu = (TH1*)gDirectory->Get("hdkinuu");
+	mc_event->SetLineColor(kRed);
+	mc_event->Draw("kin_chi2>>hmckinuu(100, 0, 50)",  main_cut && "uu" && "kin_chi2<50  && pid_chi2<20", "NORMSAME");
+	TH1 * hmckinuu = (TH1*)gDirectory->Get("hmckinuu");
+  TLegend *lkin = new TLegend(0.8,0.8,1.0,1.0);
+  lkin->AddEntry(hdkinKK,"data2009 K^{+}K^{-}","lp");
+  lkin->AddEntry(hmckinKK,"mc2009 K^{+}K^{-}","lp");
+  lkin->AddEntry(hdkinuu,"data2009 #mu^{+}#mu^{-}","lp");
+  lkin->AddEntry(hmckinuu,"mc2009 #mu^{+}#mu^{-}","lp");
+  lkin->Draw();
+  lkin->Draw();
 }
 
 
@@ -364,7 +445,9 @@ void add_uniform_events(TH1 * h,  double n)
 #include <RooRealVar.h>
 #include <RooPolynomial.h>
 #include <RooDataSet.h>
+#include <RooDataHist.h>
 #include <RooGaussian.h>
+#include <RooCategory.h>
 #include <RooAddPdf.h>
 #include <TCanvas.h>
 #include <RooPlot.h>
@@ -398,7 +481,7 @@ void roofit(TTree *tree)
 	RooPolynomial bkgd_poly("bkgd_poly", "linear function for background", Mrec, RooArgList(poly_c1));	
 
   // Construct plot frame in 'x'
-  RooPlot* xframe = Mrec.frame(Title("Gaussian p.d.f.")) ;
+  //RooPlot* xframe = Mrec.frame(Title("Gaussian p.d.f.")) ;
 
 	RooRealVar peak_yield("peak_yield", "yield signal peak", 3000, 0, 1000000);
 	RooRealVar bkgd_yield("bkgd_yield", "yield of background", 500, 0, 1000000);
@@ -413,13 +496,13 @@ void roofit(TTree *tree)
   // ---------------------------------------------------------------------------
 
   // Plot gauss in frame (i.e. in x) 
-  gauss.plotOn(xframe) ;
+  //gauss.plotOn(xframe) ;
 
   // Change the value of sigma to 3
   //sigma.setVal(3) ;
 
   // Plot gauss in frame (i.e. in x) and draw frame on canvas
-  gauss.plotOn(xframe,LineColor(kRed)) ;
+  //gauss.plotOn(xframe,LineColor(kRed)) ;
   
 
   // G e n e r a t e   e v e n t s 
@@ -451,8 +534,229 @@ void roofit(TTree *tree)
 
   // Draw all frames on a canvas
   TCanvas* c = new TCanvas("rf101_basics","rf101_basics",800,400) ;
-  c->Divide(2) ;
-  c->cd(1) ; gPad->SetLeftMargin(0.15) ; xframe->GetYaxis()->SetTitleOffset(1.6) ; xframe->Draw() ;
+  //c->Divide(2) ;
+  //c->cd(1) ; gPad->SetLeftMargin(0.15) ; xframe->GetYaxis()->SetTitleOffset(1.6) ; xframe->Draw() ;
   c->cd(2) ; gPad->SetLeftMargin(0.15) ; xframe2->GetYaxis()->SetTitleOffset(1.6) ; xframe2->Draw() ;
 	
+}
+
+void roofit(TH1F * his)
+{
+	gSystem->Load("libRooFit") ;
+	//using namespace RooFit ;
+
+  // S e t u p   m o d e l 
+  // ---------------------
+	RooRealProxy realProxy;
+
+  // Declare variables x,mean,sigma with associated name, title, initial value and allowed range
+  RooRealVar Mrec("Mrec","Mrec",-45,+45) ;
+  RooRealVar mean("mean","mean of gaussian",0,-45,45) ;
+  RooRealVar sigma("sigma","width of gaussian",1.3,0.01,10) ;
+
+  RooRealVar lambda("lambda","asymetry",0.001, -1, 1);
+  RooRealVar rho_left("rho_left","left tail",0.001, 0, 100);
+  RooRealVar rho_right("rho_right","right tail",0.001, 0, 100);
+
+  // Build gaussian p.d.f in terms of x,mean and sigma
+  //RooGaussian gauss("gauss","gaussian PDF",Mrec,mean,sigma) ;  
+  RooBukinPdf gauss("bukin","bukin PDF",Mrec,mean,sigma, lambda, rho_left, rho_right) ;  
+
+	RooRealVar poly_c1("poly_c1","coefficient of x^1 term",0,-10,10);
+	RooPolynomial bkgd_poly("bkgd_poly", "linear function for background", Mrec, RooArgList(poly_c1));	
+
+  // Construct plot frame in 'x'
+  //RooPlot* xframe = Mrec.frame(Title("Gaussian p.d.f.")) ;
+
+	RooRealVar peak_yield("peak_yield", "yield signal peak", 3000, 0, 1000000);
+	RooRealVar bkgd_yield("bkgd_yield", "yield of background", 500, 0, 1000000);
+	RooArgList shapes;
+	RooArgList yields;
+	shapes.add(bkgd_poly);      yields.add(bkgd_yield);
+	shapes.add(gauss);  yields.add(peak_yield);
+	RooAddPdf  totalPdf("totalPdf", "sum of signal and background PDF's", shapes, yields);
+
+
+  // P l o t   m o d e l   a n d   c h a n g e   p a r a m e t e r   v a l u e s
+  // ---------------------------------------------------------------------------
+
+  // Plot gauss in frame (i.e. in x) 
+  //gauss.plotOn(xframe) ;
+
+  // Change the value of sigma to 3
+  //sigma.setVal(3) ;
+
+  // Plot gauss in frame (i.e. in x) and draw frame on canvas
+  //gauss.plotOn(xframe,LineColor(kRed)) ;
+  
+
+	// Create category observable c that serves as index for the ROOT histograms
+  RooCategory rooCategory("c","c") ;
+  rooCategory.defineType("his") ;
+  // G e n e r a t e   e v e n t s 
+  // -----------------------------
+
+  // Generate a dataset of 1000 events in x from gauss
+  //RooDataSet* data = gauss.generate(x,10000) ;  
+	RooArgSet ntupleVarSet(Mrec);
+	//RooDataSet * data = new RooDataSet("tree", "tree",  tree,  ntupleVarSet);
+	//RooDataSet * data = new RooDataSet("dh", "dh", Mrec, Index(rooCategory),  Import("his",*his));
+  RooRealVar x("x","x",-45,+45) ;
+	RooDataHist * data = new RooDataHist("dh", "dh", Mrec, Import(*his));
+  
+  // Make a second plot frame in x and draw both the 
+  // data and the p.d.f in the frame
+  RooPlot* xframe2 = Mrec.frame(Title("Gaussian p.d.f. with data")) ;
+  data->plotOn(xframe2) ;
+  totalPdf.plotOn(xframe2) ;
+	totalPdf.plotOn(xframe2,Components(bkgd_poly),LineStyle(kDashed)) ;
+  
+
+  // F i t   m o d e l   t o   d a t a
+  // -----------------------------
+
+  // Fit pdf to data
+  //gauss.fitTo(*data) ;
+	//totalPdf.fitTo(*data, Extended());
+	totalPdf.fitTo(*data, FitOptions("qmh"));
+
+  // Print values of mean and sigma (that now reflect fitted values and errors)
+  mean.Print() ;
+  sigma.Print() ;
+
+  // Draw all frames on a canvas
+  TCanvas* c = new TCanvas("rf101_basics","rf101_basics",800,400) ;
+  //c->Divide(2) ;
+  //c->cd(1) ; gPad->SetLeftMargin(0.15) ; xframe->GetYaxis()->SetTitleOffset(1.6) ; xframe->Draw() ;
+  c->cd(2) ; gPad->SetLeftMargin(0.15) ; xframe2->GetYaxis()->SetTitleOffset(1.6) ; xframe2->Draw() ;
+	
+}
+
+void myroofit(TH1F * his)
+{
+	gSystem->Load("libRooFit") ;
+	gSystem->Load("libFit") ;
+	//RooRealProxy realProxy;
+
+  // Declare variables x,mean,sigma with associated name, title, initial value and allowed range
+  RooRealVar Mrec("Mrec","Mrec",-45,+45);
+  RooRealVar sigma("sigma","sigma",1.3,0.01,10, "MeV") ;
+
+	std::vector<RooRealVar> staple(7);
+	for(int i=0;i<staple.size();i++)
+	{
+		char buf[128];
+		sprintf(buf, "staple-%d",i );
+		staple[i] = RooRealVar(buf, buf, -45, +45);
+	}
+	std::vector<RooRealVar> N(2);
+	N[0] = RooRealVar("nl", "Left power", 2,  0.1, 100);
+	N[1] = RooRealVar("nr", "Right power", 2,  0.1, 100);
+
+	ModifiedCrystalBall mcb("ModCB", "Modified CrystalBall",  Mrec,  sigma,  
+			staple[0], 
+			staple[1], 
+			staple[2], 
+			staple[3], 
+			staple[4], 
+			staple[5], 
+			staple[6], 
+			N[0], 
+			N[1]);
+
+	RooRealVar poly_c1("poly_c1","coefficient of x^1 term",0,-10,10);
+	RooPolynomial bkgd_poly("bkgd_poly", "linear function for background", Mrec, RooArgList(poly_c1));	
+
+  // Construct plot frame in 'x'
+  //RooPlot* xframe = Mrec.frame(Title("Gaussian p.d.f.")) ;
+
+	RooRealVar peak_yield("peak_yield", "yield signal peak", 3000, 0, 1000000);
+	RooRealVar bkgd_yield("bkgd_yield", "yield of background", 500, 0, 1000000);
+	RooArgList shapes;
+	RooArgList yields;
+	shapes.add(bkgd_poly);      yields.add(bkgd_yield);
+	shapes.add(mcb);  yields.add(peak_yield);
+	RooAddPdf  totalPdf("totalPdf", "sum of signal and background PDF's", shapes, yields);
+
+
+  // P l o t   m o d e l   a n d   c h a n g e   p a r a m e t e r   v a l u e s
+  // ---------------------------------------------------------------------------
+
+  // Plot gauss in frame (i.e. in x) 
+  //gauss.plotOn(xframe) ;
+
+  // Change the value of sigma to 3
+  //sigma.setVal(3) ;
+
+  // Plot gauss in frame (i.e. in x) and draw frame on canvas
+  //gauss.plotOn(xframe,LineColor(kRed)) ;
+  
+
+	// Create category observable c that serves as index for the ROOT histograms
+  RooCategory rooCategory("c","c") ;
+  rooCategory.defineType("his") ;
+  // G e n e r a t e   e v e n t s 
+  // -----------------------------
+
+  // Generate a dataset of 1000 events in x from gauss
+  //RooDataSet* data = gauss.generate(x,10000) ;  
+	RooArgSet ntupleVarSet(Mrec);
+	//RooDataSet * data = new RooDataSet("tree", "tree",  tree,  ntupleVarSet);
+	//RooDataSet * data = new RooDataSet("dh", "dh", Mrec, Index(rooCategory),  Import("his",*his));
+	RooDataHist * data = new RooDataHist("dh", "dh", Mrec, Import(*his));
+  
+  // Make a second plot frame in x and draw both the 
+  // data and the p.d.f in the frame
+  RooPlot* xframe2 = Mrec.frame(Title("Gaussian p.d.f. with data")) ;
+  data->plotOn(xframe2) ;
+  totalPdf.plotOn(xframe2) ;
+	totalPdf.plotOn(xframe2,Components(bkgd_poly),LineStyle(kDashed)) ;
+  
+
+  // F i t   m o d e l   t o   d a t a
+  // -----------------------------
+
+  // Fit pdf to data
+  //gauss.fitTo(*data) ;
+	//totalPdf.fitTo(*data, Extended());
+	totalPdf.fitTo(*data, FitOptions("qmh"));
+
+  // Print values of mean and sigma (that now reflect fitted values and errors)
+  //mean.Print() ;
+  sigma.Print() ;
+	for(auto s : staple)
+	{
+		s.Print();
+	}
+	for(auto n : N)
+	{
+		n.Print();
+	}
+
+  // Draw all frames on a canvas
+  TCanvas* c = new TCanvas("rf101_basics","rf101_basics",800,400) ;
+  //c->Divide(2) ;
+  //c->cd(1) ; gPad->SetLeftMargin(0.15) ; xframe->GetYaxis()->SetTitleOffset(1.6) ; xframe->Draw() ;
+  c->cd(2) ; gPad->SetLeftMargin(0.15) ; xframe2->GetYaxis()->SetTitleOffset(1.6) ; xframe2->Draw() ;
+	
+}
+
+
+void gaus_fit(TH1 * h)
+{
+	TF1 * fun = new TF1("fun",  "gaus(0)+gaus(3)+gaus(6)+pol0(9)");
+	for(int i=0;i<3;i++)
+	{
+		fun->SetParameter(3*i+1, 0);
+	}
+	fun->SetParameter(0, h->GetMaximum());
+	fun->SetParameter(3, h->GetMaximum()/10);
+	fun->SetParameter(6, h->GetMaximum()/100);
+
+	fun->SetParameter(2, 1);
+	fun->SetParameter(5, 5);
+	fun->SetParameter(8, 25);
+	fun->SetParameter(9, 0);
+	h->Fit("fun");
+
 }

@@ -1022,8 +1022,6 @@ StatusCode JpsiKK::execute()
   }
 
   //make other pairs
-  //TrackPairList_t muon_pairs;
-  //TrackPairList_t kaon_pairs;
   TrackPairList_t other_pairs;
   for(TrackList_t::iterator i=other_negative_tracks.begin(); i!=other_negative_tracks.end(); ++i)
   {
@@ -1039,71 +1037,6 @@ StatusCode JpsiKK::execute()
       if(!(*second_track)->isEmcShowerValid()) continue;
       TrackPair_t pair(first_track,second_track);
       other_pairs.push_back(pair);
-      //double Ep[2]; // E/p ratio
-      //double E[2];
-      //double p[2];
-      //for(int k=0;k<2;k++)
-      //{
-      //  if(!(*itTrk[k])->isMdcTrackValid() || ! (*itTrk[k])->isEmcShowerValid()) 
-      //  {
-      //    log << MSG::ERROR << "Invalid mdc info for track.Exiting" << endmsg;
-      //    return StatusCode::FAILURE;
-      //  }
-      //  //SELECTION CODE:
-      //  RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
-      //  RecEmcShower *emcTrk = (*itTrk[k])->emcShower();
-      //  E[k] = emcTrk->energy();
-      //  p[k] = mdcTrk->p();
-      //  if(p[k]!=0) Ep[k] = E[k]/p[k];
-      //  else Ep[k]=999999;
-      //}
-      //double M[5]={0,0,0,0,0};
-      //for(int pid=0;pid<5;pid++)
-      //{
-      //  M[pid]=get_invariant_mass2(pair,XMASS[pid]);
-      //  if(M[pid]>0) M[pid] = sqrt(M[pid]);
-      //  else M[pid] = 0;
-      //}
-      ////SELECTION CODE KAON CASE
-      //if(MIN_INVARIANT_MASS <  M[0]   && M[0]  < MAX_INVARIANT_MASS)
-      //{
-      //  if(Ep[0] < MAX_KAON_EP_RATIO && Ep[1] < MAX_KAON_EP_RATIO)
-      //  {
-      //    if(MIN_KAON_MOMENTUM < p[0] && p[0] < MAX_KAON_MOMENTUM)
-      //    {
-      //      if(MIN_KAON_MOMENTUM < p[1] && p[1] < MAX_KAON_MOMENTUM)
-      //      {
-      //        kaon_pairs.push_back(pair);
-      //      }
-      //    }
-      //  }
-      //}
-      ////SELECTION CODE MUON CASE
-      //if(MIN_INVARIANT_MASS <  M[1]   && M[1]  < MAX_INVARIANT_MASS)
-      //{
-      //  if(Ep[0] < MAX_MUON_EP_RATIO && Ep[1] < MAX_MUON_EP_RATIO)
-      //  {
-      //    if(MIN_MUON_MOMENTUM < p[0] && p[0] < MAX_MUON_MOMENTUM)
-      //    {
-      //      if(MIN_MUON_MOMENTUM < p[1] && p[1] < MAX_MUON_MOMENTUM)
-      //      {
-      //        muon_pairs.push_back(pair);
-      //      }
-      //    }
-      //  }
-      //}
-      ////SELECT ANY OTHER PAIRS
-      ////suppress electron case
-      //if(Ep[0] < MAX_KAON_EP_RATIO && Ep[1] < MAX_KAON_EP_RATIO)
-      //{
-      //  if(MIN_MUON_MOMENTUM < p[0] && p[0] < MAX_MUON_MOMENTUM)
-      //  {
-      //    if(MIN_MUON_MOMENTUM < p[1] && p[1] < MAX_MUON_MOMENTUM)
-      //    {
-      //      other_pairs.push_back(pair);
-      //    }
-      //  }
-      //}
     }
   }
   int channel = -1;
