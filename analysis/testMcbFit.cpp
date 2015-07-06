@@ -47,7 +47,8 @@ using namespace std;
 int main(int argc,  char ** argv)
 {
 	TApplication theApp("root_app", &argc, argv);
-	TFile file("data12-Mrec90MeV.root");
+  if(argc<2) return 1;
+	TFile file(argv[1]);
 	TH1 * his = (TH1*)file.Get("hMrecUU");
 
 	double Mmin  = his->GetXaxis()->GetXmin();
