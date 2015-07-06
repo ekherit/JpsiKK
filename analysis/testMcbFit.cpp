@@ -26,7 +26,7 @@ TROOT root("polarimeter","polarimeter", initfuncs);
 
 #include <TFile.h>
 #include <TH1F.h>
-#include "RooMcbPdf.h"
+#include <TH2F.h>
 
 #include <RooRealVar.h>
 #include <RooPolynomial.h>
@@ -40,6 +40,8 @@ TROOT root("polarimeter","polarimeter", initfuncs);
 #include <TAxis.h>
 #include <RooBukinPdf.h>
 
+#include "RooMcbPdf.h"
+
 using namespace RooFit;
 using namespace std;
 int main(int argc,  char ** argv)
@@ -52,13 +54,13 @@ int main(int argc,  char ** argv)
 	double Mmax  = his->GetXaxis()->GetXmax();
   RooRealVar Mrec("Mrec","M_{rec}(#pi^{+}#pi^{-})",Mmin,Mmax, "MeV");
   RooRealVar sigma("sigma","sigma",his->GetRMS(),0,100, "MeV") ;
-  RooRealVar staple1("staple1","staple1",-20,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple1("staple1","staple1",-30,   Mmin,Mmax, "MeV") ;
   RooRealVar staple2("staple2","staple2", -2,  Mmin,Mmax, "MeV") ;
   RooRealVar staple3("staple3","staple3", -1.75,  Mmin,Mmax, "MeV") ;
-  RooRealVar staple4("staple4","staple4",  0,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple4("staple4","staple4",  0,   -1,+1, "MeV") ;
   RooRealVar staple5("staple5","staple5",  1.2,  Mmin,Mmax, "MeV") ;
   RooRealVar staple6("staple6","staple6",  2,  Mmin,Mmax, "MeV") ;
-  RooRealVar staple7("staple7","staple7", 20,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple7("staple7","staple7", 30,   Mmin,Mmax, "MeV") ;
   RooRealVar n1("n1","n1", 3.1,  1,100) ;
   RooRealVar n2("n2","n2", 2.4,  1,100) ;
 
@@ -103,7 +105,7 @@ int main(int argc,  char ** argv)
 
 
 	RooRealVar peak_yield("peak_yield", "yield signal peak", his->GetEntries(), 0, 1e100);
-	RooRealVar bkgd_yield("bkgd_yield", "yield of background", 0, 0, 1e100);
+	RooRealVar bkgd_yield("bkgd_yield", "yield of background", 0);
 	RooArgList shapes;
 	RooArgList yields;
 	shapes.add(bkgd_poly);      yields.add(bkgd_yield);
@@ -139,8 +141,13 @@ int main(int argc,  char ** argv)
 
   // Draw all frames on a canvas
   TCanvas* c = new TCanvas("mcb","Test for Modified CrystalBall Fit") ;
+	//TH2F * h2=new TH2F("h2", "h2", 100, Mmin, Mmax, 100, -0.2*his->GetMaximum(), his->GetMaximum()*1.2);
+	//h2->Draw();
 	c->SetLogy();
-  c->cd(2) ; gPad->SetLeftMargin(0.15) ; xframe2->GetYaxis()->SetTitleOffset(1.6) ; xframe2->Draw() ;
+  c->cd(2) ; 
+	gPad->SetLeftMargin(0.15) ; 
+	xframe2->GetYaxis()->SetTitleOffset(1.6) ; 
+	xframe2->Draw() ;
 
 
 
