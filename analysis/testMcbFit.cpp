@@ -28,6 +28,7 @@ TROOT root("polarimeter","polarimeter", initfuncs);
 #include <TH1F.h>
 #include <TH2F.h>
 
+#include <RooNLLVar.h>
 #include <RooRealVar.h>
 #include <RooPolynomial.h>
 #include <RooDataSet.h>
@@ -46,24 +47,24 @@ using namespace RooFit;
 using namespace std;
 int main(int argc,  char ** argv)
 {
-	TApplication theApp("root_app", &argc, argv);
   if(argc<2) return 1;
 	TFile file(argv[1]);
 	TH1 * his = (TH1*)file.Get("hMrecUU");
+	TApplication theApp("root_app", &argc, argv);
 
 	double Mmin  = his->GetXaxis()->GetXmin();
 	double Mmax  = his->GetXaxis()->GetXmax();
-  RooRealVar Mrec("Mrec","M_{rec}(#pi^{+}#pi^{-})",Mmin,Mmax, "MeV");
-  RooRealVar sigma("sigma","sigma",his->GetRMS(),0,100, "MeV") ;
-  RooRealVar staple1("staple1","staple1",-30,   Mmin,Mmax, "MeV") ;
-  RooRealVar staple2("staple2","staple2", -2,  Mmin,Mmax, "MeV") ;
-  RooRealVar staple3("staple3","staple3", -1.75,  Mmin,Mmax, "MeV") ;
-  RooRealVar staple4("staple4","staple4",  0,   -1,+1, "MeV") ;
-  RooRealVar staple5("staple5","staple5",  1.2,  Mmin,Mmax, "MeV") ;
-  RooRealVar staple6("staple6","staple6",  2,  Mmin,Mmax, "MeV") ;
-  RooRealVar staple7("staple7","staple7", 30,   Mmin,Mmax, "MeV") ;
-  RooRealVar n1("n1","n1", 3.1,  1,100) ;
-  RooRealVar n2("n2","n2", 2.4,  1,100) ;
+  RooRealVar Mrec("Mrec","M_{rec}(#pi^{+}#pi^{-})", Mmin,Mmax, "MeV");
+  RooRealVar sigma("sigma","sigma",1.4,0,10, "MeV") ;
+  RooRealVar staple1("staple1","staple1",-15,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple2("staple2","staple2", -3,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple3("staple3","staple3", -2,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple4("staple4","staple4",  0,   -2,2, "MeV") ;
+  RooRealVar staple5("staple5","staple5",  2,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple6("staple6","staple6",  4,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple7("staple7","staple7", 15,   Mmin,Mmax, "MeV") ;
+  RooRealVar n1("n1","n1", 3,  1,100) ;
+  RooRealVar n2("n2","n2", 2,  1,100) ;
 
 	std::vector<RooRealVar> staple(7);
 	for(int i=0;i<staple.size();i++)
@@ -92,8 +93,8 @@ int main(int argc,  char ** argv)
 	RooGaussian small_gaus("smals_gauss", "small_gauss",  Mrec,  mean2,  sigma2);
 
 
-	RooRealVar mcb_yield("mcb_yield", "MCB yield", his->GetEntries(), 0, 1000000);
-	RooRealVar sg_yield("sg_yield", "small gauss yield", 0, 0, 1000000);
+	RooRealVar mcb_yield("mcb_yield", "MCB yield", his->GetEntries(), 0, his->GetEntries());
+	RooRealVar sg_yield("sg_yield", "small gauss yield", 0, 0, his->GetEntries());
 	RooArgList sig_shapes;
 	RooArgList sig_yields;
 	sig_shapes.add(small_gaus);      sig_yields.add(sg_yield);
@@ -105,12 +106,13 @@ int main(int argc,  char ** argv)
 	RooPolynomial bkgd_poly("bkgd_poly", "linear function for background", Mrec, RooArgList(poly_c1));	
 
 
-	RooRealVar peak_yield("peak_yield", "yield signal peak", his->GetEntries(), 0, 1e100);
-	RooRealVar bkgd_yield("bkgd_yield", "yield of background", 0);
+	RooRealVar Nsig("Nsig", "Number of signal events", his->GetEntries(), 0, his->GetEntries()*100);
+	RooRealVar Nbg("Nbg", "Number of background events", 0, 0,  his->GetEntries()*100);
+	//RooRealVar bkgd_yield("bkgd_yield", "yield of background", 0);
 	RooArgList shapes;
 	RooArgList yields;
-	shapes.add(bkgd_poly);      yields.add(bkgd_yield);
-	shapes.add(mcb);  yields.add(peak_yield);
+	shapes.add(bkgd_poly);      yields.add(Nbg);
+	shapes.add(mcb);  					yields.add(Nsig);
 	RooAddPdf  totalPdf("totalPdf", "sum of signal and background PDF's", shapes, yields);
 
 
@@ -123,7 +125,14 @@ int main(int argc,  char ** argv)
 	//RooDataSet * data = new RooDataSet("dh", "dh", Mrec, Index(rooCategory),  Import("his",*his));
 	RooDataHist * data = new RooDataHist("dh", "dh", Mrec, Import(*his));
   
-	totalPdf.fitTo(*data,  FitOptions("qmh"));
+  RooPlot* xframe3 = Mrec.frame(Title("Show my cb function")) ;
+	mcb.plotOn(xframe3);
+	TCanvas * c_mcb = new TCanvas;
+	xframe3->Draw();
+
+	//theApp.Run();
+	//totalPdf.fitTo(*data,  Extended(), FitOptions("qmh"));
+	totalPdf.fitTo(*data,  Extended(), Strategy(2));
   RooPlot* xframe2 = Mrec.frame(Title("Fit by Modified CrystalBall")) ;
   data->plotOn(xframe2, MarkerSize(0.5)) ;
   totalPdf.plotOn(xframe2,  LineWidth(1)) ;
@@ -152,7 +161,65 @@ int main(int argc,  char ** argv)
 
 
 
+	RooNLLVar nll("nll","nll",totalPdf,*data) ;
+
+  RooPlot* frame_sigma = sigma.frame(Range(0.2, 2.0), Title("-log(L) scan vs m0, problematic regions masked")) ;
+  nll.plotOn(frame_sigma,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
+  RooPlot* frame_staple4 = staple4.frame(Title("staple4 -log(L)")) ;
+  nll.plotOn(frame_staple4,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
+  RooPlot* frame_staple3 = staple3.frame(Title("staple3 -log(L)")) ;
+  nll.plotOn(frame_staple3,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
+  RooPlot* frame_staple5 = staple5.frame(Title("staple5 -log(L)")) ;
+  nll.plotOn(frame_staple5,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
+
+  RooPlot* frame_staple2 = staple2.frame(Title("staple2 -log(L)")) ;
+  nll.plotOn(frame_staple2,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
+  RooPlot* frame_staple6 = staple6.frame(Title("staple6 -log(L)")) ;
+  nll.plotOn(frame_staple6,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
+
+  RooPlot* frame_staple1 = staple1.frame(Title("staple1 -log(L)")) ;
+  nll.plotOn(frame_staple1,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
+  RooPlot* frame_staple7 = staple7.frame(Title("staple7 -log(L)")) ;
+  nll.plotOn(frame_staple7,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
 
 
+  RooPlot* frame_n1 = n1.frame(Title("n1 -log(L)"), Range(1, 5)) ;
+  nll.plotOn(frame_n1,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
+
+  RooPlot* frame_n2 = n2.frame(Title("n2 -log(L)"), Range(1, 5)) ;
+  nll.plotOn(frame_n2,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
+
+  RooPlot* frame_Nsig = Nsig.frame(Range(0, his->GetEntries()*1.2), Title("Nsig -log(L)")) ;
+  nll.plotOn(frame_Nsig,PrintEvalErrors(-1),ShiftToZero(), EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
+	frame_Nsig->SetMinimum(0);
+	frame_Nsig->SetMaximum(40);
+
+  RooPlot* frame_Nbg = Nbg.frame(Range(0, his->GetEntries()*0.1), Title("Nbg -log(L)")) ;
+  nll.plotOn(frame_Nbg,PrintEvalErrors(-1),ShiftToZero(), EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
+
+	TCanvas * cnll =new TCanvas;
+	cnll->Divide(3, 3);
+	cnll->cd(1);
+	frame_sigma->Draw();
+	cnll->cd(2);
+	frame_staple4->Draw();
+	cnll->cd(3);
+	frame_staple3->Draw();
+	cnll->cd(4);
+	frame_staple5->Draw();
+	cnll->cd(5);
+	frame_staple2->Draw();
+	frame_staple6->Draw("same");
+	cnll->cd(6);
+	frame_staple1->Draw();
+	frame_staple7->Draw("same");
+	cnll->cd(7);
+	frame_n1->Draw();
+	frame_n2->Draw("same");
+	cnll->cd(8);
+	frame_Nsig->Draw();
+	cnll->cd(9);
+	frame_Nbg->Draw();
+	
 	theApp.Run();
 }

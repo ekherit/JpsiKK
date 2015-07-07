@@ -86,8 +86,9 @@ private:
 	mutable double B[2]; //power tail amplitude
 	mutable double C[2]; //second exp tail amplitude
 
-	mutable double xb[2]; //handy shift for power tail
+//	mutable double xb[2]; //handy shift for power tail
 	mutable double ka[2]; //first exp tail k
+	mutable double kb[2]; //koef for power
 	mutable double kc[2]; //second exp tail k
 
 

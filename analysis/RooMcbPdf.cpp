@@ -99,15 +99,12 @@ Double_t RooMcbPdf::evaluate() const
 {
 	initArgs();
 	double x = (fX - mean)/fSigma;
-	//cout << "x = " << x << endl;
-
-	int t = x < 0 ? 0 : 1; //tail index
+	int i = x < 0 ? 0 : 1; //tail index
 	double y = TMath::Abs(x); //abs of x
-	if(y>c[t]) return C[t]*exp(-(y-c[t])*kc[t]);
-	if(y>b[t]) return B[t]*pow(xb[t]+y,  -n[t]);
-	if(y>a[t]) return A[t]*exp(-(y-a[t])*ka[t]);
+	if(y>c[i]) return C[i]*exp(-(y-c[i])*kc[i]);
+	if(y>b[i]) return B[i]*pow(1.0 + kb[i]*(y-b[i]),  -n[i]);
+	if(y>a[i]) return A[i]*exp(-(y-a[i])*ka[i]);
 	return exp(-0.5*y*y);
-
 }
 
 
@@ -165,12 +162,12 @@ void RooMcbPdf::initArgs(void) const
 
 	for(int i=0;i<2;i++)
 	{
-		A[i]  =  TMath::Exp(-0.5*a[i]*a[i]);
 		ka[i] =  a[i];
-		xb[i] =  n[i]/ka[i]  - b[i];
-		B[i]  =  A[i]*pow(n[i]/ka[i], n[i])*TMath::Exp(- ka[i]*(b[i]-a[i]));
-		C[i]  =  B[i]/pow( xb[i] + c[i],  n[i]);
-		kc[i] =  n[i]/(xb[i]+c[i]);
+		kb[i] =  ka[i]/n[i];
+		kc[i] =  n[i]*kb[i]/(1.0 + kb[i]*(c[i]-b[i]));
+		A[i]  =  TMath::Exp(-0.5*a[i]*a[i]);
+		B[i]  =  A[i]*TMath::Exp(- ka[i]*(b[i]-a[i]));
+		C[i]  =  B[i]*pow( 1.0  + kb[i]*(c[i]-b[i]),  - n[i]);
 		//cout << "A = " << A[i] << endl;
 		//cout << "B = " << B[i] << endl;
 		//cout << "C = " << C[i] << endl;
@@ -182,7 +179,7 @@ void RooMcbPdf::initArgs(void) const
 //_____________________________________________________________________________
 Int_t RooMcbPdf::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* ) const
 {
-  //if (matchArgs(allVars,analVars,fX)) return 1 ;
+  if (matchArgs(allVars,analVars,fX)) return 1 ;
   return 0;
 }
 
@@ -200,21 +197,78 @@ Double_t RooMcbPdf::analyticalIntegral(Int_t code, const char* rangeName) const
 	double IB[2]; //power part of integral
 	double IC[2]; //exp tail part of integral
 	double I=0; //sum of previouse one
-	double xrange[2]  = { -xmin, +xmax};
+	double xrange[2]  = { fabs(xmin), fabs(xmax)};
+	//std::cout << "xmin = " << xmin << " xmax = " << xmax << endl;
 	for(int i=0;i<2;i++)
 	{
-		IG[i]  =  sqrt(M_PI*0.5)*TMath::Erf(a[i]/sqrt(2.0));
-		//cout << IG[i] << endl;
-		IA[i]  =  A[i]/ka[i]*( 1.0 -  TMath::Exp(- ka[i]*(b[i]-a[i])));
-		//cout << IA[i] << endl;
-		if(n[i]==1.0) IB[i] = B[i]*log((xb[i] + c[i])/(xb[i] + b[i]));
-		else IB[i] = B[i]/(n[i]-1.0)*(pow( xb[i] + b[i], - n[i] + 1.)  - pow( xb[i] + c[i], - n[i] + 1.));
-		//cout << IB[i] << endl;
-		IC[i]  =  C[i]/kc[i]*( 1.0  - TMath::Exp(- kc[i]*(xrange[i] - c[i])));
-		//cout << IC[i] << endl;
-		I+=IG[i] + IA[i] + IB[i] + IC[i];
-		//cout << I << endl;
+		//cout << "a["<<i<<"]=" << a[i] << endl;
+		//cout << "b["<<i<<"]=" << b[i] << endl;
+		//cout << "c["<<i<<"]=" << c[i] << endl;
+		//cout << "n["<<i<<"]=" << n[i] << endl;
+		if(false) 
+		{
+			I+=xrange[i];
+		}
+		else 
+		{
+			//cout << " A["<< i<<"] = " << A[i] << endl;
+			//cout << " B["<<i<<"] = " << B[i] << endl;
+			//cout << " C["<<i<<"] = " << C[i] << endl;
+			//cout << " ka["<<i<<"] = " << ka[i] << endl;
+			//cout << " kc["<<i<<"] = " << kc[i] << endl;
+			//cout << " kb["<<i<<"] = " << kb[i] << endl;
+			if(xrange[i] < a[i])
+			{
+				IG[i]  =  sqrt(M_PI*0.5)*TMath::Erf(xrange[i]/sqrt(2.0));
+				IA[i]  =  0;
+				IB[i]  =  0;
+				IC[i]  =  0;
+			}
+			if(a[i] <= xrange[i] < b[i])
+			{
+				IG[i]  =  sqrt(M_PI*0.5)*TMath::Erf(a[i]/sqrt(2.0));
+				IA[i]  =  A[i]/ka[i]*( 1.0 -  TMath::Exp(- ka[i]*(xrange[i]-a[i])));
+				IB[i]  =  0;
+				IC[i]  =  0;
+			}
+			if(b[i] <= xrange[i] < c[i])
+			{
+				IG[i]  =  sqrt(M_PI*0.5)*TMath::Erf(a[i]/sqrt(2.0));
+				//cout << IG[i] << endl;
+				IA[i]  =  A[i]/ka[i]*( 1.0 -  TMath::Exp(- ka[i]*(b[i]-a[i])));
+				if(n[i]==1.0) IB[i] = B[i]/kb[i]*log(1.0 +kb[i]*(xrange[i]-b[i]));
+				else IB[i] = B[i]/kb[i]/(n[i]-1.0)*(1.0  - pow( 1.0 + kb[i]*(xrange[i]-b[i]), - n[i] + 1.));
+			}
+			if(c[i] <= xrange[i])
+			{
+				if(ka[i]>0)
+				{
+					IG[i]  =  sqrt(M_PI*0.5)*TMath::Erf(a[i]/sqrt(2.0));
+					IA[i]  =  A[i]/ka[i]*( 1.0 -  TMath::Exp(- ka[i]*(b[i]-a[i])));
+					if(n[i]>1.0) IB[i] = B[i]/kb[i]/(n[i]-1.0)*(1.0  - pow( 1.0 + kb[i]*(c[i]-b[i]), - n[i] + 1.));
+					else IB[i] = B[i]/kb[i]*log(1.0 +kb[i]*(c[i]-b[i]));
+					IC[i]  =  C[i]/kc[i]*( 1.0  - TMath::Exp(- kc[i]*(xrange[i] - c[i])));
+				}
+				else
+				{
+					IG[i] = 0;
+					IA[i] = A[i]*(b[i]-a[i]);
+					IB[i] = B[i]*(c[i]-b[i]);
+					IC[i] = C[i]*(xrange[i]-c[i]);
+				}
+				//cout << " hit max range" << endl;
+			}
+			else
+			{
+				cout << "ERROR: wrong integral hit range" << endl;
+			}
+			//cout << "IG[" << i << "]=" << IG[i] << endl;
+			//cout << "IA[" << i << "]=" << IA[i] << endl;
+			//cout << "IB[" << i << "]=" << IB[i] << endl;
+			//cout << "IC[" << i << "]=" << IC[i] << endl;
+			I+=IG[i] + IA[i] + IB[i] + IC[i];
+		}
 	}
 	//cout << "Itotal = " << I << endl;
-	return I;
+	return I*fSigma;
 }
