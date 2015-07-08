@@ -51,7 +51,7 @@ int main(int argc,  char ** argv)
 {
   if(argc<2) return 1;
 	TFile file(argv[1]);
-	TH1 * his = (TH1*)file.Get("hMrecKK");
+	TH1 * his = (TH1*)file.Get("hMrecUU");
 	TApplication theApp("root_app", &argc, argv);
 
 	double Mmin  = his->GetXaxis()->GetXmin();

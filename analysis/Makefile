@@ -1,4 +1,4 @@
-all : testMcbFit
+all : testMcbFit CombMcbFit
 
 LIBS = `root-config --libs` -lMinuit  -lboost_program_options -lRooFit -lMinuit -lRooFitCore
 CXXFLAGS = `root-config --cflags`  -std=c++1y -fPIC
@@ -7,6 +7,9 @@ BINDIR=$(HOME)/work/bin
 
 testMcbFit : testMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o
 		g++ $(LIBS) -o testMcbFit   RooMcbPdf.o testMcbFit.cpp $(CXXFLAGS)
+
+CombMcbFit : CombMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o
+		g++ $(LIBS) -o CombMcbFit   RooMcbPdf.o CombMcbFit.cpp $(CXXFLAGS)
 
 libFit.so : RooMcbPdf.o libFitDict.o 
 		g++ -fPIC -shared  RooMcbPdf.o -o libFit.so libFitDict.o $(LIBS)
