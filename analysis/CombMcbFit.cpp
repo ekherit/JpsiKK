@@ -16,6 +16,8 @@
 #include <iostream>
 
 
+#include <boost/format.hpp>
+
 #include <TROOT.h>
 #include <TApplication.h>
 #include <TSystem.h>
@@ -84,6 +86,14 @@ int main(int argc,  char ** argv)
 			n1, 
 			n2);
 
+	RooRealVar radMean("radMean", "rad mean",20,  1, 40, "MeV");
+	RooRealVar radSigma("radSigma", "rad sigma", 10,  5, 30, "MeV");
+	RooGaussian radGausPdf("smals_gauss", "small_gauss",  Mrec,  radMean,  radSigma);
+
+	//RooRealVar fRad("fRad", "Fraction of rad", 1e-3, 0, 0.1);
+	//RooRealVar fRad("fRad", "Fraction of rad", 0);
+	//RooAddPdf signalPdf("signalPdf", "Signal with radiative photons",  RooArgList(radGausPdf,  mcb),  fRad);
+	RooMcbPdf & signalPdf = mcb;
 
 	//RooRealVar poly_c1("poly_c1","coefficient of x^1 term",0, -10, 10);
 	//RooRealVar poly_c1("poly_c1","coefficient of x^1 term",0);
@@ -93,21 +103,21 @@ int main(int argc,  char ** argv)
 	RooPolynomial bgUU("bgKK", "constant background for UU channel", Mrec);	
 
 
-	RooRealVar NKK("NKK", "Number of KK events", hisKK->GetEntries(), 0, hisKK->GetEntries()*100);
-	RooRealVar NbgKK("NbgKK", "Number of background events for KK channel", 0, 0,  hisKK->GetEntries()*100);
+	RooRealVar NKK("NKK", "Number of KK events", hisKK->GetEntries(), hisKK->GetEntries()/2.0, hisKK->GetEntries()*100);
+	RooRealVar NbgKK("NbgKK", "Number of background events for KK channel", 0, 0,  hisKK->GetEntries()*0.5);
 	//RooRealVar bkgd_yield("bkgd_yield", "yield of background", 0);
 	RooArgList shapesKK;
 	RooArgList yieldsKK;
 	shapesKK.add(bgKK);         yieldsKK.add(NbgKK);
-	shapesKK.add(mcb);  					yieldsKK.add(NKK);
+	shapesKK.add(signalPdf);  					yieldsKK.add(NKK);
 	RooAddPdf  KKPdf("KKPdf", "KK + background p.d.f.", shapesKK, yieldsKK);
 
-	RooRealVar NUU("NUU", "Number of UU events", hisUU->GetEntries(), 0, hisUU->GetEntries()*100);
-	RooRealVar NbgUU("NbgUU", "Number of background events for UU channel", 0, 0,  hisUU->GetEntries()*100);
+	RooRealVar NUU("NUU", "Number of UU events", hisUU->GetEntries(), hisUU->GetEntries()/2.0, hisUU->GetEntries()*100);
+	RooRealVar NbgUU("NbgUU", "Number of background events for UU channel", 0, 0,  hisUU->GetEntries()*0.5);
 	RooArgList shapesUU;
 	RooArgList yieldsUU;
 	shapesUU.add(bgUU);      yieldsUU.add(NbgUU);
-	shapesUU.add(mcb);  					yieldsUU.add(NUU);
+	shapesUU.add(signalPdf);  					yieldsUU.add(NUU);
 	RooAddPdf  UUPdf("UUPdf", "UU + background p.d.f.", shapesUU, yieldsUU);
 
 
@@ -153,11 +163,11 @@ int main(int argc,  char ** argv)
 
 	simPdf.fitTo(combData, Extended(), Strategy(2), Minos());
 
-	//RooChi2Var chi2Var("chi2", "chi2", totalPdf, *data);
-	//cout << "chi2/ndf = " << chi2Var.getVal() << endl;
+	RooChi2Var chi2Var("chi2", "chi2", simPdf, *data);
+	cout << "chi2 = " << chi2Var.getVal() << endl;
 
   RooPlot* frameKK = Mrec.frame(Title("K^{+}K^{-} events")) ;
-  RooPlot* frameUU = Mrec.frame(Title("#mu^{+}mu^{-} events")) ;
+  RooPlot* frameUU = Mrec.frame(Title("#mu^{+}#mu^{-} events")) ;
   combData.plotOn(frameKK, MarkerSize(0.5),  Cut("sample==sample::KK")) ;
   simPdf.plotOn(frameKK, Slice(sample,"KK"),ProjWData(sample,combData),   LineWidth(1)) ;
   simPdf.plotOn(frameKK, Slice(sample,"KK"),ProjWData(sample,combData), Components(bgKK),LineStyle(kDashed),LineWidth(1)) ;
@@ -213,13 +223,13 @@ int main(int argc,  char ** argv)
   nll.plotOn(frame_staple7,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
 
 
-  RooPlot* frame_n1 = n1.frame(Title("n1 -log(L)"), Range(1, 5)) ;
+  RooPlot* frame_n1 = n1.frame(Title("n1 -log(L)"), Range(1, 10)) ;
   nll.plotOn(frame_n1,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
 
-  RooPlot* frame_n2 = n2.frame(Title("n2 -log(L)"), Range(1, 5)) ;
+  RooPlot* frame_n2 = n2.frame(Title("n2 -log(L)"), Range(1, 10)) ;
   nll.plotOn(frame_n2,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
 
-  RooPlot* frame_NKK = NKK.frame(Range(0, hisKK->GetEntries()*1.2), Title("NKK -log(L)")) ;
+  RooPlot* frame_NKK = NKK.frame(Range(hisKK->GetEntries()*0.75, hisKK->GetEntries()*1.2), Title("NKK -log(L)")) ;
   nll.plotOn(frame_NKK,PrintEvalErrors(-1),ShiftToZero(), EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
 	frame_NKK->SetMinimum(0);
 	frame_NKK->SetMaximum(40);
@@ -254,6 +264,8 @@ int main(int argc,  char ** argv)
 	double theRatio = NKK.getValV()/NUU.getValV();
 	double theRelError = sqrt( pow(NKK.getError()/NKK.getValV(), 2)  +  pow(NUU.getError()/NUU.getValV(), 2) );
 	double theError = theRatio * theRelError;
-	cout << "Nkk/Nuu = " << theRatio << " +/- " << theError  <<  " ( +/- " << theRelError*100 << "% )" <<  endl;
+	boost::format fmt("%s = (%6.3f ± %-4.3f) * 1e-3 ( ± %.2f%%)");
+	//cout << fmt % "Nkk/Nuu = (" << theRatio*1000 << " +/- " << theError*1000  <<  ") * 1e-3 ( +/- " << theRelError*100 << "% )" <<  endl;
+	cout << fmt % "Nkk/Nuu" % (theRatio*1000) %  (theError*1000) %  (theRelError*100)  <<  endl;
 	theApp.Run();
 }
