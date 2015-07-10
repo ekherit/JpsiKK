@@ -54,4 +54,9 @@ note/*.nav
 note/*.snm
 note/*.toc
 
+note/note.pdf
+
+tmp
+data
+
 
