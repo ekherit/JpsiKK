@@ -17,6 +17,7 @@
 
 
 #include <boost/format.hpp>
+#include <boost/program_options.hpp>
 
 #include <TROOT.h>
 #include <TApplication.h>
@@ -50,10 +51,42 @@ TROOT root("polarimeter","polarimeter", initfuncs);
 
 using namespace RooFit;
 using namespace std;
+
+
 int main(int argc,  char ** argv)
 {
-  if(argc<2) return 1;
-	TFile file(argv[1]);
+  namespace po=boost::program_options;
+  po::options_description opt_desc("Allowed options");
+  std::string tree_name;
+  std::string tree_file;
+  unsigned long long N;
+  opt_desc.add_options()
+    ("help,h","Print this help")
+    ("input", po::value<std::string>(&tree_file), "Root file (.root) with the data")
+		("rad",  "Fit by rad gaus")
+		("simple",  "Simple model gaus + power + exp")
+    ;
+  po::positional_options_description pos;
+  pos.add("input",-1);
+  po::variables_map opt; //options container
+  try
+  {
+    po::store(po::command_line_parser(argc, argv).options(opt_desc).positional(pos).run(), opt);
+    po::notify(opt);
+  } 
+  catch (boost::program_options::error & po_error)
+  {
+    std::cerr << "WARGNING: configuration: "<< po_error.what() << std::endl;
+  }
+
+  if(opt.count("help") && !opt.count("input"))
+  {
+    std::cout << "Usage: CombMcbFit <root_file>" << std::endl;
+    std::clog << opt_desc;
+    return 0;
+  }
+  //if(argc<2) return 1;
+	TFile file(tree_file.c_str());
 	TH1 * hisKK = (TH1*)file.Get("hMrecKK");
 	TH1 * hisUU = (TH1*)file.Get("hMrecUU");
 	//TTree * treeKK = (TTree*)file.Get("eventKK");
@@ -74,8 +107,21 @@ int main(int argc,  char ** argv)
   RooRealVar n1("n1","n1", 3,  1,100) ;
   RooRealVar n2("n2","n2", 2,  1,100) ;
 
-
-	RooMcbPdf mcb("ModCB", "Modified CrystalBall",  Mrec,  sigma,  
+	RooMcbPdf *mcbPdf=0;
+	if(opt.count("simple"))
+	{
+		mcbPdf =  new RooMcbPdf("ModCB", "Simple Modified CrystalBall: gaus + power + exp",  Mrec,  sigma,  
+			staple1, 
+			staple2, 
+			staple4, 
+			staple6, 
+			staple7, 
+			n1, 
+			n2);
+	}
+	else 
+	{
+		mcbPdf =  new RooMcbPdf("ModCB", "Simple Modified CrystalBall: gaus + power + exp",  Mrec,  sigma,  
 			staple1, 
 			staple2, 
 			staple3, 
@@ -85,15 +131,23 @@ int main(int argc,  char ** argv)
 			staple7, 
 			n1, 
 			n2);
+	}
+
 
 	RooRealVar radMean("radMean", "rad mean",20,  1, 40, "MeV");
 	RooRealVar radSigma("radSigma", "rad sigma", 10,  5, 30, "MeV");
 	RooGaussian radGausPdf("smals_gauss", "small_gauss",  Mrec,  radMean,  radSigma);
 
-	//RooRealVar fRad("fRad", "Fraction of rad", 1e-3, 0, 0.1);
+	RooAbsPdf * signalPdf =0;
+	signalPdf= mcbPdf;
+
+	RooRealVar fRad("fRad", "Fraction of rad", 1e-3, 0, 0.1);
 	//RooRealVar fRad("fRad", "Fraction of rad", 0);
-	//RooAddPdf signalPdf("signalPdf", "Signal with radiative photons",  RooArgList(radGausPdf,  mcb),  fRad);
-	RooMcbPdf & signalPdf = mcb;
+	RooAddPdf  signalRadPdf("signalPdf", "Signal with radiative photons",  RooArgList(radGausPdf,  *mcbPdf),  fRad);
+	if(opt.count("rad"))
+	{
+		signalPdf = &signalRadPdf;
+	}
 
 	//RooRealVar poly_c1("poly_c1","coefficient of x^1 term",0, -10, 10);
 	//RooRealVar poly_c1("poly_c1","coefficient of x^1 term",0);
@@ -105,25 +159,16 @@ int main(int argc,  char ** argv)
 
 	RooRealVar NKK("NKK", "Number of KK events", hisKK->GetEntries(), hisKK->GetEntries()/2.0, hisKK->GetEntries()*100);
 	RooRealVar NbgKK("NbgKK", "Number of background events for KK channel", 0, 0,  hisKK->GetEntries()*0.5);
-	//RooRealVar bkgd_yield("bkgd_yield", "yield of background", 0);
-	RooArgList shapesKK;
-	RooArgList yieldsKK;
-	shapesKK.add(bgKK);         yieldsKK.add(NbgKK);
-	shapesKK.add(signalPdf);  					yieldsKK.add(NKK);
-	RooAddPdf  KKPdf("KKPdf", "KK + background p.d.f.", shapesKK, yieldsKK);
+	RooAddPdf  KKPdf("KKPdf", "KK + background p.d.f.", RooArgList(bgKK, *signalPdf), RooArgList(NbgKK,  NKK));
 
 	RooRealVar NUU("NUU", "Number of UU events", hisUU->GetEntries(), hisUU->GetEntries()/2.0, hisUU->GetEntries()*100);
 	RooRealVar NbgUU("NbgUU", "Number of background events for UU channel", 0, 0,  hisUU->GetEntries()*0.5);
-	RooArgList shapesUU;
-	RooArgList yieldsUU;
-	shapesUU.add(bgUU);      yieldsUU.add(NbgUU);
-	shapesUU.add(signalPdf);  					yieldsUU.add(NUU);
-	RooAddPdf  UUPdf("UUPdf", "UU + background p.d.f.", shapesUU, yieldsUU);
+	RooAddPdf  UUPdf("UUPdf", "UU + background p.d.f.", RooArgList(bgUU, *signalPdf), RooArgList(NbgUU,  NUU));
 
 
 
 
-	RooAbsReal* igx = mcb.createIntegral(Mrec) ;
+	RooAbsReal* igx = mcbPdf->createIntegral(Mrec) ;
 	cout << "gx_Int[x] = " << igx->getVal() << endl;
 
 
@@ -146,10 +191,6 @@ int main(int argc,  char ** argv)
 	//RooDataSet * data = & combData;
 
 
-  // C o n s t r u c t   a   s i m u l t a n e o u s   p d f   i n   ( x , s a m p l e )
-  // -----------------------------------------------------------------------------------
-
-  // Construct a simultaneous pdf using category sample as index
   RooSimultaneous simPdf("simPdf","simultaneous pdf",sample) ;
 
   // Associate model with the physics state and model_ctl with the control state
@@ -157,7 +198,7 @@ int main(int argc,  char ** argv)
   simPdf.addPdf(UUPdf,"UU") ;
   
   RooPlot* xframe3 = Mrec.frame(Title("Show my cb function")) ;
-	mcb.plotOn(xframe3);
+	mcbPdf->plotOn(xframe3);
 	TCanvas * c_mcb = new TCanvas;
 	xframe3->Draw();
 
@@ -172,7 +213,7 @@ int main(int argc,  char ** argv)
   simPdf.plotOn(frameKK, Slice(sample,"KK"),ProjWData(sample,combData),   LineWidth(1)) ;
   simPdf.plotOn(frameKK, Slice(sample,"KK"),ProjWData(sample,combData), Components(bgKK),LineStyle(kDashed),LineWidth(1)) ;
 	frameKK->SetMinimum(1);
-  combData.plotOn(frameUU, MarkerSize(0.5),  Cut("sample==sample::UU")) ;
+  combData.plotOn(frameUU, MarkerSize(0.5),  Cut("sample==sample::UU"), "X0") ;
   simPdf.plotOn(frameUU, Slice(sample,"UU"),ProjWData(sample,combData),   LineWidth(1)) ;
   simPdf.plotOn(frameUU, Slice(sample,"UU"),ProjWData(sample,combData), Components(bgUU),LineStyle(kDashed),LineWidth(1)) ;
 	frameUU->SetMinimum(1);
