@@ -44,4 +44,14 @@ AutoDict*
 *_C.d
 
 
-mctop
+mctopo
+CombMcbFit
+testMcbFit
+
+note/*.log
+note/*.aux
+note/*.nav
+note/*.snm
+note/*.toc
+
+
