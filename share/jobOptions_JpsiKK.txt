@@ -1,7 +1,7 @@
 ApplicationMgr.DLLs += {"JpsiKK"};
 ApplicationMgr.TopAlg += {"JpsiKK"};
 JpsiKK.CENTER_MASS_ENERGY=0;
-JpsiKK.MIN_CHARGED_TRACKS=4;
+JpsiKK.MIN_CHARGED_TRACKS=3;
 JpsiKK.MAX_CHARGED_TRACKS=4;
 JpsiKK.MAX_NEUTRAL_TRACKS=1000;
 
