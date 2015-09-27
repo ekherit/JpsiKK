@@ -737,7 +737,7 @@ bool three_tracks_kinematic_fit(
 		double W
     )
 {
-  P.resize(3);
+  P.resize(4);
   EvtRecTrackIterator  PionTrk[2] = {pion_pair.first, pion_pair.second};
 	EvtRecTrackIterator & OtherTrk = other_track;
   RecMdcKalTrack * PionKalTrk[2];
@@ -766,10 +766,12 @@ bool three_tracks_kinematic_fit(
   //kmfit->setIterNumber(10000);
   //kmfit->setChisqCut(10000);
   kmfit->init();
-  for(int i=0;i<4;i++)
+  for(int i=0;i<3;i++)
   {
     kmfit->AddTrack(i,vtxfit->wtrk(i));
   }
+  kmfit->AddMissTrack(3,XMASS[PID]);
+
   HepLorentzVector Pcmf(W*sin(0.011) /* 40.546 MeV*/,0,0,W); //initial vector of center of mass frame
   kmfit->AddFourMomentum(0,  Pcmf);
   //kmfit->AddTotalEnergy(0,PSIP_MASS,0,1,2,3);
@@ -1121,7 +1123,9 @@ StatusCode JpsiKK::execute()
   //log << MSG::ERROR << "pion pairs: " << pion_pairs.size() << endmsg;
 
 
+  //if no other particles
 	if(other_negative_tracks.empty() && other_positive_tracks.empty()) return StatusCode::SUCCESS;
+  //one charged particle is missing
 	if(other_positive_tracks.empty() || other_negative_tracks.empty())
 	{
 		TrackList_t * tracks=0;
@@ -1133,9 +1137,13 @@ StatusCode JpsiKK::execute()
 			//must has mdc and emc information
 			if(!(*track)->isMdcTrackValid()) continue;
 			if(!(*track)->isEmcShowerValid()) continue;
+      for(int pid=0;pid<2;pid++)
+      {
+        HepLorentzVector p = mdcTrk->p4(XMASS[pis]);
+      }
 		}
 	}
-	else
+	else //positive and negartive particles exists then find best pair
 	{
 		//make other pairs
 		TrackPairList_t other_pairs;
