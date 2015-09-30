@@ -110,6 +110,7 @@ class JpsiKK : public Algorithm
     NTuple::Item<long>    npositive_pions; //number of positive pions
     NTuple::Item<long>    nnegative_pions; //number of negative pions
     NTuple::Item<long>    npion_pairs; //total number of found pion pairs
+		NTuple::Item<long>    sign;   //signature of the event shows missed particle  01(only K/mu+), 10 (only K/mu-),  11 (both K/mu-, K/mu+)
     NTuple::Item<long>    channel;     //J/psi decay channel 0 -- K+K-, 1 -- mu+mu-
     NTuple::Item<long>    KK;     //KK Jpsi decay event
     NTuple::Item<long>    uu;     //MuMu event
