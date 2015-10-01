@@ -983,7 +983,7 @@ bool kinfit(
 		const std::vector<EvtRecTrackIterator> & Tracks,  
 		int & channel,  
 		double & chi2,  
-		HepLorentzVector & P,  
+		std::vector<HepLorentzVector> & P,  
 		const double CENTER_MASS_ENERGY
 		)
 {
@@ -991,7 +991,7 @@ bool kinfit(
 	for(int pid=0;pid<2;pid++)
 	{
 		double chi2_tmp=1e100;
-		HepLorentzVector P_tmp;
+		std::vector<HepLorentzVector> P_tmp;
 		bool fit_result = kinematic_fit(pid, Tracks, P_tmp, chi2_tmp, CENTER_MASS_ENERGY);
 		if(fit_result)
 		{
