@@ -1413,6 +1413,7 @@ StatusCode JpsiKK::execute()
     fEvent.vz[i]=0;
     fEvent.vphi[i]=0;
   }
+	std::cerr << "DEBUG: BEFORE particle id" << std::endl;
 
 
   ParticleID * PID = ParticleID::instance();
