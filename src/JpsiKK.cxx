@@ -1491,6 +1491,7 @@ StatusCode JpsiKK::execute()
       //fDedx.p[i] = dedxTrk->getDedxExpect(4);
       //fDedx.pid[i]=dedxTrk->particleId();
     }
+		std::cerr << "DEBUG: Before TOF:" << std::endl;
     if((*Tracks[i])->isTofTrackValid())
     {
       SmartRefVector<RecTofTrack> tofTrkCol = (*Tracks[i])->tofTrack();
@@ -1533,6 +1534,7 @@ StatusCode JpsiKK::execute()
 
     //fill particle id
 
+		std::cerr << "DEBUG: Before PID:" << std::endl;
     PID->setRecTrack((*Tracks[i]));
     PID->calculate();
     if(PID->IsPidInfoValid())
@@ -1543,6 +1545,7 @@ StatusCode JpsiKK::execute()
       fPid.prob[ID_KAON][i]     = PID->probKaon();
       fPid.prob[ID_PROTON][i]   = PID->probProton();
     }
+		std::cerr << "DEBUG: Before chi2:" << std::endl;
     vector<double> chi2 = get_chi2(Tracks[i]);
     for(int pid=0;pid<5;pid++)
     {
@@ -1550,6 +1553,7 @@ StatusCode JpsiKK::execute()
     }
 
   }
+		std::cerr << "DEBUG: Before fPID:" << std::endl;
   for(int i=0;i<5;i++)
   {
     fPid.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
