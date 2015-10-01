@@ -1415,7 +1415,6 @@ StatusCode JpsiKK::execute()
   }
 	std::cerr << "DEBUG: BEFORE particle id" << std::endl;
 
-
   ParticleID * PID = ParticleID::instance();
   PID->init();
   PID->setMethod(PID->methodProbability());
@@ -1432,6 +1431,7 @@ StatusCode JpsiKK::execute()
   fMdc.Mrecoil = get_recoil__mass(pion_pair, PION_MASS,  CENTER_MASS_ENERGY);
   fMdc.Minv    = sqrt(get_invariant_mass2(result_pair,XMASS[channel]));
   //EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
+	std::cerr << "DEBUG: BEFORE loop" << std::endl;
   for(int i=0;i<4;i++)
   {
 		if(Tracks[i]==evtRecTrkCol->end()) continue;
