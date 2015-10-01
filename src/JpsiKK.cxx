@@ -520,7 +520,10 @@ void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
   phi=Rvphi0;
 }
 
-std::list<EvtRecTrackIterator> createGoodChargedTrackList(SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol)
+std::list<EvtRecTrackIterator> createGoodChargedTrackList(
+		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
+		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
+		)
 {
   std::list<EvtRecTrackIterator> good_charged_tracks;
   for(unsigned i = 0; i < evtRecEvent->totalCharged(); i++)
@@ -538,7 +541,10 @@ std::list<EvtRecTrackIterator> createGoodChargedTrackList(SmartDataPtr<EvtRecTra
 	return good_charged_tracks;
 }
 
-std::list<EvtRecTrackIterator> createGoodNeutralTrackList(SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol)
+std::list<EvtRecTrackIterator> createGoodNeutralTrackList(
+		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
+		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
+		)
 {
 	std::list<EvtRecTrackIterator> good_neutral_tracks;
 	//collect good neutral track
@@ -1083,8 +1089,8 @@ StatusCode JpsiKK::execute()
   //fill initial value of the selected event
   fEvent.init();
 
-  std::list<EvtRecTrackIterator> good_charged_tracks=createGoodChargedTrackList(evtRecTrkCol);
-  std::list<EvtRecTrackIterator> good_neutral_tracks=createGoodNeutralTrackList(evtRecTrkCol);
+  std::list<EvtRecTrackIterator> good_charged_tracks=createGoodChargedTrackList(evtRecEvent, evtRecTrkCol);
+  std::list<EvtRecTrackIterator> good_neutral_tracks=createGoodNeutralTrackList(evtRecEvent, evtRecTrkCol);
 
   //SELECTION CODE
   if( MAX_NEUTRAL_TRACKS < good_neutral_tracks.size()) return StatusCode::SUCCESS;
