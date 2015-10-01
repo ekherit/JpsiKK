@@ -1096,6 +1096,8 @@ StatusCode JpsiKK::execute()
   if( MAX_NEUTRAL_TRACKS < good_neutral_tracks.size()) return StatusCode::SUCCESS;
   //SELECTION CODE
   if( good_charged_tracks.size() < MIN_CHARGED_TRACKS || MAX_CHARGED_TRACKS < good_charged_tracks.size()) return StatusCode::SUCCESS;
+
+	cout <<  "Number of good charged tracks: " << good_charged_tracks.size() << endl;
   
   TrackList_t charged_tracks; //selected tracks for specific cut
   TrackList_t positive_charged_tracks; //selected tracks for specific cut
@@ -1161,6 +1163,7 @@ StatusCode JpsiKK::execute()
         pion_pairs.push_back(pair);
       }
     }
+	cout <<  "Number of pion pairs: " << pion_pairs.size() << endl;
   //SELECTION CODE we must have at list one pion pair
   if(pion_pairs.empty()) return StatusCode::SUCCESS; //we must have at list one pion pair
 	//if(pion_pairs.size()!=1) return StatusCode::SUCCESS; //exacly one pion pair
@@ -1179,10 +1182,10 @@ StatusCode JpsiKK::execute()
   //keep only specific signature
   //if(positive_charged_tracks.size()!=2 || negative_charged_tracks.size()!=2) return StatusCode::SUCCESS;
 
-  //log << MSG::ERROR << "good charged tracks: " << charged_tracks.size() << " (" << negative_charged_tracks.size() << ", " << positive_charged_tracks.size() << endmsg;
-  //log << MSG::ERROR << "pions: " << negative_pion_tracks.size()  << ", " << positive_pion_tracks.size() << endmsg;
-  //log << MSG::ERROR << "other: " << other_negative_tracks.size()  << ", " << other_positive_tracks.size() << endmsg;
-  //log << MSG::ERROR << "pion pairs: " << pion_pairs.size() << endmsg;
+  log << MSG::ERROR << "good charged tracks: " << charged_tracks.size() << " (" << negative_charged_tracks.size() << ", " << positive_charged_tracks.size() << endmsg;
+  log << MSG::ERROR << "pions: " << negative_pion_tracks.size()  << ", " << positive_pion_tracks.size() << endmsg;
+  log << MSG::ERROR << "other: " << other_negative_tracks.size()  << ", " << other_positive_tracks.size() << endmsg;
+  log << MSG::ERROR << "pion pairs: " << pion_pairs.size() << endmsg;
 
 
   //if no other particles
@@ -1242,7 +1245,7 @@ StatusCode JpsiKK::execute()
 	}
 	else //positive and negartive particles exists then find best pair
 	{
-    cout<< "Four particles" << endreq;
+    cout<< "Four particles" << endl;
 		std::vector<EvtRecTrackIterator> tmp_Tracks(3);
 		tmp_Tracks.resize(4);
 		tmp_Tracks[0]=pion_pair.first;
