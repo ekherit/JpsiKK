@@ -980,7 +980,7 @@ bool kinematic_fit(
 }
 
 bool kinfit(
-		std::vector<EvtRecTrackIterator> & Tracks,  
+		const std::vector<EvtRecTrackIterator> & Tracks,  
 		int & channel,  
 		double & chi2,  
 		HepLorentzVector & P,  
