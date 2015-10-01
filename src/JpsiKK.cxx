@@ -1512,7 +1512,7 @@ StatusCode JpsiKK::execute()
 
     //fill particle id
 
-    PID->setRecTrack(Tracks[i]);
+    PID->setRecTrack((*Tracks[i]));
     PID->calculate();
     if(PID->IsPidInfoValid())
     {
