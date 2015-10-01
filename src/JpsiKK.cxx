@@ -1320,6 +1320,7 @@ StatusCode JpsiKK::execute()
 	{
 		pchi2[pid]/scale*2;
 	}
+	std::cerr << "DEBUG: After pid" << std::endl;
 
 	//SELECTION CODE
 	if( pchi2[channel] > 200 ) return StatusCode::SUCCESS;
@@ -1367,6 +1368,7 @@ StatusCode JpsiKK::execute()
   //now fill the tuples
 
   //some statistics information
+	std::cerr << "DEBUG: BEFORE header filling and Pkf inv masses" << std::endl;
   fEvent.ngood_charged_track = good_charged_tracks.size();
   fEvent.ngood_neutral_track = good_neutral_tracks.size();
   fEvent.npositive_track = positive_charged_tracks.size();
