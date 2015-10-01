@@ -1331,6 +1331,7 @@ StatusCode JpsiKK::execute()
 	//if( pchi2[channel] > pchi2[ID_ELECTRON] ) return StatusCode::SUCCESS;
 	
 	fEvent.sign = sign;
+	std::cerr << "DEBUG: Before swithc channel" << std::endl;
 
 	switch(channel)
 	{
