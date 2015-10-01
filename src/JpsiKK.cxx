@@ -1369,7 +1369,7 @@ StatusCode JpsiKK::execute()
   //now fill the tuples
 
   //some statistics information
-	std::cerr << "DEBUG: BEFORE header filling and Pkf inv masses" << std::endl;
+	std::cerr << "DEBUG: BEFORE header fillin" << std::endl;
   fEvent.ngood_charged_track = good_charged_tracks.size();
   fEvent.ngood_neutral_track = good_neutral_tracks.size();
   fEvent.npositive_track = positive_charged_tracks.size();
@@ -1381,6 +1381,7 @@ StatusCode JpsiKK::execute()
   fEvent.channel = channel; 
   fEvent.kin_chi2 = kinematic_chi2;
   fEvent.pid_chi2 = get_chi2(result_pair)[channel];
+	std::cerr << "DEBUG: BEFORE Pkf inv masses" << std::endl;
   fEvent.Minv = (Pkf[2]+Pkf[3]).m();
   fEvent.M012 = (Pkf[0]+Pkf[1]+Pkf[2]).m();
   fEvent.M013 = (Pkf[0]+Pkf[1]+Pkf[3]).m();
@@ -1388,6 +1389,7 @@ StatusCode JpsiKK::execute()
   fEvent.M12 =  (Pkf[1]+Pkf[2]).m();
   fEvent.M01 =  (Pkf[0]+Pkf[1]).m();
   HepLorentzVector P_psip(CENTER_MASS_ENERGY*sin(0.011),0,0,CENTER_MASS_ENERGY); //initial vector of psip
+	std::cerr << "DEBUG: BEFORE Mrecoil" << std::endl;
   fEvent.Mrecoil = (P_psip - Pkf[0] - Pkf[1]).m();
 
   fEvent.ntrack = 4;
