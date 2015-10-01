@@ -1429,7 +1429,7 @@ StatusCode JpsiKK::execute()
   fEmc.ntrack=4;
   fTof.ntrack=4;
   fMdc.Mrecoil = get_recoil__mass(pion_pair, PION_MASS,  CENTER_MASS_ENERGY);
-  fMdc.Minv    = sqrt(get_invariant_mass2(result_pair,XMASS[channel]));
+  //fMdc.Minv    = sqrt(get_invariant_mass2(result_pair,XMASS[channel]));
   //EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
 	std::cerr << "DEBUG: BEFORE loop" << std::endl;
   for(int i=0;i<4;i++)
