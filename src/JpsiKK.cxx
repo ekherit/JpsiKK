@@ -983,7 +983,7 @@ bool kinfit(
 		std::vector<EvtRecTrackIterator> & Tracks,  
 		int & channel,  
 		double & chi2,  
-		std::HepLorentzVector & P,  
+		HepLorentzVector & P,  
 		const double CENTER_MASS_ENERGY
 		)
 {
