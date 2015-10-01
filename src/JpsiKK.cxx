@@ -1380,7 +1380,7 @@ StatusCode JpsiKK::execute()
   // fill the decay channel of the J/psi 0 - kaons, 1 --muons
   fEvent.channel = channel; 
   fEvent.kin_chi2 = kinematic_chi2;
-  fEvent.pid_chi2 = get_chi2(result_pair)[channel];
+  fEvent.pid_chi2 = pchi2[channel];
 	std::cerr << "DEBUG: BEFORE Pkf inv masses" << std::endl;
   fEvent.Minv = (Pkf[2]+Pkf[3]).m();
   fEvent.M012 = (Pkf[0]+Pkf[1]+Pkf[2]).m();
