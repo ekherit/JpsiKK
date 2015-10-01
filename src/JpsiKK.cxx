@@ -1434,7 +1434,9 @@ StatusCode JpsiKK::execute()
 	std::cerr << "DEBUG: BEFORE loop" << std::endl;
   for(int i=0;i<4;i++)
   {
+		std::cerr << "DEBUG: track " << i << std::endl;
 		if(Tracks[i]==evtRecTrkCol->end()) continue;
+		std::cerr << "DEBUG: Before emcTrk:" << std::endl;
     if(i>1)
     {
       RecEmcShower *emcTrk = (*Tracks[i])->emcShower();
@@ -1444,6 +1446,7 @@ StatusCode JpsiKK::execute()
       fEmc.time[i] = emcTrk->time();
       fMdc.E[i] = fEmc.E[i];
     }
+		std::cerr << "DEBUG: Before mdcTrk:" << std::endl;
     RecMdcTrack  *mdcTrk = (*Tracks[i])->mdcTrack();
     fMdc.trackId[i] = mdcTrk->trackId();
     fMdc.q[i] = mdcTrk->charge(); 
@@ -1460,6 +1463,7 @@ StatusCode JpsiKK::execute()
     fMdc.y[i]  = mdcTrk->y();
     fMdc.z[i]  = mdcTrk->z();
     double rvxy,rvz,rvphi;
+		std::cerr << "DEBUG: calculate vertex:" << std::endl;
     calculate_vertex(mdcTrk,rvxy,rvz,rvphi); 
     fMdc.vxy[i] = rvxy;
     fMdc.vz[i]  = rvz; 
@@ -1467,6 +1471,7 @@ StatusCode JpsiKK::execute()
 
 
     //dedx information
+		std::cerr << "DEBUG: DedX:" << std::endl;
     if((*Tracks[i])->isMdcDedxValid())
     {
       RecMdcDedx* dedxTrk = (*Tracks[i])->mdcDedx();
