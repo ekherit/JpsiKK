@@ -1280,7 +1280,7 @@ StatusCode JpsiKK::execute()
 	//SELECTION CODE SUPRESS ELECTRONS
 	for(int i=2;i<4;i++)
 	{
-		if(Tracks[i]==evtRecTrkCol.end()) continue;
+		if(Tracks[i]==evtRecTrkCol->end()) continue;
 		RecMdcTrack  * mdcTrk = (*Tracks[i])->mdcTrack();
 		RecEmcShower * emcTrk = (*Tracks[i])->emcShower();
 		double EpRatio = emcTrk->energy()/mdcTrk->p();
@@ -1292,7 +1292,7 @@ StatusCode JpsiKK::execute()
 	int scale=0;
 	for(int i=2;i<4;i++)
 	{
-		if(Tracks[i]==evtRecTrkCol.end()) continue;
+		if(Tracks[i]==evtRecTrkCol->end()) continue;
 		vector<double> chi2 = get_chi2(Tracks[i]);
 		scale++;
 		for(int pid =0;pid<5;pid++)
@@ -1412,7 +1412,7 @@ StatusCode JpsiKK::execute()
   //EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
   for(int i=0;i<4;i++)
   {
-		if(Tracks[i]==evtRecTrkCol.end()) continue;
+		if(Tracks[i]==evtRecTrkCol->end()) continue;
     if(i>1)
     {
       RecEmcShower *emcTrk = (*Tracks[i])->emcShower();
