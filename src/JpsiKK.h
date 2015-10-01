@@ -124,22 +124,33 @@ std::list<EvtRecTrackIterator> createGoodChargedTrackList(
     NTuple::Item<long>    npositive_pions; //number of positive pions
     NTuple::Item<long>    nnegative_pions; //number of negative pions
     NTuple::Item<long>    npion_pairs; //total number of found pion pairs
-		NTuple::Item<long>    sign;   //signature of the event shows missed particle  01(only K/mu+), 10 (only K/mu-),  11 (both K/mu-, K/mu+)
+		NTuple::Item<long>    sign;   //signature of the event shows missed particle  01(K- or mu-), 10 (K+ or mu+),  11 (KK or uu)
     NTuple::Item<long>    channel;     //J/psi decay channel 0 -- K+K-, 1 -- mu+mu-
     NTuple::Item<long>    KK;     //KK Jpsi decay event
     NTuple::Item<long>    uu;     //MuMu event
-    NTuple::Item<double>  Mrecoil;  //pion recoil mass
-    NTuple::Item<double>  M2missing; //missing square invariant mass
-    NTuple::Item<double>  Minv; //invariant mass two charged particles
+    NTuple::Item<double>  Mrec;  //pion recoil mass
+    //NTuple::Item<double>  M2missing; //missing square invariant mass move to per track parameter
+    //NTuple::Item<double>  Minv; //invariant mass two charged particles // move to M23 notation
+
     NTuple::Item<double>  kin_chi2; //kinematic chi2
     NTuple::Item<double>  pid_chi2; //my prob  chi2
-    NTuple::Item<double>  M012; //invariant mass of  two pion and negative Kaon
-    NTuple::Item<double>  M013; //invariant mass of  two pion and positive Kaon
+
+    NTuple::Item<double>  M012; //M(pi pi K/mu-)
+    NTuple::Item<double>  M013; //M(pi pi K/mu+)
+    NTuple::Item<double>  M023; //M(pi- KK/uu)
+    NTuple::Item<double>  M123; //M(pi+ KK/uu)
+
     NTuple::Item<double>  M03; //invariant mass of Kaon and pion
     NTuple::Item<double>  M12; //invariant mass of kaon and pion
     NTuple::Item<double>  M01; //invariant mass of pion
+    NTuple::Item<double>  M23; //invariant mass of kaons or muons
 
     NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
+    NTuple::Array<double> kchi;    //kinematik chi2
+    NTuple::Array<double> pchi;    //my pid chi2
+    NTuple::Array<double> P[5];    //probability from ParticleID
+    NTuple::Array<double> Mmis;    //missing invariant mass
+
     NTuple::Array<double> q; //charge of the track
     NTuple::Array<double> E;
     NTuple::Array<double> p;

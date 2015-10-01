@@ -84,6 +84,13 @@ const double PSIP_MASS = 3.686109; //GeV PDG-2014
 enum              {ID_KAON=0, ID_MUON=1, ID_ELECTRON=2, ID_PION=3, ID_PROTON=4};
 double XMASS[5] = {KAON_MASS, MUON_MASS, ELECTRON_MASS, PION_MASS, PROTON_MASS};
 
+enum
+{
+	OTHER_NEGATIVE_TRACK=0x1, 
+	OTHER_POSITIVE_TRACK=0x2, 
+	OTHER_TWO_TRACKS=0x3
+};
+
 inline double sq(double x) { return x*x; }
 
 typedef std::pair<EvtRecTrackIterator, EvtRecTrackIterator> TrackPair_t;
@@ -1203,12 +1210,30 @@ StatusCode JpsiKK::execute()
 	Tracks.reserve(4);
 	
   //one charged particle is missing
-	if(other_positive_tracks.empty() || other_negative_tracks.empty())
+	if(!other_positive_tracks.empty() || !other_negative_tracks.empty())
 	{
     cout<< "Three particles" << endreq;
 		TrackList_t * tracks=0;
-		if(!other_positive_tracks.empty()) tracks = &other_positive_tracks;
-		if(!other_negative_tracks.empty()) tracks = &other_negative_tracks;
+		switch(sign)
+		{
+			case OTHER_NEGATIVE_TRACK:
+				tracks = &other_negative_tracks;
+				break;
+			case OTHER_POSITIVE_TRACK:
+				tracks = &other_positive_tracks;
+				break;
+			case OTHER_TWO_TRACKS:
+				switch(eventHeader->eventNumber() % 2)
+				{
+					case 0:
+						tracks = &other_positive_tracks;
+						break;
+					case 1:
+						tracks = &other_negative_tracks;
+						break;
+				}
+				break;
+		};
 		int tmp_chan=-1;
 		double tmp_chi2=2e100;
 		std::vector<EvtRecTrackIterator> tmp_Tracks(3);
@@ -1233,7 +1258,7 @@ StatusCode JpsiKK::execute()
 			}
 		}
 		//convert resulting 4-momentum P to Pkf with corresponding sign
-		if(sign == 0x4) 
+		if(sign == 0x2) 
 		{
 			std::swap(Pkf[2], Pkf[3]);
 			if(Tracks.size()==3) 
@@ -1243,7 +1268,8 @@ StatusCode JpsiKK::execute()
 			}
 		}
 	}
-	else //positive and negartive particles exists then find best pair
+	if(false && !other_positive_tracks.empty() && !other_negative_tracks.empty())
+	//else //positive and negartive particles exists then find best pair
 	{
     cout<< "Four particles" << endl;
 		std::vector<EvtRecTrackIterator> tmp_Tracks(4);
