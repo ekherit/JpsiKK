@@ -25,6 +25,9 @@
 
 #include "EventModel/EventHeader.h"
 
+#include "EvtRecEvent/EvtRecEvent.h"
+#include "EvtRecEvent/EvtRecTrack.h"
+
 class JpsiKK : public Algorithm 
 {
 	public:
