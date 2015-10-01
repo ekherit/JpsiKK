@@ -1208,8 +1208,8 @@ StatusCode JpsiKK::execute()
 		double tmp_chi2=2e100;
 		std::vector<EvtRecTrackIterator> tmp_Tracks(3);
 		tmp_Tracks.resize(3);
-		tmp_Tracks[0]=pion_pair.first();
-		tmp_Tracks[1]=pion_pair.second();
+		tmp_Tracks[0]=pion_pair.first;
+		tmp_Tracks[1]=pion_pair.second;
 		std::vector<HepLorentzVector> tmp_P;
 		for(TrackList_t::iterator i=tracks->begin(); i!=tracks->end(); ++i)
 		{
@@ -1243,8 +1243,8 @@ StatusCode JpsiKK::execute()
 	{
 		std::vector<EvtRecTrackIterator> tmp_Tracks(3);
 		tmp_Tracks.resize(4);
-		tmp_Tracks[0]=pion_pair.first();
-		tmp_Tracks[1]=pion_pair.second();
+		tmp_Tracks[0]=pion_pair.first;
+		tmp_Tracks[1]=pion_pair.second;
 		int tmp_chan=-1;
 		double tmp_chi2=2e100;
 		std::vector<HepLorentzVector> tmp_P;
