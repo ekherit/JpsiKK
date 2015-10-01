@@ -992,6 +992,7 @@ bool kinfit(
 	{
 		double chi2_tmp=1e100;
 		std::vector<HepLorentzVector> P_tmp;
+		std::cout << "Before kinematic_fit" << endl;
 		bool fit_result = kinematic_fit(pid, Tracks, P_tmp, chi2_tmp, CENTER_MASS_ENERGY);
 		if(fit_result)
 		{
