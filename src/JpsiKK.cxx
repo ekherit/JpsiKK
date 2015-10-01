@@ -1291,6 +1291,7 @@ StatusCode JpsiKK::execute()
 	double MIN_EP_RATIO[5] = { MIN_KAON_EP_RATIO,  MIN_MUON_EP_RATIO,  0, 0, 0}; 
 	double MAX_EP_RATIO[5] = { MAX_KAON_EP_RATIO,  MAX_MUON_EP_RATIO,  0, 0, 0}; 
 	//SELECTION CODE SUPRESS ELECTRONS
+	std::cerr << "DEBUG: BEGIN supressing electrons" << std::endl;
 	for(int i=2;i<4;i++)
 	{
 		if(Tracks[i]==evtRecTrkCol->end()) continue;
@@ -1300,6 +1301,7 @@ StatusCode JpsiKK::execute()
 		if( EpRatio < MIN_EP_RATIO[channel]      || MAX_EP_RATIO[channel] < EpRatio )     return StatusCode::SUCCESS;
 		if( mdcTrk->p() < MIN_MOMENTUM[channel]  || MAX_MOMENTUM[channel] < mdcTrk->p() ) return StatusCode::SUCCESS;
 	}
+	std::cerr << "DEBUG: END supressing electrons" << std::endl;
 
 	vector<double> pchi2(5, 0);
 	int scale=0;
