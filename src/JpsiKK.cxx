@@ -1553,10 +1553,10 @@ StatusCode JpsiKK::execute()
     }
 
   }
-		std::cerr << "DEBUG: Before fPID:" << std::endl;
+	std::cerr << "DEBUG: Before fPID:" << std::endl;
   for(int i=0;i<5;i++)
   {
-    fPid.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
+    //fPid.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
     HepLorentzVector p1(Pkf[2].vect(), XMASS[i]);
     HepLorentzVector p2(Pkf[3].vect(), XMASS[i]);
     fPid.kM[i] = (p1+p2).m();
