@@ -1275,6 +1275,7 @@ StatusCode JpsiKK::execute()
 						Tracks = tmp_Tracks;
 					}
 				}
+				cout << "After kinematik_fit" << std::endl;
 			} //end of loop for positive tracks
 		} //end of loop for negative tracks 
 	}
