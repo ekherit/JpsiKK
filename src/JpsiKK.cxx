@@ -227,7 +227,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("nppions", npositive_pions); //good poitive pion tracks in event
   status = tuple->addItem ("nnpions", nnegative_pions); //good negative pion track in event
   status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
-  //status = tuple->addItem ("sign", sign); //number of pions paris in event
+  status = tuple->addItem ("sign", sign); //number of pions paris in event
   status = tuple->addItem ("channel", channel); //decay channel of the J/psi
   status = tuple->addItem ("KK", KK); //KK decay channel of the J/psi
   status = tuple->addItem ("uu", uu); //mu-mu decay channel of the J/psi
@@ -1323,9 +1323,9 @@ StatusCode JpsiKK::execute()
 	std::cerr << "DEBUG: After pid" << std::endl;
 
 	//SELECTION CODE
-	//if( pchi2[channel] > 200 ) return StatusCode::SUCCESS;
-	//if( pchi2[channel] > pchi2[ID_KAON] )     return StatusCode::SUCCESS;
-	//if( pchi2[channel] > pchi2[ID_MUON] )     return StatusCode::SUCCESS;
+	if( pchi2[channel] > 200 ) return StatusCode::SUCCESS;
+	if( pchi2[channel] > pchi2[ID_KAON] )     return StatusCode::SUCCESS;
+	if( pchi2[channel] > pchi2[ID_MUON] )     return StatusCode::SUCCESS;
 	//if( pchi2[channel] > pchi2[ID_PION] )     return StatusCode::SUCCESS;
 	//if( pchi2[channel] > pchi2[ID_PROTON] )   return StatusCode::SUCCESS;
 	//if( pchi2[channel] > pchi2[ID_ELECTRON] ) return StatusCode::SUCCESS;
