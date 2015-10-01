@@ -1201,6 +1201,7 @@ StatusCode JpsiKK::execute()
   //one charged particle is missing
 	if(other_positive_tracks.empty() || other_negative_tracks.empty())
 	{
+    cout<< "Three particles" << endreq;
 		TrackList_t * tracks=0;
 		if(!other_positive_tracks.empty()) tracks = &other_positive_tracks;
 		if(!other_negative_tracks.empty()) tracks = &other_negative_tracks;
@@ -1241,6 +1242,7 @@ StatusCode JpsiKK::execute()
 	}
 	else //positive and negartive particles exists then find best pair
 	{
+    cout<< "Four particles" << endreq;
 		std::vector<EvtRecTrackIterator> tmp_Tracks(3);
 		tmp_Tracks.resize(4);
 		tmp_Tracks[0]=pion_pair.first;
