@@ -1388,6 +1388,7 @@ StatusCode JpsiKK::execute()
   fEvent.Mrecoil = (P_psip - Pkf[0] - Pkf[1]).m();
 
   fEvent.ntrack = 4;
+	std::cerr << "DEBUG: BEFORE fEvent filling" << std::endl;
   for ( int i=0;i<4;i++)
   {
     fEvent.q[i]  = i%2 == 0 ? -1 : +1;
