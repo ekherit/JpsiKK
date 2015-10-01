@@ -763,7 +763,7 @@ bool vertex_fit(const std::vector<WTrackParameter> & input_tracks,  std::vector<
   VertexFit* vtxfit = VertexFit::instance();
   vtxfit->init();
 	std::vector<int> index_list(input_tracks.size());
-	for(int i=0; i<inputs_tracks.size(); ++i)
+	for(int i=0; i<input_tracks.size(); ++i)
 	{
 		vtxfit->AddTrack(i, input_tracks[i]);
 		index_list[i] = i;
