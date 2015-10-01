@@ -87,6 +87,17 @@ class JpsiKK : public Algorithm
   long int event_with_pions;
   long int event_with_protons;
   long int event_with_electrons;
+	protected:
+
+std::list<EvtRecTrackIterator> createGoodNeutralTrackList(
+		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
+		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
+		);
+
+std::list<EvtRecTrackIterator> createGoodChargedTrackList(
+		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
+		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
+		);
 
   public:
   struct RootTuple

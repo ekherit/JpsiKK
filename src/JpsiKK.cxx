@@ -520,7 +520,7 @@ void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
   phi=Rvphi0;
 }
 
-std::list<EvtRecTrackIterator> createGoodChargedTrackList(
+std::list<EvtRecTrackIterator> JpsiKK::createGoodChargedTrackList(
 		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
 		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
 		)
@@ -541,7 +541,7 @@ std::list<EvtRecTrackIterator> createGoodChargedTrackList(
 	return good_charged_tracks;
 }
 
-std::list<EvtRecTrackIterator> createGoodNeutralTrackList(
+std::list<EvtRecTrackIterator> JpsiKK::createGoodNeutralTrackList(
 		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
 		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
 		)
