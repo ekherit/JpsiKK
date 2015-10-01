@@ -1211,7 +1211,6 @@ StatusCode JpsiKK::execute()
 		int tmp_chan=-1;
 		double tmp_chi2=2e100;
 		std::vector<EvtRecTrackIterator> tmp_Tracks(3);
-		tmp_Tracks.resize(3);
 		tmp_Tracks[0]=pion_pair.first;
 		tmp_Tracks[1]=pion_pair.second;
 		std::vector<HepLorentzVector> tmp_P;
@@ -1246,8 +1245,7 @@ StatusCode JpsiKK::execute()
 	else //positive and negartive particles exists then find best pair
 	{
     cout<< "Four particles" << endl;
-		std::vector<EvtRecTrackIterator> tmp_Tracks(3);
-		tmp_Tracks.resize(4);
+		std::vector<EvtRecTrackIterator> tmp_Tracks(4);
 		tmp_Tracks[0]=pion_pair.first;
 		tmp_Tracks[1]=pion_pair.second;
 		int tmp_chan=-1;
@@ -1263,6 +1261,7 @@ StatusCode JpsiKK::execute()
 				EvtRecTrackIterator second_track = *j;
 				tmp_Tracks[2] = *i;
 				tmp_Tracks[3] = *j;
+				cout << "Before kinfit" << endl;
 				bool fit_result=kinfit(tmp_Tracks, tmp_chan, tmp_chi2,tmp_P,  CENTER_MASS_ENERGY);
 				if(fit_result)
 				{
