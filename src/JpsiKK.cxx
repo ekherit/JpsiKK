@@ -1318,7 +1318,7 @@ StatusCode JpsiKK::execute()
 	//normalization of chi2
 	for(int pid=0;pid<5;pid++)
 	{
-		pchi2[pid]/scale*2;
+		pchi2[pid]=pchi2[pid]/scale*2;
 	}
 	std::cerr << "DEBUG: After pid" << std::endl;
 
