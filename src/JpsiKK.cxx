@@ -1279,6 +1279,7 @@ StatusCode JpsiKK::execute()
 			} //end of loop for positive tracks
 		} //end of loop for negative tracks 
 	}
+	cout << "After ifelse" << endl;
 
 	//SELECTION CODE
 	if(!GoodKinematikFit) return StatusCode::SUCCESS;
