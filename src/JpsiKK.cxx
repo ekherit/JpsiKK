@@ -1323,9 +1323,9 @@ StatusCode JpsiKK::execute()
 	std::cerr << "DEBUG: After pid" << std::endl;
 
 	//SELECTION CODE
-	if( pchi2[channel] > 200 ) return StatusCode::SUCCESS;
-	if( pchi2[channel] > pchi2[ID_KAON] )     return StatusCode::SUCCESS;
-	if( pchi2[channel] > pchi2[ID_MUON] )     return StatusCode::SUCCESS;
+	//if( pchi2[channel] > 200 ) return StatusCode::SUCCESS;
+	//if( pchi2[channel] > pchi2[ID_KAON] )     return StatusCode::SUCCESS;
+	//if( pchi2[channel] > pchi2[ID_MUON] )     return StatusCode::SUCCESS;
 	//if( pchi2[channel] > pchi2[ID_PION] )     return StatusCode::SUCCESS;
 	//if( pchi2[channel] > pchi2[ID_PROTON] )   return StatusCode::SUCCESS;
 	//if( pchi2[channel] > pchi2[ID_ELECTRON] ) return StatusCode::SUCCESS;
