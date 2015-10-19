@@ -112,6 +112,83 @@ std::list<EvtRecTrackIterator> createGoodChargedTrackList(
     virtual StatusCode init_tuple(void)=0;
   };
 
+
+	struct Mass_t
+	{
+    NTuple::Item<double>  Mrec;  //pion recoil mass
+    NTuple::Item<double>  M012; //M(pi pi K/mu-)
+    NTuple::Item<double>  M013; //M(pi pi K/mu+)
+    NTuple::Item<double>  M023; //M(pi- KK/uu)
+    NTuple::Item<double>  M123; //M(pi+ KK/uu)
+
+    NTuple::Item<double>  M03; //invariant mass of Kaon and pion
+    NTuple::Item<double>  M12; //invariant mass of kaon and pion
+    NTuple::Item<double>  M01; //invariant mass of pion
+    NTuple::Item<double>  M23; //invariant mass of kaons or muons
+
+    NTuple::Array<double> Mmis;    //missing invariant mass
+
+    virtual StatusCode add_to_tuple(NTuple::Tuple * tuple)
+		{
+			StatusCode status;
+			status = tuple->addItem ("Mrec", Mrec); 
+			status = tuple->addItem ("M012", M012); 
+			status = tuple->addItem ("M013", M013); 
+			status = tuple->addItem ("M023", M023); 
+			status = tuple->addItem ("M123", M123); 
+
+			status = tuple->addItem ("M03", M03); 
+			status = tuple->addItem ("M12", M12); 
+			status = tuple->addItem ("M01", M01); 
+			status = tuple->addItem ("M23", M23); 
+			return status;
+		}
+	};
+
+	struct Track_t
+	{
+    NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
+    NTuple::Array<long>   trackId; //id of the track
+    NTuple::Array<double> q; //charge of the track
+    NTuple::Array<double> E;
+    NTuple::Array<double> p;
+    NTuple::Array<double> px;
+    NTuple::Array<double> py;
+    NTuple::Array<double> pz;
+    NTuple::Array<double> pt; //transvese momentum
+    NTuple::Array<double> theta,phi;
+    NTuple::Array<double> x, y, z, r; //poca coordinate of track
+    NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
+    virtual StatusCode add_to_tuple(NTuple::Tuple * tuple)
+		{
+			StatusCode status;
+			status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
+			status = tuple->addIndexedItem ("trackId",   ntrack, trackId);
+			status = tuple->addIndexedItem ("q",     ntrack, q);
+			status = tuple->addIndexedItem ("E",     ntrack, E);
+			status = tuple->addIndexedItem ("p",     ntrack, p);
+			status = tuple->addIndexedItem ("px",    ntrack, px);
+			status = tuple->addIndexedItem ("py",    ntrack, py);
+			status = tuple->addIndexedItem ("pz",    ntrack, pz);
+			status = tuple->addIndexedItem ("pt",    ntrack, pt);
+			status = tuple->addIndexedItem ("theta", ntrack, theta);
+			status = tuple->addIndexedItem ("phi",   ntrack, phi);
+			status = tuple->addIndexedItem ("x",     ntrack, x);
+			status = tuple->addIndexedItem ("y",     ntrack, y);
+			status = tuple->addIndexedItem ("z",     ntrack, z);
+			status = tuple->addIndexedItem ("r",     ntrack, r);
+			status = tuple->addIndexedItem ("vxy",   ntrack, vxy);
+			status = tuple->addIndexedItem ("vz",    ntrack, vz);
+			status = tuple->addIndexedItem ("vphi",  ntrack, vphi);
+			return status;
+		}
+	};
+
+
+	// =====================================================================================
+	//        Class:  RootEvent
+	//  Description:  Main event information supposed to used for selection
+	// =====================================================================================
   struct RootEvent : public RootTuple
   {
     NTuple::Item<long>    run; //run number
@@ -124,43 +201,42 @@ std::list<EvtRecTrackIterator> createGoodChargedTrackList(
     NTuple::Item<long>    npositive_pions; //number of positive pions
     NTuple::Item<long>    nnegative_pions; //number of negative pions
     NTuple::Item<long>    npion_pairs; //total number of found pion pairs
+
 		NTuple::Item<long>    sign;   //signature of the event shows missed particle  01(K- or mu-), 10 (K+ or mu+),  11 (KK or uu)
     NTuple::Item<long>    channel;     //J/psi decay channel 0 -- K+K-, 1 -- mu+mu-
-    NTuple::Item<long>    KK;     //KK Jpsi decay event
-    NTuple::Item<long>    uu;     //MuMu event
-    NTuple::Item<double>  Mrec;  //pion recoil mass
-    //NTuple::Item<double>  M2missing; //missing square invariant mass move to per track parameter
-    //NTuple::Item<double>  Minv; //invariant mass two charged particles // move to M23 notation
+    //NTuple::Item<long>    KK;     //KK Jpsi decay event
+    //NTuple::Item<long>    uu;     //MuMu event
 
+
+		Mass_t  M;
+    NTuple::Item<double> kM[5];    //Invariant mass for track 23 for different hyptotesis
+
+		//here will be result of the kinematic fit and particle id
     NTuple::Item<double>  kin_chi2; //kinematic chi2
     NTuple::Item<double>  pid_chi2; //my prob  chi2
 
-    NTuple::Item<double>  M012; //M(pi pi K/mu-)
-    NTuple::Item<double>  M013; //M(pi pi K/mu+)
-    NTuple::Item<double>  M023; //M(pi- KK/uu)
-    NTuple::Item<double>  M123; //M(pi+ KK/uu)
+		Track_t T;
 
-    NTuple::Item<double>  M03; //invariant mass of Kaon and pion
-    NTuple::Item<double>  M12; //invariant mass of kaon and pion
-    NTuple::Item<double>  M01; //invariant mass of pion
-    NTuple::Item<double>  M23; //invariant mass of kaons or muons
-
-    NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
     NTuple::Array<double> kchi;    //kinematik chi2
-    NTuple::Array<double> pchi;    //my pid chi2
-    NTuple::Array<double> P[5];    //probability from ParticleID
-    NTuple::Array<double> Mmis;    //missing invariant mass
+    NTuple::Array<double> pchi;    //my particle id chi square
 
-    NTuple::Array<double> q; //charge of the track
-    NTuple::Array<double> E;
-    NTuple::Array<double> p;
-    NTuple::Array<double> px;
-    NTuple::Array<double> py;
-    NTuple::Array<double> pz;
-    NTuple::Array<double> pt; //transvese momentum
-    NTuple::Array<double> theta,phi;
-    NTuple::Array<double> x, y, z, r; //poca coordinate of track
-    NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
+    NTuple::Array<double> prob[5]; //probability from ParticleID
+    NTuple::Array<double> pchi2[5];//my particle id chi square different hypo
+
+    virtual void init(void);
+    virtual StatusCode init_tuple(void);
+  };
+
+
+	// =====================================================================================
+	//        Class:  RootMdc
+	//  Description:  Discribes track information from Mdc before Vertex and 
+	//  Kinematik fit.
+	// =====================================================================================
+  struct RootMdc : public RootTuple
+  {
+		Mass_t M;
+		Track_t T;
     virtual void init(void);
     virtual StatusCode init_tuple(void);
   };
@@ -177,23 +253,8 @@ std::list<EvtRecTrackIterator> createGoodChargedTrackList(
     virtual StatusCode init_tuple(void);
   };
 
-  struct RootMdc : public RootTuple
-  {
-    NTuple::Item<double>  Mrecoil;  //pion recoil mass
-    NTuple::Item<double>  Minv; //invariant mass two charged particles
 
-    NTuple::Item<long>    ntrack;  //size of the array = 4: [pi-,pi+,K-,K+]
-    NTuple::Array<long>  trackId; //id of the track
-    NTuple::Array<double> q; //charge of the track
-    NTuple::Array<double> E,p;
-    NTuple::Array<double> px,py,pz;
-    NTuple::Array<double> pt; //transvese momentum
-    NTuple::Array<double> theta,phi;
-    NTuple::Array<double> x, y, z, r; //poca coordinate of track
-    NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
-    virtual void init(void);
-    virtual StatusCode init_tuple(void);
-  };
+
 
 
   struct RootDedx : public RootTuple
@@ -286,7 +347,7 @@ std::list<EvtRecTrackIterator> createGoodChargedTrackList(
   private:
 
   RootEvent  fEvent;   //signal event essential information
-  RootPid    fPid;     //Paritlce id information
+  //RootPid    fPid;     //Paritlce id information
   RootMdc    fMdc;     //Mdc information
   RootDedx   fDedx;    //DeDx for the event
   RootEmc    fEmc;    //Emc infromation for the event

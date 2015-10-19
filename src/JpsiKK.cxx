@@ -234,37 +234,34 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("nppions", npositive_pions); //good poitive pion tracks in event
   status = tuple->addItem ("nnpions", nnegative_pions); //good negative pion track in event
   status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
+
   status = tuple->addItem ("sign", sign); //number of pions paris in event
   status = tuple->addItem ("channel", channel); //decay channel of the J/psi
   status = tuple->addItem ("KK", KK); //KK decay channel of the J/psi
   status = tuple->addItem ("uu", uu); //mu-mu decay channel of the J/psi
-  status = tuple->addItem ("Mrec", Mrecoil); 
-  status = tuple->addItem ("Minv", Minv); 
-  status = tuple->addItem ("M012", M012); 
-  status = tuple->addItem ("M013", M013); 
-  status = tuple->addItem ("M03", M03); 
-  status = tuple->addItem ("M12", M12); 
-  status = tuple->addItem ("M01", M01); 
+
+	status = M.add_to_tuple(tuple);
+  status = tuple->addItem ("Mee",   kM[ID_ELECTRON]);
+  status = tuple->addItem ("MKK",   kM[ID_KAON]);
+  status = tuple->addItem ("Muu",   kM[ID_MUON]);
+  status = tuple->addItem ("Mpp",   kM[ID_PROTON]);
+  status = tuple->addItem ("Mpipi", kM[ID_PION]);
+
+	status = T.add_to_tuple(tuple);
+
   status = tuple->addItem ("kin_chi2", kin_chi2); 
   status = tuple->addItem ("pid_chi2", pid_chi2); 
 
-  status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
-  status = tuple->addIndexedItem ("q",     ntrack, q);
-  status = tuple->addIndexedItem ("E",     ntrack, E);
-  status = tuple->addIndexedItem ("p",     ntrack, p);
-  status = tuple->addIndexedItem ("px",    ntrack, px);
-  status = tuple->addIndexedItem ("py",    ntrack, py);
-  status = tuple->addIndexedItem ("pz",    ntrack, pz);
-  status = tuple->addIndexedItem ("pt",    ntrack, pt);
-  status = tuple->addIndexedItem ("theta", ntrack, theta);
-  status = tuple->addIndexedItem ("phi",   ntrack, phi);
-  status = tuple->addIndexedItem ("x",     ntrack, x);
-  status = tuple->addIndexedItem ("y",     ntrack, y);
-  status = tuple->addIndexedItem ("z",     ntrack, z);
-  status = tuple->addIndexedItem ("r",     ntrack, r);
-  status = tuple->addIndexedItem ("vxy",   ntrack, vxy);
-  status = tuple->addIndexedItem ("vz",    ntrack, vz);
-  status = tuple->addIndexedItem ("vphi",  ntrack, vphi);
+  status = tuple->addIndexedItem ("kchi",  T.ntrack, kchi);
+  status = tuple->addIndexedItem ("pchi",  T.ntrack, pchi);
+
+  status = tuple->addIndexedItem ("probe",  T.ntrack,  prob[ID_ELECTRON]);
+  status = tuple->addIndexedItem ("probmu", T.ntrack,  prob[ID_MUON]);
+  status = tuple->addIndexedItem ("probpi", T.ntrack,  prob[ID_PION]);
+  status = tuple->addIndexedItem ("probk",  T.ntrack,  prob[ID_KAON]);
+  status = tuple->addIndexedItem ("probp",  T.ntrack,  prob[ID_PROTON]);
+
+
   return status;
 }
 
@@ -311,33 +308,15 @@ void JpsiKK::RootPid::init(void)
 StatusCode JpsiKK::RootMdc::init_tuple(void)
 {
   StatusCode status;
-  status = tuple->addItem ("Mrec", Mrecoil); 
-  status = tuple->addItem ("Minv", Minv); 
-  status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
-  status = tuple->addIndexedItem ("trackId",   ntrack, trackId);
-  status = tuple->addIndexedItem ("q",     ntrack, q);
-  status = tuple->addIndexedItem ("E",     ntrack, E);
-  status = tuple->addIndexedItem ("p",     ntrack, p);
-  status = tuple->addIndexedItem ("px",    ntrack, px);
-  status = tuple->addIndexedItem ("py",    ntrack, py);
-  status = tuple->addIndexedItem ("pz",    ntrack, pz);
-  status = tuple->addIndexedItem ("pt",    ntrack, pt);
-  status = tuple->addIndexedItem ("theta", ntrack, theta);
-  status = tuple->addIndexedItem ("phi",   ntrack, phi);
-  status = tuple->addIndexedItem ("x",     ntrack, x);
-  status = tuple->addIndexedItem ("y",     ntrack, y);
-  status = tuple->addIndexedItem ("z",     ntrack, z);
-  status = tuple->addIndexedItem ("r",     ntrack, r);
-  status = tuple->addIndexedItem ("vxy",   ntrack, vxy);
-  status = tuple->addIndexedItem ("vz",    ntrack, vz);
-  status = tuple->addIndexedItem ("vphi",  ntrack, vphi);
+	status = M.add_to_tuple(tuple);
+	status = T.add_to_tuple(tuple);
   return status;
 }
 
 
 void JpsiKK::RootMdc::init(void)
 {
-  ntrack=4;
+  T.ntrack=4;
 }
 
 
@@ -891,6 +870,45 @@ bool kinematic_fit(
 
 
 
+
+bool kinematic_fit(
+    int PID, //hypotizes 0 -- KAONS, 1 - MUONS
+    TrackPairList_t  & pion_pairs,  //list of pion pairs  (signle pair in simple case)
+    TrackPairList_t &  other_pairs, //list of other pairs  (signle pair in simple case)
+    std::vector<HepLorentzVector> & P, //?
+    double & chi2,  //result of the fit
+    TrackPair_t & result_pion_pair,  //best pion pair
+    TrackPair_t & result_other_pair,   //best other pair
+		double W
+    )
+{
+  chi2=std::numeric_limits<double>::max();
+  if(pion_pairs.empty() || other_pairs.empty()) return false;
+  bool GoodKinematikFit=false;
+  //loop over all pion pairs and all other pairs
+  for(TrackPairList_t::iterator pion_pair=pion_pairs.begin(); pion_pair!=pion_pairs.end();pion_pair++)
+    for(TrackPairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
+    {
+      std::vector<HepLorentzVector> P_tmp;
+      double chi2_tmp=std::numeric_limits<double>::max();
+      bool oksq=kinematic_fit(PID, *pion_pair, *other_pair, P_tmp, chi2_tmp, W);
+      if(oksq) 
+      {
+        if(chi2_tmp < chi2)
+        {
+          GoodKinematikFit = true;
+          chi2  = chi2_tmp;
+          P = P_tmp;
+          result_pion_pair = *pion_pair;
+          result_other_pair = * other_pair;
+        }
+      }
+    } 
+  return GoodKinematikFit;
+}
+
+
+
 bool kinematic_fit(
     int PID,  // hypotezies 0 - kaon, 1 - muon,  ...
 		const std::vector<EvtRecTrackIterator> & Tracks, 
@@ -986,6 +1004,67 @@ bool kinematic_fit(
   return oksq;
 }
 
+struct KinFitParam_t
+{
+	bool success; //result  of the kinematic fit
+	int channel;  //channel of the fit K, mu
+	double chi2;  //chi2
+	std::vector<HepLorentzVector>  P;
+	std::vector<EvtRecTrackIterator> tracks;
+	EvtRecTrackIterator end;
+	double W;//center of mass energy
+	bool is_electron;
+	double mypid_chi2;
+	KinFitParam_t(double cme= PSIP_MASS)
+	{
+		channel = -1;
+		success = false;
+		is_electron = false;
+		chi2 = 1e100;
+		W = cme;
+		mypid_chi2=1e100;
+	}
+
+	KinFitParam_t(double cme= PSIP_MASS, EvtRecTrackIterator END)
+	{
+		channel = -1;
+		success = false;
+		is_electron = false;
+		chi2 = 1e100;
+		W = cme;
+		end = END;
+		mypid_chi2=1e100;
+	}
+
+	KinFitParam_t(const KinFitParam_t & kfp)
+	{
+		success = kfp.success;
+		channel = kfp.channel;
+		chi2    = kfp.chi2;
+		P       = kfp.P;
+		tracks  = kfp.tracks;
+		W       = kfp.W;
+		is_electron = kfp.is_electron;
+		end     = kfp.end;
+		mypid_chi2 = kfp.mypid_chi2;
+	}
+
+	KinFitParam_t & operator=(const KinFitParam_t & kfp)
+	{
+		success = kfp.success;
+		channel = kfp.channel;
+		chi2    = kfp.chi2;
+		P       = kfp.P;
+		tracks  = kfp.tracks;
+		W       = kfp.W;
+		is_electron = kfp.is_electron;
+		end     = kfp.end;
+		mypid_chi2 = kfp.mypid_chi2;
+	}
+
+	operator bool() const { return success; }
+};
+
 bool kinfit(
 		const std::vector<EvtRecTrackIterator> & Tracks,  
 		int & channel,  
@@ -1015,41 +1094,74 @@ bool kinfit(
 	return goodfit;
 }
 
-bool kinematic_fit(
-    int PID, //hypotizes 0 -- KAONS, 1 - MUONS
-    TrackPairList_t  & pion_pairs,  //list of pion pairs  (signle pair in simple case)
-    TrackPairList_t &  other_pairs, //list of other pairs  (signle pair in simple case)
-    std::vector<HepLorentzVector> & P, //?
-    double & chi2,  //result of the fit
-    TrackPair_t & result_pion_pair,  //best pion pair
-    TrackPair_t & result_other_pair,   //best other pair
-		double W
-    )
+bool kinfit(KinFitParam_t & kfp)
 {
-  chi2=std::numeric_limits<double>::max();
-  if(pion_pairs.empty() || other_pairs.empty()) return false;
-  bool GoodKinematikFit=false;
-  //loop over all pion pairs and all other pairs
-  for(TrackPairList_t::iterator pion_pair=pion_pairs.begin(); pion_pair!=pion_pairs.end();pion_pair++)
-    for(TrackPairList_t::iterator other_pair=other_pairs.begin(); other_pair!=other_pairs.end();other_pair++)
-    {
-      std::vector<HepLorentzVector> P_tmp;
-      double chi2_tmp=std::numeric_limits<double>::max();
-      bool oksq=kinematic_fit(PID, *pion_pair, *other_pair, P_tmp, chi2_tmp, W);
-      if(oksq) 
-      {
-        if(chi2_tmp < chi2)
-        {
-          GoodKinematikFit = true;
-          chi2  = chi2_tmp;
-          P = P_tmp;
-          result_pion_pair = *pion_pair;
-          result_other_pair = * other_pair;
-        }
-      }
-    } 
-  return GoodKinematikFit;
+	kfp.success = kinfit(kfp.tracks,  kfp.channel,  kfp.chi2,  kfp.P,  kfp.W);
+	return kfp.success;
 }
+
+
+bool kinfit(
+		TrackPair_t & pion_pair,
+		TrackList_t & other_tracks, 
+		KinFitParam_t & kfp
+		)
+{
+	KinFitParam_t tmp_kfp(kfp);
+	tmp_kfp.tracks.resize(3);
+	tmp_kfp.tracks[0]=pion_pair.first;
+	tmp_kfp.tracks[1]=pion_pair.second;
+	for(TrackList_t::iterator i=tracks->begin(); i!=tracks->end(); ++i)
+	{
+		EvtRecTrackIterator track = *i;
+		tmp_kfp.tracks[2] = track;
+		if(kinfit(tmp_kfp))
+		{
+			kfp.success = true;
+			if(tmp_kfp.chi2 < kfp.chi2)
+			{
+				kfp = tmp_kfp;
+			}
+		}
+	}
+	//kfp.tracks.push_back(kfp.tracks[2]);
+	return  kfp.success;
+}
+
+
+bool JpsiKK::isElectrons(KinFitParam_t & kfp)
+{
+	double MIN_MOMENTUM[5] = { MIN_KAON_MOMENTUM,  MIN_MUON_MOMENTUM,  0, 0, 0}; 
+	double MAX_MOMENTUM[5] = { MAX_KAON_MOMENTUM,  MAX_MUON_MOMENTUM,  0, 0, 0}; 
+	double MIN_EP_RATIO[5] = { MIN_KAON_EP_RATIO,  MIN_MUON_EP_RATIO,  0, 0, 0}; 
+	double MAX_EP_RATIO[5] = { MAX_KAON_EP_RATIO,  MAX_MUON_EP_RATIO,  0, 0, 0}; 
+	for(int i=2;i<4;i++)
+	{
+		if(kfp.tracks[i]==kfp.end) continue;
+		RecMdcTrack  * mdcTrk = (*Tracks[i])->mdcTrack();
+		RecEmcShower * emcTrk = (*Tracks[i])->emcShower();
+		double EpRatio = emcTrk->energy()/mdcTrk->p();
+		if( EpRatio < MIN_EP_RATIO[kfp.channel]      || MAX_EP_RATIO[kfp.channel] < EpRatio )     kfp.is_electron = true;
+		if( mdcTrk->p() < MIN_MOMENTUM[kfp.channel]  || MAX_MOMENTUM[kfp.channel] < mdcTrk->p() ) kfp.is_electron = true;
+	}
+	return kfp.is_electron;
+}
+
+
+bool myPID(KinFitParam_t & kfp)
+{
+	for(int i=2;i<4;i++)
+	{
+		if(kfp.tracks[i]==kfp.end) continue;
+		vector<double> chi2 = get_chi2(kfp.tracks[i]);
+		for(int pid =0;pid<5;pid++)
+		{
+			pchi2[pid]+=chi2[pid];
+		}
+	}
+}
+
+
 
 
 StatusCode JpsiKK::execute()
@@ -1199,134 +1311,33 @@ StatusCode JpsiKK::execute()
   //if no other particles
 	if(other_negative_tracks.empty() && other_positive_tracks.empty()) return StatusCode::SUCCESS;
 
-	int sign = (int(!other_positive_tracks.empty()) << 1 ) + int(!other_negative_tracks.empty());
+	//int sign = (int(!other_positive_tracks.empty()) << 1 ) + int(!other_negative_tracks.empty());
 
-	bool GoodKinematikFit=false;
-	double kinematic_chi2=2e100;
-	int channel = -1;
-	TrackPair_t result_pair;
-	std::vector<HepLorentzVector> Pkf(4); //four momentum after kinematic fit
-	std::vector<EvtRecTrackIterator> Tracks;
-	Tracks.reserve(4);
-	
-  //one charged particle is missing
-	if(!other_positive_tracks.empty() || !other_negative_tracks.empty())
+
+	//KinFitParam_t KFP(CENTER_MASS_ENERGY);
+	KinFitParam_t negative_kfp(CENTER_MASS_ENERGY, evtRecTrkCol->end());
+	KinFitParam_t positive_kfp(CENTER_MASS_ENERGY, evtRecTrkCol->end());
+
+	if(!other_negative_tracks.empty()) 
 	{
-    cout<< "Three particles" << endreq;
-		TrackList_t * tracks=0;
-		switch(sign)
-		{
-			case OTHER_NEGATIVE_TRACK:
-				tracks = &other_negative_tracks;
-				break;
-			case OTHER_POSITIVE_TRACK:
-				tracks = &other_positive_tracks;
-				break;
-			case OTHER_TWO_TRACKS:
-				switch(eventHeader->eventNumber() % 2)
-				{
-					case 0:
-						tracks = &other_positive_tracks;
-						break;
-					case 1:
-						tracks = &other_negative_tracks;
-						break;
-				}
-				break;
-		};
-		int tmp_chan=-1;
-		double tmp_chi2=2e100;
-		std::vector<EvtRecTrackIterator> tmp_Tracks(3);
-		tmp_Tracks[0]=pion_pair.first;
-		tmp_Tracks[1]=pion_pair.second;
-		std::vector<HepLorentzVector> tmp_P;
-		for(TrackList_t::iterator i=tracks->begin(); i!=tracks->end(); ++i)
-		{
-			EvtRecTrackIterator track = *i;
-			tmp_Tracks[2] = track;
-			bool fit_result=kinfit(tmp_Tracks, tmp_chan, tmp_chi2,tmp_P,  CENTER_MASS_ENERGY);
-			if(fit_result)
-			{
-				GoodKinematikFit=true;
-				if(tmp_chi2 < kinematic_chi2)
-				{
-					kinematic_chi2 = tmp_chi2;
-					channel = tmp_chan;
-					Pkf = tmp_P;
-					Tracks = tmp_Tracks;
-				}
-			}
-		}
-		//convert resulting 4-momentum P to Pkf with corresponding sign
-		if(sign == 0x2) 
-		{
-			std::swap(Pkf[2], Pkf[3]);
-			if(Tracks.size()==3) 
-			{
-				Tracks.push_back(evtRecTrkCol->end());
-				std::swap(Tracks[2], Tracks[3]);
-			}
-		}
+		kinfit(pion_pairs,  other_negative_tracks,  negative_kfp);
+		isElectrons(negative_kfp);
+		myPID(negative_kfp);
+		//positive_kfp.tracks[3] = evtRecTrkCol->end();
 	}
-	if(false && !other_positive_tracks.empty() && !other_negative_tracks.empty())
-	//else //positive and negartive particles exists then find best pair
+
+	if(!other_positive_tracks.empty()) 
 	{
-    cout<< "Four particles" << endl;
-		std::vector<EvtRecTrackIterator> tmp_Tracks(4);
-		tmp_Tracks[0]=pion_pair.first;
-		tmp_Tracks[1]=pion_pair.second;
-		int tmp_chan=-1;
-		double tmp_chi2=2e100;
-		std::vector<HepLorentzVector> tmp_P;
-		//make other pairs
-		//TrackPairList_t other_pairs;
-		for(TrackList_t::iterator i=other_negative_tracks.begin(); i!=other_negative_tracks.end(); ++i)
-		{
-			EvtRecTrackIterator first_track = *i;
-			for(TrackList_t::iterator j=other_positive_tracks.begin(); j!=other_positive_tracks.end(); ++j)
-			{
-				EvtRecTrackIterator second_track = *j;
-				tmp_Tracks[2] = *i;
-				tmp_Tracks[3] = *j;
-				cout << "Before kinfit" << endl;
-				bool fit_result=kinfit(tmp_Tracks, tmp_chan, tmp_chi2,tmp_P,  CENTER_MASS_ENERGY);
-				if(fit_result)
-				{
-					GoodKinematikFit=true;
-					if(tmp_chi2 < kinematic_chi2)
-					{
-						kinematic_chi2 = tmp_chi2;
-						channel = tmp_chan;
-						Pkf = tmp_P;
-						Tracks = tmp_Tracks;
-					}
-				}
-				cout << "After kinematik_fit" << std::endl;
-			} //end of loop for positive tracks
-		} //end of loop for negative tracks 
+		kinfit(pion_pairs,  other_positive_tracks,  positive_kfp);
+		//positive_kfp.tracks[2] = evtRecTrkCol->end();
+		//swap(positive_kfp.P[2], positive_kfp.P[3])
 	}
-	cout << "After ifelse" << endl;
 
 	//SELECTION CODE
 	if(!GoodKinematikFit) return StatusCode::SUCCESS;
 	if(kinematic_chi2>200) return StatusCode::SUCCESS;
 	good_kinematic_fit++;
 
-	double MIN_MOMENTUM[5] = { MIN_KAON_MOMENTUM,  MIN_MUON_MOMENTUM,  0, 0, 0}; 
-	double MAX_MOMENTUM[5] = { MAX_KAON_MOMENTUM,  MAX_MUON_MOMENTUM,  0, 0, 0}; 
-	double MIN_EP_RATIO[5] = { MIN_KAON_EP_RATIO,  MIN_MUON_EP_RATIO,  0, 0, 0}; 
-	double MAX_EP_RATIO[5] = { MAX_KAON_EP_RATIO,  MAX_MUON_EP_RATIO,  0, 0, 0}; 
-	//SELECTION CODE SUPRESS ELECTRONS
-	std::cerr << "DEBUG: BEGIN supressing electrons" << std::endl;
-	for(int i=2;i<4;i++)
-	{
-		if(Tracks[i]==evtRecTrkCol->end()) continue;
-		RecMdcTrack  * mdcTrk = (*Tracks[i])->mdcTrack();
-		RecEmcShower * emcTrk = (*Tracks[i])->emcShower();
-		double EpRatio = emcTrk->energy()/mdcTrk->p();
-		if( EpRatio < MIN_EP_RATIO[channel]      || MAX_EP_RATIO[channel] < EpRatio )     return StatusCode::SUCCESS;
-		if( mdcTrk->p() < MIN_MOMENTUM[channel]  || MAX_MOMENTUM[channel] < mdcTrk->p() ) return StatusCode::SUCCESS;
-	}
 	std::cerr << "DEBUG: END supressing electrons" << std::endl;
 
 	vector<double> pchi2(5, 0);
