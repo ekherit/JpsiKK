@@ -70,19 +70,11 @@ typedef HepGeom::Point3D<double> HepPoint3D;
 
 int JpsiKK::RootEmc::ARRAY_SIZE = 100;
 
-const double PI_MESON_MASS = 0.13957018; //GeV
-const double PION_MASS     = 0.13957018; //GeV
-const double MUON_MASS     = 0.105658389; //GeV
-const double KAON_MASS     = 0.493677; //GeV
-const double ELECTRON_MASS = 0.000510999;//GeV
-const double PROTON_MASS   = 0.93827231;//GeV
 
-const double JPSI_MASS = 3.096916; //GeV
-//const double PSIP_MASS = 3.686093; //GeV 
-const double PSIP_MASS = 3.686109; //GeV PDG-2014
+#include "PhysConst.h"
 
-enum              {ID_KAON=0, ID_MUON=1, ID_ELECTRON=2, ID_PION=3, ID_PROTON=4};
-double XMASS[5] = {KAON_MASS, MUON_MASS, ELECTRON_MASS, PION_MASS, PROTON_MASS};
+#include "MyPid.h"
+
 
 enum
 {
@@ -617,116 +609,6 @@ double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pion
   return Pmis.m2();
 }
 
-SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk, bool & isTofValid)
-{
-  SmartRefVector<RecTofTrack> tofTrkCol = (*itTrk)->tofTrack();
-  SmartRefVector<RecTofTrack>::iterator tofTrk = tofTrkCol.begin();
-  TofHitStatus *hitst = new TofHitStatus;
-  std::vector<int> tofecount;
-  int goodtofetrk=0;
-  for(tofTrk = tofTrkCol.begin(); tofTrk!=tofTrkCol.end(); tofTrk++,goodtofetrk++)
-  {
-    unsigned int st = (*tofTrk)->status();
-    hitst->setStatus(st);
-    if( !hitst->is_cluster() ) continue;
-    //if(  (hitst->is_barrel()) ) continue;
-    //if( !(hitst->is_counter()) ) continue;
-    tofecount.push_back(goodtofetrk);
-  }
-  delete hitst;
-  if(!tofecount.empty()) 
-  {
-    tofTrk = tofTrkCol.begin()+tofecount[0];
-    isTofValid = true;
-  }
-  return tofTrk;
-}
-
-//vector<SmartRefVector<RecTofTrack>::iterator>  getTofTrk(EvtRecTrackIterator itTrk, bool & isTofValid)
-//{
-//  SmartRefVector<RecTofTrack> tofTrkCol = (*itTrk)->tofTrack();
-//  SmartRefVector<RecTofTrack>::iterator tofTrk = tofTrkCol.begin();
-//  vector<SmartRefVector<RecTofTrack>::iterator> result_tof;
-//  TofHitStatus *hitst = new TofHitStatus;
-//  //std::vector<int> tofecount;
-//  //int goodtofetrk=0;
-//  for(tofTrk = tofTrkCol.begin(); tofTrk!=tofTrkCol.end(); tofTrk++,goodtofetrk++)
-//  {
-//    unsigned int st = (*tofTrk)->status();
-//    hitst->setStatus(st);
-//    //if(  (hitst->is_barrel()) ) continue;
-//    if( !(hitst->is_counter()) ) continue;
-//    tofecount.push_back(goodtofetrk);
-//  }
-//  delete hitst;
-//  if(!tofecount.empty()) 
-//  {
-//    tofTrk = tofTrkCol.begin()+tofecount[0];
-//    isTofValid = true;
-//  }
-//  return tofTrk;
-//}
-
-
-vector<double> get_chi2(EvtRecTrackIterator & itTrk)
-{
-  vector<double> chi2(5,99999);
-  if(!(*itTrk)->isMdcTrackValid()) return chi2;
-  if(!(*itTrk)->isMdcDedxValid())  return chi2;
-  for(int i=0;i<5;i++) chi2[i]=0;
-  RecMdcTrack * mdcTrk  = (*itTrk)->mdcTrack();
-
-  //dedx information
-  RecMdcDedx  * dedxTrk = (*itTrk)->mdcDedx();
-  chi2[ID_KAON]     +=   sq(dedxTrk->chiK());
-  chi2[ID_MUON]     +=   sq(dedxTrk->chiMu());
-  chi2[ID_ELECTRON] +=   sq(dedxTrk->chiE());
-  chi2[ID_PION]     +=   sq(dedxTrk->chiPi());
-  chi2[ID_PROTON]   +=   sq(dedxTrk->chiP());
-
-  //tof information
-  if(!(*itTrk)->isTofTrackValid()) return chi2;
-  bool isTofValid=false;
-  SmartRefVector<RecTofTrack>::iterator tofTrk = getTofTrk(itTrk, isTofValid);
-  if(isTofValid)
-  {
-    double t = (*tofTrk)->tof();  //flight time
-    double dt = (*tofTrk)->errtof(); //error of flight time
-    chi2[ID_KAON]     +=   sq(((*tofTrk)->texpKaon()-t)/dt);
-    chi2[ID_MUON]     +=   sq(((*tofTrk)->texpMuon()-t)/dt);
-    chi2[ID_ELECTRON] +=   sq(((*tofTrk)->texpElectron()-t)/dt);
-    chi2[ID_PION]     +=   sq(((*tofTrk)->texpPion()-t)/dt);
-    chi2[ID_PROTON]   +=   sq(((*tofTrk)->texpProton()-t)/dt);
-  }
-  return chi2;
-}
-
-
-vector< vector<double> > get_chi2(TrackPair_t & pion_pair, TrackPair_t & kaon_pair)
-{
-  EvtRecTrackIterator  itTrk[4] = {pion_pair.first, pion_pair.second, kaon_pair.first, kaon_pair.second};
-  vector< vector<double> > chi2(4);
-  for(int track=0;track<chi2.size();track++)
-  {
-    chi2[track] = get_chi2(itTrk[track]);
-  }
-  return chi2;
-}
-
-vector<double> get_chi2(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> & pair)
-{
-  EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
-  vector<double> chi2(5,0);
-  for(int track=0;track<2;track++)
-  {
-    vector<double> tmp_chi2=get_chi2(itTrk[track]);
-    for(int i=0;i<5;i++)
-    {
-      chi2[i]  += tmp_chi2[i]; 
-    }
-  }
-  return chi2;
-}
 
 
 bool vertex_fit(const std::vector<WTrackParameter> & input_tracks,  std::vector<WTrackParameter> output_tracks)
@@ -1004,66 +886,6 @@ bool kinematic_fit(
   return oksq;
 }
 
-struct KinFitParam_t
-{
-	bool success; //result  of the kinematic fit
-	int channel;  //channel of the fit K, mu
-	double chi2;  //chi2
-	std::vector<HepLorentzVector>  P;
-	std::vector<EvtRecTrackIterator> tracks;
-	EvtRecTrackIterator end;
-	double W;//center of mass energy
-	bool is_electron;
-	double mypid_chi2;
-	KinFitParam_t(double cme= PSIP_MASS)
-	{
-		channel = -1;
-		success = false;
-		is_electron = false;
-		chi2 = 1e100;
-		W = cme;
-		mypid_chi2=1e100;
-	}
-
-	KinFitParam_t(double cme= PSIP_MASS, EvtRecTrackIterator END)
-	{
-		channel = -1;
-		success = false;
-		is_electron = false;
-		chi2 = 1e100;
-		W = cme;
-		end = END;
-		mypid_chi2=1e100;
-	}
-
-	KinFitParam_t(const KinFitParam_t & kfp)
-	{
-		success = kfp.success;
-		channel = kfp.channel;
-		chi2    = kfp.chi2;
-		P       = kfp.P;
-		tracks  = kfp.tracks;
-		W       = kfp.W;
-		is_electron = kfp.is_electron;
-		end     = kfp.end;
-		mypid_chi2 = kfp.mypid_chi2;
-	}
-
-	KinFitParam_t & operator=(const KinFitParam_t & kfp)
-	{
-		success = kfp.success;
-		channel = kfp.channel;
-		chi2    = kfp.chi2;
-		P       = kfp.P;
-		tracks  = kfp.tracks;
-		W       = kfp.W;
-		is_electron = kfp.is_electron;
-		end     = kfp.end;
-		mypid_chi2 = kfp.mypid_chi2;
-	}
-
-	operator bool() const { return success; }
-};
 
 bool kinfit(
 		const std::vector<EvtRecTrackIterator> & Tracks,  
@@ -1094,7 +916,7 @@ bool kinfit(
 	return goodfit;
 }
 
-bool kinfit(KinFitParam_t & kfp)
+bool kinfit(SelectionHelper_t & kfp)
 {
 	kfp.success = kinfit(kfp.tracks,  kfp.channel,  kfp.chi2,  kfp.P,  kfp.W);
 	return kfp.success;
@@ -1104,10 +926,10 @@ bool kinfit(KinFitParam_t & kfp)
 bool kinfit(
 		TrackPair_t & pion_pair,
 		TrackList_t & other_tracks, 
-		KinFitParam_t & kfp
+		SelectionHelper_t & kfp
 		)
 {
-	KinFitParam_t tmp_kfp(kfp);
+	SelectionHelper_t tmp_kfp(kfp);
 	tmp_kfp.tracks.resize(3);
 	tmp_kfp.tracks[0]=pion_pair.first;
 	tmp_kfp.tracks[1]=pion_pair.second;
@@ -1129,8 +951,10 @@ bool kinfit(
 }
 
 
-bool JpsiKK::isElectrons(KinFitParam_t & kfp)
+
+bool JpsiKK::checkElectrons(SelectionHelper_t & kfp)
 {
+	kfp.pass_electron = false;
 	double MIN_MOMENTUM[5] = { MIN_KAON_MOMENTUM,  MIN_MUON_MOMENTUM,  0, 0, 0}; 
 	double MAX_MOMENTUM[5] = { MAX_KAON_MOMENTUM,  MAX_MUON_MOMENTUM,  0, 0, 0}; 
 	double MIN_EP_RATIO[5] = { MIN_KAON_EP_RATIO,  MIN_MUON_EP_RATIO,  0, 0, 0}; 
@@ -1141,25 +965,15 @@ bool JpsiKK::isElectrons(KinFitParam_t & kfp)
 		RecMdcTrack  * mdcTrk = (*Tracks[i])->mdcTrack();
 		RecEmcShower * emcTrk = (*Tracks[i])->emcShower();
 		double EpRatio = emcTrk->energy()/mdcTrk->p();
-		if( EpRatio < MIN_EP_RATIO[kfp.channel]      || MAX_EP_RATIO[kfp.channel] < EpRatio )     kfp.is_electron = true;
-		if( mdcTrk->p() < MIN_MOMENTUM[kfp.channel]  || MAX_MOMENTUM[kfp.channel] < mdcTrk->p() ) kfp.is_electron = true;
+		if( 
+				in(EpRatio, MIN_EP_RATIO[kfp.channel],  MAX_EP_RATIO[kfp.channel] ) 
+					&&
+				in(mdcTrk->p(), MIN_MOMENTUM[kfp.channel],  MAX_MOMENTUM[kfp.channel] )
+			) kfp.pass_electron = true;
 	}
-	return kfp.is_electron;
+	return kfp.pass_electron;
 }
 
-
-bool myPID(KinFitParam_t & kfp)
-{
-	for(int i=2;i<4;i++)
-	{
-		if(kfp.tracks[i]==kfp.end) continue;
-		vector<double> chi2 = get_chi2(kfp.tracks[i]);
-		for(int pid =0;pid<5;pid++)
-		{
-			pchi2[pid]+=chi2[pid];
-		}
-	}
-}
 
 
 
@@ -1314,21 +1128,23 @@ StatusCode JpsiKK::execute()
 	//int sign = (int(!other_positive_tracks.empty()) << 1 ) + int(!other_negative_tracks.empty());
 
 
-	//KinFitParam_t KFP(CENTER_MASS_ENERGY);
-	KinFitParam_t negative_kfp(CENTER_MASS_ENERGY, evtRecTrkCol->end());
-	KinFitParam_t positive_kfp(CENTER_MASS_ENERGY, evtRecTrkCol->end());
+	//SelectionHelper_t KFP(CENTER_MASS_ENERGY);
+	SelectionHelper_t negative_kfp(CENTER_MASS_ENERGY, evtRecTrkCol->end());
+	SelectionHelper_t positive_kfp(CENTER_MASS_ENERGY, evtRecTrkCol->end());
 
 	if(!other_negative_tracks.empty()) 
 	{
 		kinfit(pion_pairs,  other_negative_tracks,  negative_kfp);
-		isElectrons(negative_kfp);
-		myPID(negative_kfp);
+		checkElectrons(negative_kfp);
+		setMyPid(negative_kfp);
 		//positive_kfp.tracks[3] = evtRecTrkCol->end();
 	}
 
 	if(!other_positive_tracks.empty()) 
 	{
 		kinfit(pion_pairs,  other_positive_tracks,  positive_kfp);
+		checkElectrons(positive_kfp);
+		setMyPid(positive_kfp);
 		//positive_kfp.tracks[2] = evtRecTrkCol->end();
 		//swap(positive_kfp.P[2], positive_kfp.P[3])
 	}
@@ -1340,24 +1156,6 @@ StatusCode JpsiKK::execute()
 
 	std::cerr << "DEBUG: END supressing electrons" << std::endl;
 
-	vector<double> pchi2(5, 0);
-	int scale=0;
-	for(int i=2;i<4;i++)
-	{
-		if(Tracks[i]==evtRecTrkCol->end()) continue;
-		vector<double> chi2 = get_chi2(Tracks[i]);
-		scale++;
-		for(int pid =0;pid<5;pid++)
-		{
-			pchi2[pid]+=chi2[pid];
-		}
-	}
-	//normalization of chi2
-	for(int pid=0;pid<5;pid++)
-	{
-		pchi2[pid]=pchi2[pid]/scale*2;
-	}
-	std::cerr << "DEBUG: After pid" << std::endl;
 
 	//SELECTION CODE
 	if( pchi2[channel] > 200 ) return StatusCode::SUCCESS;
