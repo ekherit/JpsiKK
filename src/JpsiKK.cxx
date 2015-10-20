@@ -592,8 +592,12 @@ StatusCode JpsiKK::execute()
 
 	if(!other_negative_tracks.empty()) 
 	{
+		log << MSG::ERROR << "Befor kinematic fit" << endmsg;
 		kinfit(pion_pair,  other_negative_tracks,  negative_sh);
+		log << MSG::ERROR << "After kinematic fit" << endmsg;
+		log << MSG::ERROR << "Befor total pass" << endmsg;
 		negative_sh.totalPass(cfg);
+		log << MSG::ERROR << "After total pass" << endmsg;
 	}
 	log << MSG::ERROR << "After negative" << endmsg;
 
