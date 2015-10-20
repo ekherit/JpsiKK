@@ -73,7 +73,7 @@ int JpsiKK::RootEmc::ARRAY_SIZE = 100;
 #include "MyPid.h"
 #include "SelectionHelper.h"
 
-#include "KinematikFit.h"
+#include "KinematicFit.h"
 
 enum
 {
