@@ -347,7 +347,7 @@ bool kinfit(
 	tmp_kfp.tracks.resize(3);
 	tmp_kfp.tracks[0]=pion_pair.first;
 	tmp_kfp.tracks[1]=pion_pair.second;
-	for(std::vector<EvtRecTrackIterator>::iterator i=kfp.tracks.begin(); i!=kfp.tracks.end(); ++i)
+	for(TrackList_t::iterator i=other_tracks.begin(); i!=other_tracks.end(); ++i)
 	{
 		EvtRecTrackIterator track = *i;
 		tmp_kfp.tracks[2] = track;
