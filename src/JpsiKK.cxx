@@ -71,6 +71,7 @@ int JpsiKK::RootEmc::ARRAY_SIZE = 100;
 #include "PhysConst.h"
 #include "Utils.h"
 #include "MyPid.h"
+#include "SelectionHelper.h"
 
 
 enum
