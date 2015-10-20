@@ -316,7 +316,6 @@ bool kinfit(
 	{
 		double chi2_tmp=1e100;
 		std::vector<HepLorentzVector> P_tmp;
-		std::cout << "Before kinematic_fit" << endl;
 		bool fit_result = kinematic_fit(pid, Tracks, P_tmp, chi2_tmp, CENTER_MASS_ENERGY);
 		if(fit_result)
 		{
@@ -335,7 +334,6 @@ bool kinfit(
 bool kinfit(SelectionHelper_t & kfp)
 {
 	kfp.good_kinematic_fit = kinfit(kfp.tracks,  kfp.channel,  kfp.kin_chi2,  kfp.P,  kfp.W);
-	cout << "In kinfit: P.size =  " <<  kfp.P.size() << endl;
 	return kfp.good_kinematic_fit;
 }
 
@@ -360,8 +358,6 @@ bool kinfit(
 			if(tmp_kfp.kin_chi2 < kfp.kin_chi2)
 			{
 				kfp = tmp_kfp;
-				cout << " tmp_kfp.P.size = " << tmp_kfp.P.size() << endl;
-				cout << " kfp.P.size = " << kfp.P.size() << endl;
 			}
 		}
 	}

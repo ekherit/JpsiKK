@@ -179,6 +179,7 @@ StatusCode JpsiKK::initialize(void)
   event_write = 0;
   event_with_kaons=0;
   event_with_muons=0;
+  event_with_kaons_and_muons=0;
   event_with_pions=0;
   event_with_electrons=0;
   event_with_protons=0;
@@ -590,14 +591,12 @@ StatusCode JpsiKK::execute()
 	{
 		kinfit(pion_pair,  other_negative_tracks,  negative_sh);
 		negative_sh.totalPass(cfg);
-		cout << "negative P.size = " << positive_sh.P.size() << endl;
 	}
 
 	if(!other_positive_tracks.empty()) 
 	{
 		kinfit(pion_pair,  other_positive_tracks,  positive_sh);
 		positive_sh.totalPass(cfg);
-		cout << "positive P.size = " << positive_sh.P.size() << endl;
 	}
 
 	TrackVector_t Tracks;
@@ -615,7 +614,6 @@ StatusCode JpsiKK::execute()
 			break;
 
 		case OTHER_NEGATIVE_TRACK: //one negative track
-			clog << " negative track" << endl;
 			fEvent.channel = negative_sh.channel;
 			Tracks = negative_sh.tracks;
 			Pkf = negative_sh.P;
@@ -625,47 +623,36 @@ StatusCode JpsiKK::execute()
 			break;
 
 		case OTHER_POSITIVE_TRACK: //one positive track
-			clog << " positive track" << endl;
 			fEvent.channel = positive_sh.channel;
 			Tracks = positive_sh.tracks;
 			Pkf = positive_sh.P;
-			clog << "size of Lorenz vector array: " << positive_sh.P.size() << endl;
 			//add missing negative tracks
 			Tracks.push_back(positive_sh.end);
 			//negative tracks go first
-			clog << "Before swap Tracks" << endl;
 			std::swap(Tracks[2], Tracks[3]);
-			clog << "After swap" << endl;
-			clog << "Before swap Pkf" << endl;
 			std::swap(Pkf[2],  Pkf[3]);
-			clog << "After swap Pkf" << endl;
 			sh = & positive_sh;
 			break;
 
 		case OTHER_TWO_TRACKS:
-			clog << " two tracks " << endl;
 			if(negative_sh.channel == ID_KAON && positive_sh.channel == ID_KAON)
 			{
 				fEvent.channel = CHAN_KAONS;
-				clog << "kaons" << endl;
 			}
 
 			if(negative_sh.channel == ID_MUON && positive_sh.channel == ID_MUON)
 			{
 				fEvent.channel = CHAN_MUONS;
-				clog << "muons" << endl;
 			}
 
 			if(negative_sh.channel == ID_KAON && positive_sh.channel == ID_MUON)
 			{
 				fEvent.channel = CHAN_KAON_MUON;
-				clog << "Kmu" << endl;
 			}
 
 			if(negative_sh.channel == 1 && positive_sh.channel == 0)
 			{
 				fEvent.channel = CHAN_MUON_KAON;
-				clog << "muK" << endl;
 			}
 			Pkf = negative_sh.P;
 			Tracks = negative_sh.tracks;
@@ -681,13 +668,16 @@ StatusCode JpsiKK::execute()
 	{
 		case CHAN_KAONS:
 			fEvent.KK = 1;
+			event_with_kaons++;
 			break;
 		case CHAN_MUONS:
 			fEvent.uu = 1;
+			event_with_muons++;
 			break;
 		case CHAN_KAON_MUON:
 		case CHAN_MUON_KAON:
 			fEvent.Ku = 1;
+			event_with_kaons_and_muons++;
 			break;
 		default:
 			return StatusCode::SUCCESS;
@@ -697,7 +687,6 @@ StatusCode JpsiKK::execute()
   //now fill the tuples
 
   //some statistics information
-	std::cerr << "DEBUG: BEFORE header fillin" << std::endl;
   fEvent.ngood_charged_track = good_charged_tracks.size();
   fEvent.ngood_neutral_track = good_neutral_tracks.size();
   fEvent.npositive_track = positive_charged_tracks.size();
@@ -709,7 +698,6 @@ StatusCode JpsiKK::execute()
   //fEvent.channel = channel; 
   fEvent.kin_chi2 = sh -> kin_chi2; //kinematic_chi2;
   fEvent.pid_chi2 = sh -> mypid_chi2[fEvent.channel]; //pchi2[channel];
-	std::cerr << "DEBUG: BEFORE Pkf inv masses" << std::endl;
 
 	//define initial four-momentum
   HepLorentzVector Pcm(cfg.CENTER_MASS_ENERGY*sin(0.011),0,0,cfg.CENTER_MASS_ENERGY); 
@@ -728,7 +716,6 @@ StatusCode JpsiKK::execute()
 
 
   fEvent.T.ntrack = 4;
-	std::cerr << "DEBUG: BEFORE fEvent filling" << std::endl;
   for ( int i=0;i<4;i++)
   {
     fEvent.T.q[i]  = i%2 == 0 ? -1 : +1;
@@ -748,7 +735,6 @@ StatusCode JpsiKK::execute()
     fEvent.T.vz[i]=0;
     fEvent.T.vphi[i]=0;
   }
-	std::cerr << "DEBUG: BEFORE particle id" << std::endl;
 
   ParticleID * PID = ParticleID::instance();
   PID->init();
@@ -766,12 +752,9 @@ StatusCode JpsiKK::execute()
   fMdc.M.Mrec = get_recoil__mass(pion_pair, PION_MASS,  cfg.CENTER_MASS_ENERGY);
   //fMdc.Minv    = sqrt(get_invariant_mass2(result_pair,XMASS[channel]));
   //EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
-	std::cerr << "DEBUG: BEFORE loop" << std::endl;
   for(int i=0;i<4;i++)
   {
-		std::cerr << "DEBUG: track " << i << std::endl;
 		if(Tracks[i]==evtRecTrkCol->end()) continue;
-		std::cerr << "DEBUG: Before emcTrk:" << std::endl;
     if(i>1)
     {
       RecEmcShower *emcTrk = (*Tracks[i])->emcShower();
@@ -781,7 +764,6 @@ StatusCode JpsiKK::execute()
       fEmc.time[i] = emcTrk->time();
       fMdc.T.E[i] = fEmc.E[i];
     }
-		std::cerr << "DEBUG: Before mdcTrk:" << std::endl;
     RecMdcTrack  *mdcTrk = (*Tracks[i])->mdcTrack();
     fMdc.T.trackId[i] = mdcTrk->trackId();
     fMdc.T.q[i] = mdcTrk->charge(); 
@@ -798,7 +780,6 @@ StatusCode JpsiKK::execute()
     fMdc.T.y[i]  = mdcTrk->y();
     fMdc.T.z[i]  = mdcTrk->z();
     double rvxy,rvz,rvphi;
-		std::cerr << "DEBUG: calculate vertex:" << std::endl;
     calculate_vertex(mdcTrk,rvxy,rvz,rvphi); 
     fMdc.T.vxy[i] = rvxy;
     fMdc.T.vz[i]  = rvz; 
@@ -806,7 +787,6 @@ StatusCode JpsiKK::execute()
 
 
     //dedx information
-		std::cerr << "DEBUG: DedX:" << std::endl;
     if((*Tracks[i])->isMdcDedxValid())
     {
       RecMdcDedx* dedxTrk = (*Tracks[i])->mdcDedx();
@@ -826,7 +806,6 @@ StatusCode JpsiKK::execute()
       //fDedx.p[i] = dedxTrk->getDedxExpect(4);
       //fDedx.pid[i]=dedxTrk->particleId();
     }
-		std::cerr << "DEBUG: Before TOF:" << std::endl;
     if((*Tracks[i])->isTofTrackValid())
     {
       SmartRefVector<RecTofTrack> tofTrkCol = (*Tracks[i])->tofTrack();
@@ -869,7 +848,6 @@ StatusCode JpsiKK::execute()
 
     //fill particle id
 
-		std::cerr << "DEBUG: Before PID:" << std::endl;
     PID->setRecTrack((*Tracks[i]));
     PID->calculate();
     if(PID->IsPidInfoValid())
@@ -880,7 +858,6 @@ StatusCode JpsiKK::execute()
       //fPid.prob[ID_KAON][i]     = PID->probKaon();
       //fPid.prob[ID_PROTON][i]   = PID->probProton();
     }
-		std::cerr << "DEBUG: Before chi2:" << std::endl;
     vector<double> chi2 = get_chi2(Tracks[i]);
     for(int pid=0;pid<5;pid++)
     {
@@ -888,7 +865,6 @@ StatusCode JpsiKK::execute()
     }
 
   }
-	std::cerr << "DEBUG: Before fPID:" << std::endl;
   for(int i=0;i<5;i++)
   {
     //fPid.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
@@ -1109,6 +1085,7 @@ StatusCode JpsiKK::finalize()
   std::cout << "Event selected: " << event_write << std::endl;
   std::cout << "Event with kaons: " << event_with_kaons << std::endl;
   std::cout << "Event with muons: " << event_with_muons << std::endl;
+  std::cout << "Event with kaons and muons: " << event_with_kaons_and_muons << std::endl;
   std::cout << "Event with pions: " << event_with_pions << std::endl;
   std::cout << "Event with electron: " << event_with_electrons << std::endl;
   std::cout << "Event with proton: " << event_with_protons << std::endl;
