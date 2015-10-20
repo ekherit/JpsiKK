@@ -332,7 +332,7 @@ bool kinfit(
 
 bool kinfit(SelectionHelper_t & kfp)
 {
-	kfp.good_kinematic_fit = kinfit(kfp.tracks,  kfp.channel,  kfp.chi2,  kfp.P,  kfp.W);
+	kfp.good_kinematic_fit = kinfit(kfp.tracks,  kfp.channel,  kfp.kin_chi2,  kfp.P,  kfp.W);
 	return kfp.good_kinematic_fit;
 }
 
@@ -347,14 +347,14 @@ bool kinfit(
 	tmp_kfp.tracks.resize(3);
 	tmp_kfp.tracks[0]=pion_pair.first;
 	tmp_kfp.tracks[1]=pion_pair.second;
-	for(TrackList_t::iterator i=tracks->begin(); i!=tracks->end(); ++i)
+	for(TrackList_t::iterator i=kfp.tracks->begin(); i!=kfp.tracks->end(); ++i)
 	{
 		EvtRecTrackIterator track = *i;
 		tmp_kfp.tracks[2] = track;
 		if(kinfit(tmp_kfp))
 		{
 			kfp.good_kinematic_fit = true;
-			if(tmp_kfp.chi2 < kfp.chi2)
+			if(tmp_kfp.kin_chi2 < kfp.kin_chi2)
 			{
 				kfp = tmp_kfp;
 			}

@@ -592,13 +592,13 @@ StatusCode JpsiKK::execute()
 
 	if(!other_negative_tracks.empty()) 
 	{
-		kinfit(pion_pairs,  other_negative_tracks,  negative_sh);
+		kinfit(pion_pair,  other_negative_tracks,  negative_sh);
 		negative_sh.totalPass(cfg);
 	}
 
 	if(!other_positive_tracks.empty()) 
 	{
-		kinfit(pion_pairs,  other_positive_tracks,  positive_sh);
+		kinfit(pion_pair,  other_positive_tracks,  positive_sh);
 		positive_sh.totalPass(cfg);
 	}
 
@@ -606,7 +606,7 @@ StatusCode JpsiKK::execute()
 	std::vector<HepLorentzVector> Pkf;
 	SelectionHelper_t * sh;
 
-	fEvent.sign = (int(negative_sh()) << 1 ) + int(positive_sh());
+	fEvent.sign = (int(negative_sh.pass) << 1 ) + int(positive_sh.pass);
 	fEvent.KK = 0;
 	fEvent.uu = 0;
 	fEvent.Ku = 0;
@@ -659,7 +659,7 @@ StatusCode JpsiKK::execute()
 			}
 			Pkf = negative_sh.P;
 			Tracks = negative_sh.tracks;
-			Tracks.push_back(positive_sh.Tracks[2]);
+			Tracks.push_back(positive_sh.tracks[2]);
 			sh = & negative_sh;
 			break;
 		default:
@@ -696,20 +696,25 @@ StatusCode JpsiKK::execute()
   fEvent.npion_pairs = pion_pairs.size();
   // fill the decay channel of the J/psi 0 - kaons, 1 --muons
   //fEvent.channel = channel; 
-  fEvent.kin_chi2 = sh.kin_chi2; //kinematic_chi2;
-  fEvent.pid_chi2 = sh.mypid_chi2[fEvent.channel]; //pchi2[channel];
+  fEvent.kin_chi2 = sh -> kin_chi2; //kinematic_chi2;
+  fEvent.pid_chi2 = sh -> mypid_chi2[fEvent.channel]; //pchi2[channel];
 	std::cerr << "DEBUG: BEFORE Pkf inv masses" << std::endl;
-  fEvent.Minv = (Pkf[2]+Pkf[3]).m();
-  fEvent.M012 = (Pkf[0]+Pkf[1]+Pkf[2]).m();
-  fEvent.M013 = (Pkf[0]+Pkf[1]+Pkf[3]).m();
-  fEvent.M03 =  (Pkf[0]+Pkf[3]).m();
-  fEvent.M12 =  (Pkf[1]+Pkf[2]).m();
-  fEvent.M01 =  (Pkf[0]+Pkf[1]).m();
+  fEvent.Mrec = (P_psip - Pkf[0] - Pkf[1]).m();
+
+  fEvent.M.M012 = (Pkf[0]+Pkf[1]+Pkf[2]).m();
+  fEvent.M.M013 = (Pkf[0]+Pkf[1]+Pkf[3]).m();
+  fEvent.M.M023 = (Pkf[0]+Pkf[2]+Pkf[3]).m();
+  fEvent.M.M123 = (Pkf[1]+Pkf[2]+Pkf[3]).m();
+
+  fEvent.M.M03 =  (Pkf[0]+Pkf[3]).m();
+  fEvent.M.M12 =  (Pkf[1]+Pkf[2]).m();
+  fEvent.M.M01 =  (Pkf[0]+Pkf[1]).m();
+  fEvent.M.M23 =  (Pkf[2]+Pkf[3]).m();
+
   HepLorentzVector P_psip(cfg.CENTER_MASS_ENERGY*sin(0.011),0,0,cfg.CENTER_MASS_ENERGY); //initial vector of psip
 	std::cerr << "DEBUG: BEFORE Mrecoil" << std::endl;
-  fEvent.Mrecoil = (P_psip - Pkf[0] - Pkf[1]).m();
 
-  fEvent.ntrack = 4;
+  fEvent.T.ntrack = 4;
 	std::cerr << "DEBUG: BEFORE fEvent filling" << std::endl;
   for ( int i=0;i<4;i++)
   {
@@ -739,13 +744,13 @@ StatusCode JpsiKK::execute()
   PID->usePidSys(PID->useDedx() || PID->useTof());
   PID->identify(PID->all()); 
 
-  fEvent.ntrack=4;
+  fEvent.T.ntrack=4;
   //fPid.ntrack=4;
-  fMdc.ntrack=4;
+  fMdc.T.ntrack=4;
   fDedx.ntrack=4;
   fEmc.ntrack=4;
   fTof.ntrack=4;
-  fMdc.Mrecoil = get_recoil__mass(pion_pair, PION_MASS,  cfg.CENTER_MASS_ENERGY);
+  fMdc.M.Mrec = get_recoil__mass(pion_pair, PION_MASS,  cfg.CENTER_MASS_ENERGY);
   //fMdc.Minv    = sqrt(get_invariant_mass2(result_pair,XMASS[channel]));
   //EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
 	std::cerr << "DEBUG: BEFORE loop" << std::endl;
@@ -761,7 +766,7 @@ StatusCode JpsiKK::execute()
       fEmc.theta[i] = emcTrk->theta();
       fEmc.phi[i] = emcTrk->phi();
       fEmc.time[i] = emcTrk->time();
-      fMdc.E[i] = fEmc.E[i];
+      fMdc.T.E[i] = fEmc.E[i];
     }
 		std::cerr << "DEBUG: Before mdcTrk:" << std::endl;
     RecMdcTrack  *mdcTrk = (*Tracks[i])->mdcTrack();
