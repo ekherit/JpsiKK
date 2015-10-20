@@ -613,6 +613,7 @@ StatusCode JpsiKK::execute()
 			break;
 
 		case OTHER_NEGATIVE_TRACK: //one negative track
+			clog << " negative track" << endl;
 			fEvent.channel = negative_sh.channel;
 			Tracks = negative_sh.tracks;
 			Pkf = negative_sh.P;
@@ -622,6 +623,7 @@ StatusCode JpsiKK::execute()
 			break;
 
 		case OTHER_POSITIVE_TRACK: //one positive track
+			clog << " positive track" << endl;
 			fEvent.channel = positive_sh.channel;
 			Tracks = positive_sh.tracks;
 			Pkf = positive_sh.P;
@@ -634,24 +636,29 @@ StatusCode JpsiKK::execute()
 			break;
 
 		case OTHER_TWO_TRACKS:
+			clog << " two tracks " << endl;
 			if(negative_sh.channel == ID_KAON && positive_sh.channel == ID_KAON)
 			{
 				fEvent.channel = CHAN_KAONS;
+				clog << "kaons" << endl;
 			}
 
 			if(negative_sh.channel == ID_MUON && positive_sh.channel == ID_MUON)
 			{
 				fEvent.channel = CHAN_MUONS;
+				clog << "muons" << endl;
 			}
 
 			if(negative_sh.channel == ID_KAON && positive_sh.channel == ID_MUON)
 			{
 				fEvent.channel = CHAN_KAON_MUON;
+				clog << "Kmu" << endl;
 			}
 
 			if(negative_sh.channel == 1 && positive_sh.channel == 0)
 			{
 				fEvent.channel = CHAN_MUON_KAON;
+				clog << "muK" << endl;
 			}
 			Pkf = negative_sh.P;
 			Tracks = negative_sh.tracks;
