@@ -676,6 +676,7 @@ StatusCode JpsiKK::execute()
 			fEvent.Ku = 1;
 			break;
 		default:
+			return StatusCode::SUCCESS;
 			break;
 	}
 
