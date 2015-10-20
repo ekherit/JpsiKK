@@ -183,7 +183,7 @@ struct SelectionHelper_t
 		clog << "Before pass Pid" << endl;
 		passPid(cfg);
 		clog << "After pass pid" << endl;
-		pass = pass_kinematic && pad_pid && pass_electron;
+		pass = pass_kinematic && pass_pid && pass_electron;
 		return pass;
 	}
 };
