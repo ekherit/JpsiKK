@@ -602,7 +602,8 @@ StatusCode JpsiKK::execute()
 	}
 
 	TrackVector_t Tracks;
-	HepLorentzVector Pkf;
+	std::vector<HepLorentzVector> Pkf;
+	SelectionHelper_t * sh;
 
 	fEvent.sign = (int(negative_sh()) << 1 ) + int(positive_sh());
 	fEvent.KK = 0;
@@ -620,6 +621,7 @@ StatusCode JpsiKK::execute()
 			Pkf = negative_sh.P;
 			//add missing positive tracks
 			Tracks.push_back(negative_sh.end);
+			sh = & negative_sh;
 			break;
 
 		case OTHER_POSITIVE_TRACK: //one positive track
@@ -631,6 +633,7 @@ StatusCode JpsiKK::execute()
 			//negative tracks go first
 			std::swap(Tracks[2], Tracks[3]);
 			std::swap(Pkf[2],  Pkf[3]);
+			sh = & positive_sh;
 			break;
 
 		case OTHER_TWO_TRACKS:
@@ -656,6 +659,7 @@ StatusCode JpsiKK::execute()
 			Pkf = negative_sh.P;
 			Tracks = negative_sh.tracks;
 			Tracks.push_back(positive_sh.Tracks[2]);
+			sh = & negative_sh;
 			break;
 		default:
 			return StatusCode::SUCCESS;
@@ -690,9 +694,9 @@ StatusCode JpsiKK::execute()
   fEvent.nnegative_pions = negative_pion_tracks.size();
   fEvent.npion_pairs = pion_pairs.size();
   // fill the decay channel of the J/psi 0 - kaons, 1 --muons
-  fEvent.channel = channel; 
-  fEvent.kin_chi2 = kinematic_chi2;
-  fEvent.pid_chi2 = pchi2[channel];
+  //fEvent.channel = channel; 
+  fEvent.kin_chi2 = sh.kin_chi2; //kinematic_chi2;
+  fEvent.pid_chi2 = sh.mypid_chi2[fEvent.channel]; //pchi2[channel];
 	std::cerr << "DEBUG: BEFORE Pkf inv masses" << std::endl;
   fEvent.Minv = (Pkf[2]+Pkf[3]).m();
   fEvent.M012 = (Pkf[0]+Pkf[1]+Pkf[2]).m();

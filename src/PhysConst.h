@@ -13,6 +13,7 @@
 //   Organization:  Budker Institute of Nuclear Physics
 //
 // =====================================================================================
+#pragma once
 
 const double PION_MASS     = 0.13957018; //GeV
 const double MUON_MASS     = 0.105658389; //GeV
