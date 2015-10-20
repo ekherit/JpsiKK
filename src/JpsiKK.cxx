@@ -705,7 +705,7 @@ StatusCode JpsiKK::execute()
 			break;
 		case CHAN_KAON_MUON:
 		case CHAN_MUON_KAON:
-			fEvent.pid_chi2 = 0.5*(positive_sh -> mypid_chi2[positive_sh->channel] + negative_sh -> mypid_chi2[negative_sh->channel]) ; //pchi2[channel];
+			fEvent.pid_chi2 = 0.5*(positive_sh.mypid_chi2[positive_sh.channel] + negative_sh.mypid_chi2[negative_sh.channel]) ; //pchi2[channel];
 			break;
 	}
 
