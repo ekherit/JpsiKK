@@ -556,7 +556,6 @@ StatusCode JpsiKK::execute()
         pion_pairs.push_back(pair);
       }
     }
-	cout <<  "Number of pion pairs: " << pion_pairs.size() << endl;
   //SELECTION CODE we must have at list one pion pair
   if(pion_pairs.empty()) return StatusCode::SUCCESS; //we must have at list one pion pair
 	//if(pion_pairs.size()!=1) return StatusCode::SUCCESS; //exacly one pion pair
@@ -575,39 +574,30 @@ StatusCode JpsiKK::execute()
   //keep only specific signature
   //if(positive_charged_tracks.size()!=2 || negative_charged_tracks.size()!=2) return StatusCode::SUCCESS;
 
-  log << MSG::ERROR << "good charged tracks: " << charged_tracks.size() << " (" << negative_charged_tracks.size() << ", " << positive_charged_tracks.size() << endmsg;
-  log << MSG::ERROR << "pions: " << negative_pion_tracks.size()  << ", " << positive_pion_tracks.size() << endmsg;
-  log << MSG::ERROR << "other: " << other_negative_tracks.size()  << ", " << other_positive_tracks.size() << endmsg;
-  log << MSG::ERROR << "pion pairs: " << pion_pairs.size() << endmsg;
+  //log << MSG::ERROR << "good charged tracks: " << charged_tracks.size() << " (" << negative_charged_tracks.size() << ", " << positive_charged_tracks.size() << endmsg;
+  //log << MSG::ERROR << "pions: " << negative_pion_tracks.size()  << ", " << positive_pion_tracks.size() << endmsg;
+  //log << MSG::ERROR << "other: " << other_negative_tracks.size()  << ", " << other_positive_tracks.size() << endmsg;
+  //log << MSG::ERROR << "pion pairs: " << pion_pairs.size() << endmsg;
 
 
   //if no other particles
 	if(other_negative_tracks.empty() && other_positive_tracks.empty()) return StatusCode::SUCCESS;
 
 
-	log << MSG::ERROR << "Befor SelectionHelper" << endmsg;
 	SelectionHelper_t negative_sh(cfg.CENTER_MASS_ENERGY, evtRecTrkCol->end());
 	SelectionHelper_t positive_sh(cfg.CENTER_MASS_ENERGY, evtRecTrkCol->end());
-	log << MSG::ERROR << "After SelectionHelper" << endmsg;
 
 	if(!other_negative_tracks.empty()) 
 	{
-		log << MSG::ERROR << "Befor kinematic fit" << endmsg;
 		kinfit(pion_pair,  other_negative_tracks,  negative_sh);
-		log << MSG::ERROR << "After kinematic fit" << endmsg;
-		log << MSG::ERROR << "Befor total pass" << endmsg;
-		std::clog << "before total pass" << std::endl;
 		negative_sh.totalPass(cfg);
-		log << MSG::ERROR << "After total pass" << endmsg;
 	}
-	log << MSG::ERROR << "After negative" << endmsg;
 
 	if(!other_positive_tracks.empty()) 
 	{
 		kinfit(pion_pair,  other_positive_tracks,  positive_sh);
 		positive_sh.totalPass(cfg);
 	}
-	log << MSG::ERROR << "After positive" << endmsg;
 
 	TrackVector_t Tracks;
 	std::vector<HepLorentzVector> Pkf;

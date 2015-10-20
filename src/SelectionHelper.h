@@ -176,13 +176,9 @@ struct SelectionHelper_t
 	bool totalPass(SelectionConfig & cfg)
 	{
 		pass = false;
-		clog << "Before pass kinematic" << endl;
 		passKinematic(cfg);
-		clog << "Before pass Electrons" << endl;
 		passElectrons(cfg);
-		clog << "Before pass Pid" << endl;
 		passPid(cfg);
-		clog << "After pass pid" << endl;
 		pass = pass_kinematic && pass_pid && pass_electron;
 		return pass;
 	}
