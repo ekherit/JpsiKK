@@ -268,9 +268,8 @@ bool kinematic_fit(
 	{
 		vtxfit->AddTrack(i, WTrk[i]);
 	}
-	if(WTrk.size()<4) vtxfit->AddMissTrack(3,XMASS[PID]);
   //add tracks. I know the first two one must be pions
-  vtxfit->AddVertex(0, vxpar,0, 1, 2, 3);
+  vtxfit->AddVertex(0, vxpar,0, 1, 2);
   if(!vtxfit->Fit(0)) return false;
   vtxfit->Fit();
   vtxfit->Swim(0);
@@ -280,10 +279,12 @@ bool kinematic_fit(
   //kmfit->setChisqCut(10000);
 
   kmfit->init();
-  for(int i=0;i<4;i++)
+  for(int i=0;i<WTrk.size();i++)
   {
     kmfit->AddTrack(i,vtxfit->wtrk(i));
   }
+	if(WTrk.size()<4) kmfit->AddMissTrack(3,XMASS[PID]);
+
   HepLorentzVector Pcmf(W*sin(0.011) /* 40.546 MeV*/,0,0,W); //initial vector of center of mass frame
   kmfit->AddFourMomentum(0,  Pcmf);
   if(!kmfit->Fit(0)) return false;
