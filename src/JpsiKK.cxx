@@ -604,7 +604,7 @@ StatusCode JpsiKK::execute()
 	std::vector<HepLorentzVector> Pkf;
 	SelectionHelper_t * sh;
 
-	fEvent.sign = (int(negative_sh.pass) << 1 ) + int(positive_sh.pass);
+	fEvent.sign = (int(positive_sh.pass) << 1 ) + int(negative_sh.pass);
 	fEvent.KK = 0;
 	fEvent.uu = 0;
 	fEvent.Ku = 0;
