@@ -759,26 +759,26 @@ StatusCode JpsiKK::execute()
     }
 		std::cerr << "DEBUG: Before mdcTrk:" << std::endl;
     RecMdcTrack  *mdcTrk = (*Tracks[i])->mdcTrack();
-    fMdc.trackId[i] = mdcTrk->trackId();
-    fMdc.q[i] = mdcTrk->charge(); 
-    fMdc.p[i] = mdcTrk->p();
-    fMdc.px[i]= mdcTrk->px();
-    fMdc.py[i]= mdcTrk->py();
-    fMdc.pz[i]= mdcTrk->pz();
-    fMdc.theta[i]= mdcTrk->theta();
-    fMdc.phi[i] = mdcTrk->phi();
-    fMdc.x[i]  = mdcTrk->x();
-    fMdc.y[i]  = mdcTrk->y();
-    fMdc.z[i]  = mdcTrk->z();
-    fMdc.x[i]  = mdcTrk->x();
-    fMdc.y[i]  = mdcTrk->y();
-    fMdc.z[i]  = mdcTrk->z();
+    fMdc.T.trackId[i] = mdcTrk->trackId();
+    fMdc.T.q[i] = mdcTrk->charge(); 
+    fMdc.T.p[i] = mdcTrk->p();
+    fMdc.T.px[i]= mdcTrk->px();
+    fMdc.T.py[i]= mdcTrk->py();
+    fMdc.T.pz[i]= mdcTrk->pz();
+    fMdc.T.theta[i]= mdcTrk->theta();
+    fMdc.T.phi[i] = mdcTrk->phi();
+    fMdc.T.x[i]  = mdcTrk->x();
+    fMdc.T.y[i]  = mdcTrk->y();
+    fMdc.T.z[i]  = mdcTrk->z();
+    fMdc.T.x[i]  = mdcTrk->x();
+    fMdc.T.y[i]  = mdcTrk->y();
+    fMdc.T.z[i]  = mdcTrk->z();
     double rvxy,rvz,rvphi;
 		std::cerr << "DEBUG: calculate vertex:" << std::endl;
     calculate_vertex(mdcTrk,rvxy,rvz,rvphi); 
-    fMdc.vxy[i] = rvxy;
-    fMdc.vz[i]  = rvz; 
-    fMdc.vphi[i] = rvphi; 
+    fMdc.T.vxy[i] = rvxy;
+    fMdc.T.vz[i]  = rvz; 
+    fMdc.T.vphi[i] = rvphi; 
 
 
     //dedx information
