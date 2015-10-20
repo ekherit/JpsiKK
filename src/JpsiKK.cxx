@@ -83,52 +83,52 @@ enum
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
 {
-  declareProperty("CENTER_MASS_ENERGY", CENTER_MASS_ENERGY = 0); //GeV
-  declareProperty("MIN_CHARGED_TRACKS", MIN_CHARGED_TRACKS=3); //minimum number of charged tracks in selection
-  declareProperty("MAX_CHARGED_TRACKS", MAX_CHARGED_TRACKS=4); //maximum number of charged tracks in selection
-  declareProperty("MAX_NEUTRAL_TRACKS", MAX_NEUTRAL_TRACKS=1000); //maximum number of good charged tracks in selection
+  declareProperty("CENTER_MASS_ENERGY", cfg.CENTER_MASS_ENERGY = 0); //GeV
+  declareProperty("MIN_CHARGED_TRACKS", cfg.MIN_CHARGED_TRACKS=3); //minimum number of charged tracks in selection
+  declareProperty("MAX_CHARGED_TRACKS", cfg.MAX_CHARGED_TRACKS=4); //maximum number of charged tracks in selection
+  declareProperty("MAX_NEUTRAL_TRACKS", cfg.MAX_NEUTRAL_TRACKS=1000); //maximum number of good charged tracks in selection
 
   //good charged track configuration
-  declareProperty("IP_MAX_Z", IP_MAX_Z = 10.0); //cm
-  declareProperty("IP_MAX_RHO", IP_MAX_RHO = 1.0); //cm
-  declareProperty("MAX_COS_THETA", MAX_COS_THETA = 0.93);
+  declareProperty("IP_MAX_Z",      cfg.IP_MAX_Z = 10.0); //cm
+  declareProperty("IP_MAX_RHO",    cfg.IP_MAX_RHO = 1.0); //cm
+  declareProperty("MAX_COS_THETA", cfg.MAX_COS_THETA = 0.93);
 
   //good neutral track configuration
   //endcup calorimeter
-  declareProperty("EMC_ENDCUP_MIN_COS_THETA", EMC_ENDCUP_MIN_COS_THETA = 0.86);
-  declareProperty("EMC_ENDCUP_MAX_COS_THETA", EMC_ENDCUP_MAX_COS_THETA = 0.92);
-  declareProperty("EMC_ENDCUP_MIN_ENERGY", EMC_ENDCUP_MIN_ENERGY = 0.05);
+  declareProperty("EMC_ENDCUP_MIN_COS_THETA", cfg.EMC_ENDCUP_MIN_COS_THETA = 0.86);
+  declareProperty("EMC_ENDCUP_MAX_COS_THETA", cfg.EMC_ENDCUP_MAX_COS_THETA = 0.92);
+  declareProperty("EMC_ENDCUP_MIN_ENERGY",    cfg.EMC_ENDCUP_MIN_ENERGY = 0.05);
   //barrel calorimeter
-  declareProperty("EMC_BARREL_MAX_COS_THETA", EMC_BARREL_MAX_COS_THETA = 0.8);
-  declareProperty("EMC_BARREL_MIN_ENERGY", EMC_BARREL_MIN_ENERGY = 0.025);
+  declareProperty("EMC_BARREL_MAX_COS_THETA", cfg.EMC_BARREL_MAX_COS_THETA = 0.8);
+  declareProperty("EMC_BARREL_MIN_ENERGY",    cfg.EMC_BARREL_MIN_ENERGY = 0.025);
 
-  declareProperty("MAX_MUON_EP_RATIO", MAX_MUON_EP_RATIO = 0.26);
-  declareProperty("MIN_MUON_EP_RATIO", MIN_MUON_EP_RATIO = 0);
+  declareProperty("MAX_MUON_EP_RATIO", cfg.MAX_MUON_EP_RATIO = 0.26);
+  declareProperty("MIN_MUON_EP_RATIO", cfg.MIN_MUON_EP_RATIO = 0);
 
-  declareProperty("MAX_KAON_EP_RATIO", MAX_KAON_EP_RATIO = 0.8);
-  declareProperty("MIN_KAON_EP_RATIO", MIN_KAON_EP_RATIO = 0);
+  declareProperty("MAX_KAON_EP_RATIO", cfg.MAX_KAON_EP_RATIO = 0.8);
+  declareProperty("MIN_KAON_EP_RATIO", cfg.MIN_KAON_EP_RATIO = 0);
 
-  declareProperty("MAX_PION_MOMENTUM", MAX_PION_MOMENTUM = 0.45); //GeV
-  declareProperty("MIN_PION_MOMENTUM", MIN_PION_MOMENTUM = 0); //GeV
+  declareProperty("MAX_PION_MOMENTUM", cfg.MAX_PION_MOMENTUM = 0.45); //GeV
+  declareProperty("MIN_PION_MOMENTUM", cfg.MIN_PION_MOMENTUM = 0); //GeV
 
-  declareProperty("MIN_KAON_MOMENTUM", MIN_KAON_MOMENTUM = 1.0); //GeV
-  declareProperty("MAX_KAON_MOMENTUM", MAX_KAON_MOMENTUM = 2.0); //GeV
+  declareProperty("MIN_KAON_MOMENTUM", cfg.MIN_KAON_MOMENTUM = 1.0); //GeV
+  declareProperty("MAX_KAON_MOMENTUM", cfg.MAX_KAON_MOMENTUM = 2.0); //GeV
 
-  declareProperty("MIN_MUON_MOMENTUM", MIN_MUON_MOMENTUM = 1.0); //GeV
-  declareProperty("MAX_MUON_MOMENTUM", MAX_MUON_MOMENTUM = 2.0); //GeV
+  declareProperty("MIN_MUON_MOMENTUM", cfg.MIN_MUON_MOMENTUM = 1.0); //GeV
+  declareProperty("MAX_MUON_MOMENTUM", cfg.MAX_MUON_MOMENTUM = 2.0); //GeV
 
-  declareProperty("MIN_RECOIL_MASS", MIN_RECOIL_MASS = 3.0); //GeV
-  declareProperty("MAX_RECOIL_MASS", MAX_RECOIL_MASS = 3.2); //GeV
-  declareProperty("MIN_INVARIANT_MASS", MIN_INVARIANT_MASS = 3.0); //GeV
-  declareProperty("MAX_INVARIANT_MASS", MAX_INVARIANT_MASS = 3.2); //GeV
-  declareProperty("MIN_KAON_MISSING_MASS", MIN_KAON_MISSING_MASS = 0.1); //GeV^2
-  declareProperty("MAX_KAON_MISSING_MASS", MAX_KAON_MISSING_MASS = 0.6); //GeV^2
-  declareProperty("MIN_MUON_MISSING_MASS", MIN_MUON_MISSING_MASS = 0); //GeV^2
-  declareProperty("MAX_MUON_MISSING_MASS", MAX_MUON_MISSING_MASS = 0.1); //GeV^2
+  declareProperty("MIN_RECOIL_MASS", cfg.MIN_RECOIL_MASS = 3.0); //GeV
+  declareProperty("MAX_RECOIL_MASS", cfg.MAX_RECOIL_MASS = 3.2); //GeV
+  declareProperty("MIN_INVARIANT_MASS", cfg.MIN_INVARIANT_MASS = 3.0); //GeV
+  declareProperty("MAX_INVARIANT_MASS", cfg.MAX_INVARIANT_MASS = 3.2); //GeV
+  declareProperty("MIN_KAON_MISSING_MASS", cfg.MIN_KAON_MISSING_MASS = 0.1); //GeV^2
+  declareProperty("MAX_KAON_MISSING_MASS", cfg.MAX_KAON_MISSING_MASS = 0.6); //GeV^2
+  declareProperty("MIN_MUON_MISSING_MASS", cfg.MIN_MUON_MISSING_MASS = 0); //GeV^2
+  declareProperty("MAX_MUON_MISSING_MASS", cfg.MAX_MUON_MISSING_MASS = 0.1); //GeV^2
 
 
-  declareProperty("MIN_MISSING_MASS", MIN_MISSING_MASS = -0.1); //GeV^2
-  declareProperty("MAX_MISSING_MASS", MAX_MISSING_MASS = +0.1); //GeV^2
+  declareProperty("MIN_MISSING_MASS", cfg.MIN_MISSING_MASS = -0.1); //GeV^2
+  declareProperty("MAX_MISSING_MASS", cfg.MAX_MISSING_MASS = +0.1); //GeV^2
 }
 
 //this is service function for fast book ntuple
@@ -431,35 +431,6 @@ void JpsiKK::RootMCTopo::init(void)
 
 
 
-
-
-
-bool JpsiKK::checkElectrons(SelectionHelper_t & kfp)
-{
-	kfp.pass_electron = false;
-	double MIN_MOMENTUM[5] = { MIN_KAON_MOMENTUM,  MIN_MUON_MOMENTUM,  0, 0, 0}; 
-	double MAX_MOMENTUM[5] = { MAX_KAON_MOMENTUM,  MAX_MUON_MOMENTUM,  0, 0, 0}; 
-	double MIN_EP_RATIO[5] = { MIN_KAON_EP_RATIO,  MIN_MUON_EP_RATIO,  0, 0, 0}; 
-	double MAX_EP_RATIO[5] = { MAX_KAON_EP_RATIO,  MAX_MUON_EP_RATIO,  0, 0, 0}; 
-	for(int i=2;i<4;i++)
-	{
-		if(kfp.tracks[i]==kfp.end) continue;
-		RecMdcTrack  * mdcTrk = (*Tracks[i])->mdcTrack();
-		RecEmcShower * emcTrk = (*Tracks[i])->emcShower();
-		double EpRatio = emcTrk->energy()/mdcTrk->p();
-		if( 
-				in(EpRatio, MIN_EP_RATIO[kfp.channel],  MAX_EP_RATIO[kfp.channel] ) 
-					&&
-				in(mdcTrk->p(), MIN_MOMENTUM[kfp.channel],  MAX_MOMENTUM[kfp.channel] )
-			) kfp.pass_electron = true;
-	}
-	return kfp.pass_electron;
-}
-
-
-
-
-
 StatusCode JpsiKK::execute()
 {
   MsgStream log(msgSvc(), name());
@@ -491,27 +462,17 @@ StatusCode JpsiKK::execute()
   SmartDataPtr<EvtRecTrackCol> evtRecTrkCol(eventSvc(),  EventModel::EvtRec::EvtRecTrackCol);
   SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
 
-//  SmartDataPtr<EventNavigator> navigator (eventSvc(),"/Event/Navigator");
-//  if( ! navigator )
-//    {
-//      log << MSG::ERROR << " Unable to retrieve EventNavigator" << endreq;
-//      return StatusCode::FAILURE;
-//    }
-//
-  //log << MSG::INFO << "EventNavigator object" << endreq;
-  //navigator->Print();
-  
 
   //fill initial value of the selected event
   fEvent.init();
 
-  std::list<EvtRecTrackIterator> good_charged_tracks=createGoodChargedTrackList(evtRecEvent, evtRecTrkCol);
-  std::list<EvtRecTrackIterator> good_neutral_tracks=createGoodNeutralTrackList(evtRecEvent, evtRecTrkCol);
+  std::list<EvtRecTrackIterator> good_charged_tracks=createGoodChargedTrackList(cfg, evtRecEvent, evtRecTrkCol);
+  std::list<EvtRecTrackIterator> good_neutral_tracks=createGoodNeutralTrackList(cfg, evtRecEvent, evtRecTrkCol);
 
   //SELECTION CODE
-  if( MAX_NEUTRAL_TRACKS < good_neutral_tracks.size()) return StatusCode::SUCCESS;
+  if( cfg.MAX_NEUTRAL_TRACKS < good_neutral_tracks.size()) return StatusCode::SUCCESS;
   //SELECTION CODE
-  if( good_charged_tracks.size() < MIN_CHARGED_TRACKS || MAX_CHARGED_TRACKS < good_charged_tracks.size()) return StatusCode::SUCCESS;
+  if( good_charged_tracks.size() < cfg.MIN_CHARGED_TRACKS || cfg.MAX_CHARGED_TRACKS < good_charged_tracks.size()) return StatusCode::SUCCESS;
 
 	cout <<  "Number of good charged tracks: " << good_charged_tracks.size() << endl;
   
@@ -530,17 +491,17 @@ StatusCode JpsiKK::execute()
     double c = fabs(cos(mdcTrk->theta()));
     double p = mdcTrk->p();
     double q = mdcTrk->charge();
-    bool barrel = c < EMC_BARREL_MAX_COS_THETA;
+    bool barrel = c < cfg.EMC_BARREL_MAX_COS_THETA;
     if(barrel) 
     {
       if(q>0) 
       {
         positive_charged_tracks.push_back(itTrk);
-        if(MIN_PION_MOMENTUM < p && p<MAX_PION_MOMENTUM) 
+        if(cfg.MIN_PION_MOMENTUM < p && p<cfg.MAX_PION_MOMENTUM) 
         {
           positive_pion_tracks.push_back(itTrk);
         }
-        if(p>std::min(MIN_KAON_MOMENTUM, MIN_MUON_MOMENTUM))
+        if(p>std::min(cfg.MIN_KAON_MOMENTUM, cfg.MIN_MUON_MOMENTUM))
         {
           if((*itTrk)->isEmcShowerValid())
           {
@@ -551,11 +512,11 @@ StatusCode JpsiKK::execute()
       if(q<0) 
       {
         negative_charged_tracks.push_back(itTrk);
-        if(MIN_PION_MOMENTUM < p &&  p<MAX_PION_MOMENTUM) 
+        if(cfg.MIN_PION_MOMENTUM < p &&  p<cfg.MAX_PION_MOMENTUM) 
         {
           negative_pion_tracks.push_back(itTrk);
         }
-        if(p>std::min(MIN_KAON_MOMENTUM, MIN_MUON_MOMENTUM))
+        if(p>std::min(cfg.MIN_KAON_MOMENTUM, cfg.MIN_MUON_MOMENTUM))
         {
           if((*itTrk)->isEmcShowerValid())
           {
@@ -574,7 +535,7 @@ StatusCode JpsiKK::execute()
     {
       TrackPair_t pair(*i,*j);
       double M_recoil = get_recoil__mass(pair, PION_MASS,  CENTER_MASS_ENERGY);
-      if(MIN_RECOIL_MASS < M_recoil && M_recoil < MAX_RECOIL_MASS) 
+      if(cfg.MIN_RECOIL_MASS < M_recoil && M_recoil < cfg.MAX_RECOIL_MASS) 
       {
         pion_pairs.push_back(pair);
       }
@@ -589,7 +550,7 @@ StatusCode JpsiKK::execute()
 		//find the best pion pair using closest value to JPSI_MASS
 		for(TrackPairList_t::iterator p=pion_pairs.begin();p!=pion_pairs.end();p++)
 		{
-			if(fabs(get_recoil__mass(*p,PION_MASS, CENTER_MASS_ENERGY) - JPSI_MASS) <  fabs(get_recoil__mass(pion_pair,PION_MASS, CENTER_MASS_ENERGY) - JPSI_MASS)) pion_pair = *p;
+			if(fabs(get_recoil__mass(*p,PION_MASS, cfg.CENTER_MASS_ENERGY) - JPSI_MASS) <  fabs(get_recoil__mass(pion_pair,PION_MASS, cfg.CENTER_MASS_ENERGY) - JPSI_MASS)) pion_pair = *p;
 		}
 	}
 	//now we have one pion pair candidate
@@ -611,25 +572,21 @@ StatusCode JpsiKK::execute()
 
 
 	//SelectionHelper_t KFP(CENTER_MASS_ENERGY);
-	SelectionHelper_t negative_kfp(CENTER_MASS_ENERGY, evtRecTrkCol->end());
-	SelectionHelper_t positive_kfp(CENTER_MASS_ENERGY, evtRecTrkCol->end());
+	SelectionHelper_t negative_sh(cfg.CENTER_MASS_ENERGY, evtRecTrkCol->end());
+	SelectionHelper_t positive_sh(cfg.CENTER_MASS_ENERGY, evtRecTrkCol->end());
 
 	if(!other_negative_tracks.empty()) 
 	{
-		kinfit(pion_pairs,  other_negative_tracks,  negative_kfp);
-		checkElectrons(negative_kfp);
-		setMyPid(negative_kfp);
-		negative_kfp.passPid;
-		//positive_kfp.tracks[3] = evtRecTrkCol->end();
+		kinfit(pion_pairs,  other_negative_tracks,  negative_sh);
+		passElectrons(cfg);
+		passPid();
 	}
 
 	if(!other_positive_tracks.empty()) 
 	{
-		kinfit(pion_pairs,  other_positive_tracks,  positive_kfp);
-		checkElectrons(positive_kfp);
-		setMyPid(positive_kfp);
-		//positive_kfp.tracks[2] = evtRecTrkCol->end();
-		//swap(positive_kfp.P[2], positive_kfp.P[3])
+		kinfit(pion_pairs,  other_positive_tracks,  positive_sh);
+		checkElectrons(positive_sh);
+		setMyPid(positive_sh);
 	}
 
 	fEvent.sign = sign;
@@ -658,7 +615,7 @@ StatusCode JpsiKK::execute()
   fEvent.M03 =  (Pkf[0]+Pkf[3]).m();
   fEvent.M12 =  (Pkf[1]+Pkf[2]).m();
   fEvent.M01 =  (Pkf[0]+Pkf[1]).m();
-  HepLorentzVector P_psip(CENTER_MASS_ENERGY*sin(0.011),0,0,CENTER_MASS_ENERGY); //initial vector of psip
+  HepLorentzVector P_psip(cfg.CENTER_MASS_ENERGY*sin(0.011),0,0,cfg.CENTER_MASS_ENERGY); //initial vector of psip
 	std::cerr << "DEBUG: BEFORE Mrecoil" << std::endl;
   fEvent.Mrecoil = (P_psip - Pkf[0] - Pkf[1]).m();
 
@@ -698,7 +655,7 @@ StatusCode JpsiKK::execute()
   fDedx.ntrack=4;
   fEmc.ntrack=4;
   fTof.ntrack=4;
-  fMdc.Mrecoil = get_recoil__mass(pion_pair, PION_MASS,  CENTER_MASS_ENERGY);
+  fMdc.Mrecoil = get_recoil__mass(pion_pair, PION_MASS,  cfg.CENTER_MASS_ENERGY);
   //fMdc.Minv    = sqrt(get_invariant_mass2(result_pair,XMASS[channel]));
   //EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
 	std::cerr << "DEBUG: BEFORE loop" << std::endl;

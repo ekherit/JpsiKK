@@ -25,12 +25,14 @@ using CLHEP::Hep2Vector;
 using CLHEP::HepLorentzVector;
 
 #include "VertexFit/IVertexDbSvc.h"
+#include "VertexFit/Helix.h"
 
 #include "EvtRecEvent/EvtRecEvent.h"
 #include "EvtRecEvent/EvtRecTrack.h"
 
 #include "utils.h"
 #include "Defs.h"
+#include "SelectionConfig.h"
 
 void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
 {
@@ -70,7 +72,9 @@ void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
   phi=Rvphi0;
 }
 
-std::list<EvtRecTrackIterator> JpsiKK::createGoodChargedTrackList(
+
+inline std::list<EvtRecTrackIterator> createGoodChargedTrackList(
+		SelectionConfig & cfg, 
 		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
 		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
 		)
@@ -84,14 +88,15 @@ std::list<EvtRecTrackIterator> JpsiKK::createGoodChargedTrackList(
     //calculate interaction point distance
     double rvxy,rvz,rvphi;
     calculate_vertex(mdcTrk,rvxy,rvz,rvphi); //find distance to interaction point
-    bool IP_track = fabs(rvz)< IP_MAX_Z && fabs(rvxy)<IP_MAX_RHO;  //tracks begin near interaction point
-    bool good_track = IP_track && fabs(cos(mdcTrk->theta()))<MAX_COS_THETA; //track is good
+    bool IP_track = fabs(rvz)< cfg.IP_MAX_Z && fabs(rvxy)<cfg.IP_MAX_RHO;  //tracks begin near interaction point
+    bool good_track = IP_track && fabs(cos(mdcTrk->theta()))<cfg.MAX_COS_THETA; //track is good
     if(good_track) good_charged_tracks.push_back(itTrk);
   }
 	return good_charged_tracks;
 }
 
-std::list<EvtRecTrackIterator> JpsiKK::createGoodNeutralTrackList(
+inline std::list<EvtRecTrackIterator> createGoodNeutralTrackList(
+		SelectionConfig & cfg, 
 		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
 		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
 		)
@@ -105,11 +110,11 @@ std::list<EvtRecTrackIterator> JpsiKK::createGoodNeutralTrackList(
 		RecEmcShower *emcTrk = (*itTrk)->emcShower();
 		double c =  fabs(cos(emcTrk->theta())); //abs cos theta
 		double E  =  emcTrk->energy();
-		bool hit_barrel = (c <= EMC_BARREL_MAX_COS_THETA);
-		bool hit_endcup = (EMC_ENDCUP_MIN_COS_THETA <=c) && (c <= EMC_ENDCUP_MAX_COS_THETA);
+		bool hit_barrel = (c <= cfg.EMC_BARREL_MAX_COS_THETA);
+		bool hit_endcup = (cfg.EMC_ENDCUP_MIN_COS_THETA <=c) && (c <= cfg.EMC_ENDCUP_MAX_COS_THETA);
 		//barrel and endcup calorimeters have different energy threshold
-		bool barrel_good_track = hit_barrel && (E > EMC_BARREL_MIN_ENERGY);
-		bool endcup_good_track = hit_endcup && (E > EMC_ENDCUP_MIN_ENERGY);
+		bool barrel_good_track = hit_barrel && (E > cfg.EMC_BARREL_MIN_ENERGY);
+		bool endcup_good_track = hit_endcup && (E > cfg.EMC_ENDCUP_MIN_ENERGY);
 		if(barrel_good_track  || endcup_good_track) 
 		{
 			//cout << "Energy of good neutral track: " << E << endl;
@@ -118,6 +123,7 @@ std::list<EvtRecTrackIterator> JpsiKK::createGoodNeutralTrackList(
 	}
 	return good_neutral_tracks;
 }
+
 
 
 double get_invariant_mass2(TrackPair_t & pair, double mass)

@@ -30,6 +30,7 @@ using CLHEP::HepLorentzVector;
 #include "PhysConst.h"
 #include "utils.h"
 #include "Utils.h"
+#include "SelectionConfig.h"
 
 
 struct SelectionHelper_t
@@ -80,15 +81,38 @@ struct SelectionHelper_t
 
 	operator bool() const { return pass; }
 
-	void setMyPid(SelectionHelper_t & kfp)
+
+	bool passElectrons(SelectionConfig & cfg)
 	{
-		vector<double> & chi2 = kfp.mypid_chi2;
+		MIN_MOMENTUM[5] = { cfg.MIN_KAON_MOMENTUM,  cfg.MIN_MUON_MOMENTUM,  0, 0, 0}; 
+		MAX_MOMENTUM[5] = { cfg.MAX_KAON_MOMENTUM,  cfg.MAX_MUON_MOMENTUM,  0, 0, 0}; 
+		MIN_EP_RATIO[5] = { cfg.MIN_KAON_EP_RATIO,  cfg.MIN_MUON_EP_RATIO,  0, 0, 0}; 
+		MAX_EP_RATIO[5] = { cfg.MAX_KAON_EP_RATIO,  cfg.MAX_MUON_EP_RATIO,  0, 0, 0}; 
+		pass_electron = false;
+		for(int i=2;i<4;i++)
+		{
+			if(tracks[i]==end) continue;
+			RecMdcTrack  * mdcTrk = (*Tracks[i])->mdcTrack();
+			RecEmcShower * emcTrk = (*Tracks[i])->emcShower();
+			double EpRatio = emcTrk->energy()/mdcTrk->p();
+			if( 
+					in(EpRatio, MIN_EP_RATIO[channel],  MAX_EP_RATIO[channel] ) 
+					&&
+					in(mdcTrk->p(), MIN_MOMENTUM[channel],  MAX_MOMENTUM[channel] )
+				) pass_electron = true;
+		}
+		return pass_electron;
+	}
+
+	void setMyPid(void)
+	{
+		vector<double> & chi2 = mypid_chi2;
 		chi2.resize(5);
 		std::fill(chi2.begin(), chi2.end(), 0);
 		for(int i=2;i<4;i++)
 		{
 			if(kfp.tracks[i]==kfp.end) continue;
-			vector<double> chi2_tmp = get_chi2(kfp.tracks[i]);
+			vector<double> chi2_tmp = get_chi2(tracks[i]);
 			for(int pid =0;pid<5;pid++)
 			{
 				chi2[pid]+=chi2_tmp[pid];
@@ -97,8 +121,9 @@ struct SelectionHelper_t
 	}
 
 
-	bool passPid(void)
+	bool passPid(SelectionConfig & cfg)
 	{
+		setMyPid();
 		double & result = pass_pid;
 		result = false;
 		double & chi2 = mypid_chi2[channel]; //current chi2
@@ -134,6 +159,17 @@ struct SelectionHelper_t
 		}
 		return result;
 	}
+
+
+	bool totalPass(SelectionConfig & cfg)
+	{
+		passElectrons(cfg);
+		passPid(cfg);
+
+		if( pass_electron && pass_pid && pass_kinematic)
+	}
+
+
 
 
 };
