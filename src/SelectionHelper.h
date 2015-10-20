@@ -73,7 +73,7 @@ struct SelectionHelper_t
 	}
 
 
-	SelectionHelper_t(double cme= PSIP_MASS, EvtRecTrackIterator END)
+	SelectionHelper_t(double cme, EvtRecTrackIterator END)
 	{
 		init();
 		W = cme;
@@ -93,8 +93,8 @@ struct SelectionHelper_t
 		for(int i=2;i<4;i++)
 		{
 			if(tracks[i]==end) continue;
-			RecMdcTrack  * mdcTrk = (*Tracks[i])->mdcTrack();
-			RecEmcShower * emcTrk = (*Tracks[i])->emcShower();
+			RecMdcTrack  * mdcTrk = (*tracks[i])->mdcTrack();
+			RecEmcShower * emcTrk = (*tracks[i])->emcShower();
 			double EpRatio = emcTrk->energy()/mdcTrk->p();
 			if( 
 					in(EpRatio, MIN_EP_RATIO[channel],  MAX_EP_RATIO[channel] ) 
@@ -157,6 +157,7 @@ struct SelectionHelper_t
 					break;
 				break;
 			default:
+				break;
 		}
 		return result;
 	}
