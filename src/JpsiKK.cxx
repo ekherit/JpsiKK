@@ -697,7 +697,17 @@ StatusCode JpsiKK::execute()
   // fill the decay channel of the J/psi 0 - kaons, 1 --muons
   //fEvent.channel = channel; 
   fEvent.kin_chi2 = sh -> kin_chi2; //kinematic_chi2;
-  fEvent.pid_chi2 = sh -> mypid_chi2[fEvent.channel]; //pchi2[channel];
+	switch(fEvent.channel)
+	{
+		case CHAN_KAONS:
+		case CHAN_MUONS:
+			fEvent.pid_chi2 = sh -> mypid_chi2[fEvent.channel]; //pchi2[channel];
+			break;
+		case CHAN_KAON_MUON:
+		case CHAN_MUON_KAON:
+			fEvent.pid_chi2 = 0.5*(positive_sh -> mypid_chi2[positive_sh->channel] + negative_sh -> mypid_chi2[negative_sh->channel]) ; //pchi2[channel];
+			break;
+	}
 
 	//define initial four-momentum
   HepLorentzVector Pcm(cfg.CENTER_MASS_ENERGY*sin(0.011),0,0,cfg.CENTER_MASS_ENERGY); 
