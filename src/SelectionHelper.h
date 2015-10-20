@@ -18,6 +18,9 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
+
+using namespace std;
 
 
 #include "CLHEP/Vector/LorentzVector.h"
@@ -173,10 +176,14 @@ struct SelectionHelper_t
 	bool totalPass(SelectionConfig & cfg)
 	{
 		pass = false;
+		clog << "Before pass kinematic" << endl;
 		passKinematic(cfg);
+		clog << "Before pass Electrons" << endl;
 		passElectrons(cfg);
+		clog << "Before pass Pid" << endl;
 		passPid(cfg);
-		pass = passKinematic(cfg) && passElectrons(cfg) && passPid(cfg);
+		clog << "After pass pid" << endl;
+		pass = pass_kinematic && pad_pid && pass_electron;
 		return pass;
 	}
 };
