@@ -360,6 +360,8 @@ bool kinfit(
 			if(tmp_kfp.kin_chi2 < kfp.kin_chi2)
 			{
 				kfp = tmp_kfp;
+				cout << " tmp_kfp.P.size = " << tmp_kfp.P.size() << endl;
+				cout << " kfp.P.size = " << kfp.P.size() << endl;
 			}
 		}
 	}
