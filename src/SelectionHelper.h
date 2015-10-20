@@ -113,7 +113,7 @@ struct SelectionHelper_t
 		vector<double> & chi2 = mypid_chi2;
 		chi2.resize(5);
 		std::fill(chi2.begin(), chi2.end(), 0);
-		for(int i=2;i<4;i++)
+		for(int i=2;i<tracks.size();i++)
 		{
 			if(tracks[i]==end) continue;
 			vector<double> chi2_tmp = get_chi2(tracks[i]);
