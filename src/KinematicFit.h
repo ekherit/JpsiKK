@@ -15,6 +15,7 @@
 // =====================================================================================
 
 #pragma once
+#include <iostream>
 
 #include "VertexFit/KinematicFit.h"
 #include "VertexFit/KalmanKinematicFit.h"
@@ -334,6 +335,7 @@ bool kinfit(
 bool kinfit(SelectionHelper_t & kfp)
 {
 	kfp.good_kinematic_fit = kinfit(kfp.tracks,  kfp.channel,  kfp.kin_chi2,  kfp.P,  kfp.W);
+	cout << "In kinfit: P.size =  " <<  kfp.P.size() << endl;
 	return kfp.good_kinematic_fit;
 }
 
