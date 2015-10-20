@@ -171,7 +171,7 @@ StatusCode JpsiKK::initialize(void)
 
   StatusCode status;
   status = init_tuple(this, fEvent,  "FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
-  status = init_tuple(this, fPid,    "FILE1/pid","particle id",log);
+//  status = init_tuple(this, fPid,    "FILE1/pid","particle id",log);
   status = init_tuple(this, fMdc,    "FILE1/mdc","Mdc info for signal",log);
   status = init_tuple(this, fDedx,   "FILE1/dedx","Dedx info for signal",log);
   status = init_tuple(this, fEmc,    "FILE1/emc","Emc info for signal",log);
@@ -202,6 +202,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("channel", channel); //decay channel of the J/psi
   status = tuple->addItem ("KK", KK); //KK decay channel of the J/psi
   status = tuple->addItem ("uu", uu); //mu-mu decay channel of the J/psi
+  status = tuple->addItem ("Ku", Ku); //Kmu or muK events
 
 	status = M.add_to_tuple(tuple);
   status = tuple->addItem ("Mee",   kM[ID_ELECTRON]);
@@ -230,7 +231,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
 
 void JpsiKK::RootEvent::init(void)
 {
-  ntrack=4;
+  T.ntrack=4;
 }
 
 StatusCode JpsiKK::RootPid::init_tuple(void)
@@ -618,6 +619,7 @@ StatusCode JpsiKK::execute()
 		kinfit(pion_pairs,  other_negative_tracks,  negative_kfp);
 		checkElectrons(negative_kfp);
 		setMyPid(negative_kfp);
+		negative_kfp.passPid;
 		//positive_kfp.tracks[3] = evtRecTrkCol->end();
 	}
 
@@ -630,56 +632,8 @@ StatusCode JpsiKK::execute()
 		//swap(positive_kfp.P[2], positive_kfp.P[3])
 	}
 
-	//SELECTION CODE
-	if(!GoodKinematikFit) return StatusCode::SUCCESS;
-	if(kinematic_chi2>200) return StatusCode::SUCCESS;
-	good_kinematic_fit++;
-
-	std::cerr << "DEBUG: END supressing electrons" << std::endl;
-
-
-	//SELECTION CODE
-	if( pchi2[channel] > 200 ) return StatusCode::SUCCESS;
-	if( pchi2[channel] > pchi2[ID_KAON] )     return StatusCode::SUCCESS;
-	if( pchi2[channel] > pchi2[ID_MUON] )     return StatusCode::SUCCESS;
-	//if( pchi2[channel] > pchi2[ID_PION] )     return StatusCode::SUCCESS;
-	//if( pchi2[channel] > pchi2[ID_PROTON] )   return StatusCode::SUCCESS;
-	//if( pchi2[channel] > pchi2[ID_ELECTRON] ) return StatusCode::SUCCESS;
-	
 	fEvent.sign = sign;
 	std::cerr << "DEBUG: Before swithc channel" << std::endl;
-
-	switch(channel)
-	{
-		case ID_KAON:
-			if( pchi2[channel] > pchi2[ID_PION] )     return StatusCode::SUCCESS;
-			fEvent.KK=1;
-			fEvent.uu=0;
-			event_with_kaons++;
-			break;
-		case ID_MUON:
-			fEvent.KK=0;
-			fEvent.uu=1;
-			event_with_muons++;
-			break;
-		case ID_ELECTRON:
-			event_with_electrons++;
-			return StatusCode::SUCCESS;
-			break;
-		case ID_PION:
-			event_with_pions++;
-			return StatusCode::SUCCESS;
-			break;
-		case ID_PROTON:
-			event_with_protons++;
-			return StatusCode::SUCCESS;
-			break;
-		default:
-			return StatusCode::SUCCESS;
-			break;
-	}
-  //now we have best pion_pair, best kaon/muon pair (result_pair), four-momentum
-  //of all particles after kinematik fit
 
 
   //now fill the tuples
@@ -739,7 +693,7 @@ StatusCode JpsiKK::execute()
   PID->identify(PID->all()); 
 
   fEvent.ntrack=4;
-  fPid.ntrack=4;
+  //fPid.ntrack=4;
   fMdc.ntrack=4;
   fDedx.ntrack=4;
   fEmc.ntrack=4;
@@ -855,17 +809,17 @@ StatusCode JpsiKK::execute()
     PID->calculate();
     if(PID->IsPidInfoValid())
     {
-      fPid.prob[ID_ELECTRON][i] = PID->probElectron();
-      fPid.prob[ID_MUON][i]     = PID->probMuon();
-      fPid.prob[ID_PION][i]     = PID->probPion();
-      fPid.prob[ID_KAON][i]     = PID->probKaon();
-      fPid.prob[ID_PROTON][i]   = PID->probProton();
+      //fPid.prob[ID_ELECTRON][i] = PID->probElectron();
+      //fPid.prob[ID_MUON][i]     = PID->probMuon();
+      //fPid.prob[ID_PION][i]     = PID->probPion();
+      //fPid.prob[ID_KAON][i]     = PID->probKaon();
+      //fPid.prob[ID_PROTON][i]   = PID->probProton();
     }
 		std::cerr << "DEBUG: Before chi2:" << std::endl;
     vector<double> chi2 = get_chi2(Tracks[i]);
     for(int pid=0;pid<5;pid++)
     {
-      fPid.chi2[pid][i]   = chi2[pid];
+      //fPid.chi2[pid][i]   = chi2[pid];
     }
 
   }
@@ -875,7 +829,7 @@ StatusCode JpsiKK::execute()
     //fPid.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
     HepLorentzVector p1(Pkf[2].vect(), XMASS[i]);
     HepLorentzVector p2(Pkf[3].vect(), XMASS[i]);
-    fPid.kM[i] = (p1+p2).m();
+    //fPid.kM[i] = (p1+p2).m();
   };
 
 
@@ -1074,7 +1028,7 @@ StatusCode JpsiKK::execute()
     fMCTopo.tuple->write();
   }
   fEvent.tuple->write();
-  fPid.tuple->write();
+  //fPid.tuple->write();
   fMdc.tuple->write();
   fEmc.tuple->write();
   fDedx.tuple->write();

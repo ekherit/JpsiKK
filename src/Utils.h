@@ -24,6 +24,8 @@ using CLHEP::Hep3Vector;
 using CLHEP::Hep2Vector;
 using CLHEP::HepLorentzVector;
 
+#include "VertexFit/IVertexDbSvc.h"
+
 #include "EvtRecEvent/EvtRecEvent.h"
 #include "EvtRecEvent/EvtRecTrack.h"
 
