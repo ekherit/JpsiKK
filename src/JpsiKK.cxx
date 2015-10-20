@@ -87,7 +87,7 @@ enum
 	CHAN_MUONS = ID_MUON, 
 	CHAN_KAON_MUON  = 10, 
 	CHAN_MUON_KAON  = 11
-}
+};
 
 
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -181,7 +181,7 @@ StatusCode JpsiKK::initialize(void)
   event_with_electrons=0;
   event_with_protons=0;
   good_kinematic_fit=0;
-	if(CENTER_MASS_ENERGY == 0) CENTER_MASS_ENERGY = PSIP_MASS;
+	if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
 
   StatusCode status;
   status = init_tuple(this, fEvent,  "FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
@@ -548,7 +548,7 @@ StatusCode JpsiKK::execute()
     for(TrackList_t::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
     {
       TrackPair_t pair(*i,*j);
-      double M_recoil = get_recoil__mass(pair, PION_MASS,  CENTER_MASS_ENERGY);
+      double M_recoil = get_recoil__mass(pair, PION_MASS,  cfg.CENTER_MASS_ENERGY);
       if(cfg.MIN_RECOIL_MASS < M_recoil && M_recoil < cfg.MAX_RECOIL_MASS) 
       {
         pion_pairs.push_back(pair);
@@ -707,22 +707,22 @@ StatusCode JpsiKK::execute()
 	std::cerr << "DEBUG: BEFORE fEvent filling" << std::endl;
   for ( int i=0;i<4;i++)
   {
-    fEvent.q[i]  = i%2 == 0 ? -1 : +1;
-    fEvent.E[i]  = Pkf[i].e();
-    fEvent.px[i] = Pkf[i].px();
-    fEvent.py[i] = Pkf[i].py();
-    fEvent.pz[i] = Pkf[i].pz();
-    fEvent.p[i]  = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py())+sq(Pkf[i].pz()));
-    fEvent.pt[i] = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py()));
-    fEvent.theta[i]= Pkf[i].theta();
-    fEvent.phi[i] = Pkf[i].phi();
-    fEvent.x[i]=0;
-    fEvent.y[i]=0;
-    fEvent.z[i]=0;
-    fEvent.r[i]=0;
-    fEvent.vxy[i]=0;
-    fEvent.vz[i]=0;
-    fEvent.vphi[i]=0;
+    fEvent.T.q[i]  = i%2 == 0 ? -1 : +1;
+    fEvent.T.E[i]  = Pkf[i].e();
+    fEvent.T.px[i] = Pkf[i].px();
+    fEvent.T.py[i] = Pkf[i].py();
+    fEvent.T.pz[i] = Pkf[i].pz();
+    fEvent.T.p[i]  = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py())+sq(Pkf[i].pz()));
+    fEvent.T.pt[i] = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py()));
+    fEvent.T.theta[i]= Pkf[i].theta();
+    fEvent.T.phi[i] = Pkf[i].phi();
+    fEvent.T.x[i]=0;
+    fEvent.T.y[i]=0;
+    fEvent.T.z[i]=0;
+    fEvent.T.r[i]=0;
+    fEvent.T.vxy[i]=0;
+    fEvent.T.vz[i]=0;
+    fEvent.T.vphi[i]=0;
   }
 	std::cerr << "DEBUG: BEFORE particle id" << std::endl;
 
