@@ -490,7 +490,6 @@ StatusCode JpsiKK::execute()
   //SELECTION CODE
   if( good_charged_tracks.size() < cfg.MIN_CHARGED_TRACKS || cfg.MAX_CHARGED_TRACKS < good_charged_tracks.size()) return StatusCode::SUCCESS;
 
-	cout <<  "Number of good charged tracks: " << good_charged_tracks.size() << endl;
   
   TrackList_t charged_tracks; //selected tracks for specific cut
   TrackList_t positive_charged_tracks; //selected tracks for specific cut
