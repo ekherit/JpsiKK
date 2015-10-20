@@ -14,6 +14,13 @@
 //
 // =====================================================================================
 
+#pragma once 
+
+#include <vector>
+
+#include "EvtRecEvent/EvtRecTrack.h"
+#include "DstEvent/TofHitStatus.h"
+
 SmartRefVector<RecTofTrack>::iterator  getTofTrk(EvtRecTrackIterator itTrk, bool & isTofValid)
 {
   SmartRefVector<RecTofTrack> tofTrkCol = (*itTrk)->tofTrack();

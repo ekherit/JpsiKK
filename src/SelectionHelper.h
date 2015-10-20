@@ -15,6 +15,8 @@
 //
 // =====================================================================================
 
+#pragma once
+
 #include <vector>
 
 
@@ -26,7 +28,9 @@ using CLHEP::HepLorentzVector;
 
 
 #include "PhysConst.h"
+#include "utils.h"
 #include "Utils.h"
+
 
 struct SelectionHelper_t
 {
@@ -113,17 +117,22 @@ struct SelectionHelper_t
 						chi2 <  mypid_chi2[ID_PION]   &&
 						chi2 <  mypid_chi2[ID_MUON]
 					)
+				{
 					result = true;
+				}
 					break;
 			case ID_MUON:
 				if( 
-						chi2 <  mypid_chi2[ID_KAON]   &&
+						chi2 <  mypid_chi2[ID_KAON]
 					)
+				{
 					result = true;
+				}
 					break;
 				break;
 			default:
 		}
+		return result;
 	}
 
 };
