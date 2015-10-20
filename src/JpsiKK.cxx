@@ -596,6 +596,7 @@ StatusCode JpsiKK::execute()
 	{
 		kinfit(pion_pair,  other_positive_tracks,  positive_sh);
 		positive_sh.totalPass(cfg);
+		cout << "positive P.size = " << positive_sh.P.size() << endl;
 	}
 
 	TrackVector_t Tracks;
