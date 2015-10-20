@@ -627,11 +627,16 @@ StatusCode JpsiKK::execute()
 			fEvent.channel = positive_sh.channel;
 			Tracks = positive_sh.tracks;
 			Pkf = positive_sh.P;
+			clog << "size of Lorenz vector array: " << positive_sh.P.size() << endl;
 			//add missing negative tracks
 			Tracks.push_back(positive_sh.end);
 			//negative tracks go first
+			clog << "Before swap Tracks" << endl;
 			std::swap(Tracks[2], Tracks[3]);
+			clog << "After swap" << endl;
+			clog << "Before swap Pkf" << endl;
 			std::swap(Pkf[2],  Pkf[3]);
+			clog << "After swap Pkf" << endl;
 			sh = & positive_sh;
 			break;
 
