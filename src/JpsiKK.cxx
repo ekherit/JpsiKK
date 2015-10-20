@@ -699,7 +699,11 @@ StatusCode JpsiKK::execute()
   fEvent.kin_chi2 = sh -> kin_chi2; //kinematic_chi2;
   fEvent.pid_chi2 = sh -> mypid_chi2[fEvent.channel]; //pchi2[channel];
 	std::cerr << "DEBUG: BEFORE Pkf inv masses" << std::endl;
-  fEvent.Mrec = (P_psip - Pkf[0] - Pkf[1]).m();
+
+	//define initial four-momentum
+  HepLorentzVector Pcm(cfg.CENTER_MASS_ENERGY*sin(0.011),0,0,cfg.CENTER_MASS_ENERGY); 
+
+  fEvent.M.Mrec = (Pcm - Pkf[0] - Pkf[1]).m();
 
   fEvent.M.M012 = (Pkf[0]+Pkf[1]+Pkf[2]).m();
   fEvent.M.M013 = (Pkf[0]+Pkf[1]+Pkf[3]).m();
@@ -711,8 +715,6 @@ StatusCode JpsiKK::execute()
   fEvent.M.M01 =  (Pkf[0]+Pkf[1]).m();
   fEvent.M.M23 =  (Pkf[2]+Pkf[3]).m();
 
-  HepLorentzVector P_psip(cfg.CENTER_MASS_ENERGY*sin(0.011),0,0,cfg.CENTER_MASS_ENERGY); //initial vector of psip
-	std::cerr << "DEBUG: BEFORE Mrecoil" << std::endl;
 
   fEvent.T.ntrack = 4;
 	std::cerr << "DEBUG: BEFORE fEvent filling" << std::endl;
