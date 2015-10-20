@@ -57,9 +57,9 @@ struct SelectionHelper_t
 	void init(void)
 	{
 		channel = -1;
-		success = false;
-		chi2 = 1e100;
-		mypid_chi2=1e100;
+		good_kinematic_fit = false;
+		kin_chi2 = 1e100;
+		//mypid_chi2=1e100;
 		W = PSIP_MASS;
 		pass_kinematic = false;
 		pass_pid = false;
@@ -80,15 +80,15 @@ struct SelectionHelper_t
 		end = END;
 	}
 
-	operator bool() const { return pass; }
+	inline operator bool() const { return pass; }
 
 
 	bool passElectrons(SelectionConfig & cfg)
 	{
-		MIN_MOMENTUM[5] = { cfg.MIN_KAON_MOMENTUM,  cfg.MIN_MUON_MOMENTUM,  0, 0, 0}; 
-		MAX_MOMENTUM[5] = { cfg.MAX_KAON_MOMENTUM,  cfg.MAX_MUON_MOMENTUM,  0, 0, 0}; 
-		MIN_EP_RATIO[5] = { cfg.MIN_KAON_EP_RATIO,  cfg.MIN_MUON_EP_RATIO,  0, 0, 0}; 
-		MAX_EP_RATIO[5] = { cfg.MAX_KAON_EP_RATIO,  cfg.MAX_MUON_EP_RATIO,  0, 0, 0}; 
+		double MIN_MOMENTUM[5] = { cfg.MIN_KAON_MOMENTUM,  cfg.MIN_MUON_MOMENTUM,  0, 0, 0}; 
+		double MAX_MOMENTUM[5] = { cfg.MAX_KAON_MOMENTUM,  cfg.MAX_MUON_MOMENTUM,  0, 0, 0}; 
+		double MIN_EP_RATIO[5] = { cfg.MIN_KAON_EP_RATIO,  cfg.MIN_MUON_EP_RATIO,  0, 0, 0}; 
+		double MAX_EP_RATIO[5] = { cfg.MAX_KAON_EP_RATIO,  cfg.MAX_MUON_EP_RATIO,  0, 0, 0}; 
 		pass_electron = false;
 		for(int i=2;i<4;i++)
 		{
@@ -112,7 +112,7 @@ struct SelectionHelper_t
 		std::fill(chi2.begin(), chi2.end(), 0);
 		for(int i=2;i<4;i++)
 		{
-			if(kfp.tracks[i]==kfp.end) continue;
+			if(tracks[i]==end) continue;
 			vector<double> chi2_tmp = get_chi2(tracks[i]);
 			for(int pid =0;pid<5;pid++)
 			{
@@ -125,7 +125,7 @@ struct SelectionHelper_t
 	bool passPid(SelectionConfig & cfg)
 	{
 		setMyPid();
-		double & result = pass_pid;
+		bool & result = pass_pid;
 		result = false;
 		double & chi2 = mypid_chi2[channel]; //current chi2
 

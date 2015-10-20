@@ -332,8 +332,8 @@ bool kinfit(
 
 bool kinfit(SelectionHelper_t & kfp)
 {
-	kfp.success = kinfit(kfp.tracks,  kfp.channel,  kfp.chi2,  kfp.P,  kfp.W);
-	return kfp.success;
+	kfp.good_kinematic_fit = kinfit(kfp.tracks,  kfp.channel,  kfp.chi2,  kfp.P,  kfp.W);
+	return kfp.good_kinematic_fit;
 }
 
 
@@ -353,7 +353,7 @@ bool kinfit(
 		tmp_kfp.tracks[2] = track;
 		if(kinfit(tmp_kfp))
 		{
-			kfp.success = true;
+			kfp.good_kinematic_fit = true;
 			if(tmp_kfp.chi2 < kfp.chi2)
 			{
 				kfp = tmp_kfp;
@@ -361,5 +361,5 @@ bool kinfit(
 		}
 	}
 	//kfp.tracks.push_back(kfp.tracks[2]);
-	return  kfp.success;
+	return  kfp.good_kinematic_fit;
 }
