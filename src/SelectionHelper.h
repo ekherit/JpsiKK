@@ -93,7 +93,7 @@ struct SelectionHelper_t
 		double MIN_EP_RATIO[5] = { cfg.MIN_KAON_EP_RATIO,  cfg.MIN_MUON_EP_RATIO,  0, 0, 0}; 
 		double MAX_EP_RATIO[5] = { cfg.MAX_KAON_EP_RATIO,  cfg.MAX_MUON_EP_RATIO,  0, 0, 0}; 
 		pass_electron = false;
-		for(int i=2;i<4;i++)
+		for(int i=2;i<tracks.size();i++)
 		{
 			if(tracks[i]==end) continue;
 			RecMdcTrack  * mdcTrk = (*tracks[i])->mdcTrack();
