@@ -75,10 +75,20 @@ int JpsiKK::RootEmc::ARRAY_SIZE = 100;
 
 enum
 {
+	OTHER_NO_TRACK = 0, 
 	OTHER_NEGATIVE_TRACK=0x1, 
 	OTHER_POSITIVE_TRACK=0x2, 
 	OTHER_TWO_TRACKS=0x3
 };
+
+enum
+{
+	CHAN_KAONS = ID_KAON, 
+	CHAN_MUONS = ID_MUON, 
+	CHAN_KAON_MUON  = 10, 
+	CHAN_MUON_KAON  = 11
+}
+
 
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
@@ -129,6 +139,10 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
 
   declareProperty("MIN_MISSING_MASS", cfg.MIN_MISSING_MASS = -0.1); //GeV^2
   declareProperty("MAX_MISSING_MASS", cfg.MAX_MISSING_MASS = +0.1); //GeV^2
+
+  declareProperty("MAX_KIN_CHI2", cfg.MAX_KIN_CHI2 = 40); //GeV^2
+  declareProperty("MAX_PID_CHI2", cfg.MAX_PID_CHI2 = 40); //GeV^2
+
 }
 
 //this is service function for fast book ntuple
@@ -568,7 +582,6 @@ StatusCode JpsiKK::execute()
   //if no other particles
 	if(other_negative_tracks.empty() && other_positive_tracks.empty()) return StatusCode::SUCCESS;
 
-	//int sign = (int(!other_positive_tracks.empty()) << 1 ) + int(!other_negative_tracks.empty());
 
 
 	//SelectionHelper_t KFP(CENTER_MASS_ENERGY);
@@ -578,20 +591,91 @@ StatusCode JpsiKK::execute()
 	if(!other_negative_tracks.empty()) 
 	{
 		kinfit(pion_pairs,  other_negative_tracks,  negative_sh);
-		passElectrons(cfg);
-		passPid();
+		negative_sh.totalPass(cfg);
 	}
 
 	if(!other_positive_tracks.empty()) 
 	{
 		kinfit(pion_pairs,  other_positive_tracks,  positive_sh);
-		checkElectrons(positive_sh);
-		setMyPid(positive_sh);
+		positive_sh.totalPass(cfg);
 	}
 
-	fEvent.sign = sign;
-	std::cerr << "DEBUG: Before swithc channel" << std::endl;
+	TrackVector_t Tracks;
+	HepLorentzVector Pkf;
 
+	fEvent.sign = (int(negative_sh()) << 1 ) + int(positive_sh());
+	fEvent.KK = 0;
+	fEvent.uu = 0;
+	fEvent.Ku = 0;
+	switch(fEvent.sign)
+	{
+		case OTHER_NO_TRACK:
+			return StatusCode::SUCCESS;
+			break;
+
+		case OTHER_NEGATIVE_TRACK: //one negative track
+			fEvent.channel = negative_sh.channel;
+			Tracks = negative_sh.tracks;
+			Pkf = negative_sh.P;
+			//add missing positive tracks
+			Tracks.push_back(negative_sh.end);
+			break;
+
+		case OTHER_POSITIVE_TRACK: //one positive track
+			fEvent.channel = positive_sh.channel;
+			Tracks = positive_sh.tracks;
+			Pkf = positive_sh.P;
+			//add missing negative tracks
+			Tracks.push_back(positive_sh.end);
+			//negative tracks go first
+			std::swap(Tracks[2], Tracks[3]);
+			std::swap(Pkf[2],  Pkf[3]);
+			break;
+
+		case OTHER_TWO_TRACKS:
+			if(negative_sh.channel == ID_KAON && positive_sh.channel == ID_KAON)
+			{
+				fEvent.channel = CHAN_KAONS;
+			}
+
+			if(negative_sh.channel == ID_MUON && positive_sh.channel == ID_MUON)
+			{
+				fEvent.channel = CHAN_MUONS;
+			}
+
+			if(negative_sh.channel == ID_KAON && positive_sh.channel == ID_MUON)
+			{
+				fEvent.channel = CHAN_KAON_MUON;
+			}
+
+			if(negative_sh.channel == 1 && positive_sh.channel == 0)
+			{
+				fEvent.channel = CHAN_MUON_KAON;
+			}
+			Pkf = negative_sh.P;
+			Tracks = negative_sh.tracks;
+			Tracks.push_back(positive_sh.Tracks[2]);
+			break;
+		default:
+			return StatusCode::SUCCESS;
+			break;
+	}
+
+	switch(fEvent.channel)
+	{
+		case CHAN_KAONS:
+			fEvent.KK = 1;
+			break;
+		case CHAN_MUONS:
+			fEvent.uu = 1;
+			break;
+		case CHAN_KAON_MUON:
+		case CHAN_MUON_KAON:
+			fEvent.Ku = 1;
+			break;
+		default:
+			break;
+	}
 
   //now fill the tuples
 

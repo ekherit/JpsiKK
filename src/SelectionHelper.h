@@ -31,6 +31,7 @@ using CLHEP::HepLorentzVector;
 #include "utils.h"
 #include "Utils.h"
 #include "SelectionConfig.h"
+#include "Defs.h"
 
 
 struct SelectionHelper_t
@@ -49,7 +50,7 @@ struct SelectionHelper_t
 	std::vector<EvtRecTrackIterator> tracks;
 	EvtRecTrackIterator end;
 
-	std::vector<double>    kin_chi2;  //the kinematic fit result chi2 for all hypo
+	//std::vector<double>    kin_chi2;  //the kinematic fit result chi2 for all hypo
 	std::vector<double>  mypid_chi2;
 	std::vector<double>        prob; //the probability 
 
@@ -129,7 +130,7 @@ struct SelectionHelper_t
 		double & chi2 = mypid_chi2[channel]; //current chi2
 
 		//global cut
-		if( chi2 < 100)
+		if( chi2 > cfg.MAX_PID_CHI2)
 		{
 			result = false;
 			return result;
@@ -161,15 +162,20 @@ struct SelectionHelper_t
 	}
 
 
-	bool totalPass(SelectionConfig & cfg)
+	bool passKinematic(SelectionConfig & cfg)
 	{
-		passElectrons(cfg);
-		passPid(cfg);
-
-		if( pass_electron && pass_pid && pass_kinematic)
+		pass_kinematic = kin_chi2 < cfg.MAX_KIN_CHI2 && good_kinematic_fit;
+		return pass_kinematic;
 	}
 
 
-
-
+	bool totalPass(SelectionConfig & cfg)
+	{
+		pass = false;
+		passKinematic(cfg)
+		passElectrons(cfg);
+		passPid(cfg);
+		pass = passKinematic(cfg) && passElectrons(cfg) && passPid(cfg);
+		return pass;
+	}
 };
