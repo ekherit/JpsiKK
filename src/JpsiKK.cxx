@@ -590,6 +590,7 @@ StatusCode JpsiKK::execute()
 	{
 		kinfit(pion_pair,  other_negative_tracks,  negative_sh);
 		negative_sh.totalPass(cfg);
+		cout << "negative P.size = " << positive_sh.P.size() << endl;
 	}
 
 	if(!other_positive_tracks.empty()) 
