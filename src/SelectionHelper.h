@@ -176,6 +176,7 @@ struct SelectionHelper_t
 	bool totalPass(SelectionConfig & cfg)
 	{
 		pass = false;
+		if(!good_kinematic_fit) return false;
 		passKinematic(cfg);
 		passElectrons(cfg);
 		passPid(cfg);
