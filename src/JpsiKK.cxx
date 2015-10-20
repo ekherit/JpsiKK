@@ -585,22 +585,24 @@ StatusCode JpsiKK::execute()
 	if(other_negative_tracks.empty() && other_positive_tracks.empty()) return StatusCode::SUCCESS;
 
 
-
-	//SelectionHelper_t KFP(CENTER_MASS_ENERGY);
+	log << MSG::ERROR << "Befor SelectionHelper" << endmsg;
 	SelectionHelper_t negative_sh(cfg.CENTER_MASS_ENERGY, evtRecTrkCol->end());
 	SelectionHelper_t positive_sh(cfg.CENTER_MASS_ENERGY, evtRecTrkCol->end());
+	log << MSG::ERROR << "After SelectionHelper" << endmsg;
 
 	if(!other_negative_tracks.empty()) 
 	{
 		kinfit(pion_pair,  other_negative_tracks,  negative_sh);
 		negative_sh.totalPass(cfg);
 	}
+	log << MSG::ERROR << "After negative" << endmsg;
 
 	if(!other_positive_tracks.empty()) 
 	{
 		kinfit(pion_pair,  other_positive_tracks,  positive_sh);
 		positive_sh.totalPass(cfg);
 	}
+	log << MSG::ERROR << "After positive" << endmsg;
 
 	TrackVector_t Tracks;
 	std::vector<HepLorentzVector> Pkf;
