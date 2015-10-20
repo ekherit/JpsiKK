@@ -173,7 +173,7 @@ struct SelectionHelper_t
 	bool totalPass(SelectionConfig & cfg)
 	{
 		pass = false;
-		passKinematic(cfg)
+		passKinematic(cfg);
 		passElectrons(cfg);
 		passPid(cfg);
 		pass = passKinematic(cfg) && passElectrons(cfg) && passPid(cfg);
