@@ -290,7 +290,7 @@ struct SelectionHelper_t
 
 	bool kinfit(
 			TrackPair_t & pion_pair,
-			TrackList_t & other_tracks, 
+			TrackList_t & other_tracks
 			)
 	{
 		SelectionHelper_t tmp_kfp(*this);
