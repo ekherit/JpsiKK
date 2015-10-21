@@ -297,6 +297,7 @@ struct SelectionHelper_t
 		tmp_kfp.tracks.resize(3);
 		tmp_kfp.tracks[0]=pion_pair.first;
 		tmp_kfp.tracks[1]=pion_pair.second;
+		kin_chi2=2e100;
 		for(TrackList_t::iterator i=other_tracks.begin(); i!=other_tracks.end(); ++i)
 		{
 			EvtRecTrackIterator track = *i;
@@ -304,7 +305,7 @@ struct SelectionHelper_t
 			if(::kinfit(tmp_kfp.tracks,  tmp_kfp.channel,  tmp_kfp.kin_chi2,  tmp_kfp.P,  tmp_kfp.W))
 			{
 				good_kinematic_fit = true;
-				if(tmp_kfp.kin_chi2 < kfp.kin_chi2)
+				if(tmp_kfp.kin_chi2 < kin_chi2)
 				{
 					*this = tmp_kfp;
 				}
