@@ -39,6 +39,9 @@ using CLHEP::HepLorentzVector;
 #include "KinematicFit.h"
 
 
+extern  std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator> & Tracks,  const double CENTER_MASS_ENERGY);
+
+
 struct SelectionHelper_t
 {
 	int  channel;           //channel of the fit K, mu store here result of the selection
