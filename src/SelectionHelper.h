@@ -230,7 +230,7 @@ struct SelectionHelper_t
 		return pass;
 	}
 
-	bool kinfit(
+	void kinfit(
 			TrackPair_t & pion_pair,
 			EvtRecTrackIterator & track, 
 			)
@@ -279,6 +279,38 @@ struct SelectionHelper_t
 		kin_chi2 = KF[channel].chi2;
 		pid_chi2 = pid_chi2[channel];
 		return true;
+	}
+
+	//bool kinfit(SelectionHelper_t & kfp)
+	//{
+	//	kfp.good_kinematic_fit = kinfit(kfp.tracks,  kfp.channel,  kfp.kin_chi2,  kfp.P,  kfp.W);
+	//	return kfp.good_kinematic_fit;
+	//}
+
+
+	bool kinfit(
+			TrackPair_t & pion_pair,
+			TrackList_t & other_tracks, 
+			)
+	{
+		SelectionHelper_t tmp_kfp(*this);
+		tmp_kfp.tracks.resize(3);
+		tmp_kfp.tracks[0]=pion_pair.first;
+		tmp_kfp.tracks[1]=pion_pair.second;
+		for(TrackList_t::iterator i=other_tracks.begin(); i!=other_tracks.end(); ++i)
+		{
+			EvtRecTrackIterator track = *i;
+			tmp_kfp.tracks[2] = track;
+			if(kinfit(tmp_kfp))
+			{
+				good_kinematic_fit = true;
+				if(tmp_kfp.kin_chi2 < kfp.kin_chi2)
+				{
+					*this = tmp_kfp;
+				}
+			}
+		}
+		return  good_kinematic_fit;
 	}
 
 	bool totalPass2(SelectionConfig & cfg)
