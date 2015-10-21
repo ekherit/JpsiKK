@@ -28,6 +28,7 @@ using CLHEP::HepLorentzVector;
 
 
 #include "EvtRecEvent/EvtRecTrack.h"
+#include "ParticleID/ParticleID.h"
 
 
 #include "PhysConst.h"
@@ -55,6 +56,7 @@ struct SelectionHelper_t
 
 	//std::vector<double>    kin_chi2;  //the kinematic fit result chi2 for all hypo
 	std::vector<double>  mypid_chi2;
+	std::vector<double>    pid_chi2; //ParticleId chi2
 	std::vector<double>        prob; //the probability 
 
 	void init(void)
@@ -124,13 +126,35 @@ struct SelectionHelper_t
 		}
 	}
 
-
-	bool passPid(SelectionConfig & cfg)
+	void setPid(void)
 	{
-		setMyPid();
+		ParticleID * PID = ParticleID::instance();
+		PID->init();
+		vector<double> & chi2 = pid_chi2;
+		chi2.resize(5);
+		std::fill(chi2.begin(), chi2.end(), 0);
+		for(int i=2;i<tracks.size();i++)
+		{
+			if(tracks[i]==end) continue;
+			PID->setRecTrack((*tracks[i]));
+			PID->setMethod(PID->methodProbability());
+			PID->setChiMinCut(4);
+			PID->usePidSys(PID->useDedx() | PID->useTof1() | PID->useTof2() | PID->useMuc());
+			PID->identify(PID->all()); 
+			PID->calculate();
+			chi2[ID_KAON]     += PID->chi[3];
+			chi2[ID_MUON]     += PID->chi[1];
+			chi2[ID_PION]     += PID->chi[2];
+			chi2[ID_ELECTRON] += PID->chi[0];
+			chi2[ID_PROTON]   += PID->chi[4];
+		}
+	}
+
+	bool passPid(SelectionConfig & cfg,  const vector<double> & pchi2)
+	{
 		bool & result = pass_pid;
 		result = false;
-		double & chi2 = mypid_chi2[channel]; //current chi2
+		double & chi2 = pchi2[channel]; //current chi2
 
 		//global cut
 		if( chi2 > cfg.MAX_PID_CHI2)
@@ -143,27 +167,40 @@ struct SelectionHelper_t
 		{
 			case ID_KAON:
 				if( 
-						chi2 <  mypid_chi2[ID_PION]   &&
-						chi2 <  mypid_chi2[ID_MUON]
+						chi2 <  pchi2[ID_PION]   &&
+						chi2 <  pchi2[ID_MUON]
 					)
 				{
 					result = true;
 				}
-					break;
+				break;
 			case ID_MUON:
 				if( 
-						chi2 <  mypid_chi2[ID_KAON]
+						chi2 <  pchi2[ID_KAON]
 					)
 				{
 					result = true;
 				}
-					break;
+				break;
 				break;
 			default:
 				break;
 		}
 		return result;
 	}
+
+	bool passMyPid(SelectionConfig & cfg)
+	{
+		setMyPid();
+		passPid(cfg,  mypid_chi2);
+	}
+
+	bool passPid(SelectionConfig & cfg)
+	{
+		setPid();
+		passPid(cfg,  pid_chi2);
+	}
+
 
 
 	bool passKinematic(SelectionConfig & cfg)
@@ -186,4 +223,6 @@ struct SelectionHelper_t
 		pass = pass_kinematic && pass_pid && pass_electron;
 		return pass;
 	}
+
+
 };

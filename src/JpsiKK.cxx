@@ -58,7 +58,6 @@ typedef HepGeom::Point3D<double> HepPoint3D;
 #include "Sphericity.h"
 
 
-#include "ParticleID/ParticleID.h"
 
 
 #include <algorithm>
@@ -587,6 +586,7 @@ StatusCode JpsiKK::execute()
 	SelectionHelper_t negative_sh(cfg.CENTER_MASS_ENERGY, evtRecTrkCol->end());
 	SelectionHelper_t positive_sh(cfg.CENTER_MASS_ENERGY, evtRecTrkCol->end());
 
+
 	if(!other_negative_tracks.empty()) 
 	{
 		kinfit(pion_pair,  other_negative_tracks,  negative_sh);
@@ -746,12 +746,6 @@ StatusCode JpsiKK::execute()
     fEvent.T.vphi[i]=0;
   }
 
-  ParticleID * PID = ParticleID::instance();
-  PID->init();
-  PID->setMethod(PID->methodProbability());
-  PID->setChiMinCut(4);
-  PID->usePidSys(PID->useDedx() || PID->useTof());
-  PID->identify(PID->all()); 
 
   fEvent.T.ntrack=4;
   //fPid.ntrack=4;
@@ -858,21 +852,21 @@ StatusCode JpsiKK::execute()
 
     //fill particle id
 
-    PID->setRecTrack((*Tracks[i]));
-    PID->calculate();
-    if(PID->IsPidInfoValid())
-    {
-      //fPid.prob[ID_ELECTRON][i] = PID->probElectron();
-      //fPid.prob[ID_MUON][i]     = PID->probMuon();
-      //fPid.prob[ID_PION][i]     = PID->probPion();
-      //fPid.prob[ID_KAON][i]     = PID->probKaon();
-      //fPid.prob[ID_PROTON][i]   = PID->probProton();
-    }
-    vector<double> chi2 = get_chi2(Tracks[i]);
-    for(int pid=0;pid<5;pid++)
-    {
-      //fPid.chi2[pid][i]   = chi2[pid];
-    }
+    //PID->setRecTrack((*Tracks[i]));
+    //PID->calculate();
+    //if(PID->IsPidInfoValid())
+    //{
+    //  //fPid.prob[ID_ELECTRON][i] = PID->probElectron();
+    //  //fPid.prob[ID_MUON][i]     = PID->probMuon();
+    //  //fPid.prob[ID_PION][i]     = PID->probPion();
+    //  //fPid.prob[ID_KAON][i]     = PID->probKaon();
+    //  //fPid.prob[ID_PROTON][i]   = PID->probProton();
+    //}
+    //vector<double> chi2 = get_chi2(Tracks[i]);
+    //for(int pid=0;pid<5;pid++)
+    //{
+    //  //fPid.chi2[pid][i]   = chi2[pid];
+    //}
 
   }
   for(int i=0;i<5;i++)
