@@ -232,7 +232,7 @@ struct SelectionHelper_t
 
 	void kinfit(
 			TrackPair_t & pion_pair,
-			EvtRecTrackIterator & track, 
+			EvtRecTrackIterator & track
 			)
 	{
 		std::vector<EvtRecTrackIterator> tracks(3);
@@ -301,7 +301,7 @@ struct SelectionHelper_t
 		{
 			EvtRecTrackIterator track = *i;
 			tmp_kfp.tracks[2] = track;
-			if(kinfit(tmp_kfp))
+			if(kinfit(tmp_kfp.tracks,  tmp_kfp.channel,  tmp_kfp.kin_chi2,  tmp_kfp.P,  tmp_kfp.W))
 			{
 				good_kinematic_fit = true;
 				if(tmp_kfp.kin_chi2 < kfp.kin_chi2)
