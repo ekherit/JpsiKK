@@ -217,6 +217,7 @@ struct SelectionHelper_t
 		passKinematic(cfg);
 		passElectrons(cfg);
 		passPid(cfg);
+		pass_pid = true; //temporary for testing
 		//clog << "good_kinematic_fit: " << good_kinematic_fit << "  kin_chi2 = " << kin_chi2 << " " ;
 		//clog << "pass_pid: " << pass_pid << "  pid_chi2 = " << mypid_chi2[channel] << " " ;
 		//clog << "pass_electron: " << pass_electron << endl;
