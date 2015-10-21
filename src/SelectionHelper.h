@@ -235,7 +235,7 @@ struct SelectionHelper_t
 			EvtRecTrackIterator & track
 			)
 	{
-		std::vector<EvtRecTrackIterator> tracks(3);
+		tracks.resize(3);
 		tracks[0] = pion_pair.first;
 		tracks[1] = pion_pair.second;
 		tracks[2] = track;
