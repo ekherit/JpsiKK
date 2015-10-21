@@ -239,7 +239,7 @@ struct SelectionHelper_t
 		tracks[0] = pion_pair.first;
 		tracks[1] = pion_pair.second;
 		tracks[2] = track;
-		KF = kinfit(tracks,  W);
+		KF = ::kinfit(tracks,  W);
 	}
 
 	//apply together particle id and kinematic fit 
