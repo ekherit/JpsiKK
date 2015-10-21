@@ -25,6 +25,7 @@
 #include "PhysConst.h"
 #include "Utils.h"
 #include "Defs.h"
+#include "SelectionHelper.h"
 
 bool vertex_fit(const std::vector<WTrackParameter> & input_tracks,  std::vector<WTrackParameter> output_tracks)
 {
