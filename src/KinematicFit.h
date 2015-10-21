@@ -331,6 +331,29 @@ bool kinfit(
 	return goodfit;
 }
 
+
+struct KinematicFit_t
+{
+	bool success;
+	double chi2;
+	std::vector<HepLorentzVector> P;
+};
+
+inline std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator> & Tracks,  const double CENTER_MASS_ENERGY)
+{
+	std::vector<KinematicFit_t> theKFV(5); //5 hypotesis
+	for(int i=0;i<theKFV.size(); i++)
+	{
+		KinematicFit_t & k = theKFV[i];
+		k.chi2=1e100;
+		k.P.resize(5);
+		k.success = false;
+		k.success = kinematic_fit(i, Tracks, k.P,  k.chi2,  CENTER_MASS_ENERGY);
+	}
+	return theKFV;
+}
+
+
 bool kinfit(SelectionHelper_t & kfp)
 {
 	kfp.good_kinematic_fit = kinfit(kfp.tracks,  kfp.channel,  kfp.kin_chi2,  kfp.P,  kfp.W);
@@ -364,3 +387,4 @@ bool kinfit(
 	//kfp.tracks.push_back(kfp.tracks[2]);
 	return  kfp.good_kinematic_fit;
 }
+

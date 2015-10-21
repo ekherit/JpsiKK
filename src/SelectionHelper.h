@@ -36,6 +36,7 @@ using CLHEP::HepLorentzVector;
 #include "Utils.h"
 #include "SelectionConfig.h"
 #include "Defs.h"
+#include "KinematicFit.h"
 
 
 struct SelectionHelper_t
@@ -48,13 +49,14 @@ struct SelectionHelper_t
 
 	double W;               //center of mass energy,  GeV
 
+
 	bool good_kinematic_fit; //result  of the kinematic fit 
 	double kin_chi2;         //chi2
 	std::vector<HepLorentzVector>  P;
 	std::vector<EvtRecTrackIterator> tracks;
 	EvtRecTrackIterator end;
 
-	//std::vector<double>    kin_chi2;  //the kinematic fit result chi2 for all hypo
+	std::vector <KinematicFit_t> KF; 
 	std::vector<double>  mypid_chi2;
 	std::vector<double>    pid_chi2; //ParticleId chi2
 	std::vector<double>        prob; //the probability 
@@ -203,6 +205,7 @@ struct SelectionHelper_t
 
 
 
+
 	bool passKinematic(SelectionConfig & cfg)
 	{
 		pass_kinematic = kin_chi2 < cfg.MAX_KIN_CHI2 && good_kinematic_fit;
@@ -224,5 +227,64 @@ struct SelectionHelper_t
 		return pass;
 	}
 
+	bool kinfit(
+			TrackPair_t & pion_pair,
+			EvtRecTrackIterator & track, 
+			)
+	{
+		std::vector<EvtRecTrackIterator> tracks(3);
+		tracks[0] = pion_pair.first;
+		tracks[1] = pion_pair.second;
+		tracks[2] = track;
+		KF = kinfit(tracks,  W);
+	}
+
+	//apply together particle id and kinematic fit 
+	//cut using MAX_KIN_CHI2
+	bool passKinPid(SelectionConfig & cfg)
+	{
+		setPid();
+		pass_pid = false;
+		pass_kinematic = false;
+		vector<double> chi2(5, 0);
+		for(int i=0;i<chi2.size();i++)
+		{
+			chi2[i] = pid_chi2[i] + KF[i].chi2;
+		}
+
+		//find minimum chi2
+		double chi2_tmp=2e100;
+		int channel_tmp = -1;
+		for(int i=0;i<chi2.size();i++)
+		{
+			if(chi2[i] < chi2_tmp)
+			{
+				channel_tmp = i;
+				chi2_tmp = chi2[i];
+			}
+		}
+		channel = channel_tmp;
+
+		if( chi2[channel] > cfg.MAX_KIN_CHI2 ||  !KF[channel].success)
+		{
+			pass_pid = false;
+			pass_kinematic =false;
+			return false;
+		}
+		pass_kinematic = true;
+		pass_pid = true;
+		kin_chi2 = KF[channel].chi2;
+		pid_chi2 = pid_chi2[channel];
+		return true;
+	}
+
+	bool totalPass2(SelectionConfig & cfg)
+	{
+		pass = false;
+		passElectrons(cfg);
+		passKinPid(cfg);
+		pass = pass_kinematic && pass_pid && pass_electron;
+		return pass;
+	}
 
 };

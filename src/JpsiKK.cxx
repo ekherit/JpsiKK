@@ -468,6 +468,7 @@ StatusCode JpsiKK::execute()
     std::cout << "event write: "   << setw(15) << event_write<< ",  ";
     std::cout << "kaons: "   << setw(15) << event_with_kaons << ",  ";
     std::cout << "muons "   << setw(15) << event_with_muons << ",  ";
+    std::cout << "Kmu "   << setw(15) << event_with_kaons_and_muons << ",  ";
     std::cout << "good knm fit "   << setw(15) << good_kinematic_fit;
     std::cout << std::endl;
   }
@@ -589,14 +590,16 @@ StatusCode JpsiKK::execute()
 
 	if(!other_negative_tracks.empty()) 
 	{
-		kinfit(pion_pair,  other_negative_tracks,  negative_sh);
-		negative_sh.totalPass(cfg);
+		//kinfit(pion_pair,  other_negative_tracks,  negative_sh);
+		negative_sh.kinfit(pion_pair,  other_negative_tracks.front());
+		negative_sh.totalPass2(cfg);
 	}
 
 	if(!other_positive_tracks.empty()) 
 	{
-		kinfit(pion_pair,  other_positive_tracks,  positive_sh);
-		positive_sh.totalPass(cfg);
+		//kinfit(pion_pair,  other_positive_tracks,  positive_sh);
+		positive_sh.kinfit(pion_pair,  other_positive_tracks.front());
+		positive_sh.totalPass2(cfg);
 	}
 
 	TrackVector_t Tracks;
