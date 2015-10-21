@@ -142,11 +142,11 @@ struct SelectionHelper_t
 			PID->usePidSys(PID->useDedx() | PID->useTof1() | PID->useTof2() | PID->useMuc());
 			PID->identify(PID->all()); 
 			PID->calculate();
-			chi2[ID_KAON]     += PID->chi[3];
-			chi2[ID_MUON]     += PID->chi[1];
-			chi2[ID_PION]     += PID->chi[2];
-			chi2[ID_ELECTRON] += PID->chi[0];
-			chi2[ID_PROTON]   += PID->chi[4];
+			chi2[ID_KAON]     += PID->chi(3);
+			chi2[ID_MUON]     += PID->chi(1);
+			chi2[ID_PION]     += PID->chi(2);
+			chi2[ID_ELECTRON] += PID->chi(0);
+			chi2[ID_PROTON]   += PID->chi(4);
 		}
 	}
 
