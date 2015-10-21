@@ -274,6 +274,7 @@ struct SelectionHelper_t
 			pass_kinematic =false;
 			return false;
 		}
+		good_kinematic_fit = true;
 		pass_kinematic = true;
 		pass_pid = true;
 		kin_chi2 = KF[channel].chi2;
