@@ -154,7 +154,7 @@ struct SelectionHelper_t
 	{
 		bool & result = pass_pid;
 		result = false;
-		double & chi2 = pchi2[channel]; //current chi2
+		const double & chi2 = pchi2[channel]; //current chi2
 
 		//global cut
 		if( chi2 > cfg.MAX_PID_CHI2)
