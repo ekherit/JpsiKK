@@ -701,11 +701,11 @@ StatusCode JpsiKK::execute()
 	{
 		case CHAN_KAONS:
 		case CHAN_MUONS:
-			fEvent.pid_chi2 = sh -> mypid_chi2[fEvent.channel]; //pchi2[channel];
+			fEvent.pid_chi2 = sh -> pid_chi2[fEvent.channel]; //pchi2[channel];
 			break;
 		case CHAN_KAON_MUON:
 		case CHAN_MUON_KAON:
-			fEvent.pid_chi2 = 0.5*(positive_sh.mypid_chi2[positive_sh.channel] + negative_sh.mypid_chi2[negative_sh.channel]) ; //pchi2[channel];
+			fEvent.pid_chi2 = 0.5*(positive_sh.pid_chi2[positive_sh.channel] + negative_sh.pid_chi2[negative_sh.channel]) ; //pchi2[channel];
 			break;
 	}
 
