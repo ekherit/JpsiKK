@@ -621,7 +621,7 @@ StatusCode JpsiKK::execute()
 			Tracks = negative_sh.tracks;
 			Pkf = negative_sh.P;
 			//add missing positive tracks
-			Tracks.push_back(negative_sh.end);
+			Tracks.push_back(evtRecTrkCol->end());
 			sh = & negative_sh;
 			break;
 
@@ -630,7 +630,7 @@ StatusCode JpsiKK::execute()
 			Tracks = positive_sh.tracks;
 			Pkf = positive_sh.P;
 			//add missing negative tracks
-			Tracks.push_back(positive_sh.end);
+			Tracks.push_back(evtRecTrkCol->end());
 			//negative tracks go first
 			std::swap(Tracks[2], Tracks[3]);
 			std::swap(Pkf[2],  Pkf[3]);
