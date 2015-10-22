@@ -313,9 +313,13 @@ struct SelectionHelper_t
 	{
 		pass = false;
 		select_channel_by_kinematic_fit(); //after this we allways has channel
+		clog << "channel = " << channel << endl;
 		if(!passKinematic()) return false;
+		clog << "pass_kinematic = " << pass_kinematic << endl;
 		if(!passElectrons()) return false;
+		clog << "pass_electrons = " << pass_electron << endl;
 		if(!passPid()) return false;
+		clog << "pass_pid = " << pass_pid << endl;
 		//clog << "kin_chi2 = " << KF[channel].chi2 << " " ;
 		//clog << "pass_pid: " << pass_pid << "  pid_chi2 = " <<  pid_chi2[channel] << " " ;
 		//clog << "pass_electron: " << pass_electron << endl;
