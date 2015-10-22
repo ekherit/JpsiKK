@@ -320,7 +320,7 @@ struct SelectionHelper_t
 		}
 		pass_kinematic = true;
 		pass_pid = true;
-		P = KF[channel].P;
+		//P = KF[channel].P;
 		return true;
 	}
 

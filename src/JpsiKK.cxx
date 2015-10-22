@@ -222,11 +222,11 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("Ku", Ku); //Kmu or muK events
 
 	status = M.add_to_tuple(tuple);
-  status = tuple->addItem ("Mee",   kM[ID_ELECTRON]);
-  status = tuple->addItem ("MKK",   kM[ID_KAON]);
-  status = tuple->addItem ("Muu",   kM[ID_MUON]);
-  status = tuple->addItem ("Mpp",   kM[ID_PROTON]);
-  status = tuple->addItem ("Mpipi", kM[ID_PION]);
+  //status = tuple->addItem ("Mee",   kM[ID_ELECTRON]);
+  //status = tuple->addItem ("MKK",   kM[ID_KAON]);
+  //status = tuple->addItem ("Muu",   kM[ID_MUON]);
+  //status = tuple->addItem ("Mpp",   kM[ID_PROTON]);
+  //status = tuple->addItem ("Mpipi", kM[ID_PION]);
 
 	status = T.add_to_tuple(tuple);
 
