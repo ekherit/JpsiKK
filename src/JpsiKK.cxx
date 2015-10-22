@@ -714,6 +714,7 @@ StatusCode JpsiKK::execute()
 			break;
 	}
 	clog << "Before pkf..." << endl;
+	clog << "Pkf.size = " << Pkf.size() << endl;
 
 	//define initial four-momentum
   HepLorentzVector Pcm(cfg.CENTER_MASS_ENERGY*sin(0.011),0,0,cfg.CENTER_MASS_ENERGY); 
