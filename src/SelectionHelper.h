@@ -57,7 +57,7 @@ struct SelectionHelper_t
 	double kin_chi2;         //chi2
 	std::vector<HepLorentzVector>  P;
 	std::vector<EvtRecTrackIterator> tracks;
-	EvtRecTrackIterator end;
+	//EvtRecTrackIterator end;
 
 	std::vector <KinematicFit_t> KF; 
 	std::vector<double>  mypid_chi2;
@@ -81,13 +81,6 @@ struct SelectionHelper_t
 		init();
 	}
 
-
-	SelectionHelper_t(const SelectionConfig & c, EvtRecTrackIterator END) : cfg(&c)
-	{
-		init();
-		end = END;
-	}
-
 	inline operator bool() const { return pass; }
 
 
@@ -100,7 +93,7 @@ struct SelectionHelper_t
 		pass_electron = false;
 		for(int i=2;i<tracks.size();i++)
 		{
-			if(tracks[i]==end) continue;
+			//if(tracks[i]==end) continue;
 			RecMdcTrack  * mdcTrk = (*tracks[i])->mdcTrack();
 			RecEmcShower * emcTrk = (*tracks[i])->emcShower();
 			double EpRatio = emcTrk->energy()/mdcTrk->p();
@@ -120,7 +113,7 @@ struct SelectionHelper_t
 		std::fill(chi2.begin(), chi2.end(), 0);
 		for(int i=2;i<tracks.size();i++)
 		{
-			if(tracks[i]==end) continue;
+			//if(tracks[i]==end) continue;
 			vector<double> chi2_tmp = get_chi2(tracks[i]);
 			for(int pid =0;pid<5;pid++)
 			{
@@ -138,7 +131,7 @@ struct SelectionHelper_t
 		std::fill(chi2.begin(), chi2.end(), 0);
 		for(int i=2;i<tracks.size();i++)
 		{
-			if(tracks[i]==end) continue;
+			//if(tracks[i]==end) continue;
 			PID->setRecTrack((*tracks[i]));
 			PID->setMethod(PID->methodProbability());
 			PID->setChiMinCut(4);

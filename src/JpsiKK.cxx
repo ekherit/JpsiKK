@@ -584,8 +584,8 @@ StatusCode JpsiKK::execute()
 	if(other_negative_tracks.empty() && other_positive_tracks.empty()) return StatusCode::SUCCESS;
 
 
-	SelectionHelper_t negative_sh(cfg, evtRecTrkCol->end());
-	SelectionHelper_t positive_sh(cfg, evtRecTrkCol->end());
+	SelectionHelper_t negative_sh(cfg);
+	SelectionHelper_t positive_sh(cfg);
 
 
 	if(!other_negative_tracks.empty()) 
