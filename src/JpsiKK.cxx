@@ -591,7 +591,6 @@ StatusCode JpsiKK::execute()
 	SelectionHelper_t negative_sh(cfg);
 	SelectionHelper_t positive_sh(cfg);
 
-	clog << "Before kin fit" << endl;
 
 	if(!other_negative_tracks.empty()) 
 	{
@@ -606,14 +605,12 @@ StatusCode JpsiKK::execute()
 		positive_sh.kinfit(pion_pair,  other_positive_tracks.front());
 		positive_sh.totalPass();
 	}
-	clog << "After kin fit" << endl;
 
 	TrackVector_t Tracks;
 	std::vector<HepLorentzVector> Pkf;
 	SelectionHelper_t * sh;
 
 	fEvent.sign = (int(positive_sh.pass) << 1 ) + int(negative_sh.pass);
-	clog << "Sig choise" << endl;
 	fEvent.KK = 0;
 	fEvent.uu = 0;
 	fEvent.Ku = 0;
@@ -694,7 +691,6 @@ StatusCode JpsiKK::execute()
 			break;
 	}
 
-	clog << "Before filling " << endl;
 
 
   //now fill the tuples
