@@ -192,13 +192,13 @@ struct SelectionHelper_t
 	bool passMyPid(void)
 	{
 		setMyPid();
-		passPid(mypid_chi2);
+		return passPid(mypid_chi2);
 	}
 
 	bool passPid(void)
 	{
 		setPid();
-		passPid(pid_chi2);
+		return passPid(pid_chi2);
 	}
 
 
@@ -323,9 +323,9 @@ struct SelectionHelper_t
 		//clog << "pass_electrons = " << pass_electron << endl;
 		//if(!passPid()) return false;
 		//clog << "pass_pid = " << pass_pid << endl;
-		clog << "kin_chi2 = " << KF[channel].chi2 << " " ;
-		clog << "pass_pid: " << pass_pid << "  pid_chi2 = " <<  pid_chi2[channel] << " " ;
-		clog << "pass_electron: " << pass_electron << endl;
+		//clog << "kin_chi2 = " << KF[channel].chi2 << " " ;
+		//clog << "pass_pid: " << pass_pid << "  pid_chi2 = " <<  pid_chi2[channel] << " " ;
+		//clog << "pass_electron: " << pass_electron << endl;
 		pass = pass_kinematic && pass_electron && pass_pid;
 		return pass;
 	}
