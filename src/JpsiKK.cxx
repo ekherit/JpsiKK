@@ -691,6 +691,8 @@ StatusCode JpsiKK::execute()
 			break;
 	}
 
+	clog << "Before filling " << endl;
+
 
   //now fill the tuples
 

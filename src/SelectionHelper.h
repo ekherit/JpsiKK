@@ -331,6 +331,9 @@ struct SelectionHelper_t
 		if(!passKinematic()) return false;
 		if(!passElectrons()) return false;
 		if(!passPid()) return false;
+		clog << "kin_chi2 = " << KF[channel].chi2 << " " ;
+		clog << "pass_pid: " << pass_pid << "  pid_chi2 = " <<  pid_chi2[channel] << " " ;
+		clog << "pass_electron: " << pass_electron << endl;
 		pass = true;
 		return pass;
 	}
