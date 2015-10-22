@@ -707,6 +707,8 @@ StatusCode JpsiKK::execute()
   // fill the decay channel of the J/psi 0 - kaons, 1 --muons
   //fEvent.channel = channel; 
   fEvent.kin_chi2 = sh -> KF[sh->channel].chi2; //kinematic_chi2;
+
+	fEvent.npid = 5;
 	for(int pid=0;pid<5;pid++)
 	{
 		fEvent.kchi[pid] = sh->KF[pid].chi2;
