@@ -158,7 +158,7 @@ struct SelectionHelper_t
 
 		//global cut
 		//if( chi2 > cfg->MAX_PID_CHI2)
-		if( chi2 > cfg->1000)
+		if( chi2 > 1000)
 		{
 			result = false;
 			return result;
