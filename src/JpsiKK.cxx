@@ -623,7 +623,7 @@ StatusCode JpsiKK::execute()
 		case OTHER_NEGATIVE_TRACK: //one negative track
 			fEvent.channel = negative_sh.channel;
 			Tracks = negative_sh.tracks;
-			Pkf = negative_sh.KF[negative_sh.channel];
+			Pkf = negative_sh.KF[negative_sh.channel].P;
 			//add missing positive tracks
 			Tracks.push_back(evtRecTrkCol->end());
 			sh = & negative_sh;
@@ -632,7 +632,7 @@ StatusCode JpsiKK::execute()
 		case OTHER_POSITIVE_TRACK: //one positive track
 			fEvent.channel = positive_sh.channel;
 			Tracks = positive_sh.tracks;
-			Pkf = positive_sh.KF[positive_sh.channel];
+			Pkf = positive_sh.KF[positive_sh.channel].P;
 			//add missing negative tracks
 			Tracks.push_back(evtRecTrkCol->end());
 			//negative tracks go first
@@ -661,7 +661,7 @@ StatusCode JpsiKK::execute()
 			{
 				fEvent.channel = CHAN_MUON_KAON;
 			}
-			Pkf = negative_sh.KF[negative_sh.channel];
+			Pkf = negative_sh.KF[negative_sh.channel].P;
 			Tracks = negative_sh.tracks;
 			Tracks.push_back(positive_sh.tracks[2]);
 			sh = & negative_sh;
