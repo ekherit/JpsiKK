@@ -83,7 +83,7 @@ struct SelectionHelper_t
 	}
 
 
-	SelectionHelper_t(const SelectionConfig_t & c, EvtRecTrackIterator END) : cfg(c)
+	SelectionHelper_t(const SelectionConfig & c, EvtRecTrackIterator END) : cfg(c)
 	{
 		init();
 		end = END;
