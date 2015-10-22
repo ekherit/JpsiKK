@@ -44,13 +44,13 @@ extern  std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator
 
 struct SelectionHelper_t
 {
+	const SelectionConfig & cfg;
 	int  channel;           //channel of the fit K, mu store here result of the selection
 	bool pass_kinematic;    //pass kinematic cut
 	bool pass_pid;          //pass pid cut
 	bool pass_electron;     //pass electron cut
 	bool pass;           		//total pass
 
-	double W;               //center of mass energy,  GeV
 
 
 	bool good_kinematic_fit; //result  of the kinematic fit 
@@ -70,30 +70,29 @@ struct SelectionHelper_t
 		good_kinematic_fit = false;
 		kin_chi2 = 1e100;
 		//mypid_chi2=1e100;
-		W = PSIP_MASS;
 		pass_kinematic = false;
 		pass_pid = false;
 		pass_electron = false;
 		pass = false;
+		if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
 	}
 
-	SelectionHelper_t(double cme= PSIP_MASS)
-	{
-		W = cme;
-	}
-
-
-	SelectionHelper_t(double cme, EvtRecTrackIterator END)
+	SelectionHelper_t(const SelectionConfig & c) : cfg(c)
 	{
 		init();
-		W = cme;
+	}
+
+
+	SelectionHelper_t(const SelectionHelper_t & c, EvtRecTrackIterator END) : cfg(c)
+	{
+		init();
 		end = END;
 	}
 
 	inline operator bool() const { return pass; }
 
 
-	bool passElectrons(SelectionConfig & cfg)
+	bool passElectrons(void)
 	{
 		double MIN_MOMENTUM[5] = { cfg.MIN_KAON_MOMENTUM,  cfg.MIN_MUON_MOMENTUM,  0, 0, 0}; 
 		double MAX_MOMENTUM[5] = { cfg.MAX_KAON_MOMENTUM,  cfg.MAX_MUON_MOMENTUM,  0, 0, 0}; 
@@ -155,7 +154,7 @@ struct SelectionHelper_t
 		}
 	}
 
-	bool passPid(SelectionConfig & cfg,  const vector<double> & pchi2)
+	bool passPid(const vector<double> & pchi2)
 	{
 		bool & result = pass_pid;
 		result = false;
@@ -194,35 +193,41 @@ struct SelectionHelper_t
 		return result;
 	}
 
-	bool passMyPid(SelectionConfig & cfg)
+	bool passMyPid(void)
 	{
 		setMyPid();
-		passPid(cfg,  mypid_chi2);
+		passPid(mypid_chi2);
 	}
 
-	bool passPid(SelectionConfig & cfg)
+	bool passPid(void)
 	{
 		setPid();
-		passPid(cfg,  pid_chi2);
+		passPid(pid_chi2);
 	}
 
 
 
 
-	bool passKinematic(SelectionConfig & cfg)
+	bool passKinematic(void)
+	{
+		pass_kinematic = kin_chi2 < cfg.MAX_KIN_CHI2 && good_kinematic_fit;
+		return pass_kinematic;
+	}
+
+	bool passKinematic2(void)
 	{
 		pass_kinematic = kin_chi2 < cfg.MAX_KIN_CHI2 && good_kinematic_fit;
 		return pass_kinematic;
 	}
 
 
-	bool totalPass(SelectionConfig & cfg)
+	bool totalPass(void)
 	{
 		pass = false;
 		if(!good_kinematic_fit) return false;
-		passKinematic(cfg);
-		passElectrons(cfg);
-		passPid(cfg);
+		passKinematic();
+		passElectrons();
+		passPid();
 		//clog << "good_kinematic_fit: " << good_kinematic_fit << "  kin_chi2 = " << kin_chi2 << " " ;
 		//clog << "pass_pid: " << pass_pid << "  pid_chi2 = " << mypid_chi2[channel] << " " ;
 		//clog << "pass_electron: " << pass_electron << endl;
@@ -239,12 +244,12 @@ struct SelectionHelper_t
 		tracks[0] = pion_pair.first;
 		tracks[1] = pion_pair.second;
 		tracks[2] = track;
-		KF = ::kinfit(tracks,  W);
+		KF = ::kinfit(tracks,  cfg.CENTER_MASS_ENERGY);
 	}
 
 	//apply together particle id and kinematic fit 
 	//cut using MAX_KIN_CHI2
-	bool passKinPid(SelectionConfig & cfg)
+	bool passKinPid(void)
 	{
 		setPid();
 		pass_pid = false;
@@ -304,7 +309,7 @@ struct SelectionHelper_t
 		{
 			EvtRecTrackIterator track = *i;
 			tmp_kfp.tracks[2] = track;
-			if(::kinfit(tmp_kfp.tracks,  tmp_kfp.channel,  tmp_kfp.kin_chi2,  tmp_kfp.P,  tmp_kfp.W))
+			if(::kinfit(tmp_kfp.tracks,  tmp_kfp.channel,  tmp_kfp.kin_chi2,  tmp_kfp.P,  cfg.CENTER_MASS_ENERGY))
 			{
 				good_kinematic_fit = true;
 				if(tmp_kfp.kin_chi2 < kin_chi2)
@@ -316,14 +321,14 @@ struct SelectionHelper_t
 		return  good_kinematic_fit;
 	}
 
-	bool totalPass2(SelectionConfig & cfg)
+	bool totalPass2(void)
 	{
 		pass = false;
-		passKinPid(cfg);
+		passKinPid();
 		//electron pass must be after kinpid
 		//we must know the channel
 		if(!pass_kinematic) return false;
-		passElectrons(cfg);
+		passElectrons();
 		pass = pass_kinematic && pass_pid && pass_electron;
 		//clog << "good_kinematic_fit: " << good_kinematic_fit << "  kin_chi2 = " << kin_chi2 << " " ;
 		//clog << "pass_pid: " << pass_pid << "  pid_chi2 = " <<  pid_chi2[channel] << " " ;

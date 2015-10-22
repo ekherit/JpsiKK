@@ -584,22 +584,22 @@ StatusCode JpsiKK::execute()
 	if(other_negative_tracks.empty() && other_positive_tracks.empty()) return StatusCode::SUCCESS;
 
 
-	SelectionHelper_t negative_sh(cfg.CENTER_MASS_ENERGY, evtRecTrkCol->end());
-	SelectionHelper_t positive_sh(cfg.CENTER_MASS_ENERGY, evtRecTrkCol->end());
+	SelectionHelper_t negative_sh(cfg, evtRecTrkCol->end());
+	SelectionHelper_t positive_sh(cfg, evtRecTrkCol->end());
 
 
 	if(!other_negative_tracks.empty()) 
 	{
 		//kinfit(pion_pair,  other_negative_tracks,  negative_sh);
 		negative_sh.kinfit(pion_pair,  other_negative_tracks.front());
-		negative_sh.totalPass2(cfg);
+		negative_sh.totalPass2();
 	}
 
 	if(!other_positive_tracks.empty()) 
 	{
 		//kinfit(pion_pair,  other_positive_tracks,  positive_sh);
 		positive_sh.kinfit(pion_pair,  other_positive_tracks.front());
-		positive_sh.totalPass2(cfg);
+		positive_sh.totalPass2();
 	}
 
 	TrackVector_t Tracks;
