@@ -279,6 +279,7 @@ struct SelectionHelper_t
 		pass_pid = true;
 		kin_chi2 = KF[channel].chi2;
 		//pid_chi2 = pid_chi2[channel];
+		P == KF[channel].P;
 		return true;
 	}
 
