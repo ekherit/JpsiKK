@@ -233,7 +233,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("kin_chi2", kin_chi2); 
   status = tuple->addItem ("pid_chi2", pid_chi2); 
 
-  status = tuple->addItem ("npid", npid,0,4);     
+  status = tuple->addItem ("npid", npid,0,5);     
   status = tuple->addIndexedItem ("kchi",  npid, kchi);
   status = tuple->addIndexedItem ("pchi",  npid, pchi);
   status = tuple->addIndexedItem ("kM",  npid,     kM23);
