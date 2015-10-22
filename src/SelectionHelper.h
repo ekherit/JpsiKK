@@ -44,7 +44,7 @@ extern  std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator
 
 struct SelectionHelper_t
 {
-	const SelectionConfig & cfg;
+	const SelectionConfig * cfg;
 	int  channel;           //channel of the fit K, mu store here result of the selection
 	bool pass_kinematic;    //pass kinematic cut
 	bool pass_pid;          //pass pid cut
@@ -74,16 +74,15 @@ struct SelectionHelper_t
 		pass_pid = false;
 		pass_electron = false;
 		pass = false;
-		//if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
 	}
 
-	SelectionHelper_t(const SelectionConfig & c) : cfg(c)
+	SelectionHelper_t(const SelectionConfig & c) : cfg(&c)
 	{
 		init();
 	}
 
 
-	SelectionHelper_t(const SelectionConfig & c, EvtRecTrackIterator END) : cfg(c)
+	SelectionHelper_t(const SelectionConfig & c, EvtRecTrackIterator END) : cfg(&c)
 	{
 		init();
 		end = END;
@@ -94,10 +93,10 @@ struct SelectionHelper_t
 
 	bool passElectrons(void)
 	{
-		double MIN_MOMENTUM[5] = { cfg.MIN_KAON_MOMENTUM,  cfg.MIN_MUON_MOMENTUM,  0, 0, 0}; 
-		double MAX_MOMENTUM[5] = { cfg.MAX_KAON_MOMENTUM,  cfg.MAX_MUON_MOMENTUM,  0, 0, 0}; 
-		double MIN_EP_RATIO[5] = { cfg.MIN_KAON_EP_RATIO,  cfg.MIN_MUON_EP_RATIO,  0, 0, 0}; 
-		double MAX_EP_RATIO[5] = { cfg.MAX_KAON_EP_RATIO,  cfg.MAX_MUON_EP_RATIO,  0, 0, 0}; 
+		double MIN_MOMENTUM[5] = { cfg->MIN_KAON_MOMENTUM,  cfg->MIN_MUON_MOMENTUM,  0, 0, 0}; 
+		double MAX_MOMENTUM[5] = { cfg->MAX_KAON_MOMENTUM,  cfg->MAX_MUON_MOMENTUM,  0, 0, 0}; 
+		double MIN_EP_RATIO[5] = { cfg->MIN_KAON_EP_RATIO,  cfg->MIN_MUON_EP_RATIO,  0, 0, 0}; 
+		double MAX_EP_RATIO[5] = { cfg->MAX_KAON_EP_RATIO,  cfg->MAX_MUON_EP_RATIO,  0, 0, 0}; 
 		pass_electron = false;
 		for(int i=2;i<tracks.size();i++)
 		{
@@ -161,7 +160,7 @@ struct SelectionHelper_t
 		const double & chi2 = pchi2[channel]; //current chi2
 
 		//global cut
-		if( chi2 > cfg.MAX_PID_CHI2)
+		if( chi2 > cfg->MAX_PID_CHI2)
 		{
 			result = false;
 			return result;
@@ -210,13 +209,13 @@ struct SelectionHelper_t
 
 	bool passKinematic(void)
 	{
-		pass_kinematic = kin_chi2 < cfg.MAX_KIN_CHI2 && good_kinematic_fit;
+		pass_kinematic = kin_chi2 < cfg->MAX_KIN_CHI2 && good_kinematic_fit;
 		return pass_kinematic;
 	}
 
 	bool passKinematic2(void)
 	{
-		pass_kinematic = kin_chi2 < cfg.MAX_KIN_CHI2 && good_kinematic_fit;
+		pass_kinematic = kin_chi2 < cfg->MAX_KIN_CHI2 && good_kinematic_fit;
 		return pass_kinematic;
 	}
 
@@ -244,7 +243,7 @@ struct SelectionHelper_t
 		tracks[0] = pion_pair.first;
 		tracks[1] = pion_pair.second;
 		tracks[2] = track;
-		KF = ::kinfit(tracks,  cfg.CENTER_MASS_ENERGY);
+		KF = ::kinfit(tracks,  cfg->CENTER_MASS_ENERGY);
 	}
 
 	//apply together particle id and kinematic fit 
@@ -273,7 +272,7 @@ struct SelectionHelper_t
 		}
 		channel = channel_tmp;
 
-		if( chi2[channel] > cfg.MAX_KIN_CHI2 ||  !KF[channel].success)
+		if( chi2[channel] > cfg->MAX_KIN_CHI2 ||  !KF[channel].success)
 		{
 			pass_pid = false;
 			pass_kinematic =false;
@@ -309,7 +308,7 @@ struct SelectionHelper_t
 		{
 			EvtRecTrackIterator track = *i;
 			tmp_kfp.tracks[2] = track;
-			if(::kinfit(tmp_kfp.tracks,  tmp_kfp.channel,  tmp_kfp.kin_chi2,  tmp_kfp.P,  cfg.CENTER_MASS_ENERGY))
+			if(::kinfit(tmp_kfp.tracks,  tmp_kfp.channel,  tmp_kfp.kin_chi2,  tmp_kfp.P,  cfg->CENTER_MASS_ENERGY))
 			{
 				good_kinematic_fit = true;
 				if(tmp_kfp.kin_chi2 < kin_chi2)
