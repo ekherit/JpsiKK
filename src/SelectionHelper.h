@@ -74,7 +74,7 @@ struct SelectionHelper_t
 		pass_pid = false;
 		pass_electron = false;
 		pass = false;
-		if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
+		//if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
 	}
 
 	SelectionHelper_t(const SelectionConfig & c) : cfg(c)
@@ -83,7 +83,7 @@ struct SelectionHelper_t
 	}
 
 
-	SelectionHelper_t(const SelectionHelper_t & c, EvtRecTrackIterator END) : cfg(c)
+	SelectionHelper_t(const SelectionConfig_t & c, EvtRecTrackIterator END) : cfg(c)
 	{
 		init();
 		end = END;
