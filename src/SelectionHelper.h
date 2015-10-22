@@ -44,7 +44,7 @@ extern  std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator
 
 struct SelectionHelper_t
 {
-	const SelectionConfig & cfg;
+	SelectionConfig & cfg;
 	int  channel;           //channel of the fit K, mu store here result of the selection
 	bool pass_kinematic;    //pass kinematic cut
 	bool pass_pid;          //pass pid cut
@@ -77,13 +77,13 @@ struct SelectionHelper_t
 		//if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
 	}
 
-	SelectionHelper_t(const SelectionConfig & c) : cfg(c)
+	SelectionHelper_t(SelectionConfig & c) : cfg(c)
 	{
 		init();
 	}
 
 
-	SelectionHelper_t(const SelectionConfig & c, EvtRecTrackIterator END) : cfg(c)
+	SelectionHelper_t(SelectionConfig & c, EvtRecTrackIterator END) : cfg(c)
 	{
 		init();
 		end = END;
