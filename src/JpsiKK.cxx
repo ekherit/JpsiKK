@@ -713,6 +713,7 @@ StatusCode JpsiKK::execute()
 			fEvent.pid_chi2 = 0.5*(positive_sh.pid_chi2[positive_sh.channel] + negative_sh.pid_chi2[negative_sh.channel]) ; //pchi2[channel];
 			break;
 	}
+	clog << "Before pkf..." << endl;
 
 	//define initial four-momentum
   HepLorentzVector Pcm(cfg.CENTER_MASS_ENERGY*sin(0.011),0,0,cfg.CENTER_MASS_ENERGY); 
@@ -731,6 +732,7 @@ StatusCode JpsiKK::execute()
 
 
   fEvent.T.ntrack = 4;
+	clog << "Before cycle ..." << endl;
   for ( int i=0;i<4;i++)
   {
     fEvent.T.q[i]  = i%2 == 0 ? -1 : +1;
