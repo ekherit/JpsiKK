@@ -349,7 +349,7 @@ inline std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator>
 		k.P.resize(5);
 		k.success = false;
 		k.success = kinematic_fit(i, Tracks, k.P,  k.chi2,  CENTER_MASS_ENERGY);
-		cout << "kinematic fit: pid = " << i << " chi2=" << k.chi2 << endl;
+		//cout << "kinematic fit: pid = " << i << " chi2=" << k.chi2 << endl;
 	}
 	return theKFV;
 }
