@@ -260,21 +260,6 @@ struct SelectionHelper_t
 	//	return  good_kinematic_fit;
 	//}
 
-	bool totalPass2(void)
-	{
-		pass = false;
-		passKinPid();
-		//electron pass must be after kinpid
-		//we must know the channel
-		if(!pass_kinematic) return false;
-		passElectrons();
-		pass = pass_kinematic && pass_pid && pass_electron;
-		//clog << "good_kinematic_fit: " << good_kinematic_fit << "  kin_chi2 = " << kin_chi2 << " " ;
-		//clog << "pass_pid: " << pass_pid << "  pid_chi2 = " <<  pid_chi2[channel] << " " ;
-		//clog << "pass_electron: " << pass_electron << endl;
-		return pass;
-	}
-
 	void select_channel_by_kinematic_fit(void)
 	{
 		channel = 0; //preselect some hypotesa
