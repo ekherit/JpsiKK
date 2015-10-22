@@ -213,6 +213,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("nppions", npositive_pions); //good poitive pion tracks in event
   status = tuple->addItem ("nnpions", nnegative_pions); //good negative pion track in event
   status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
+  //status = tuple->addItem ("ntrack", T.ntrack,0,4);     
 
   status = tuple->addItem ("sign", sign); //number of pions paris in event
   status = tuple->addItem ("channel", channel); //decay channel of the J/psi
@@ -232,8 +233,10 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   status = tuple->addItem ("kin_chi2", kin_chi2); 
   status = tuple->addItem ("pid_chi2", pid_chi2); 
 
-  status = tuple->addIndexedItem ("kchi",  T.ntrack, kchi);
-  status = tuple->addIndexedItem ("pchi",  T.ntrack, pchi);
+  //status = tuple->addItem ("npid", T,0,4);     
+  status = tuple->addIndexedItem ("kchi",  npid, kchi);
+  status = tuple->addIndexedItem ("pchi",  npid, pchi);
+  status = tuple->addIndexedItem ("kM",  npid,     kM);
 
   status = tuple->addIndexedItem ("probe",  T.ntrack,  prob[ID_ELECTRON]);
   status = tuple->addIndexedItem ("probmu", T.ntrack,  prob[ID_MUON]);
@@ -248,6 +251,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
 void JpsiKK::RootEvent::init(void)
 {
   T.ntrack=4;
+	npid = 5; //number of particle id hypotesis
 }
 
 StatusCode JpsiKK::RootPid::init_tuple(void)
@@ -592,7 +596,7 @@ StatusCode JpsiKK::execute()
 	{
 		//kinfit(pion_pair,  other_negative_tracks,  negative_sh);
 		negative_sh.kinfit(pion_pair,  other_negative_tracks.front());
-		negative_sh.totalPass2();
+		negative_sh.totalPass();
 	}
 
 	if(!other_positive_tracks.empty()) 
@@ -619,7 +623,7 @@ StatusCode JpsiKK::execute()
 		case OTHER_NEGATIVE_TRACK: //one negative track
 			fEvent.channel = negative_sh.channel;
 			Tracks = negative_sh.tracks;
-			Pkf = negative_sh.P;
+			Pkf = negative_sh.KF[negative_sh.channel];
 			//add missing positive tracks
 			Tracks.push_back(evtRecTrkCol->end());
 			sh = & negative_sh;
@@ -628,7 +632,7 @@ StatusCode JpsiKK::execute()
 		case OTHER_POSITIVE_TRACK: //one positive track
 			fEvent.channel = positive_sh.channel;
 			Tracks = positive_sh.tracks;
-			Pkf = positive_sh.P;
+			Pkf = positive_sh.KF[positive_sh.channel];
 			//add missing negative tracks
 			Tracks.push_back(evtRecTrkCol->end());
 			//negative tracks go first
@@ -657,7 +661,7 @@ StatusCode JpsiKK::execute()
 			{
 				fEvent.channel = CHAN_MUON_KAON;
 			}
-			Pkf = negative_sh.P;
+			Pkf = negative_sh.KF[negative_sh.channel];
 			Tracks = negative_sh.tracks;
 			Tracks.push_back(positive_sh.tracks[2]);
 			sh = & negative_sh;
@@ -700,7 +704,14 @@ StatusCode JpsiKK::execute()
   fEvent.npion_pairs = pion_pairs.size();
   // fill the decay channel of the J/psi 0 - kaons, 1 --muons
   //fEvent.channel = channel; 
-  fEvent.kin_chi2 = sh -> kin_chi2; //kinematic_chi2;
+  fEvent.kin_chi2 = sh -> KF[sh->channel].chi2; //kinematic_chi2;
+	for(int pid=0;pid<5;pid++)
+	{
+		fEvent.kchi2[pid] = sh->kin_chi2[pid];
+		fEvent.pchi2[pid] = sh->pid_chi2[pid];
+		fEvent.kM[pid] = (sh->KF[pid].P[2] + sh->KF[pid].P[3]).m();
+	}
+
 	switch(fEvent.channel)
 	{
 		case CHAN_KAONS:

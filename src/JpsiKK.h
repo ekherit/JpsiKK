@@ -161,7 +161,6 @@ class JpsiKK : public Algorithm
 
 
 		Mass_t  M;
-    NTuple::Item<double> kM[5];    //Invariant mass for track 23 for different hyptotesis
 
 		//here will be result of the kinematic fit and particle id
     NTuple::Item<double>  kin_chi2; //kinematic chi2
@@ -169,8 +168,10 @@ class JpsiKK : public Algorithm
 
 		Track_t T;
 
+    NTuple::Item<long>    npid;    //number of particle id's
     NTuple::Array<double> kchi;    //kinematik chi2
-    NTuple::Array<double> pchi;    //my particle id chi square
+    NTuple::Array<double> pchi;    //particle id chi square
+    NTuple::Array<double> kM23;      //Invariant mass for track 23 for different hyptotesis
 
     NTuple::Array<double> prob[5]; //probability from ParticleID
     NTuple::Array<double> pchi2[5];//my particle id chi square different hypo
