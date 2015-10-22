@@ -236,7 +236,7 @@ StatusCode JpsiKK::RootEvent::init_tuple(void)
   //status = tuple->addItem ("npid", T,0,4);     
   status = tuple->addIndexedItem ("kchi",  npid, kchi);
   status = tuple->addIndexedItem ("pchi",  npid, pchi);
-  status = tuple->addIndexedItem ("kM",  npid,     kM);
+  status = tuple->addIndexedItem ("kM",  npid,     kM23);
 
   status = tuple->addIndexedItem ("probe",  T.ntrack,  prob[ID_ELECTRON]);
   status = tuple->addIndexedItem ("probmu", T.ntrack,  prob[ID_MUON]);
@@ -709,7 +709,7 @@ StatusCode JpsiKK::execute()
 	{
 		fEvent.kchi2[pid] = sh->kin_chi2[pid];
 		fEvent.pchi2[pid] = sh->pid_chi2[pid];
-		fEvent.kM[pid] = (sh->KF[pid].P[2] + sh->KF[pid].P[3]).m();
+		fEvent.kM23[pid] = (sh->KF[pid].P[2] + sh->KF[pid].P[3]).m();
 	}
 
 	switch(fEvent.channel)
