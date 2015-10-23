@@ -139,7 +139,7 @@ struct SelectionHelper_t
 			PID->setRecTrack((*tracks[i]));
 			PID->setMethod(PID->methodProbability());
 			PID->setChiMinCut(4);
-			PID->usePidSys(PID->useDedx() | PID->useTof1() | PID->useTof2() | PID->useMuc() | PID->useEmc());
+			PID->usePidSys(PID->useDedx() | PID->useTof1() | PID->useTof2() | PID->useMuc());
 			PID->identify(PID->all()); 
 			PID->calculate();
 			chi2[ID_KAON]     += PID->chi(3);
@@ -158,7 +158,6 @@ struct SelectionHelper_t
 
 		//global cut
 		if( chi2 > cfg->MAX_PID_CHI2)
-		//if( chi2 > 1000)
 		{
 			result = false;
 			return result;
