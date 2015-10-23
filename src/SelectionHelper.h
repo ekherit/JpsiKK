@@ -139,7 +139,7 @@ struct SelectionHelper_t
 			PID->setRecTrack((*tracks[i]));
 			PID->setMethod(PID->methodProbability());
 			PID->setChiMinCut(4);
-			PID->usePidSys(PID->useDedx() | PID->useTof1() | PID->useTof2() | PID->useMuc());
+			PID->usePidSys(PID->useDedx() | PID->useTof1() | PID->useTof2());
 			PID->identify(PID->all()); 
 			PID->calculate();
 			chi2[ID_KAON]     += PID->chi(3);
