@@ -168,7 +168,7 @@ struct SelectionHelper_t
 		{
 			case ID_KAON:
 				if( 
-						chi2 <  pchi2[ID_PION]   &&
+		//				chi2 <  pchi2[ID_PION]   &&
 						chi2 <  pchi2[ID_MUON]
 					)
 				{
@@ -264,8 +264,9 @@ struct SelectionHelper_t
 
 	void select_channel_by_kinematic_fit(void)
 	{
-		channel = 0; //preselect some hypotesa
-		for(int i=0;i<KF.size();i++)
+		channel = 4; //preselect some hypotesa
+		//for(int i=0;i<KF.size();i++)
+		for(int i=0;i<2;i++)
 		{
 			if(KF[i].chi2 < KF[channel].chi2)
 			{
@@ -287,8 +288,8 @@ struct SelectionHelper_t
 
 
 		//select best channel
-		channel = 0;
-		for(int i=0;i<chi2.size();i++)
+		channel = 4;
+		for(int i=0;i<2;i++)
 		{
 			if(chi2[i] < chi2[channel])
 			{
