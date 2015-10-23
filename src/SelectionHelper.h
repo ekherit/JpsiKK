@@ -157,8 +157,8 @@ struct SelectionHelper_t
 		const double & chi2 = pchi2[channel]; //current chi2
 
 		//global cut
-		//if( chi2 > cfg->MAX_PID_CHI2)
-		if( chi2 > 1000)
+		if( chi2 > cfg->MAX_PID_CHI2)
+		//if( chi2 > 1000)
 		{
 			result = false;
 			return result;
@@ -207,8 +207,7 @@ struct SelectionHelper_t
 
 	bool passKinematic(void)
 	{
-		//pass_kinematic = KF[channel].chi2 < cfg->MAX_KIN_CHI2 && KF[channel].success;
-		pass_kinematic = KF[channel].chi2 < 1000 && KF[channel].success;
+		pass_kinematic = KF[channel].chi2 < cfg->MAX_KIN_CHI2 && KF[channel].success;
 		return pass_kinematic;
 	}
 
