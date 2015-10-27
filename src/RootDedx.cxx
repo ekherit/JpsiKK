@@ -55,15 +55,15 @@ void RootDedx::fill(EvtRecTrackIterator & track)
 	if((*Tracks[i])->isMdcDedxValid())
 	{
 		RecMdcDedx* dedxTrk = (*Tracks[i])->mdcDedx();
-		fDedx.chie[i] = dedxTrk->chiE();
-		fDedx.chimu[i] = dedxTrk->chiMu();
-		fDedx.chipi[i] = dedxTrk->chiPi();
-		fDedx.chik[i] = dedxTrk->chiK();
-		fDedx.chip[i] = dedxTrk->chiP();
+		chie[i] = dedxTrk->chiE();
+		chimu[i] = dedxTrk->chiMu();
+		chipi[i] = dedxTrk->chiPi();
+		chik[i] = dedxTrk->chiK();
+		chip[i] = dedxTrk->chiP();
 		//fDedx.ghit[i] = dedxTrk->numGoodHits();
 		//fDedx.thit[i] = dedxTrk->numTotalHits();
-		fDedx.probPH[i] = dedxTrk->probPH();
-		fDedx.normPH[i] = dedxTrk->normPH();
+		probPH[i] = dedxTrk->probPH();
+		normPH[i] = dedxTrk->normPH();
 		//fDedx.e[i] = dedxTrk->getDedxExpect(0);
 		//fDedx.mu[i] = dedxTrk->getDedxExpect(1);
 		//fDedx.pi[i] = dedxTrk->getDedxExpect(2);

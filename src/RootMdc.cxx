@@ -35,23 +35,23 @@ void RootMdc::init(void)
 void RootMdc::fill(EvtRecTrackIterator & track)
 {
 	RecMdcTrack  *mdcTrk = (*track)->mdcTrack();
-	fMdc.T.trackId[i] = mdcTrk->trackId();
-	fMdc.T.q[i] = mdcTrk->charge(); 
-	fMdc.T.p[i] = mdcTrk->p();
-	fMdc.T.px[i]= mdcTrk->px();
-	fMdc.T.py[i]= mdcTrk->py();
-	fMdc.T.pz[i]= mdcTrk->pz();
-	fMdc.T.theta[i]= mdcTrk->theta();
-	fMdc.T.phi[i] = mdcTrk->phi();
-	fMdc.T.x[i]  = mdcTrk->x();
-	fMdc.T.y[i]  = mdcTrk->y();
-	fMdc.T.z[i]  = mdcTrk->z();
-	fMdc.T.x[i]  = mdcTrk->x();
-	fMdc.T.y[i]  = mdcTrk->y();
-	fMdc.T.z[i]  = mdcTrk->z();
+	T.trackId[i] = mdcTrk->trackId();
+	T.q[i] = mdcTrk->charge(); 
+	T.p[i] = mdcTrk->p();
+	T.px[i]= mdcTrk->px();
+	T.py[i]= mdcTrk->py();
+	T.pz[i]= mdcTrk->pz();
+	T.theta[i]= mdcTrk->theta();
+	T.phi[i] = mdcTrk->phi();
+	T.x[i]  = mdcTrk->x();
+	T.y[i]  = mdcTrk->y();
+	T.z[i]  = mdcTrk->z();
+	T.x[i]  = mdcTrk->x();
+	T.y[i]  = mdcTrk->y();
+	T.z[i]  = mdcTrk->z();
 	double rvxy,rvz,rvphi;
 	calculate_vertex(mdcTrk,rvxy,rvz,rvphi); 
-	fMdc.T.vxy[i] = rvxy;
-	fMdc.T.vz[i]  = rvz; 
-	fMdc.T.vphi[i] = rvphi; 
+	T.vxy[i] = rvxy;
+	T.vz[i]  = rvz; 
+	T.vphi[i] = rvphi; 
 }

@@ -83,23 +83,23 @@ void RootTof::fill(EvtRecTrackIterator & track)
 		if(!tofecount.empty())
 		{
 			tofTrk = tofTrkCol.begin()+tofecount[0];
-			fTof.tofID[i] = (*tofTrk)->tofID();
-			fTof.t0[i] = (*tofTrk)->t0();
-			fTof.t[i] = (*tofTrk)->tof();
-			fTof.dt[i] = (*tofTrk)->errtof();
-			fTof.beta[i] = (*tofTrk)->beta();
-			fTof.te[i] = (*tofTrk)->texpElectron();
-			fTof.tmu[i]= (*tofTrk)->texpMuon();
-			fTof.tpi[i]= (*tofTrk)->texpPion();
-			fTof.tk[i] = (*tofTrk)->texpKaon();
-			fTof.tp[i] = (*tofTrk)->texpProton();
+			tofID[i] = (*tofTrk)->tofID();
+			t0[i] = (*tofTrk)->t0();
+			t[i] = (*tofTrk)->tof();
+			dt[i] = (*tofTrk)->errtof();
+			beta[i] = (*tofTrk)->beta();
+			te[i] = (*tofTrk)->texpElectron();
+			tmu[i]= (*tofTrk)->texpMuon();
+			tpi[i]= (*tofTrk)->texpPion();
+			tk[i] = (*tofTrk)->texpKaon();
+			tp[i] = (*tofTrk)->texpProton();
 			if(fTof.dt[i]>0)
 			{
-				fTof.chie[i]  = (fTof.t[i] - fTof.te[i])  /  fTof.dt[i];
-				fTof.chimu[i] = (fTof.t[i] - fTof.tmu[i]) /  fTof.dt[i];
-				fTof.chipi[i] = (fTof.t[i] - fTof.tpi[i]) /  fTof.dt[i];
-				fTof.chik[i]  = (fTof.t[i] - fTof.tk[i])  /  fTof.dt[i];
-				fTof.chip[i]  = (fTof.t[i] - fTof.tp[i])  /  fTof.dt[i];
+				chie[i]  = (t[i] - te[i])  /  dt[i];
+				chimu[i] = (t[i] - tmu[i]) /  dt[i];
+				chipi[i] = (t[i] - tpi[i]) /  dt[i];
+				chik[i]  = (t[i] - tk[i])  /  dt[i];
+				chip[i]  = (t[i] - tp[i])  /  dt[i];
 			}
 		}
 	}
