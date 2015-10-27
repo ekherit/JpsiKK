@@ -68,7 +68,7 @@ class JpsiKK : public Algorithm
 		void init_tuple(A & a,  const char * dir, const char * title);
 
 
-	void fillTuples(const std::vector<CLHEP::LorentzVector> & Pkf,  TrackVector_t & Tracks,  Event::McParticleCol * mcParticleCol);
+	void fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  TrackVector_t & Tracks,  Event::McParticleCol * mcParticleCol);
 	void writeTuples(void);
 };
 
