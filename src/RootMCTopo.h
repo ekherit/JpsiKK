@@ -17,7 +17,7 @@
 #pragma once
 
 #include "RootTuple.h"
-#include "EventModel/Event.h"
+#include "McParticle.h"
 
 struct RootMCTopo : public RootTuple
 {
