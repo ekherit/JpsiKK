@@ -459,11 +459,11 @@ StatusCode JpsiKK::execute()
 	try
 	{
 		fillTuples(Pkf, Tracks);
-		writeTuples(void);
+		writeTuples();
 	}
 	catch(std::runtime_error & error)
 	{
-			log << MSG::ERROR <<  << error.what() << endmsg;
+			log << MSG::ERROR  << error.what() << endmsg;
 			return StatusCode::FAILURE;
 	}
 
