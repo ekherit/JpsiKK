@@ -17,6 +17,7 @@
 #pragma once 
 
 #include "GaudiKernel/NTuple.h"
+#include "EvtRecEvent/EvtRecTrack.h"
 
 struct RootTuple
 {
