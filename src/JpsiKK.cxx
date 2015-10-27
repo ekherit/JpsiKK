@@ -146,28 +146,6 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
 
 }
 
-//this is service function for fast book ntuple
-template <class A>
-StatusCode init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title, MsgStream & log)
-{
-  StatusCode status;
-  NTuplePtr nt(alg->ntupleSvc(), dir);
-  if(nt) a.tuple = nt;
-  else
-  {
-    a.tuple = alg->ntupleSvc()->book(dir, CLID_ColumnWiseTuple, title);
-    if(a.tuple)
-    {
-      return a.init_tuple();
-    }
-    else
-    {
-      log << MSG::ERROR << "    Cannot book N-tuple:" << long(a.tuple) << endmsg;
-      return StatusCode::FAILURE;
-    }
-  }
-  return status;
-}
 
 StatusCode JpsiKK::initialize(void)
 {
@@ -186,14 +164,14 @@ StatusCode JpsiKK::initialize(void)
 	if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
 
   StatusCode status;
-  status = init_tuple(this, fEvent,  "FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
-//  status = init_tuple(this, fPid,    "FILE1/pid","particle id",log);
-  status = init_tuple(this, fMdc,    "FILE1/mdc","Mdc info for signal",log);
-  status = init_tuple(this, fDedx,   "FILE1/dedx","Dedx info for signal",log);
-  status = init_tuple(this, fEmc,    "FILE1/emc","Emc info for signal",log);
-  status = init_tuple(this, fTof,    "FILE1/tof","Tof info for signal",log);
-  status = init_tuple(this, fNeutral,"FILE1/neutral","Good neutral tracks",log);
-  status = init_tuple(this, fMC,     "FILE1/mc","Monte Carlo truth information",log);
+  status = init_tuple(this, fEvent,      "FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
+//  status = init_tuple(this, fPid,        "FILE1/pid","particle id",log);
+  status = init_tuple(this, fMdc,        "FILE1/mdc","Mdc info for signal",log);
+  status = init_tuple(this, fDedx,       "FILE1/dedx","Dedx info for signal",log);
+  status = init_tuple(this, fEmc,        "FILE1/emc","Emc info for signal",log);
+  status = init_tuple(this, fTof,        "FILE1/tof","Tof info for signal",log);
+  status = init_tuple(this, fNeutral,    "FILE1/neutral","Good neutral tracks",log);
+  status = init_tuple(this, fMC,         "FILE1/mc","Monte Carlo truth information",log);
   status = init_tuple(this, fMCTopo,     "FILE1/mctopo","Monte Carlo truth information topology",log);
 
   return status;

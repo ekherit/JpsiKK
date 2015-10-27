@@ -29,6 +29,7 @@
 #include "EvtRecEvent/EvtRecTrack.h"
 
 #include "SelectionConfig.h"
+#include "RootAdaptors.h"
 
 class JpsiKK : public Algorithm 
 {
