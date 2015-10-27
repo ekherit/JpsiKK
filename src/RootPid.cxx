@@ -15,6 +15,7 @@
 // =====================================================================================
 
 #include "RootPid.h"
+#include "PhysConst.h"
 
 StatusCode RootPid::init_tuple(void)
 {
