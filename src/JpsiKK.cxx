@@ -214,7 +214,6 @@ StatusCode JpsiKK::execute()
   //  Get information about reconstructed events
   SmartDataPtr<EvtRecEvent> evtRecEvent(eventSvc(), EventModel::EvtRec::EvtRecEvent);
   SmartDataPtr<EvtRecTrackCol> evtRecTrkCol(eventSvc(),  EventModel::EvtRec::EvtRecTrackCol);
-  SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
 
 
   //fill initial value of the selected event
@@ -458,7 +457,7 @@ StatusCode JpsiKK::execute()
 	//define initial four-momentum
 	try
 	{
-		fillTuples(Pkf, Tracks, mcParticleCol);
+		fillTuples(Pkf, Tracks);
 		writeTuples(void);
 	}
 	catch(std::runtime_error & error)
@@ -505,8 +504,9 @@ void JpsiKK::init_tuple(A & a,  const char * dir, const char * title)
   }
 }
 
-void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  TrackVector_t & Tracks,  Event::McParticleCol * mcParticleCol)
+void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  TrackVector_t & Tracks)
 {
+  SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
 	fEvent.fill(Pkf,  cfg.CENTER_MASS_ENERGY);
 	//fPid.ntrack=4;
 	fMdc.T.ntrack=4;
