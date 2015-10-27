@@ -65,7 +65,7 @@ class JpsiKK : public Algorithm
   RootEmc    fNeutral; //neutral tracks
 
 	template <class A> 
-		StatusCode JpsiKK::init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title, MsgStream & log);
+		StatusCode init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title, MsgStream & log);
 };
 
 #endif
