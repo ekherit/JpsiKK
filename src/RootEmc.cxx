@@ -27,7 +27,7 @@ StatusCode RootEmc::init_tuple(void)
   return status;
 }
 
-void JpsiKK::RootEmc::init(void)
+void RootEmc::init(void)
 {
   ntrack=4;
   for(int i=0;i<ntrack;i++)
