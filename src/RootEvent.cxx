@@ -18,7 +18,7 @@
 #include "PhysConst.h"
 #include "utils.h"
 
-StatusCode RootEvent::init_tuple(void)
+void RootEvent::init_tuple(void)
 {
   tuple->addItem ("run", run); //run number
   tuple->addItem ("event", event); //event number
