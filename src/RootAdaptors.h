@@ -24,8 +24,8 @@
 #include "RootMC.h"
 #include "RootPid.h"
 
-inline template <class A>
-StatusCode init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title, MsgStream & log)
+template <class A>
+inline StatusCode init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title, MsgStream & log)
 {
   StatusCode status;
   NTuplePtr nt(alg->ntupleSvc(), dir);
