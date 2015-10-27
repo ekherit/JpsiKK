@@ -30,3 +30,38 @@ void RootMCTopo::init(void)
 {
   m_idxmc=0;
 }
+
+
+virtual void fill(Event::McParticleCol * mcParticleCol)
+{
+	//check the MC information
+	if(!mcParticleCol)
+	{
+		log << MSG::ERROR << "Could not retrieve McParticelCol" << endreq;
+		return StatusCode::FAILURE;
+	}
+	//Fill MC TOPO INFORMATION
+	bool psipDecay = false;
+	int rootIndex = -1;
+	Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
+	int m_numParticle = 0;
+	for (; iter_mc != mcParticleCol->end(); iter_mc++)
+	{
+		if ((*iter_mc)->primaryParticle()) continue;
+		if (!(*iter_mc)->decayFromGenerator()) continue;
+		if ((*iter_mc)->particleProperty()==100443)
+		{
+			psipDecay = true;
+			rootIndex = (*iter_mc)->trackIndex();
+		}
+		if (!psipDecay) continue;
+		int pdgid = (*iter_mc)->particleProperty();
+		int mcidx = ((*iter_mc)->mother()).trackIndex() - rootIndex;
+		fMCTopo.m_pdgid[m_numParticle] = pdgid;
+		fMCTopo.m_motheridx[m_numParticle] = mcidx;
+		fMCTopo.m_idx[m_numParticle] = (*iter_mc)->trackIndex()-rootIndex;
+		fMCTopo.m_hash=0; //no hash calculation now
+		m_numParticle += 1;
+	}
+	fMCTopo.m_idxmc = m_numParticle;
+}
