@@ -16,6 +16,7 @@
 
 #include "RootEvent.h"
 #include "PhysConst.h"
+#include "utils.h"
 
 StatusCode RootEvent::init_tuple(void)
 {
