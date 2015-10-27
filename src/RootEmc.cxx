@@ -16,6 +16,8 @@
 
 #include "RootEmc.h"
 
+int RootEmc::ARRAY_SIZE = 100;
+
 StatusCode RootEmc::init_tuple(void)
 {
   StatusCode status;

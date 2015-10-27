@@ -63,7 +63,6 @@ typedef HepGeom::Point3D<double> HepPoint3D;
 #include <algorithm>
 #include <limits>
 
-int JpsiKK::RootEmc::ARRAY_SIZE = 100;
 
 
 #include "Defs.h"
