@@ -26,11 +26,11 @@ void RootDedx::init_tuple(void)
   tuple->addIndexedItem ("chip",  ntrack, chip);
   tuple->addIndexedItem ("probPH",  ntrack, probPH);
   tuple->addIndexedItem ("normPH",  ntrack, normPH);
-  tuple->addIndexedItem ("probe",  ntrack, probe);
-  tuple->addIndexedItem ("probmu",  ntrack, probmu);
-  tuple->addIndexedItem ("probpi",  ntrack, probpi);
-  tuple->addIndexedItem ("probk",  ntrack, probk);
-  tuple->addIndexedItem ("probp",  ntrack, probp);
+  //tuple->addIndexedItem ("probe",  ntrack, probe);
+  //tuple->addIndexedItem ("probmu",  ntrack, probmu);
+  //tuple->addIndexedItem ("probpi",  ntrack, probpi);
+  //tuple->addIndexedItem ("probk",  ntrack, probk);
+  //tuple->addIndexedItem ("probp",  ntrack, probp);
   return status;
 }
 
