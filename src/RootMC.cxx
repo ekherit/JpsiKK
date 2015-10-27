@@ -16,7 +16,7 @@
 
 #include "RootMC.h"
 
-StatusCode RootMC::init_tuple(void)
+void RootMC::init_tuple(void)
 {
   tuple->addItem ("psip_decay", psip_decay); //flag for psip decay
   tuple->addItem ("jpsi_decay", jpsi_decay); //flag for jpsi decay 
