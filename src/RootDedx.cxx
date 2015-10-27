@@ -50,11 +50,11 @@ void RootDedx::init(void)
   }
 }
 
-void RootDedx::fill(EvtRecTrackIterator & track)
+void RootDedx::fill(int i, EvtRecTrackIterator & track)
 {
-	if((*Tracks[i])->isMdcDedxValid())
+	if((*track)->isMdcDedxValid())
 	{
-		RecMdcDedx* dedxTrk = (*Tracks[i])->mdcDedx();
+		RecMdcDedx* dedxTrk = (*track)->mdcDedx();
 		chie[i] = dedxTrk->chiE();
 		chimu[i] = dedxTrk->chiMu();
 		chipi[i] = dedxTrk->chiPi();

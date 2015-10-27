@@ -62,11 +62,11 @@ void RootTof::init(void)
 }
 
 
-void RootTof::fill(EvtRecTrackIterator & track)
+void RootTof::fill(int i,  EvtRecTrackIterator & track)
 {
-	if((*Tracks[i])->isTofTrackValid())
+	if((*track)->isTofTrackValid())
 	{
-		SmartRefVector<RecTofTrack> tofTrkCol = (*Tracks[i])->tofTrack();
+		SmartRefVector<RecTofTrack> tofTrkCol = (*track)->tofTrack();
 		SmartRefVector<RecTofTrack>::iterator tofTrk = tofTrkCol.begin();
 		TofHitStatus *hitst = new TofHitStatus;
 		std::vector<int> tofecount;
