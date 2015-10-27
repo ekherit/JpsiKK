@@ -416,9 +416,6 @@ StatusCode JpsiKK::execute()
 	}
 
 
-
-  //now fill the tuples
-
   //some statistics information
   fEvent.ngood_charged_track = good_charged_tracks.size();
   fEvent.ngood_neutral_track = good_neutral_tracks.size();
