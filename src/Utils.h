@@ -35,6 +35,7 @@ using CLHEP::HepLorentzVector;
 #include "utils.h"
 #include "Defs.h"
 #include "SelectionConfig.h"
+#include "PhysConst.h"
 
 inline void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
 {
