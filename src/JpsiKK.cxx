@@ -332,7 +332,6 @@ StatusCode JpsiKK::execute()
 		positive_sh.totalPass();
 	}
 
-	clog << "After kinematic fit" << endl;
 
 	TrackVector_t Tracks;
 	std::vector<HepLorentzVector> Pkf;
@@ -416,7 +415,6 @@ StatusCode JpsiKK::execute()
 			break;
 	}
 
-	clog << "Before fill" << endl;
 
 
   //now fill the tuples
