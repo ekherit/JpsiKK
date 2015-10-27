@@ -33,28 +33,26 @@ struct Track_t
 	NTuple::Array<double> theta,phi;
 	NTuple::Array<double> x, y, z, r; //poca coordinate of track
 	NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
-	virtual StatusCode add_to_tuple(NTuple::Tuple * tuple)
+	virtual void add_to_tuple(NTuple::Tuple * tuple)
 	{
-		StatusCode status;
-		status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
-		status = tuple->addIndexedItem ("trackId",   ntrack, trackId);
-		status = tuple->addIndexedItem ("q",     ntrack, q);
-		status = tuple->addIndexedItem ("E",     ntrack, E);
-		status = tuple->addIndexedItem ("p",     ntrack, p);
-		status = tuple->addIndexedItem ("px",    ntrack, px);
-		status = tuple->addIndexedItem ("py",    ntrack, py);
-		status = tuple->addIndexedItem ("pz",    ntrack, pz);
-		status = tuple->addIndexedItem ("pt",    ntrack, pt);
-		status = tuple->addIndexedItem ("theta", ntrack, theta);
-		status = tuple->addIndexedItem ("phi",   ntrack, phi);
-		status = tuple->addIndexedItem ("x",     ntrack, x);
-		status = tuple->addIndexedItem ("y",     ntrack, y);
-		status = tuple->addIndexedItem ("z",     ntrack, z);
-		status = tuple->addIndexedItem ("r",     ntrack, r);
-		status = tuple->addIndexedItem ("vxy",   ntrack, vxy);
-		status = tuple->addIndexedItem ("vz",    ntrack, vz);
-		status = tuple->addIndexedItem ("vphi",  ntrack, vphi);
-		return status;
+		tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
+		tuple->addIndexedItem ("trackId",   ntrack, trackId);
+		tuple->addIndexedItem ("q",     ntrack, q);
+		tuple->addIndexedItem ("E",     ntrack, E);
+		tuple->addIndexedItem ("p",     ntrack, p);
+		tuple->addIndexedItem ("px",    ntrack, px);
+		tuple->addIndexedItem ("py",    ntrack, py);
+		tuple->addIndexedItem ("pz",    ntrack, pz);
+		tuple->addIndexedItem ("pt",    ntrack, pt);
+		tuple->addIndexedItem ("theta", ntrack, theta);
+		tuple->addIndexedItem ("phi",   ntrack, phi);
+		tuple->addIndexedItem ("x",     ntrack, x);
+		tuple->addIndexedItem ("y",     ntrack, y);
+		tuple->addIndexedItem ("z",     ntrack, z);
+		tuple->addIndexedItem ("r",     ntrack, r);
+		tuple->addIndexedItem ("vxy",   ntrack, vxy);
+		tuple->addIndexedItem ("vz",    ntrack, vz);
+		tuple->addIndexedItem ("vphi",  ntrack, vphi);
 	}
 
 };

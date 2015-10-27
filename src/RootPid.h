@@ -26,6 +26,6 @@ struct RootPid : public RootTuple
 	NTuple::Array<double> prob[5]; //probability of track to be e,mu,pi,k or p
 	NTuple::Array<double> chi2[5];  
 	virtual void init(void);
-	virtual StatusCode init_tuple(void);
+	virtual void init_tuple(void);
 	virtual void fill(int i,  EvtRecTrackIterator & track);
 };

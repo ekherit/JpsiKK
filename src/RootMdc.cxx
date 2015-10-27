@@ -17,12 +17,10 @@
 #include "RootMdc.h"
 #include "Utils.h"
 
-StatusCode RootMdc::init_tuple(void)
+void RootMdc::init_tuple(void)
 {
-  StatusCode status;
-	status = M.add_to_tuple(tuple);
-	status = T.add_to_tuple(tuple);
-  return status;
+	M.add_to_tuple(tuple);
+	T.add_to_tuple(tuple);
 }
 
 

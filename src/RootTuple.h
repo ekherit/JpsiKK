@@ -25,6 +25,6 @@ struct RootTuple
 		NTuple::Tuple * tuple; //tuple
 		virtual ~RootTuple(void){};
 		virtual void init(void)=0;
-		virtual StatusCode init_tuple(void)=0;
+		virtual void init_tuple(void)=0;
 		virtual void fill(EvtRecTrackIterator & track) {};
 };

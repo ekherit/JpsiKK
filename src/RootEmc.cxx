@@ -20,15 +20,13 @@
 
 int RootEmc::ARRAY_SIZE = 100;
 
-StatusCode RootEmc::init_tuple(void)
+void RootEmc::init_tuple(void)
 {
-  StatusCode status;
-  status = tuple->addItem ("ntrack",       ntrack, 0, ARRAY_SIZE); //good nuetral track in event
-  status = tuple->addIndexedItem ("E",     ntrack, E);
-  status = tuple->addIndexedItem ("theta", ntrack, theta);
-  status = tuple->addIndexedItem ("phi",   ntrack, phi);
-  status = tuple->addIndexedItem ("time",  ntrack, time);
-  return status;
+  tuple->addItem ("ntrack",       ntrack, 0, ARRAY_SIZE); //good nuetral track in event
+  tuple->addIndexedItem ("E",     ntrack, E);
+  tuple->addIndexedItem ("theta", ntrack, theta);
+  tuple->addIndexedItem ("phi",   ntrack, phi);
+  tuple->addIndexedItem ("time",  ntrack, time);
 }
 
 void RootEmc::init(void)

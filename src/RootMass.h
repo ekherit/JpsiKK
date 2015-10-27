@@ -33,19 +33,17 @@ struct Mass_t
 
 	NTuple::Array<double> Mmis;    //missing invariant mass
 
-	virtual StatusCode add_to_tuple(NTuple::Tuple * tuple)
+	virtual void add_to_tuple(NTuple::Tuple * tuple)
 	{
-		StatusCode status;
-		status = tuple->addItem ("Mrec", Mrec); 
-		status = tuple->addItem ("M012", M012); 
-		status = tuple->addItem ("M013", M013); 
-		status = tuple->addItem ("M023", M023); 
-		status = tuple->addItem ("M123", M123); 
+		tuple->addItem ("Mrec", Mrec); 
+		tuple->addItem ("M012", M012); 
+		tuple->addItem ("M013", M013); 
+		tuple->addItem ("M023", M023); 
+		tuple->addItem ("M123", M123); 
 
-		status = tuple->addItem ("M03", M03); 
-		status = tuple->addItem ("M12", M12); 
-		status = tuple->addItem ("M01", M01); 
-		status = tuple->addItem ("M23", M23); 
-		return status;
+		tuple->addItem ("M03", M03); 
+		tuple->addItem ("M12", M12); 
+		tuple->addItem ("M01", M01); 
+		tuple->addItem ("M23", M23); 
 	}
 };

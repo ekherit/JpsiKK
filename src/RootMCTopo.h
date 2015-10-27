@@ -27,6 +27,6 @@ struct RootMCTopo : public RootTuple
 	NTuple::Array <int>  m_idx;
 	NTuple::Item <unsigned long>  m_hash;
 	virtual void init(void);
-	virtual StatusCode init_tuple(void);
+	virtual void init_tuple(void);
 	virtual void fill(Event::McParticleCol *);
 };

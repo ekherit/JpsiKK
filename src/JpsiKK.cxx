@@ -494,7 +494,7 @@ void JpsiKK::init_tuple(A & a,  const char * dir, const char * title)
     a.tuple = this->ntupleSvc()->book(dir, CLID_ColumnWiseTuple, title);
     if(a.tuple)
     {
-      return a.init_tuple();
+      a.init_tuple();
     }
     else
     {

@@ -38,7 +38,7 @@ struct RootTof : public RootTuple
 	NTuple::Array<double> chik;  
 	NTuple::Array<double> chip;  
 	virtual void init(void);
-	virtual StatusCode init_tuple(void);
+	virtual void init_tuple(void);
 	virtual void fill(int i,  EvtRecTrackIterator & track);
 };
 

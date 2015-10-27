@@ -18,24 +18,22 @@
 
 StatusCode RootMC::init_tuple(void)
 {
-  StatusCode status;
-  status = tuple->addItem ("psip_decay", psip_decay); //flag for psip decay
-  status = tuple->addItem ("jpsi_decay", jpsi_decay); //flag for jpsi decay 
-  status = tuple->addItem ("KK", KK);               //KK event
-  status = tuple->addItem ("uu", uu);               //mu mu event
-  status = tuple->addItem ("oo", oo);               //other event
-  status = tuple->addItem ("ntrack", ntrack,0,4); 
-  status = tuple->addIndexedItem ("id",    ntrack, pid);
-  status = tuple->addIndexedItem ("q",     ntrack, q);
-  status = tuple->addIndexedItem ("E",     ntrack, E);
-  status = tuple->addIndexedItem ("p",     ntrack, p);
-  status = tuple->addIndexedItem ("px",    ntrack, px);
-  status = tuple->addIndexedItem ("py",    ntrack, py);
-  status = tuple->addIndexedItem ("pz",    ntrack, pz);
-  status = tuple->addIndexedItem ("pt",    ntrack, pt);
-  status = tuple->addIndexedItem ("theta", ntrack, theta);
-  status = tuple->addIndexedItem ("phi",   ntrack, phi);
-  return status;
+  tuple->addItem ("psip_decay", psip_decay); //flag for psip decay
+  tuple->addItem ("jpsi_decay", jpsi_decay); //flag for jpsi decay 
+  tuple->addItem ("KK", KK);               //KK event
+  tuple->addItem ("uu", uu);               //mu mu event
+  tuple->addItem ("oo", oo);               //other event
+  tuple->addItem ("ntrack", ntrack,0,4); 
+  tuple->addIndexedItem ("id",    ntrack, pid);
+  tuple->addIndexedItem ("q",     ntrack, q);
+  tuple->addIndexedItem ("E",     ntrack, E);
+  tuple->addIndexedItem ("p",     ntrack, p);
+  tuple->addIndexedItem ("px",    ntrack, px);
+  tuple->addIndexedItem ("py",    ntrack, py);
+  tuple->addIndexedItem ("pz",    ntrack, pz);
+  tuple->addIndexedItem ("pt",    ntrack, pt);
+  tuple->addIndexedItem ("theta", ntrack, theta);
+  tuple->addIndexedItem ("phi",   ntrack, phi);
 }
 
 void RootMC::init(void)

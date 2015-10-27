@@ -17,26 +17,24 @@
 #include "RootTof.h"
 #include "DstEvent/TofHitStatus.h"
 
-StatusCode RootTof::init_tuple(void)
+void RootTof::init_tuple(void)
 {
-  StatusCode status;
-  status = tuple->addItem ("ntrack", ntrack,0,4); 
-  status = tuple->addIndexedItem ("ID",  ntrack, tofID);
-  status = tuple->addIndexedItem ("t",  ntrack, t);
-  status = tuple->addIndexedItem ("dt",  ntrack, dt);
-  status = tuple->addIndexedItem ("t0",  ntrack, t0);
-  status = tuple->addIndexedItem ("chie",  ntrack, chie);
-  status = tuple->addIndexedItem ("chimu",  ntrack, chimu);
-  status = tuple->addIndexedItem ("chipi",  ntrack, chipi);
-  status = tuple->addIndexedItem ("chik",  ntrack, chik);
-  status = tuple->addIndexedItem ("chip",  ntrack, chip);
-  status = tuple->addIndexedItem ("beta",  ntrack, beta);
-  status = tuple->addIndexedItem ("te",  ntrack, te);
-  status = tuple->addIndexedItem ("tmu",  ntrack, tmu);
-  status = tuple->addIndexedItem ("tpi",  ntrack, tpi);
-  status = tuple->addIndexedItem ("tk",  ntrack, tk);
-  status = tuple->addIndexedItem ("tp",  ntrack, tp);
-  return status;
+  tuple->addItem ("ntrack", ntrack,0,4); 
+  tuple->addIndexedItem ("ID",  ntrack, tofID);
+  tuple->addIndexedItem ("t",  ntrack, t);
+  tuple->addIndexedItem ("dt",  ntrack, dt);
+  tuple->addIndexedItem ("t0",  ntrack, t0);
+  tuple->addIndexedItem ("chie",  ntrack, chie);
+  tuple->addIndexedItem ("chimu",  ntrack, chimu);
+  tuple->addIndexedItem ("chipi",  ntrack, chipi);
+  tuple->addIndexedItem ("chik",  ntrack, chik);
+  tuple->addIndexedItem ("chip",  ntrack, chip);
+  tuple->addIndexedItem ("beta",  ntrack, beta);
+  tuple->addIndexedItem ("te",  ntrack, te);
+  tuple->addIndexedItem ("tmu",  ntrack, tmu);
+  tuple->addIndexedItem ("tpi",  ntrack, tpi);
+  tuple->addIndexedItem ("tk",  ntrack, tk);
+  tuple->addIndexedItem ("tp",  ntrack, tp);
 }
 
 void RootTof::init(void)

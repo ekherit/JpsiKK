@@ -16,22 +16,21 @@
 
 #include "RootDedx.h"
 
-StatusCode RootDedx::init_tuple(void)
+void RootDedx::init_tuple(void)
 {
-  StatusCode status;
-  status = tuple->addItem ("ntrack", ntrack,0,4); 
-  status = tuple->addIndexedItem ("chie",  ntrack, chie);
-  status = tuple->addIndexedItem ("chimu",  ntrack, chimu);
-  status = tuple->addIndexedItem ("chipi",  ntrack, chipi);
-  status = tuple->addIndexedItem ("chik",  ntrack, chik);
-  status = tuple->addIndexedItem ("chip",  ntrack, chip);
-  status = tuple->addIndexedItem ("probPH",  ntrack, probPH);
-  status = tuple->addIndexedItem ("normPH",  ntrack, normPH);
-  //status = tuple->addIndexedItem ("probe",  ntrack, probe);
-  //status = tuple->addIndexedItem ("probmu",  ntrack, probmu);
-  //status = tuple->addIndexedItem ("probpi",  ntrack, probpi);
-  //status = tuple->addIndexedItem ("probk",  ntrack, probk);
-  //status = tuple->addIndexedItem ("probp",  ntrack, probp);
+  tuple->addItem ("ntrack", ntrack,0,4); 
+  tuple->addIndexedItem ("chie",  ntrack, chie);
+  tuple->addIndexedItem ("chimu",  ntrack, chimu);
+  tuple->addIndexedItem ("chipi",  ntrack, chipi);
+  tuple->addIndexedItem ("chik",  ntrack, chik);
+  tuple->addIndexedItem ("chip",  ntrack, chip);
+  tuple->addIndexedItem ("probPH",  ntrack, probPH);
+  tuple->addIndexedItem ("normPH",  ntrack, normPH);
+  tuple->addIndexedItem ("probe",  ntrack, probe);
+  tuple->addIndexedItem ("probmu",  ntrack, probmu);
+  tuple->addIndexedItem ("probpi",  ntrack, probpi);
+  tuple->addIndexedItem ("probk",  ntrack, probk);
+  tuple->addIndexedItem ("probp",  ntrack, probp);
   return status;
 }
 

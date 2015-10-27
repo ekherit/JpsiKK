@@ -65,7 +65,7 @@ struct RootEvent : public RootTuple
 	NTuple::Array<double> pchi2[5];//my particle id chi square different hypo
 
 	virtual void init(void);
-	virtual StatusCode init_tuple(void);
+	virtual void init_tuple(void);
 
 	virtual void fill(const std::vector<HepLorentzVector> & Pkf,  double W);
 };

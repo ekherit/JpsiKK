@@ -19,50 +19,46 @@
 
 StatusCode RootEvent::init_tuple(void)
 {
-  StatusCode status;
-  status = tuple->addItem ("run", run); //run number
-  status = tuple->addItem ("event", event); //event number
-  status = tuple->addItem ("time", time); //event time
-  status = tuple->addItem ("ngtrack", ngood_charged_track); //good charged track in event
-  status = tuple->addItem ("ngntrack", ngood_neutral_track); //good neutral track in event
-  status = tuple->addItem ("nptrack", npositive_track); //good positive charged track in event
-  status = tuple->addItem ("nntrack", nnegative_track); //good negative charged track in event
-  status = tuple->addItem ("nppions", npositive_pions); //good poitive pion tracks in event
-  status = tuple->addItem ("nnpions", nnegative_pions); //good negative pion track in event
-  status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
-  //status = tuple->addItem ("ntrack", T.ntrack,0,4);     
+  tuple->addItem ("run", run); //run number
+  tuple->addItem ("event", event); //event number
+  tuple->addItem ("time", time); //event time
+  tuple->addItem ("ngtrack", ngood_charged_track); //good charged track in event
+  tuple->addItem ("ngntrack", ngood_neutral_track); //good neutral track in event
+  tuple->addItem ("nptrack", npositive_track); //good positive charged track in event
+  tuple->addItem ("nntrack", nnegative_track); //good negative charged track in event
+  tuple->addItem ("nppions", npositive_pions); //good poitive pion tracks in event
+  tuple->addItem ("nnpions", nnegative_pions); //good negative pion track in event
+  tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
+  tuple->addItem ("ntrack", T.ntrack,0,4);     
 
-  status = tuple->addItem ("sign", sign); //number of pions paris in event
-  status = tuple->addItem ("channel", channel); //decay channel of the J/psi
-  status = tuple->addItem ("KK", KK); //KK decay channel of the J/psi
-  status = tuple->addItem ("uu", uu); //mu-mu decay channel of the J/psi
-  status = tuple->addItem ("Ku", Ku); //Kmu or muK events
+  tuple->addItem ("sign", sign); //number of pions paris in event
+  tuple->addItem ("channel", channel); //decay channel of the J/psi
+  tuple->addItem ("KK", KK); //KK decay channel of the J/psi
+  tuple->addItem ("uu", uu); //mu-mu decay channel of the J/psi
+  tuple->addItem ("Ku", Ku); //Kmu or muK events
 
-	status = M.add_to_tuple(tuple);
-  //status = tuple->addItem ("Mee",   kM[ID_ELECTRON]);
-  //status = tuple->addItem ("MKK",   kM[ID_KAON]);
-  //status = tuple->addItem ("Muu",   kM[ID_MUON]);
-  //status = tuple->addItem ("Mpp",   kM[ID_PROTON]);
-  //status = tuple->addItem ("Mpipi", kM[ID_PION]);
+	M.add_to_tuple(tuple);
+  //tuple->addItem ("Mee",   kM[ID_ELECTRON]);
+  //tuple->addItem ("MKK",   kM[ID_KAON]);
+  //tuple->addItem ("Muu",   kM[ID_MUON]);
+  //tuple->addItem ("Mpp",   kM[ID_PROTON]);
+  //tuple->addItem ("Mpipi", kM[ID_PION]);
 
-	status = T.add_to_tuple(tuple);
+	T.add_to_tuple(tuple);
 
-  status = tuple->addItem ("kin_chi2", kin_chi2); 
-  status = tuple->addItem ("pid_chi2", pid_chi2); 
+  tuple->addItem ("kin_chi2", kin_chi2); 
+  tuple->addItem ("pid_chi2", pid_chi2); 
 
-  status = tuple->addItem ("npid", npid,0,5);     
-  status = tuple->addIndexedItem ("kchi",  npid, kchi);
-  status = tuple->addIndexedItem ("pchi",  npid, pchi);
-  status = tuple->addIndexedItem ("kM",  npid,     kM23);
+  tuple->addItem ("npid", npid,0,5);     
+  tuple->addIndexedItem ("kchi",  npid, kchi);
+  tuple->addIndexedItem ("pchi",  npid, pchi);
+  tuple->addIndexedItem ("kM",  npid,     kM23);
 
-  status = tuple->addIndexedItem ("probe",  T.ntrack,  prob[ID_ELECTRON]);
-  status = tuple->addIndexedItem ("probmu", T.ntrack,  prob[ID_MUON]);
-  status = tuple->addIndexedItem ("probpi", T.ntrack,  prob[ID_PION]);
-  status = tuple->addIndexedItem ("probk",  T.ntrack,  prob[ID_KAON]);
-  status = tuple->addIndexedItem ("probp",  T.ntrack,  prob[ID_PROTON]);
-
-
-  return status;
+  //tuple->addIndexedItem ("probe",  T.ntrack,  prob[ID_ELECTRON]);
+  //tuple->addIndexedItem ("probmu", T.ntrack,  prob[ID_MUON]);
+  //tuple->addIndexedItem ("probpi", T.ntrack,  prob[ID_PION]);
+  //tuple->addIndexedItem ("probk",  T.ntrack,  prob[ID_KAON]);
+  //tuple->addIndexedItem ("probp",  T.ntrack,  prob[ID_PROTON]);
 }
 
 void RootEvent::init(void)

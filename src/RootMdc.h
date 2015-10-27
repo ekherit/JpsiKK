@@ -25,6 +25,6 @@ struct RootMdc : public RootTuple
 	Mass_t M;
 	Track_t T;
 	virtual void init(void);
-	virtual StatusCode init_tuple(void);
+	virtual void init_tuple(void);
 	virtual void fill(int i,  EvtRecTrackIterator & track);
 };

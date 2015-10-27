@@ -15,15 +15,13 @@
 // =====================================================================================
 
 #include "RootMCTopo.h"
-StatusCode RootMCTopo::init_tuple(void)
+void RootMCTopo::init_tuple(void)
 {
-  StatusCode status;
-  status = tuple->addItem("indexmc", m_idxmc, 0, 100);
-  status = tuple->addIndexedItem("pdgid", m_idxmc, m_pdgid);
-  status = tuple->addIndexedItem("motheridx", m_idxmc, m_motheridx);
-  status = tuple->addIndexedItem("idx", m_idxmc, m_idx);
-  status = tuple->addItem("hash", m_hash);
-  return status;
+  tuple->addItem("indexmc", m_idxmc, 0, 100);
+  tuple->addIndexedItem("pdgid", m_idxmc, m_pdgid);
+  tuple->addIndexedItem("motheridx", m_idxmc, m_motheridx);
+  tuple->addIndexedItem("idx", m_idxmc, m_idx);
+  tuple->addItem("hash", m_hash);
 }
 
 void RootMCTopo::init(void)
