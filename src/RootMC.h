@@ -19,6 +19,8 @@
 #include "RootTuple.h"
 #include "McParticle.h"
 
+#include "CLHEP/Vector/LorentzVector.h"
+
 struct RootMC : public RootTuple
 {
 	NTuple::Item<long>    psip_decay; //is event from psip decay
@@ -36,5 +38,5 @@ struct RootMC : public RootTuple
 	virtual void init(void);
 	virtual StatusCode init_tuple(void);
 	virtual void fill(EvtRecTrackIterator & track){};
-	virtual void fill(Event::McParticleCol *);
+	virtual void fill(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Event::McParticleCol *);
 };

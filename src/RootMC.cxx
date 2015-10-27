@@ -43,7 +43,7 @@ void RootMC::init(void)
   ntrack=4;
 }
 
-void RootMC::fill(Event::McParticleCol * mcParticleCol)
+void RootMC::fill(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Event::McParticleCol * mcParticleCol)
 {
 	//Fill my mc truth information
 	ntrack=4;
