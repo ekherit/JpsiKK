@@ -32,7 +32,7 @@ void RootMCTopo::init(void)
 }
 
 
-virtual void fill(Event::McParticleCol * mcParticleCol)
+virtual void RootMCTopo::fill(Event::McParticleCol * mcParticleCol)
 {
 	//check the MC information
 	//if(!mcParticleCol)
