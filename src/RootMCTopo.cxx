@@ -35,11 +35,11 @@ void RootMCTopo::init(void)
 virtual void fill(Event::McParticleCol * mcParticleCol)
 {
 	//check the MC information
-	if(!mcParticleCol)
-	{
-		log << MSG::ERROR << "Could not retrieve McParticelCol" << endreq;
-		return StatusCode::FAILURE;
-	}
+	//if(!mcParticleCol)
+	//{
+	//	log << MSG::ERROR << "Could not retrieve McParticelCol" << endreq;
+	//	return StatusCode::FAILURE;
+	//}
 	//Fill MC TOPO INFORMATION
 	bool psipDecay = false;
 	int rootIndex = -1;
