@@ -16,6 +16,7 @@
 
 #pragma once 
 
+#include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/NTuple.h"
 #include "EvtRecEvent/EvtRecTrack.h"
 
