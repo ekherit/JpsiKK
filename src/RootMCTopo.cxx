@@ -57,10 +57,10 @@ virtual void fill(Event::McParticleCol * mcParticleCol)
 		if (!psipDecay) continue;
 		int pdgid = (*iter_mc)->particleProperty();
 		int mcidx = ((*iter_mc)->mother()).trackIndex() - rootIndex;
-		fMCTopo.m_pdgid[m_numParticle] = pdgid;
-		fMCTopo.m_motheridx[m_numParticle] = mcidx;
-		fMCTopo.m_idx[m_numParticle] = (*iter_mc)->trackIndex()-rootIndex;
-		fMCTopo.m_hash=0; //no hash calculation now
+		m_pdgid[m_numParticle] = pdgid;
+		m_motheridx[m_numParticle] = mcidx;
+		m_idx[m_numParticle] = (*iter_mc)->trackIndex()-rootIndex;
+		m_hash=0; //no hash calculation now
 		m_numParticle += 1;
 	}
 	fMCTopo.m_idxmc = m_numParticle;
