@@ -94,13 +94,13 @@ void RootTof::fill(int i,  EvtRecTrackIterator & track)
 			tpi[i]= (*tofTrk)->texpPion();
 			tk[i] = (*tofTrk)->texpKaon();
 			tp[i] = (*tofTrk)->texpProton();
-			if(fTof.dt[i]>0)
+			if(dt[i]>0)
 			{
-				chie[i]  = (t[i] - te[i])  /  dt[i];
-				chimu[i] = (t[i] - tmu[i]) /  dt[i];
-				chipi[i] = (t[i] - tpi[i]) /  dt[i];
-				chik[i]  = (t[i] - tk[i])  /  dt[i];
-				chip[i]  = (t[i] - tp[i])  /  dt[i];
+				chie[i]  = (t[i] - te[i])  /  fabs(dt[i]);
+				chimu[i] = (t[i] - tmu[i]) /  fabs(dt[i]);
+				chipi[i] = (t[i] - tpi[i]) /  fabs(dt[i]);
+				chik[i]  = (t[i] - tk[i])  /  fabs(dt[i]);
+				chip[i]  = (t[i] - tp[i])  /  fabs(dt[i]);
 			}
 		}
 	}
