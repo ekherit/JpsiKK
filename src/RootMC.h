@@ -36,5 +36,5 @@ struct RootMC : public RootTuple
 	virtual void init(void);
 	virtual StatusCode init_tuple(void);
 	virtual void fill(EvtRecTrackIterator & track){};
-	virtual void fill(Event::McParticle *);
+	virtual void fill(Event::McParticleCol *);
 };

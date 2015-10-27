@@ -549,6 +549,8 @@ StatusCode JpsiKK::execute()
 		}
 		fMCTopo.fill(mcParticleCol);
 		fMC.fill(mcParticleCol);
+    fMC.tuple->write();
+    fMCTopo.tuple->write();
 	}
 
 
@@ -563,12 +565,6 @@ StatusCode JpsiKK::execute()
     fNeutral.phi[idx] =  emcTrk->phi();
     fNeutral.time[idx] = emcTrk->time();
     idx++;
-  }
-
-  if(fEvent.run<0) 
-  {
-    fMC.tuple->write();
-    fMCTopo.tuple->write();
   }
   fEvent.tuple->write();
   //fPid.tuple->write();
