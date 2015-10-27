@@ -23,4 +23,5 @@
 #include "RootMCTopo.h"
 #include "RootMC.h"
 #include "RootPid.h"
+#include "RootEmc.h"
 
