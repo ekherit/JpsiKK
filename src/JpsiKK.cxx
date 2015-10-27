@@ -214,13 +214,14 @@ StatusCode JpsiKK::execute()
   //  Get information about reconstructed events
   SmartDataPtr<EvtRecEvent> evtRecEvent(eventSvc(), EventModel::EvtRec::EvtRecEvent);
   SmartDataPtr<EvtRecTrackCol> evtRecTrkCol(eventSvc(),  EventModel::EvtRec::EvtRecTrackCol);
+	tracks_end = evtRecTrkCol->end();
 
 
   //fill initial value of the selected event
   fEvent.init();
 
-  std::list<EvtRecTrackIterator> good_charged_tracks=createGoodChargedTrackList(cfg, evtRecEvent, evtRecTrkCol);
-  std::list<EvtRecTrackIterator> good_neutral_tracks=createGoodNeutralTrackList(cfg, evtRecEvent, evtRecTrkCol);
+  good_charged_tracks=createGoodChargedTrackList(cfg, evtRecEvent, evtRecTrkCol);
+  good_neutral_tracks=createGoodNeutralTrackList(cfg, evtRecEvent, evtRecTrkCol);
 
   //SELECTION CODE
   if( cfg.MAX_NEUTRAL_TRACKS < good_neutral_tracks.size()) return StatusCode::SUCCESS;
@@ -355,7 +356,7 @@ StatusCode JpsiKK::execute()
 			Tracks = negative_sh.tracks;
 			Pkf = negative_sh.KF[negative_sh.channel].P;
 			//add missing positive tracks
-			Tracks.push_back(evtRecTrkCol->end());
+			Tracks.push_back(tracks_end);
 			sh = & negative_sh;
 			break;
 
@@ -364,7 +365,7 @@ StatusCode JpsiKK::execute()
 			Tracks = positive_sh.tracks;
 			Pkf = positive_sh.KF[positive_sh.channel].P;
 			//add missing negative tracks
-			Tracks.push_back(evtRecTrkCol->end());
+			Tracks.push_back(tracks_end);
 			//negative tracks go first
 			std::swap(Tracks[2], Tracks[3]);
 			std::swap(Pkf[2],  Pkf[3]);
@@ -516,8 +517,8 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 	fMdc.M.Mrec = get_recoil__mass(Tracks[0], Tracks[1], PION_MASS,  cfg.CENTER_MASS_ENERGY);
 	for(int i=0;i<4;i++)
 	{
-		if(Tracks[i]==evtRecTrkCol->end()) continue;
-		fEmc.fill (i,  Tracks[i])
+		if(Tracks[i]==tracks_end) continue;
+		fEmc.fill (i,  Tracks[i]);
 		fMdc.fill (i,  Tracks[i]);
 		fDedx.fill(i,  Tracks[i]);
 		fTof.fill (i,  Tracks[i]);

@@ -71,6 +71,11 @@ class JpsiKK : public Algorithm
 
 	void fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  TrackVector_t & Tracks);
 	void writeTuples(void);
+
+
+	std::list<EvtRecTrackIterator> good_neutral_tracks;
+	std::list<EvtRecTrackIterator> good_charged_tracks;
+	EvtRecTrackIterator tracks_end; //a flag of the end of the track
 };
 
 #endif
