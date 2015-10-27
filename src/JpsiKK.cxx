@@ -16,6 +16,7 @@
  *
  * =====================================================================================
  */
+#include <stdexcept>
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/AlgFactory.h"
@@ -163,18 +164,24 @@ StatusCode JpsiKK::initialize(void)
   good_kinematic_fit=0;
 	if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
 
-  StatusCode status;
-  status = init_tuple(this, fEvent,      "FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-",log);
-//  status = init_tuple(this, fPid,        "FILE1/pid","particle id",log);
-  status = init_tuple(this, fMdc,        "FILE1/mdc","Mdc info for signal",log);
-  status = init_tuple(this, fDedx,       "FILE1/dedx","Dedx info for signal",log);
-  status = init_tuple(this, fEmc,        "FILE1/emc","Emc info for signal",log);
-  status = init_tuple(this, fTof,        "FILE1/tof","Tof info for signal",log);
-  status = init_tuple(this, fNeutral,    "FILE1/neutral","Good neutral tracks",log);
-  status = init_tuple(this, fMC,         "FILE1/mc","Monte Carlo truth information",log);
-  status = init_tuple(this, fMCTopo,     "FILE1/mctopo","Monte Carlo truth information topology",log);
-
-  return status;
+	try
+	{
+		init_tuple(fEvent,      "FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-");
+		init_tuple(fMdc,        "FILE1/mdc","Mdc info for signal");
+		init_tuple(fDedx,       "FILE1/dedx","Dedx info for signal");
+		init_tuple(fEmc,        "FILE1/emc","Emc info for signal");
+		init_tuple(fTof,        "FILE1/tof","Tof info for signal");
+		init_tuple(fNeutral,    "FILE1/neutral","Good neutral tracks");
+		init_tuple(fMC,         "FILE1/mc","Monte Carlo truth information");
+		init_tuple(fMCTopo,     "FILE1/mctopo","Monte Carlo truth information topology");
+		//init_tuple(this, fPid,        "FILE1/pid","particle id");
+	}
+	catch(std::runtime_error & error)
+	{
+		log << MSG::ERROR << "    Cannot book N-tuple:" << long(a.tuple) << endmsg;
+		return StatusCode::FAILURE;
+	}
+  return StatusCode::SUCCESS;
 }
 
 StatusCode JpsiKK::execute()
@@ -449,121 +456,17 @@ StatusCode JpsiKK::execute()
 	}
 
 	//define initial four-momentum
-  HepLorentzVector Pcm(cfg.CENTER_MASS_ENERGY*sin(0.011),0,0,cfg.CENTER_MASS_ENERGY); 
-
-  fEvent.M.Mrec = (Pcm - Pkf[0] - Pkf[1]).m();
-
-  fEvent.M.M012 = (Pkf[0]+Pkf[1]+Pkf[2]).m();
-  fEvent.M.M013 = (Pkf[0]+Pkf[1]+Pkf[3]).m();
-  fEvent.M.M023 = (Pkf[0]+Pkf[2]+Pkf[3]).m();
-  fEvent.M.M123 = (Pkf[1]+Pkf[2]+Pkf[3]).m();
-
-  fEvent.M.M03 =  (Pkf[0]+Pkf[3]).m();
-  fEvent.M.M12 =  (Pkf[1]+Pkf[2]).m();
-  fEvent.M.M01 =  (Pkf[0]+Pkf[1]).m();
-  fEvent.M.M23 =  (Pkf[2]+Pkf[3]).m();
-
-
-  fEvent.T.ntrack = 4;
-  for ( int i=0;i<4;i++)
-  {
-    fEvent.T.q[i]  = i%2 == 0 ? -1 : +1;
-    fEvent.T.E[i]  = Pkf[i].e();
-    fEvent.T.px[i] = Pkf[i].px();
-    fEvent.T.py[i] = Pkf[i].py();
-    fEvent.T.pz[i] = Pkf[i].pz();
-    fEvent.T.p[i]  = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py())+sq(Pkf[i].pz()));
-    fEvent.T.pt[i] = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py()));
-    fEvent.T.theta[i]= Pkf[i].theta();
-    fEvent.T.phi[i] = Pkf[i].phi();
-    fEvent.T.x[i]=0;
-    fEvent.T.y[i]=0;
-    fEvent.T.z[i]=0;
-    fEvent.T.r[i]=0;
-    fEvent.T.vxy[i]=0;
-    fEvent.T.vz[i]=0;
-    fEvent.T.vphi[i]=0;
-  }
-
-
-  fEvent.T.ntrack=4;
-  //fPid.ntrack=4;
-  fMdc.T.ntrack=4;
-  fDedx.ntrack=4;
-  fEmc.ntrack=4;
-  fTof.ntrack=4;
-  fMdc.M.Mrec = get_recoil__mass(pion_pair, PION_MASS,  cfg.CENTER_MASS_ENERGY);
-  //fMdc.Minv    = sqrt(get_invariant_mass2(result_pair,XMASS[channel]));
-  //EvtRecTrackIterator itTrk[4] = {pion_pair.first, pion_pair.second, result_pair.first, result_pair.second};
-  for(int i=0;i<4;i++)
-  {
-		if(Tracks[i]==evtRecTrkCol->end()) continue;
-    if(i>1)
-    {
-      RecEmcShower *emcTrk = (*Tracks[i])->emcShower();
-      fEmc.E[i] = emcTrk->energy();
-      fEmc.theta[i] = emcTrk->theta();
-      fEmc.phi[i] = emcTrk->phi();
-      fEmc.time[i] = emcTrk->time();
-      fMdc.T.E[i] = fEmc.E[i];
-    }
-		fMdc.fill (i,  Tracks[i]);
-		fDedx.fill(i,  Tracks[i]);
-		fTof.fill (i,  Tracks[i]);
-    //dedx information
-
-    //fill particle id
-
-    //PID->setRecTrack((*Tracks[i]));
-    //PID->calculate();
-    //if(PID->IsPidInfoValid())
-    //{
-    //  //fPid.prob[ID_ELECTRON][i] = PID->probElectron();
-    //  //fPid.prob[ID_MUON][i]     = PID->probMuon();
-    //  //fPid.prob[ID_PION][i]     = PID->probPion();
-    //  //fPid.prob[ID_KAON][i]     = PID->probKaon();
-    //  //fPid.prob[ID_PROTON][i]   = PID->probProton();
-    //}
-    //vector<double> chi2 = get_chi2(Tracks[i]);
-    //for(int pid=0;pid<5;pid++)
-    //{
-    //  //fPid.chi2[pid][i]   = chi2[pid];
-    //}
-
-  }
-  for(int i=0;i<5;i++)
-  {
-    //fPid.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
-    HepLorentzVector p1(Pkf[2].vect(), XMASS[i]);
-    HepLorentzVector p2(Pkf[3].vect(), XMASS[i]);
-    //fPid.kM[i] = (p1+p2).m();
-  };
-
-
-  if(fEvent.run<0)
+	try
 	{
-		if(!mcParticleCol)
-		{
-			log << MSG::ERROR << "Could not retrieve McParticelCol" << endreq;
+		fillTuples(Pkf, Tracks, mcParticleCol);
+		writeTuples(void);
+	}
+	catch(std::runtime_error & error)
+	{
+			log << MSG::ERROR <<  << error.what() << endmsg;
 			return StatusCode::FAILURE;
-		}
-		fMCTopo.fill(mcParticleCol);
-		fMC.fill(Pkf, mcParticleCol);
-    fMC.tuple->write();
-    fMCTopo.tuple->write();
 	}
 
-	fNeutral.fill(good_neutral_tracks);
-
-
-  fEvent.tuple->write();
-  //fPid.tuple->write();
-  fMdc.tuple->write();
-  fEmc.tuple->write();
-  fDedx.tuple->write();
-  fTof.tuple->write();
-  fNeutral.tuple->write();
-  event_write++;
   return StatusCode::SUCCESS;
 }
 
@@ -582,23 +485,72 @@ StatusCode JpsiKK::finalize()
 }
 
 template <class A>
-inline StatusCode JpsiKK::init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title, MsgStream & log)
+void JpsiKK::init_tuple(A & a,  const char * dir, const char * title)
 {
-  StatusCode status;
-  NTuplePtr nt(alg->ntupleSvc(), dir);
+  NTuplePtr nt(this->ntupleSvc(), dir);
   if(nt) a.tuple = nt;
   else
   {
-    a.tuple = alg->ntupleSvc()->book(dir, CLID_ColumnWiseTuple, title);
+    a.tuple = this->ntupleSvc()->book(dir, CLID_ColumnWiseTuple, title);
     if(a.tuple)
     {
       return a.init_tuple();
     }
     else
     {
-      log << MSG::ERROR << "    Cannot book N-tuple:" << long(a.tuple) << endmsg;
-      return StatusCode::FAILURE;
+			char buf[1024];
+			sprintf(buf, "   Cannot book N-tuple: %d",  long(a.tuple));
+			throw std::runtime_error(buf);
     }
   }
-  return status;
 }
+
+StatusCode  JpsiKK::fillTuples(const std::vector<CLHEP::LorentzVector> & Pkf,  TrackVector_t & Tracks,  Event::McParticleCol * mcParticleCol)
+{
+	fEvent.fill(Pkf,  cfg.CENTER_MASS_ENERGY);
+	//fPid.ntrack=4;
+	fMdc.T.ntrack=4;
+	fDedx.ntrack=4;
+	fEmc.ntrack=4;
+	fTof.ntrack=4;
+	fMdc.M.Mrec = get_recoil__mass(Tracks[0], Tracks[1], PION_MASS,  cfg.CENTER_MASS_ENERGY);
+	for(int i=0;i<4;i++)
+	{
+		if(Tracks[i]==evtRecTrkCol->end()) continue;
+		fEmc.fill (i,  Tracks[i])
+		fMdc.fill (i,  Tracks[i]);
+		fDedx.fill(i,  Tracks[i]);
+		fTof.fill (i,  Tracks[i]);
+	}
+	//Monte Carlo information
+	if(fEvent.run<0)
+	{
+		
+		if(!mcParticleCol)
+		{
+			throw std::runtime_error("Could not retrieve McParticelCol");
+		}
+		fMCTopo.fill(mcParticleCol);
+		fMC.fill(Pkf, mcParticleCol);
+	}
+	fNeutral.fill(good_neutral_tracks);
+}
+
+void JpsiKK::writeTuples(void)
+{
+  fEvent.tuple->write();
+  //fPid.tuple->write();
+  fMdc.tuple->write();
+  fEmc.tuple->write();
+  fDedx.tuple->write();
+  fTof.tuple->write();
+  fNeutral.tuple->write();
+	if(fEvent.run<0)
+	{
+		fMC.tuple->write();
+		fMCTopo.tuple->write();
+	}
+  event_write++;
+}
+
+

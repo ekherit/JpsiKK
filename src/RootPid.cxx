@@ -52,3 +52,30 @@ void RootPid::init(void)
 {
   ntrack=4;
 }
+
+void RootPid::fill(int i,  EvtRecTrackIterator & track);
+{
+	//PID->setRecTrack((*Tracks[i]));
+	//PID->calculate();
+	//if(PID->IsPidInfoValid())
+	//{
+	//  //fPid.prob[ID_ELECTRON][i] = PID->probElectron();
+	//  //fPid.prob[ID_MUON][i]     = PID->probMuon();
+	//  //fPid.prob[ID_PION][i]     = PID->probPion();
+	//  //fPid.prob[ID_KAON][i]     = PID->probKaon();
+	//  //fPid.prob[ID_PROTON][i]   = PID->probProton();
+	//}
+	//vector<double> chi2 = get_chi2(Tracks[i]);
+	//for(int pid=0;pid<5;pid++)
+	//{
+	//  //fPid.chi2[pid][i]   = chi2[pid];
+	//}
+  //for(int i=0;i<5;i++)
+  //{
+  //  //fPid.M[i]    = sqrt(get_invariant_mass2(result_pair,XMASS[i]));
+  //  HepLorentzVector p1(Pkf[2].vect(), XMASS[i]);
+  //  HepLorentzVector p2(Pkf[3].vect(), XMASS[i]);
+  //  //fPid.kM[i] = (p1+p2).m();
+  //};
+}
+

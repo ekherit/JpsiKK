@@ -70,3 +70,41 @@ void RootEvent::init(void)
   T.ntrack=4;
 	npid = 5; //number of particle id hypotesis
 }
+
+void RootEvent::fill(const std::vector<HepLorentzVector> & Pkf,  double CENTER_MASS_ENERGY)
+{
+  HepLorentzVector Pcm(CENTER_MASS_ENERGY*sin(0.011),0,0,CENTER_MASS_ENERGY); 
+
+  M.Mrec = (Pcm - Pkf[0] - Pkf[1]).m();
+
+  M.M012 = (Pkf[0]+Pkf[1]+Pkf[2]).m();
+  M.M013 = (Pkf[0]+Pkf[1]+Pkf[3]).m();
+  M.M023 = (Pkf[0]+Pkf[2]+Pkf[3]).m();
+  M.M123 = (Pkf[1]+Pkf[2]+Pkf[3]).m();
+
+  M.M03 =  (Pkf[0]+Pkf[3]).m();
+  M.M12 =  (Pkf[1]+Pkf[2]).m();
+  M.M01 =  (Pkf[0]+Pkf[1]).m();
+  M.M23 =  (Pkf[2]+Pkf[3]).m();
+
+	T.ntrack = Pkf.size();
+	for ( int i=0;i<4;i++)
+	{
+		T.q[i]  = i%2 == 0 ? -1 : +1;
+		T.E[i]  = Pkf[i].e();
+		T.px[i] = Pkf[i].px();
+		T.py[i] = Pkf[i].py();
+		T.pz[i] = Pkf[i].pz();
+		T.p[i]  = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py())+sq(Pkf[i].pz()));
+		T.pt[i] = sqrt(sq(Pkf[i].px())+sq(Pkf[i].py()));
+		T.theta[i]= Pkf[i].theta();
+		T.phi[i] = Pkf[i].phi();
+		T.x[i]=0;
+		T.y[i]=0;
+		T.z[i]=0;
+		T.r[i]=0;
+		T.vxy[i]=0;
+		T.vz[i]=0;
+		T.vphi[i]=0;
+	}
+}

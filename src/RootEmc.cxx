@@ -43,6 +43,19 @@ void RootEmc::init(void)
   }
 }
 
+void RootEmc::fill(int i,  EvtRecTrackIterator & track)
+{
+	if((*track)->isEmcShowerValid())
+	{
+		RecEmcShower *emcTrk = (*track)->emcShower();
+		E[i] = emcTrk->energy();
+		theta[i] = emcTrk->theta();
+		phi[i] = emcTrk->phi();
+		time[i] = emcTrk->time();
+	}
+}
+
+
 void RootEmc::fill(list<EvtRecTrackIterator> & good_neutral_tracks)
 {
 	ntrack=std::min(good_neutral_tracks.size(), size_t(ARRAY_SIZE));

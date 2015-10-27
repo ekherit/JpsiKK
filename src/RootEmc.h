@@ -29,5 +29,6 @@ struct RootEmc : public RootTuple
 	virtual void init(void);
 	virtual StatusCode init_tuple(void);
 	virtual void fill(EvtRecTrackIterator & track) {};
+	virtual void fill(int i,  EvtRecTrackIterator & track);
 	virtual void fill(list<EvtRecTrackIterator> & tracks);
 };

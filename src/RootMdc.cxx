@@ -34,6 +34,7 @@ void RootMdc::init(void)
 
 void RootMdc::fill(int i, EvtRecTrackIterator & track)
 {
+	if(!(*track)->isMdcTrackValid()) return; 
 	RecMdcTrack  *mdcTrk = (*track)->mdcTrack();
 	T.trackId[i] = mdcTrk->trackId();
 	T.q[i] = mdcTrk->charge(); 
@@ -54,4 +55,13 @@ void RootMdc::fill(int i, EvtRecTrackIterator & track)
 	T.vxy[i] = rvxy;
 	T.vz[i]  = rvz; 
 	T.vphi[i] = rvphi; 
+
+	if((*track)->isEmcShowerValid())
+	{
+		T.E[i] = emcTrk->energy();
+	}
+	else
+	{
+		T.E[i] = 0;
+	}
 }

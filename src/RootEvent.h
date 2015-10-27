@@ -16,9 +16,13 @@
 
 #pragma once
 
+#include <vector>
+
 #include "RootTuple.h"
 #include "RootMass.h"
 #include "RootTrack.h"
+
+#include "CLHEP/Vector/LorentzVector.h"
 
 // =====================================================================================
 //        Class:  RootEvent
@@ -62,4 +66,6 @@ struct RootEvent : public RootTuple
 
 	virtual void init(void);
 	virtual StatusCode init_tuple(void);
+
+	virtual void fill(const std::vector<HepLorentzVector> & Pkf,  double W);
 };

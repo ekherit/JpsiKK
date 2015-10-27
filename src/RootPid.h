@@ -27,4 +27,5 @@ struct RootPid : public RootTuple
 	NTuple::Array<double> chi2[5];  
 	virtual void init(void);
 	virtual StatusCode init_tuple(void);
+	virtual void fill(int i,  EvtRecTrackIterator & track);
 };

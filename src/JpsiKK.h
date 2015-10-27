@@ -65,7 +65,11 @@ class JpsiKK : public Algorithm
   RootEmc    fNeutral; //neutral tracks
 
 	template <class A> 
-		StatusCode init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title, MsgStream & log);
+		void init_tuple(A & a,  const char * dir, const char * title);
+
+
+	void fillTuples(const std::vector<CLHEP::LorentzVector> & Pkf,  TrackVector_t & Tracks,  Event::McParticleCol * mcParticleCol);
+	void writeTuples(void);
 };
 
 #endif
