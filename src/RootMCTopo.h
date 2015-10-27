@@ -28,5 +28,5 @@ struct RootMCTopo : public RootTuple
 	NTuple::Item <unsigned long>  m_hash;
 	virtual void init(void);
 	virtual StatusCode init_tuple(void);
-	virtual void fill(EvtRecTrackIterator & track);
+	virtual void fill(EvtRecTrackIterator & track){};
 };

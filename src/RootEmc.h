@@ -28,5 +28,5 @@ struct RootEmc : public RootTuple
 	NTuple::Array<double> time;
 	virtual void init(void);
 	virtual StatusCode init_tuple(void);
-	virtual void fill(EvtRecTrackIterator & track);
+	virtual void fill(EvtRecTrackIterator & track) {};
 };

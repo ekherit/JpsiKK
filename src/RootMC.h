@@ -35,5 +35,5 @@ struct RootMC : public RootTuple
 	NTuple::Array<double> theta,phi;
 	virtual void init(void);
 	virtual StatusCode init_tuple(void);
-	virtual void fill(EvtRecTrackIterator & track);
+	virtual void fill(EvtRecTrackIterator & track){};
 };
