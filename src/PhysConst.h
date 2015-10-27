@@ -25,4 +25,3 @@ const double JPSI_MASS     = 3.096916; //GeV
 const double PSIP_MASS     = 3.686109; //GeV PDG-2014
 
 enum              {ID_KAON=0, ID_MUON=1, ID_ELECTRON=2, ID_PION=3, ID_PROTON=4};
-double XMASS[5] = {KAON_MASS, MUON_MASS, ELECTRON_MASS, PION_MASS, PROTON_MASS};
