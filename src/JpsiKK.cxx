@@ -76,10 +76,10 @@ int JpsiKK::RootEmc::ARRAY_SIZE = 100;
 
 enum
 {
-	OTHER_NO_TRACK = 0, 
-	OTHER_NEGATIVE_TRACK=0x1, 
-	OTHER_POSITIVE_TRACK=0x2, 
-	OTHER_TWO_TRACKS=0x3
+	OTHER_NEGATIVE_TRACK=-1, 
+	OTHER_POSITIVE_TRACK=+1, 
+	OTHER_TWO_TRACKS=0, 
+	OTHER_NO_TRACK=99
 };
 
 enum
@@ -198,258 +198,6 @@ StatusCode JpsiKK::initialize(void)
 
   return status;
 }
-
-
-StatusCode JpsiKK::RootEvent::init_tuple(void)
-{
-  StatusCode status;
-  status = tuple->addItem ("run", run); //run number
-  status = tuple->addItem ("event", event); //event number
-  status = tuple->addItem ("time", time); //event time
-  status = tuple->addItem ("ngtrack", ngood_charged_track); //good charged track in event
-  status = tuple->addItem ("ngntrack", ngood_neutral_track); //good neutral track in event
-  status = tuple->addItem ("nptrack", npositive_track); //good positive charged track in event
-  status = tuple->addItem ("nntrack", nnegative_track); //good negative charged track in event
-  status = tuple->addItem ("nppions", npositive_pions); //good poitive pion tracks in event
-  status = tuple->addItem ("nnpions", nnegative_pions); //good negative pion track in event
-  status = tuple->addItem ("npion_pairs", npion_pairs); //number of pions paris in event
-  //status = tuple->addItem ("ntrack", T.ntrack,0,4);     
-
-  status = tuple->addItem ("sign", sign); //number of pions paris in event
-  status = tuple->addItem ("channel", channel); //decay channel of the J/psi
-  status = tuple->addItem ("KK", KK); //KK decay channel of the J/psi
-  status = tuple->addItem ("uu", uu); //mu-mu decay channel of the J/psi
-  status = tuple->addItem ("Ku", Ku); //Kmu or muK events
-
-	status = M.add_to_tuple(tuple);
-  //status = tuple->addItem ("Mee",   kM[ID_ELECTRON]);
-  //status = tuple->addItem ("MKK",   kM[ID_KAON]);
-  //status = tuple->addItem ("Muu",   kM[ID_MUON]);
-  //status = tuple->addItem ("Mpp",   kM[ID_PROTON]);
-  //status = tuple->addItem ("Mpipi", kM[ID_PION]);
-
-	status = T.add_to_tuple(tuple);
-
-  status = tuple->addItem ("kin_chi2", kin_chi2); 
-  status = tuple->addItem ("pid_chi2", pid_chi2); 
-
-  status = tuple->addItem ("npid", npid,0,5);     
-  status = tuple->addIndexedItem ("kchi",  npid, kchi);
-  status = tuple->addIndexedItem ("pchi",  npid, pchi);
-  status = tuple->addIndexedItem ("kM",  npid,     kM23);
-
-  status = tuple->addIndexedItem ("probe",  T.ntrack,  prob[ID_ELECTRON]);
-  status = tuple->addIndexedItem ("probmu", T.ntrack,  prob[ID_MUON]);
-  status = tuple->addIndexedItem ("probpi", T.ntrack,  prob[ID_PION]);
-  status = tuple->addIndexedItem ("probk",  T.ntrack,  prob[ID_KAON]);
-  status = tuple->addIndexedItem ("probp",  T.ntrack,  prob[ID_PROTON]);
-
-
-  return status;
-}
-
-void JpsiKK::RootEvent::init(void)
-{
-  T.ntrack=4;
-	npid = 5; //number of particle id hypotesis
-}
-
-StatusCode JpsiKK::RootPid::init_tuple(void)
-{
-  StatusCode status;
-  status = tuple->addItem ("Mee", M[ID_ELECTRON]);
-  status = tuple->addItem ("MKK", M[ID_KAON]);
-  status = tuple->addItem ("Muu", M[ID_MUON]);
-  status = tuple->addItem ("Mpp", M[ID_PROTON]);
-  status = tuple->addItem ("Mpipi", M[ID_PION]);
-
-  status = tuple->addItem ("kMee", kM[ID_ELECTRON]);
-  status = tuple->addItem ("kMKK", kM[ID_KAON]);
-  status = tuple->addItem ("kMuu", kM[ID_MUON]);
-  status = tuple->addItem ("kMpp", kM[ID_PROTON]);
-  status = tuple->addItem ("kMpipi", kM[ID_PION]);
-  //info prof ParticleID package
-  status = tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
-  status = tuple->addIndexedItem ("probe",  ntrack, prob[ID_ELECTRON]);
-  status = tuple->addIndexedItem ("probmu",  ntrack, prob[ID_MUON]);
-  status = tuple->addIndexedItem ("probpi",  ntrack, prob[ID_PION]);
-  status = tuple->addIndexedItem ("probk",  ntrack, prob[ID_KAON]);
-  status = tuple->addIndexedItem ("probp",  ntrack, prob[ID_PROTON]);
-  //my particle id information
-  status = tuple->addIndexedItem ("chi2e",  ntrack, chi2[ID_ELECTRON]);
-  status = tuple->addIndexedItem ("chi2mu",  ntrack, chi2[ID_MUON]);
-  status = tuple->addIndexedItem ("chi2pi",  ntrack, chi2[ID_PION]);
-  status = tuple->addIndexedItem ("chi2k",  ntrack, chi2[ID_KAON]);
-  status = tuple->addIndexedItem ("chi2p",  ntrack, chi2[ID_PROTON]);
-  return status;
-}
-
-void JpsiKK::RootPid::init(void)
-{
-  ntrack=4;
-}
-
-StatusCode JpsiKK::RootMdc::init_tuple(void)
-{
-  StatusCode status;
-	status = M.add_to_tuple(tuple);
-	status = T.add_to_tuple(tuple);
-  return status;
-}
-
-
-void JpsiKK::RootMdc::init(void)
-{
-  T.ntrack=4;
-}
-
-
-StatusCode JpsiKK::RootEmc::init_tuple(void)
-{
-  StatusCode status;
-  status = tuple->addItem ("ntrack",       ntrack,0,ARRAY_SIZE); //good nuetral track in event
-  status = tuple->addIndexedItem ("E",     ntrack, E);
-  status = tuple->addIndexedItem ("theta", ntrack, theta);
-  status = tuple->addIndexedItem ("phi",   ntrack, phi);
-  status = tuple->addIndexedItem ("time",  ntrack, time);
-  return status;
-}
-
-void JpsiKK::RootEmc::init(void)
-{
-  ntrack=4;
-  for(int i=0;i<ntrack;i++)
-  {
-    E[i] = 0;
-    theta[i] = -1000;;
-    phi[i] = -1000;
-    time[i] = -1000;
-  }
-}
-
-StatusCode JpsiKK::RootDedx::init_tuple(void)
-{
-  StatusCode status;
-  status = tuple->addItem ("ntrack", ntrack,0,4); 
-  status = tuple->addIndexedItem ("chie",  ntrack, chie);
-  status = tuple->addIndexedItem ("chimu",  ntrack, chimu);
-  status = tuple->addIndexedItem ("chipi",  ntrack, chipi);
-  status = tuple->addIndexedItem ("chik",  ntrack, chik);
-  status = tuple->addIndexedItem ("chip",  ntrack, chip);
-  status = tuple->addIndexedItem ("probPH",  ntrack, probPH);
-  status = tuple->addIndexedItem ("normPH",  ntrack, normPH);
-  //status = tuple->addIndexedItem ("probe",  ntrack, probe);
-  //status = tuple->addIndexedItem ("probmu",  ntrack, probmu);
-  //status = tuple->addIndexedItem ("probpi",  ntrack, probpi);
-  //status = tuple->addIndexedItem ("probk",  ntrack, probk);
-  //status = tuple->addIndexedItem ("probp",  ntrack, probp);
-  return status;
-}
-
-void JpsiKK::RootDedx::init(void)
-{
-  ntrack=4;
-  for(int i=0;i<ntrack;i++)
-  {
-    chie[i]=-1000;
-    chimu[i]=-1000;
-    chipi[i]=-1000;
-    chik[i]=-1000;
-    chip[i]=-1000;
-    probPH[i]=0;
-    normPH[i]=0;
-  }
-}
-
-StatusCode JpsiKK::RootTof::init_tuple(void)
-{
-  StatusCode status;
-  status = tuple->addItem ("ntrack", ntrack,0,4); 
-  status = tuple->addIndexedItem ("ID",  ntrack, tofID);
-  status = tuple->addIndexedItem ("t",  ntrack, t);
-  status = tuple->addIndexedItem ("dt",  ntrack, dt);
-  status = tuple->addIndexedItem ("t0",  ntrack, t0);
-  status = tuple->addIndexedItem ("chie",  ntrack, chie);
-  status = tuple->addIndexedItem ("chimu",  ntrack, chimu);
-  status = tuple->addIndexedItem ("chipi",  ntrack, chipi);
-  status = tuple->addIndexedItem ("chik",  ntrack, chik);
-  status = tuple->addIndexedItem ("chip",  ntrack, chip);
-  status = tuple->addIndexedItem ("beta",  ntrack, beta);
-  status = tuple->addIndexedItem ("te",  ntrack, te);
-  status = tuple->addIndexedItem ("tmu",  ntrack, tmu);
-  status = tuple->addIndexedItem ("tpi",  ntrack, tpi);
-  status = tuple->addIndexedItem ("tk",  ntrack, tk);
-  status = tuple->addIndexedItem ("tp",  ntrack, tp);
-  return status;
-}
-
-void JpsiKK::RootTof::init(void)
-{
-  ntrack=4;
-  for(int i=0;i<ntrack;i++)
-  {
-    tofID[i]=-1000;
-    t[i]=-1000;
-    dt[i]=-1000;
-    t0[i]=-1000;
-    chie[i]=-1000;
-    chimu[i]=-1000;
-    chipi[i]=-1000;
-    chik[i]=-1000;
-    chip[i]=-1000;
-    beta[i]=-1000;
-    te[i]=-1000;
-    tmu[i]=-1000;
-    tpi[i]=-1000;
-    tk[i]=-1000;
-    tp[i]=-1000;
-  }
-}
-
-StatusCode JpsiKK::RootMC::init_tuple(void)
-{
-  StatusCode status;
-  status = tuple->addItem ("psip_decay", psip_decay); //flag for psip decay
-  status = tuple->addItem ("jpsi_decay", jpsi_decay); //flag for jpsi decay 
-  status = tuple->addItem ("KK", KK);               //KK event
-  status = tuple->addItem ("uu", uu);               //mu mu event
-  status = tuple->addItem ("oo", oo);               //other event
-  status = tuple->addItem ("ntrack", ntrack,0,4); 
-  status = tuple->addIndexedItem ("id",    ntrack, pid);
-  status = tuple->addIndexedItem ("q",     ntrack, q);
-  status = tuple->addIndexedItem ("E",     ntrack, E);
-  status = tuple->addIndexedItem ("p",     ntrack, p);
-  status = tuple->addIndexedItem ("px",    ntrack, px);
-  status = tuple->addIndexedItem ("py",    ntrack, py);
-  status = tuple->addIndexedItem ("pz",    ntrack, pz);
-  status = tuple->addIndexedItem ("pt",    ntrack, pt);
-  status = tuple->addIndexedItem ("theta", ntrack, theta);
-  status = tuple->addIndexedItem ("phi",   ntrack, phi);
-  return status;
-}
-
-void JpsiKK::RootMC::init(void)
-{
-  ntrack=4;
-}
-
-StatusCode JpsiKK::RootMCTopo::init_tuple(void)
-{
-  StatusCode status;
-  status = tuple->addItem("indexmc", m_idxmc, 0, 100);
-  status = tuple->addIndexedItem("pdgid", m_idxmc, m_pdgid);
-  status = tuple->addIndexedItem("motheridx", m_idxmc, m_motheridx);
-  status = tuple->addIndexedItem("idx", m_idxmc, m_idx);
-  status = tuple->addItem("hash", m_hash);
-  return status;
-}
-
-void JpsiKK::RootMCTopo::init(void)
-{
-  m_idxmc=0;
-}
-
-
 
 StatusCode JpsiKK::execute()
 {
@@ -610,16 +358,12 @@ StatusCode JpsiKK::execute()
 	std::vector<HepLorentzVector> Pkf;
 	SelectionHelper_t * sh;
 
-	fEvent.sign = (int(positive_sh.pass) << 1 ) + int(negative_sh.pass);
+	fEvent.sign = int(positive_sh.pass) - int(negative_sh.pass);
 	fEvent.KK = 0;
 	fEvent.uu = 0;
 	fEvent.Ku = 0;
 	switch(fEvent.sign)
 	{
-		case OTHER_NO_TRACK:
-			return StatusCode::SUCCESS;
-			break;
-
 		case OTHER_NEGATIVE_TRACK: //one negative track
 			fEvent.channel = negative_sh.channel;
 			Tracks = negative_sh.tracks;
