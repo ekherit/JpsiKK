@@ -63,6 +63,7 @@ void RootMC::fill(Event::McParticleCol * mcParticleCol)
 	oo = 0;
 	bool psipDecay = false;
 	int rootIndex = -1;
+	Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
 	for (iter_mc = mcParticleCol->begin(); iter_mc != mcParticleCol->end(); iter_mc++)
 	{
 		if ((*iter_mc)->primaryParticle()) continue;
