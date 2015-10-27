@@ -15,6 +15,7 @@
 // =====================================================================================
 
 #include "RootTof.h"
+#include "DstEvent/TofHitStatus.h"
 
 StatusCode RootTof::init_tuple(void)
 {
