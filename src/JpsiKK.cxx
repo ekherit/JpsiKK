@@ -836,3 +836,25 @@ StatusCode JpsiKK::finalize()
   std::cout << "Good kinematic fits: " << good_kinematic_fit << std::endl;
   return StatusCode::SUCCESS;
 }
+
+template <class A>
+inline StatusCode JpsiKK::init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title, MsgStream & log)
+{
+  StatusCode status;
+  NTuplePtr nt(alg->ntupleSvc(), dir);
+  if(nt) a.tuple = nt;
+  else
+  {
+    a.tuple = alg->ntupleSvc()->book(dir, CLID_ColumnWiseTuple, title);
+    if(a.tuple)
+    {
+      return a.init_tuple();
+    }
+    else
+    {
+      log << MSG::ERROR << "    Cannot book N-tuple:" << long(a.tuple) << endmsg;
+      return StatusCode::FAILURE;
+    }
+  }
+  return status;
+}

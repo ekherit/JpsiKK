@@ -63,6 +63,9 @@ class JpsiKK : public Algorithm
   RootMC     fMC;     //Monte Carlo truth
   RootMCTopo fMCTopo; //Monte Carlo topology
   RootEmc    fNeutral; //neutral tracks
+
+	template <class A> 
+		StatusCode JpsiKK::init_tuple(JpsiKK * alg, A & a,  const char * dir, const char * title, MsgStream & log);
 };
 
 #endif
