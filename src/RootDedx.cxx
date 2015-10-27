@@ -14,6 +14,8 @@
 //
 // =====================================================================================
 
+#include "RootDedx.h"
+
 StatusCode RootDedx::init_tuple(void)
 {
   StatusCode status;
