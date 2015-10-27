@@ -49,3 +49,26 @@ void RootDedx::init(void)
     normPH[i]=0;
   }
 }
+
+void RootDedx::fill(EvtRecTrackIterator & track)
+{
+	if((*Tracks[i])->isMdcDedxValid())
+	{
+		RecMdcDedx* dedxTrk = (*Tracks[i])->mdcDedx();
+		fDedx.chie[i] = dedxTrk->chiE();
+		fDedx.chimu[i] = dedxTrk->chiMu();
+		fDedx.chipi[i] = dedxTrk->chiPi();
+		fDedx.chik[i] = dedxTrk->chiK();
+		fDedx.chip[i] = dedxTrk->chiP();
+		//fDedx.ghit[i] = dedxTrk->numGoodHits();
+		//fDedx.thit[i] = dedxTrk->numTotalHits();
+		fDedx.probPH[i] = dedxTrk->probPH();
+		fDedx.normPH[i] = dedxTrk->normPH();
+		//fDedx.e[i] = dedxTrk->getDedxExpect(0);
+		//fDedx.mu[i] = dedxTrk->getDedxExpect(1);
+		//fDedx.pi[i] = dedxTrk->getDedxExpect(2);
+		//fDedx.K[i] = dedxTrk->getDedxExpect(3);
+		//fDedx.p[i] = dedxTrk->getDedxExpect(4);
+		//fDedx.pid[i]=dedxTrk->particleId();
+	}
+}

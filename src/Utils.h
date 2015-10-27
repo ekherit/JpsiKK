@@ -34,7 +34,7 @@ using CLHEP::HepLorentzVector;
 #include "Defs.h"
 #include "SelectionConfig.h"
 
-void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
+inline void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
 {
   ro = -9999;
   z = -9999;
@@ -126,7 +126,7 @@ inline std::list<EvtRecTrackIterator> createGoodNeutralTrackList(
 
 
 
-double get_invariant_mass2(TrackPair_t & pair, double mass)
+inline double get_invariant_mass2(TrackPair_t & pair, double mass)
 {
   EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
   HepLorentzVector  P[2];
@@ -140,7 +140,7 @@ double get_invariant_mass2(TrackPair_t & pair, double mass)
   return P_sum.m2();
 }
 
-double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, double mass,  double W /*  total energy */)
+inline double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, double mass,  double W /*  total energy */)
 {
   EvtRecTrackIterator  itTrk[2] = {trk1, trk2};
   HepLorentzVector  P[2];
@@ -156,13 +156,13 @@ double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, 
   return P_recoil.m();
 }
 
-double get_recoil__mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> p, double mass,  double W)
+inline double get_recoil__mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> p, double mass,  double W)
 {
   return get_recoil__mass(p.first, p.second, mass,  W);
 }
 
 
-double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pions, std::pair<EvtRecTrackIterator, EvtRecTrackIterator> kaons,  double W)
+inline double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pions, std::pair<EvtRecTrackIterator, EvtRecTrackIterator> kaons,  double W)
 {
   EvtRecTrackIterator  PionTrk[2] = {pions.first, pions.second};
   EvtRecTrackIterator  KaonTrk[2] = {kaons.first, kaons.second};

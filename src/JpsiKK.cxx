@@ -507,87 +507,10 @@ StatusCode JpsiKK::execute()
       fEmc.time[i] = emcTrk->time();
       fMdc.T.E[i] = fEmc.E[i];
     }
-    RecMdcTrack  *mdcTrk = (*Tracks[i])->mdcTrack();
-    fMdc.T.trackId[i] = mdcTrk->trackId();
-    fMdc.T.q[i] = mdcTrk->charge(); 
-    fMdc.T.p[i] = mdcTrk->p();
-    fMdc.T.px[i]= mdcTrk->px();
-    fMdc.T.py[i]= mdcTrk->py();
-    fMdc.T.pz[i]= mdcTrk->pz();
-    fMdc.T.theta[i]= mdcTrk->theta();
-    fMdc.T.phi[i] = mdcTrk->phi();
-    fMdc.T.x[i]  = mdcTrk->x();
-    fMdc.T.y[i]  = mdcTrk->y();
-    fMdc.T.z[i]  = mdcTrk->z();
-    fMdc.T.x[i]  = mdcTrk->x();
-    fMdc.T.y[i]  = mdcTrk->y();
-    fMdc.T.z[i]  = mdcTrk->z();
-    double rvxy,rvz,rvphi;
-    calculate_vertex(mdcTrk,rvxy,rvz,rvphi); 
-    fMdc.T.vxy[i] = rvxy;
-    fMdc.T.vz[i]  = rvz; 
-    fMdc.T.vphi[i] = rvphi; 
-
-
+		fMdc.fill(Track[i]);
+		fDedx.fill(Track[i]);
+		fTof.fill(track[i]);
     //dedx information
-    if((*Tracks[i])->isMdcDedxValid())
-    {
-      RecMdcDedx* dedxTrk = (*Tracks[i])->mdcDedx();
-      fDedx.chie[i] = dedxTrk->chiE();
-      fDedx.chimu[i] = dedxTrk->chiMu();
-      fDedx.chipi[i] = dedxTrk->chiPi();
-      fDedx.chik[i] = dedxTrk->chiK();
-      fDedx.chip[i] = dedxTrk->chiP();
-      //fDedx.ghit[i] = dedxTrk->numGoodHits();
-      //fDedx.thit[i] = dedxTrk->numTotalHits();
-      fDedx.probPH[i] = dedxTrk->probPH();
-      fDedx.normPH[i] = dedxTrk->normPH();
-      //fDedx.e[i] = dedxTrk->getDedxExpect(0);
-      //fDedx.mu[i] = dedxTrk->getDedxExpect(1);
-      //fDedx.pi[i] = dedxTrk->getDedxExpect(2);
-      //fDedx.K[i] = dedxTrk->getDedxExpect(3);
-      //fDedx.p[i] = dedxTrk->getDedxExpect(4);
-      //fDedx.pid[i]=dedxTrk->particleId();
-    }
-    if((*Tracks[i])->isTofTrackValid())
-    {
-      SmartRefVector<RecTofTrack> tofTrkCol = (*Tracks[i])->tofTrack();
-      SmartRefVector<RecTofTrack>::iterator tofTrk = tofTrkCol.begin();
-      TofHitStatus *hitst = new TofHitStatus;
-      std::vector<int> tofecount;
-      int goodtofetrk=0;
-      for(tofTrk = tofTrkCol.begin(); tofTrk!=tofTrkCol.end(); tofTrk++,goodtofetrk++)
-      {
-        unsigned int st = (*tofTrk)->status();
-        hitst->setStatus(st);
-        //if(  (hitst->is_barrel()) ) continue;
-        if( !(hitst->is_counter()) ) continue;
-        tofecount.push_back(goodtofetrk);
-      }
-      delete hitst;
-      if(!tofecount.empty())
-      {
-        tofTrk = tofTrkCol.begin()+tofecount[0];
-        fTof.tofID[i] = (*tofTrk)->tofID();
-        fTof.t0[i] = (*tofTrk)->t0();
-        fTof.t[i] = (*tofTrk)->tof();
-        fTof.dt[i] = (*tofTrk)->errtof();
-        fTof.beta[i] = (*tofTrk)->beta();
-        fTof.te[i] = (*tofTrk)->texpElectron();
-        fTof.tmu[i]= (*tofTrk)->texpMuon();
-        fTof.tpi[i]= (*tofTrk)->texpPion();
-        fTof.tk[i] = (*tofTrk)->texpKaon();
-        fTof.tp[i] = (*tofTrk)->texpProton();
-        if(fTof.dt[i]>0)
-        {
-          fTof.chie[i]  = (fTof.t[i] - fTof.te[i])  /  fTof.dt[i];
-          fTof.chimu[i] = (fTof.t[i] - fTof.tmu[i]) /  fTof.dt[i];
-          fTof.chipi[i] = (fTof.t[i] - fTof.tpi[i]) /  fTof.dt[i];
-          fTof.chik[i]  = (fTof.t[i] - fTof.tk[i])  /  fTof.dt[i];
-          fTof.chip[i]  = (fTof.t[i] - fTof.tp[i])  /  fTof.dt[i];
-        }
-      }
-    }
 
     //fill particle id
 

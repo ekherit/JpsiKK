@@ -60,3 +60,48 @@ void RootTof::init(void)
     tp[i]=-1000;
   }
 }
+
+
+void RootTof::fill(EvtRecTrackIterator & track)
+{
+	if((*Tracks[i])->isTofTrackValid())
+	{
+		SmartRefVector<RecTofTrack> tofTrkCol = (*Tracks[i])->tofTrack();
+		SmartRefVector<RecTofTrack>::iterator tofTrk = tofTrkCol.begin();
+		TofHitStatus *hitst = new TofHitStatus;
+		std::vector<int> tofecount;
+		int goodtofetrk=0;
+		for(tofTrk = tofTrkCol.begin(); tofTrk!=tofTrkCol.end(); tofTrk++,goodtofetrk++)
+		{
+			unsigned int st = (*tofTrk)->status();
+			hitst->setStatus(st);
+			//if(  (hitst->is_barrel()) ) continue;
+			if( !(hitst->is_counter()) ) continue;
+			tofecount.push_back(goodtofetrk);
+		}
+		delete hitst;
+		if(!tofecount.empty())
+		{
+			tofTrk = tofTrkCol.begin()+tofecount[0];
+			fTof.tofID[i] = (*tofTrk)->tofID();
+			fTof.t0[i] = (*tofTrk)->t0();
+			fTof.t[i] = (*tofTrk)->tof();
+			fTof.dt[i] = (*tofTrk)->errtof();
+			fTof.beta[i] = (*tofTrk)->beta();
+			fTof.te[i] = (*tofTrk)->texpElectron();
+			fTof.tmu[i]= (*tofTrk)->texpMuon();
+			fTof.tpi[i]= (*tofTrk)->texpPion();
+			fTof.tk[i] = (*tofTrk)->texpKaon();
+			fTof.tp[i] = (*tofTrk)->texpProton();
+			if(fTof.dt[i]>0)
+			{
+				fTof.chie[i]  = (fTof.t[i] - fTof.te[i])  /  fTof.dt[i];
+				fTof.chimu[i] = (fTof.t[i] - fTof.tmu[i]) /  fTof.dt[i];
+				fTof.chipi[i] = (fTof.t[i] - fTof.tpi[i]) /  fTof.dt[i];
+				fTof.chik[i]  = (fTof.t[i] - fTof.tk[i])  /  fTof.dt[i];
+				fTof.chip[i]  = (fTof.t[i] - fTof.tp[i])  /  fTof.dt[i];
+			}
+		}
+	}
+
+}

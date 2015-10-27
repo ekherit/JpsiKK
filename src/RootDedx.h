@@ -35,5 +35,5 @@ struct RootDedx : public RootTuple
 	//NTuple::Array<double> probp;  //prob e
 	virtual void init(void);
 	virtual StatusCode init_tuple(void);
-	void fill(EvtRecTrackIterator & track){};
+	void fill(EvtRecTrackIterator & track);
 };
