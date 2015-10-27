@@ -332,11 +332,14 @@ StatusCode JpsiKK::execute()
 		positive_sh.totalPass();
 	}
 
+	clog << "After kinematic fit" << endl;
+
 	TrackVector_t Tracks;
 	std::vector<HepLorentzVector> Pkf;
 	SelectionHelper_t * sh;
 
-	fEvent.sign = int(positive_sh.pass) - int(negative_sh.pass);
+	//fEvent.sign = int(positive_sh.pass) - int(negative_sh.pass);
+	fEvent.sign = (int(positive_sh.pass) << 1 ) + int(negative_sh.pass);
 	fEvent.KK = 0;
 	fEvent.uu = 0;
 	fEvent.Ku = 0;
@@ -413,6 +416,7 @@ StatusCode JpsiKK::execute()
 			break;
 	}
 
+	clog << "Before fill" << endl;
 
 
   //now fill the tuples
