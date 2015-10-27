@@ -63,5 +63,5 @@ virtual void RootMCTopo::fill(Event::McParticleCol * mcParticleCol)
 		m_hash=0; //no hash calculation now
 		m_numParticle += 1;
 	}
-	fMCTopo.m_idxmc = m_numParticle;
+	m_idxmc = m_numParticle;
 }
