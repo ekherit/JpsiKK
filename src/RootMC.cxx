@@ -164,7 +164,6 @@ void RootMC::fill(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Event::McPa
 			if ((*iter_mc)->primaryParticle()) continue;
 			if (!(*iter_mc)->decayFromGenerator()) continue;
 			HepLorentzVector P = (*iter_mc)->initialFourMomentum();
-			int pid = (*iter_mc)->particleProperty();
 			Hep3Vector p_mc = P.vect();
 			for(int i=0;i<4;i++)
 			{
@@ -172,7 +171,7 @@ void RootMC::fill(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Event::McPa
 				Hep3Vector dp = p_rec - p_mc;
 				if(dp.mag()/std::min(p_rec.mag(), p_mc.mag()) < 0.05)
 				{
-					pid[i] = pid;
+					pid[i] = (*iter_mc)->particleProperty(); 
 					//q[i] = 0; 
 					E[i] = P.e();
 					p[i] = P.rho();
