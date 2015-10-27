@@ -31,7 +31,6 @@ void RootDedx::init_tuple(void)
   //tuple->addIndexedItem ("probpi",  ntrack, probpi);
   //tuple->addIndexedItem ("probk",  ntrack, probk);
   //tuple->addIndexedItem ("probp",  ntrack, probp);
-  return status;
 }
 
 void RootDedx::init(void)
