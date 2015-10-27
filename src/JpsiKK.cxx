@@ -505,7 +505,7 @@ void JpsiKK::init_tuple(A & a,  const char * dir, const char * title)
   }
 }
 
-StatusCode  JpsiKK::fillTuples(const std::vector<CLHEP::LorentzVector> & Pkf,  TrackVector_t & Tracks,  Event::McParticleCol * mcParticleCol)
+void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  TrackVector_t & Tracks,  Event::McParticleCol * mcParticleCol)
 {
 	fEvent.fill(Pkf,  cfg.CENTER_MASS_ENERGY);
 	//fPid.ntrack=4;
