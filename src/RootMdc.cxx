@@ -58,6 +58,7 @@ void RootMdc::fill(int i, EvtRecTrackIterator & track)
 
 	if((*track)->isEmcShowerValid())
 	{
+		RecEmcShower *emcTrk = (*track)->emcShower();
 		T.E[i] = emcTrk->energy();
 	}
 	else
