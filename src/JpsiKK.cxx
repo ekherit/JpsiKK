@@ -541,150 +541,15 @@ StatusCode JpsiKK::execute()
 
 
   if(fEvent.run<0)
-  {
+	{
+		if(!mcParticleCol)
+		{
+			log << MSG::ERROR << "Could not retrieve McParticelCol" << endreq;
+			return StatusCode::FAILURE;
+		}
 		fMCTopo.fill(mcParticleCol);
-
-    //Fill my mc truth information
-    fMC.ntrack=4;
-    HepLorentzVector MCPpion[2];
-    HepLorentzVector MCPkaon_or_muon[2];
-    bool pi_minus(false);
-    bool pi_plus(false);
-    bool K_minus(false);
-    bool K_plus(false);
-    bool mu_minus(false);
-    bool mu_plus(false);
-    int mytrack=0;
-    fMC.psip_decay = 0;
-    fMC.jpsi_decay = 0;
-    fMC.KK = 0;
-    fMC.uu = 0;
-    fMC.oo = 0;
-    psipDecay=false;
-    rootIndex=-1;
-    for (iter_mc = mcParticleCol->begin(); iter_mc != mcParticleCol->end(); iter_mc++)
-    {
-      if ((*iter_mc)->primaryParticle()) continue;
-      if (!(*iter_mc)->decayFromGenerator()) continue;
-      //if ( ((*iter_mc)->mother()).trackIndex()<3 ) continue;
-      if ((*iter_mc)->particleProperty()==100443)
-      {
-        psipDecay = true;
-        fMC.psip_decay=1;
-        rootIndex = (*iter_mc)->trackIndex();
-      }
-      if (!psipDecay) continue;
-      if ((*iter_mc)->particleProperty()==443)
-      {
-        fMC.jpsi_decay=1;
-      }
-      if (fMC.jpsi_decay!=1) continue;
-      if((*iter_mc)->particleProperty() == +211) 
-      {
-        pi_plus=true;
-        MCPpion[1] = (*iter_mc)->initialFourMomentum();
-        fMC.pid[1]=211;
-        mytrack++;
-      }
-      if((*iter_mc)->particleProperty() == -211) 
-      {
-        MCPpion[0] = (*iter_mc)->initialFourMomentum();
-        pi_minus=true;
-        fMC.pid[0]=-211;
-        mytrack++;
-      }
-      if( ! pi_plus && !pi_minus) continue; //keep only psip to Jpsi pi pi decay
-      switch((*iter_mc)->particleProperty())
-      {
-        case -13:
-          MCPkaon_or_muon[0] = (*iter_mc)->initialFourMomentum();
-          mu_minus = true;
-          mytrack++;
-          fMC.pid[2]=-13;
-          break;
-        case +13:
-          MCPkaon_or_muon[1] = (*iter_mc)->initialFourMomentum();
-          mu_plus = true;
-          mytrack++;
-          fMC.pid[3]=13;
-          break;
-        case -321:
-          MCPkaon_or_muon[0] = (*iter_mc)->initialFourMomentum();
-          K_minus=true;
-          mytrack++;
-          fMC.pid[2]=-321;
-          break;
-        case +321:
-          MCPkaon_or_muon[1] = (*iter_mc)->initialFourMomentum();
-          mytrack++;
-          K_plus = true;
-          fMC.pid[3]=321;
-          break;
-      };
-    }
-    if(K_plus && K_minus) 
-    {
-      fMC.KK=1;
-      fMC.oo=0;
-    }
-    if(mu_plus && mu_minus) 
-    {
-      fMC.uu=1;
-      fMC.oo=0;
-    }
-    if(fMC.KK==1 && fMC.uu==1) fMC.oo=1;
-    if(mytrack!=4) fMC.oo=1;
-    if(fMC.KK==1 || fMC.uu==1)
-    {
-      vector<HepLorentzVector> P(4);
-      P[0]=MCPpion[0];
-      P[1]=MCPpion[1];
-      P[2]=MCPkaon_or_muon[0];
-      P[3]=MCPkaon_or_muon[1];
-      for(int i=0;i<4;i++)
-      {
-        fMC.q[i] = 0; 
-        fMC.E[i] = P[i].e();
-        fMC.p[i] = P[i].rho();
-        fMC.px[i]= P[i].px();
-        fMC.py[i]= P[i].py();
-        fMC.pz[i]= P[i].pz();
-        fMC.pt[i]= P[i].perp();
-        fMC.theta[i]= P[i].theta();
-        fMC.phi[i] = P[i].phi();
-      }
-    }
-    else
-    {
-      Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
-      for (; iter_mc != mcParticleCol->end(); iter_mc++)
-      {
-        if ((*iter_mc)->primaryParticle()) continue;
-        if (!(*iter_mc)->decayFromGenerator()) continue;
-        HepLorentzVector P = (*iter_mc)->initialFourMomentum();
-        int pid = (*iter_mc)->particleProperty();
-        Hep3Vector p_mc = P.vect();
-        for(int i=0;i<4;i++)
-        {
-          Hep3Vector p_rec = Pkf[i].vect();
-          Hep3Vector dp = p_rec - p_mc;
-          if(dp.mag()/std::min(p_rec.mag(), p_mc.mag()) < 0.05)
-          {
-            fMC.pid[i] = pid;
-            //fMC.q[i] = 0; 
-            fMC.E[i] = P.e();
-            fMC.p[i] = P.rho();
-            fMC.px[i]= P.px();
-            fMC.py[i]= P.py();
-            fMC.pz[i]= P.pz();
-            fMC.pt[i]= P.perp();
-            fMC.theta[i]= P.theta();
-            fMC.phi[i] = P.phi();
-          }
-        }
-      }
-    }
-  }
+		fMC.fill(mcParticleCol);
+	}
 
 
   fNeutral.ntrack=std::min(good_neutral_tracks.size(), size_t(RootEmc::ARRAY_SIZE));

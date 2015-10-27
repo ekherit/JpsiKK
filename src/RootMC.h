@@ -17,7 +17,7 @@
 #pragma once
 
 #include "RootTuple.h"
-
+#include "McParticle.h"
 
 struct RootMC : public RootTuple
 {
@@ -36,4 +36,5 @@ struct RootMC : public RootTuple
 	virtual void init(void);
 	virtual StatusCode init_tuple(void);
 	virtual void fill(EvtRecTrackIterator & track){};
+	virtual void fill(Event::McParticle *);
 };
