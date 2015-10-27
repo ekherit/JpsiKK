@@ -178,7 +178,7 @@ StatusCode JpsiKK::initialize(void)
 	}
 	catch(std::runtime_error & error)
 	{
-		log << MSG::ERROR << "    Cannot book N-tuple:" << long(a.tuple) << endmsg;
+		log << MSG::ERROR << error.what() << endmsg;
 		return StatusCode::FAILURE;
 	}
   return StatusCode::SUCCESS;
