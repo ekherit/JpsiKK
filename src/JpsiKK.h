@@ -23,6 +23,7 @@
 #include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/NTuple.h"
 
+#include "McParticle.h"
 #include "EventModel/EventHeader.h"
 
 #include "EvtRecEvent/EvtRecEvent.h"
@@ -30,6 +31,7 @@
 
 #include "SelectionConfig.h"
 #include "RootAdaptors.h"
+#include "Defs.h"
 
 class JpsiKK : public Algorithm 
 {
