@@ -507,9 +507,9 @@ StatusCode JpsiKK::execute()
       fEmc.time[i] = emcTrk->time();
       fMdc.T.E[i] = fEmc.E[i];
     }
-		fMdc.fill(Track[i]);
-		fDedx.fill(Track[i]);
-		fTof.fill(track[i]);
+		fMdc.fill (i,  Track[i]);
+		fDedx.fill(i, Track[i]);
+		fTof.fill (i,  track[i]);
     //dedx information
 
     //fill particle id

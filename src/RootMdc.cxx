@@ -32,7 +32,7 @@ void RootMdc::init(void)
 }
 
 
-void RootMdc::fill(EvtRecTrackIterator & track)
+void RootMdc::fill(int i, EvtRecTrackIterator & track)
 {
 	RecMdcTrack  *mdcTrk = (*track)->mdcTrack();
 	T.trackId[i] = mdcTrk->trackId();
