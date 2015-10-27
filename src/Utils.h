@@ -24,6 +24,8 @@ using CLHEP::Hep3Vector;
 using CLHEP::Hep2Vector;
 using CLHEP::HepLorentzVector;
 
+#include "GaudiKernel/ISvcLocator.h"
+
 #include "VertexFit/IVertexDbSvc.h"
 #include "VertexFit/Helix.h"
 
