@@ -548,24 +548,14 @@ StatusCode JpsiKK::execute()
 			return StatusCode::FAILURE;
 		}
 		fMCTopo.fill(mcParticleCol);
-		fMC.fill(mcParticleCol);
+		fMC.fill(Pkf, mcParticleCol);
     fMC.tuple->write();
     fMCTopo.tuple->write();
 	}
 
+	fNeutral.fill(good_neutral_tracks);
 
-  fNeutral.ntrack=std::min(good_neutral_tracks.size(), size_t(RootEmc::ARRAY_SIZE));
-  int idx=0;
-  for(list<EvtRecTrackIterator>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
-  {
-    EvtRecTrackIterator  itTrk = *track;
-    RecEmcShower *emcTrk = (*itTrk)->emcShower();
-    fNeutral.E[idx]  =  emcTrk->energy();
-    fNeutral.theta[idx] =  emcTrk->theta();
-    fNeutral.phi[idx] =  emcTrk->phi();
-    fNeutral.time[idx] = emcTrk->time();
-    idx++;
-  }
+
   fEvent.tuple->write();
   //fPid.tuple->write();
   fMdc.tuple->write();

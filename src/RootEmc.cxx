@@ -14,6 +14,8 @@
 //
 // =====================================================================================
 
+#include <algorithm>
+
 #include "RootEmc.h"
 
 int RootEmc::ARRAY_SIZE = 100;
@@ -39,4 +41,20 @@ void RootEmc::init(void)
     phi[i] = -1000;
     time[i] = -1000;
   }
+}
+
+void RootEmc::fill(list<EvtRecTrackIterator> & good_neutral_tracks)
+{
+	ntrack=std::min(good_neutral_tracks.size(), size_t(ARRAY_SIZE));
+	int idx=0;
+	for(list<EvtRecTrackIterator>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
+	{
+		EvtRecTrackIterator  itTrk = *track;
+		RecEmcShower *emcTrk = (*itTrk)->emcShower();
+		E[idx]  =  emcTrk->energy();
+		theta[idx] =  emcTrk->theta();
+		phi[idx] =  emcTrk->phi();
+		time[idx] = emcTrk->time();
+		idx++;
+	}
 }
