@@ -335,9 +335,9 @@ struct SelectionHelper_t
 	{
 		select_channel_by_kinematic_fit();
 		pass = true;
-		if(channel!=KAON_ID || channel != MUON_ID)
+		if(channel!=ID_KAON || channel != ID_MUON)
 		{
-			channel = KAON_ID;
+			channel = ID_KAON;
 		}
 		return pass;
 	}
