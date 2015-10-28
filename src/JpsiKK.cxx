@@ -190,9 +190,6 @@ StatusCode JpsiKK::execute()
   log << MSG::INFO << "executing" << endreq;
 
   SmartDataPtr<Event::EventHeader> eventHeader(eventSvc(),"/Event/EventHeader");
-  fEvent.run=eventHeader->runNumber();
-  fEvent.event=eventHeader->eventNumber();
-  fEvent.time=eventHeader->time();
   bool isprint=false;
   if(event_proceed<10) isprint=true;
   if(10 <= event_proceed && event_proceed < 100 && event_proceed % 10 ==0) isprint=true;
@@ -218,7 +215,6 @@ StatusCode JpsiKK::execute()
 
 
   //fill initial value of the selected event
-  fEvent.init();
 
   good_charged_tracks=createGoodChargedTrackList(cfg, evtRecEvent, evtRecTrkCol);
   good_neutral_tracks=createGoodNeutralTrackList(cfg, evtRecEvent, evtRecTrkCol);
@@ -344,22 +340,6 @@ StatusCode JpsiKK::execute()
 	std::vector<HepLorentzVector> Pkf;
 	SelectionHelper_t * sh;
 
-	//fEvent.sign = int(positive_sh.pass) - int(negative_sh.pass);
-	//fEvent.sign = (int(positive_sh.pass) << 1 ) + int(negative_sh.pass);
-	fEvent.Ku = 0;
-
-	if(psh.pass &&  nsh.pass && 
-			(
-			 (psh.channel == ID_KAON && nsh.channel == ID_MUON) || (psh.channel == ID_MUON && nsh.channel == ID_KAON) 
-			)
-		)
-	{
-		fEvent.Ku = 1;
-		event_with_kaons_and_muons++;
-	}
-
-
-
 	//I decided to save double record if event pass both
 	//selection creteria for kaon and muons
 	int chan[2] = {ID_KAON,  ID_MUON};
@@ -368,8 +348,22 @@ StatusCode JpsiKK::execute()
 		bool plus  = psh.pass && psh.channel == chan[i];
 		bool minus = nsh.pass && nsh.channel == chan[i];
 		if(!plus && !minus) continue;
+		fEvent.init();
+		fEvent.run=eventHeader->runNumber();
+		fEvent.event=eventHeader->eventNumber();
+		fEvent.time=eventHeader->time();
 		fEvent.KK = 0;
 		fEvent.uu = 0;
+		fEvent.Ku = 0;
+		if(psh.pass &&  nsh.pass && 
+				(
+				 (psh.channel == ID_KAON && nsh.channel == ID_MUON) || (psh.channel == ID_MUON && nsh.channel == ID_KAON) 
+				)
+			)
+		{
+			fEvent.Ku = 1;
+			event_with_kaons_and_muons++;
+		}
 		fEvent.channel=chan[i];
 		fEvent.npid = 5;
 
