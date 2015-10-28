@@ -380,10 +380,16 @@ StatusCode JpsiKK::execute()
 			fEvent.kin_chi2 = 0.5*(nsh.getKinChi2(chan[i])  + psh.getKinChi2(chan[i]));
 			fEvent.pid_chi2 = 0.5*(nsh.getPidChi2(chan[i])  + psh.getPidChi2(chan[i]));
 
-			Pkf = 0.5*(nsh.getMomentum(chan[i])  + psh.getMomentum(chan[i]));
+			Pkf.resize(4);
+			std::vector<HepLorentzVector> Pp = psh.getMomentum(chan[i]);
+			std::vector<HepLorentzVector> Pm = nsh.getMomentum(chan[i]);
+			for(int k=0;k<Pkf.size();k++)
+			{
+				Pkf[k] = 0.5*(Pp[k]+Pm[k]);
+			}
 
-			Tracks = negative_sh.tracks;
-			Tracks.push_back(positive_sh.tracks[2]);
+			Tracks = nsh.tracks;
+			Tracks.push_back(psh.tracks[2]);
 
 			for(int pid=0;pid<fEvent.npid;pid++)
 			{
@@ -404,8 +410,8 @@ StatusCode JpsiKK::execute()
 				sh = & nsh;
 			}
 
-			Pkf = sh.getMomentum(chan[i]);
-			Tracks = sh.tracks; 
+			Pkf = sh->getMomentum(chan[i]);
+			Tracks = sh->tracks; 
 			Tracks.push_back(tracks_end);
 			//now positive tracks on the first place,  swap it
 			if(plus)
@@ -416,8 +422,8 @@ StatusCode JpsiKK::execute()
 			//no negative charged tracks go first
 			for(int pid=0;pid<fEvent.npid;pid++)
 			{
-				fEvent.kchi[pid] = sh.getKinChi2(pid);
-				fEvent.pchi[pid] = sh.getPidChi2(pid);
+				fEvent.kchi[pid] = sh->getKinChi2(pid);
+				fEvent.pchi[pid] = sh->getPidChi2(pid);
 			}
 		}
 		fEvent.kin_chi2 = fEvent.kchi[chan[i]];
