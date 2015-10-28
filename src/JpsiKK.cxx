@@ -537,7 +537,8 @@ void JpsiKK::writeTuples(void)
   fEmc.tuple->write();
   fDedx.tuple->write();
   fTof.tuple->write();
-  fNeutral.tuple->write();
+  //fNeutral.tuple->write();
+	cout << fEvent.run << endl;
 	if(fEvent.run<0)
 	{
 		fMC.tuple->write();
