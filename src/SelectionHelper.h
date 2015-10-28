@@ -331,4 +331,26 @@ struct SelectionHelper_t
 		return pass;
 	}
 
+
+	bool pass(int pid) const
+	{
+		return pass && channel == pid;
+	}
+
+
+	double getKinChi2(int pid) const
+	{
+		return KF[pid].chi2;
+	}
+
+	double getPidChi2(int pid) const
+	{
+		return pid_chi2[pid];
+	}
+
+	std::vector<HepLorentzVector> getMomentum(int pid) const
+	{
+		return KF[pid].P;
+	}
+
 };

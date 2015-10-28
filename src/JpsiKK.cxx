@@ -321,22 +321,22 @@ StatusCode JpsiKK::execute()
 	if(other_negative_tracks.empty() && other_positive_tracks.empty()) return StatusCode::SUCCESS;
 
 
-	SelectionHelper_t negative_sh(cfg);
-	SelectionHelper_t positive_sh(cfg);
+	SelectionHelper_t nsh(cfg); //for negative kinematic fit
+	SelectionHelper_t psh(cfg); //for positive kinematic fit
 
 
 	if(!other_negative_tracks.empty()) 
 	{
 		//kinfit(pion_pair,  other_negative_tracks,  negative_sh);
-		negative_sh.kinfit(pion_pair,  other_negative_tracks.front());
-		negative_sh.totalPass();
+		nsh.kinfit(pion_pair,  other_negative_tracks.front());
+		nsh.totalPass();
 	}
 
 	if(!other_positive_tracks.empty()) 
 	{
 		//kinfit(pion_pair,  other_positive_tracks,  positive_sh);
-		positive_sh.kinfit(pion_pair,  other_positive_tracks.front());
-		positive_sh.totalPass();
+		psh.kinfit(pion_pair,  other_positive_tracks.front());
+		psh.totalPass();
 	}
 
 
@@ -345,128 +345,112 @@ StatusCode JpsiKK::execute()
 	SelectionHelper_t * sh;
 
 	//fEvent.sign = int(positive_sh.pass) - int(negative_sh.pass);
-	fEvent.sign = (int(positive_sh.pass) << 1 ) + int(negative_sh.pass);
-	fEvent.KK = 0;
-	fEvent.uu = 0;
+	//fEvent.sign = (int(positive_sh.pass) << 1 ) + int(negative_sh.pass);
 	fEvent.Ku = 0;
-	switch(fEvent.sign)
-	{
-		case OTHER_NEGATIVE_TRACK: //one negative track
-			fEvent.channel = negative_sh.channel;
-			Tracks = negative_sh.tracks;
-			Pkf = negative_sh.KF[negative_sh.channel].P;
-			//add missing positive tracks
-			Tracks.push_back(tracks_end);
-			sh = & negative_sh;
-			break;
 
-		case OTHER_POSITIVE_TRACK: //one positive track
-			fEvent.channel = positive_sh.channel;
-			Tracks = positive_sh.tracks;
-			Pkf = positive_sh.KF[positive_sh.channel].P;
-			//add missing negative tracks
-			Tracks.push_back(tracks_end);
-			//negative tracks go first
-			std::swap(Tracks[2], Tracks[3]);
-			std::swap(Pkf[2],  Pkf[3]);
-			sh = & positive_sh;
-			break;
-
-		case OTHER_TWO_TRACKS:
-			if(negative_sh.channel == ID_KAON && positive_sh.channel == ID_KAON)
-			{
-				fEvent.channel = CHAN_KAONS;
-			}
-
-			if(negative_sh.channel == ID_MUON && positive_sh.channel == ID_MUON)
-			{
-				fEvent.channel = CHAN_MUONS;
-			}
-
-			if(negative_sh.channel == ID_KAON && positive_sh.channel == ID_MUON)
-			{
-				fEvent.channel = CHAN_KAON_MUON;
-			}
-
-			if(negative_sh.channel == 1 && positive_sh.channel == 0)
-			{
-				fEvent.channel = CHAN_MUON_KAON;
-			}
-			Pkf = negative_sh.KF[negative_sh.channel].P;
-			Tracks = negative_sh.tracks;
-			Tracks.push_back(positive_sh.tracks[2]);
-			sh = & negative_sh;
-			break;
-		default:
-			return StatusCode::SUCCESS;
-			break;
-	}
-
-	switch(fEvent.channel)
-	{
-		case CHAN_KAONS:
-			fEvent.KK = 1;
-			event_with_kaons++;
-			break;
-		case CHAN_MUONS:
-			fEvent.uu = 1;
-			event_with_muons++;
-			break;
-		case CHAN_KAON_MUON:
-		case CHAN_MUON_KAON:
+	if(psh.pass &&  nsh.pass && 
+			(
+				(psh.channel == ID_KAON && nsh.channel = ID_MUON) || (psh.channel == ID_MUON && nsh.channel = ID_KAON) 
+			)
 			fEvent.Ku = 1;
 			event_with_kaons_and_muons++;
-			break;
-		default:
-			return StatusCode::SUCCESS;
-			break;
-	}
+		)
 
 
-  //some statistics information
-  fEvent.ngood_charged_track = good_charged_tracks.size();
-  fEvent.ngood_neutral_track = good_neutral_tracks.size();
-  fEvent.npositive_track = positive_charged_tracks.size();
-  fEvent.nnegative_track = negative_charged_tracks.size();
-  fEvent.npositive_pions = positive_pion_tracks.size();
-  fEvent.nnegative_pions = negative_pion_tracks.size();
-  fEvent.npion_pairs = pion_pairs.size();
-  // fill the decay channel of the J/psi 0 - kaons, 1 --muons
-  //fEvent.channel = channel; 
-  fEvent.kin_chi2 = sh -> KF[sh->channel].chi2; //kinematic_chi2;
 
-	fEvent.npid = 5;
-	for(int pid=0;pid<5;pid++)
+	//I decided to save double record if event pass both
+	//selection creteria for kaon and muons
+	int chan[2] = {ID_KAON,  ID_MUON};
+	for(int i = 0; i<2;i++)
 	{
-		fEvent.kchi[pid] = sh->KF[pid].chi2;
-		fEvent.pchi[pid] = sh->pid_chi2[pid];
-		fEvent.kM23[pid] = (sh->KF[pid].P[2] + sh->KF[pid].P[3]).m();
-	}
+		bool plus  = psh.pass && psh.channel == chan[i];
+		bool minus = nsh.pass && nsh.channel == chan[i];
+		if(!plus && !minus) continue;
+		fEvent.KK = 0;
+		fEvent.uu = 0;
+		fEvent.channel=chan[i];
+		fEvent.npid = 5;
 
-	switch(fEvent.channel)
-	{
-		case CHAN_KAONS:
-		case CHAN_MUONS:
-			fEvent.pid_chi2 = sh -> pid_chi2[fEvent.channel]; //pchi2[channel];
-			break;
-		case CHAN_KAON_MUON:
-		case CHAN_MUON_KAON:
-			fEvent.pid_chi2 = 0.5*(positive_sh.pid_chi2[positive_sh.channel] + negative_sh.pid_chi2[negative_sh.channel]) ; //pchi2[channel];
-			break;
-	}
+		if (plus && minus) //four track case
+		{
+			fEvent.sign = 0;
 
-	//define initial four-momentum
-	try
-	{
-		fillTuples(Pkf, Tracks);
-		writeTuples();
-	}
-	catch(std::runtime_error & error)
-	{
+			fEvent.kin_chi2 = 0.5*(nsh.getKinChi2(chan[i])  + psh.getKinChi2(chan[i]));
+			fEvent.pid_chi2 = 0.5*(nsh.getPidChi2(chan[i])  + psh.getPidChi2(chan[i]));
+
+			Pkf = 0.5*(nsh.getMomentum(chan[i])  + psh.getMomentum(chan[i]));
+
+			Tracks = negative_sh.tracks;
+			Tracks.push_back(positive_sh.tracks[2]);
+
+			for(int pid=0;pid<fEvent.npid;pid++)
+			{
+				fEvent.kchi[pid] = 0.5*(nsh.getKinChi2(pid)  + psh.getKinChi2(pid));
+				fEvent.pchi[pid] = 0.5*(nsh.getPidChi2(pid)  + psh.getPidChi2(pid));
+			}
+		}
+		else
+		{
+			if (plus)
+			{
+				fEvent.sign = +1;
+				sh = & psh;
+			}
+			if (minus)
+			{
+				fEvent.sign = -1;
+				sh = & nsh;
+			}
+
+			Pkf = sh.getMomentum(chan[i]);
+			Tracks = sh.tracks; 
+			Tracks.push_back(tracks_end);
+			//now positive tracks on the first place,  swap it
+			if(plus)
+			{
+				std::swap(Pkf[2],  Pkf[3]);
+				std::swap(Tracks[2],  Tracks[3]);
+			}
+			//no negative charged tracks go first
+			for(int pid=0;pid<fEvent.npid;pid++)
+			{
+				fEvent.kchi[pid] = sh.getKinChi2(pid);
+				fEvent.pchi[pid] = sh.getPidChi2(pid);
+			}
+		}
+		fEvent.kin_chi2 = fEvent.kchi[chan[i]];
+		fEvent.pid_chi2 = fEvent.pchi[chan[i]];
+
+		switch(fEvent.channel)
+		{
+			case CHAN_KAONS:
+				fEvent.KK = 1;
+				event_with_kaons++;
+				break;
+			case CHAN_MUONS:
+				fEvent.uu = 1;
+				event_with_muons++;
+				break;
+		}
+		fEvent.ngood_charged_track = good_charged_tracks.size();
+		fEvent.ngood_neutral_track = good_neutral_tracks.size();
+		fEvent.npositive_track = positive_charged_tracks.size();
+		fEvent.nnegative_track = negative_charged_tracks.size();
+		fEvent.npositive_pions = positive_pion_tracks.size();
+		fEvent.nnegative_pions = negative_pion_tracks.size();
+		fEvent.npion_pairs = pion_pairs.size();
+		//define initial four-momentum
+		try
+		{
+			fillTuples(Pkf, Tracks);
+			writeTuples();
+		}
+		catch(std::runtime_error & error)
+		{
 			log << MSG::ERROR  << error.what() << endmsg;
 			return StatusCode::FAILURE;
+		}
 	}
-
   return StatusCode::SUCCESS;
 }
 
