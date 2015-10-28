@@ -543,7 +543,6 @@ void JpsiKK::writeTuples(void)
   fDedx.tuple->write();
   fTof.tuple->write();
   //fNeutral.tuple->write();
-	cout << "2 fEvent.run = " << fEvent.run << endl;
   event_write++;
 }
 
