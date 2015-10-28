@@ -350,7 +350,7 @@ StatusCode JpsiKK::execute()
 
 	if(psh.pass &&  nsh.pass && 
 			(
-				(psh.channel == ID_KAON && nsh.channel = ID_MUON) || (psh.channel == ID_MUON && nsh.channel = ID_KAON) 
+				(psh.channel == ID_KAON && nsh.channel == ID_MUON) || (psh.channel == ID_MUON && nsh.channel == ID_KAON) 
 			)
 			fEvent.Ku = 1;
 			event_with_kaons_and_muons++;
