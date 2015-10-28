@@ -325,14 +325,16 @@ StatusCode JpsiKK::execute()
 	{
 		//kinfit(pion_pair,  other_negative_tracks,  negative_sh);
 		nsh.kinfit(pion_pair,  other_negative_tracks.front());
-		nsh.totalPass();
+		//nsh.totalPass();
+		nsh.dummyPass();
 	}
 
 	if(!other_positive_tracks.empty()) 
 	{
 		//kinfit(pion_pair,  other_positive_tracks,  positive_sh);
 		psh.kinfit(pion_pair,  other_positive_tracks.front());
-		psh.totalPass();
+		//psh.totalPass();
+		psh.dummyPass();
 	}
 
 

@@ -331,6 +331,17 @@ struct SelectionHelper_t
 		return pass;
 	}
 
+	bool dummyPass(void)
+	{
+		select_channel_by_kinematic_fit();
+		pass = true;
+		if(channel!=KAON_ID || channel != MUON_ID)
+		{
+			channel = KAON_ID;
+		}
+		return pass;
+	}
+
 	double getKinChi2(int pid) const
 	{
 		return KF[pid].chi2;
