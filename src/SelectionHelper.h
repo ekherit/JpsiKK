@@ -334,6 +334,7 @@ struct SelectionHelper_t
 	bool dummyPass(void)
 	{
 		select_channel_by_kinematic_fit();
+		setPid();
 		pass = true;
 		if(channel!=ID_KAON || channel != ID_MUON)
 		{
