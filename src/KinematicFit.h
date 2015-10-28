@@ -139,8 +139,8 @@ bool kinematic_fit(
   vtxfit->Swim(0);
 
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
-  //kmfit->setIterNumber(10000);
-  //kmfit->setChisqCut(10000);
+  kmfit->setIterNumber(10000);
+  kmfit->setChisqCut(10000);
 
   kmfit->init();
   for(int i=0;i<4;i++)
