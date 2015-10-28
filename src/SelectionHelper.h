@@ -331,13 +331,6 @@ struct SelectionHelper_t
 		return pass;
 	}
 
-
-	bool pass(int pid) const
-	{
-		return pass && channel == pid;
-	}
-
-
 	double getKinChi2(int pid) const
 	{
 		return KF[pid].chi2;
