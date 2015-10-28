@@ -531,7 +531,11 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 
 void JpsiKK::writeTuples(void)
 {
-	cout << "1 fEvent.run " << fEvent.run << endl;
+	if(fEvent.run<0)
+	{
+		fMC.tuple->write();
+		fMCTopo.tuple->write();
+	}
   fEvent.tuple->write();
   //fPid.tuple->write();
   fMdc.tuple->write();
@@ -540,11 +544,6 @@ void JpsiKK::writeTuples(void)
   fTof.tuple->write();
   //fNeutral.tuple->write();
 	cout << "2 fEvent.run = " << fEvent.run << endl;
-	if(fEvent.run<0)
-	{
-		fMC.tuple->write();
-		fMCTopo.tuple->write();
-	}
   event_write++;
 }
 
