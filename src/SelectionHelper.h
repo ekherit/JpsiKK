@@ -263,8 +263,8 @@ struct SelectionHelper_t
 	void select_channel_by_kinematic_fit(void)
 	{
 		channel = 0; //preselect some hypotesa
-		//for(int i=0;i<KF.size();i++)
-		for(int i=0;i<2;i++)
+		for(int i=0;i<KF.size();i++)
+		//for(int i=0;i<5;i++)
 		{
 			if(KF[i].chi2 < KF[channel].chi2)
 			{
@@ -287,7 +287,7 @@ struct SelectionHelper_t
 
 		//select best channel
 		channel = 4;
-		for(int i=0;i<2;i++)
+		for(int i=0;i<5;i++)
 		{
 			if(chi2[i] < chi2[channel])
 			{
