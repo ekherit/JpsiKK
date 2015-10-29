@@ -221,8 +221,7 @@ inline double getInvariantMass2(TrackVector_t & T, std::vector<int> & pid)
 	{
 		if(!(*T[i])->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating invariant mass (getInvariantMass2)");
     RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
-		P[i] =  mdcTrk->p4(XMASS[i]);
-		Psum+=P[i];
+		Psum += (mdcTrk->p4(XMASS[i]));;
 	}
   return Psum.m2();
 }
