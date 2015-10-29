@@ -70,14 +70,12 @@ void RootMdc::fill(int i, EvtRecTrackIterator & track)
 	}
 }
 
-void RootMdc::fill_mass(double W,  TrackVector_t & tracks,   EvtRecTrackIterator & end)
+void RootMdc::fill_mass(double Wcm,  TrackVector_t & tracks,   EvtRecTrackIterator & end)
 {
 	npid=5;
 
 	for(int pid =0; pid <5;pid++)
 	{
-		pids[2]=pid;
-		pids[3]=pid;
 		if(tracks[2] != end && tracks[3] != end)
 		{
 			std::vector<int> pids(2, pid);
@@ -103,8 +101,8 @@ void RootMdc::fill_mass(double W,  TrackVector_t & tracks,   EvtRecTrackIterator
 			{
 				T[2] = tracks[3];
 			}
-			M23[pid]  = sqrt(getMissingMass2(W, T, pids));
+			M23[pid]  = sqrt(getMissingMass2(Wcm, T, pids));
 		}
 	}
-	Mrec = getPionRecoilMass(W, tracks[0],  tracks[1]);
+	Mrec = getPionRecoilMass(Wcm, tracks[0],  tracks[1]);
 }
