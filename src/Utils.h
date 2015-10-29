@@ -201,7 +201,7 @@ inline double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterato
 inline double getMissingMass2(double Wcm,  TrackVector_t & T, std::vector<int> & pid)
 {
 	HepLorentzVector Ptotal = getTotalMomentum(Wcm);
-	HepLorentzVector P(T.size());
+	std::vector<HepLorentzVector> P(T.size());
 	HepLorentzVector Psum;
 	for(int i=0; i<T.size(); i++)
 	{
