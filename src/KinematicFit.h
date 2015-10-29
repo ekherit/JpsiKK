@@ -316,7 +316,7 @@ bool kinfit(
 	bool goodfit=false;
 	for(int pid=0;pid<2;pid++)
 	{
-		double chi2_tmp=std::limits<double>::max();
+		double chi2_tmp=std::numeric_limits<double>::max();
 		std::vector<HepLorentzVector> P_tmp;
 		bool fit_result = kinematic_fit(pid, Tracks, P_tmp, chi2_tmp, CENTER_MASS_ENERGY);
 		if(fit_result)
@@ -347,7 +347,7 @@ inline std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator>
 	for(int i=0;i<theKFV.size(); i++)
 	{
 		KinematicFit_t & k = theKFV[i];
-		k.chi2=std::limits<double>::max();
+		k.chi2=std::numeric_limits<double>::max();
 		k.P.resize(5);
 		k.success = false;
 		k.success = kinematic_fit(i, Tracks, k.P,  k.chi2,  CENTER_MASS_ENERGY);
