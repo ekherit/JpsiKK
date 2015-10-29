@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <exception>
+
 #include "CLHEP/Vector/ThreeVector.h"
 #include "CLHEP/Vector/LorentzVector.h"
 #include "CLHEP/Vector/TwoVector.h"

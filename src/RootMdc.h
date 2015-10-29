@@ -20,6 +20,8 @@
 #include "RootTrack.h"
 #include "RootMass.h"
 
+#include "Defs.h"
+
 struct RootMdc : public RootTuple
 {
 	//Mass_t M;
