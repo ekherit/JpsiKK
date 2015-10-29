@@ -26,6 +26,8 @@
 #include "Utils.h"
 #include "Defs.h"
 
+#include <limits>
+
 bool vertex_fit(const std::vector<WTrackParameter> & input_tracks,  std::vector<WTrackParameter> output_tracks)
 {
   //vertex fit - уточним вершины
@@ -139,8 +141,8 @@ bool kinematic_fit(
   vtxfit->Swim(0);
 
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
-  kmfit->setIterNumber(10000);
-  kmfit->setChisqCut(10000);
+  kmfit->setIterNumber(1000);
+  kmfit->setChisqCut(1000);
 
   kmfit->init();
   for(int i=0;i<4;i++)
@@ -276,8 +278,8 @@ bool kinematic_fit(
   vtxfit->Swim(0);
 
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
-  //kmfit->setIterNumber(10000);
-  //kmfit->setChisqCut(10000);
+  kmfit->setIterNumber(1000);
+  kmfit->setChisqCut(1000);
 
   kmfit->init();
   for(int i=0;i<WTrk.size();i++)
@@ -314,7 +316,7 @@ bool kinfit(
 	bool goodfit=false;
 	for(int pid=0;pid<2;pid++)
 	{
-		double chi2_tmp=1e100;
+		double chi2_tmp=std::limits<double>::max();
 		std::vector<HepLorentzVector> P_tmp;
 		bool fit_result = kinematic_fit(pid, Tracks, P_tmp, chi2_tmp, CENTER_MASS_ENERGY);
 		if(fit_result)
@@ -345,11 +347,10 @@ inline std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator>
 	for(int i=0;i<theKFV.size(); i++)
 	{
 		KinematicFit_t & k = theKFV[i];
-		k.chi2=1e100;
+		k.chi2=std::limits<double>::max();
 		k.P.resize(5);
 		k.success = false;
 		k.success = kinematic_fit(i, Tracks, k.P,  k.chi2,  CENTER_MASS_ENERGY);
-		//cout << "kinematic fit: pid = " << i << " chi2=" << k.chi2 <<  " success = " << k.success << endl;
 	}
 	return theKFV;
 }

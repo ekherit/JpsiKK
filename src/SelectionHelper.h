@@ -262,7 +262,7 @@ struct SelectionHelper_t
 
 	void select_channel_by_kinematic_fit(void)
 	{
-		channel = 4; //preselect some hypotesa
+		channel = 0; //preselect some hypotesa
 		//for(int i=0;i<KF.size();i++)
 		for(int i=0;i<2;i++)
 		{
@@ -334,10 +334,6 @@ struct SelectionHelper_t
 	bool dummyPass(void)
 	{
 		select_channel_by_kinematic_fit();
-		if(channel!=ID_KAON && channel != ID_MUON)
-		{
-			channel = ID_KAON;
-		}
 		setPid();
 		pass = true;
 		return pass;
