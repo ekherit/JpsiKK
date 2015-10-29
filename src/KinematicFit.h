@@ -278,10 +278,10 @@ bool kinematic_fit(
   vtxfit->Swim(0);
 
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
+  kmfit->init();
   kmfit->setIterNumber(1000);
   kmfit->setChisqCut(1000);
-
-  kmfit->init();
+	cout << "getChisqCut: " << kmfit->getChisqCut() << endl;
   for(int i=0;i<WTrk.size();i++)
   {
     kmfit->AddTrack(i,vtxfit->wtrk(i));
