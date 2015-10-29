@@ -32,5 +32,5 @@ struct RootMdc : public RootTuple
 	virtual void init(void);
 	virtual void init_tuple(void);
 	virtual void fill(int i,  EvtRecTrackIterator & track);
-	virtual void fill_mass(EvtRecTrackIterator & track1,  EvtRecTrackIterator & track2);
+	virtual void fill_mass(double, TrackVector_t&, EvtRecTrackIterator&);
 };
