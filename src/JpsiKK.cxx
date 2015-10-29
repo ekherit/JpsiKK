@@ -502,7 +502,7 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 	fDedx.ntrack=4;
 	fEmc.ntrack=4;
 	fTof.ntrack=4;
-	fMdc.M.Mrec = get_recoil__mass(Tracks[0], Tracks[1], PION_MASS,  cfg.CENTER_MASS_ENERGY);
+	//fMdc.M.Mrec = get_recoil__mass(Tracks[0], Tracks[1], PION_MASS,  cfg.CENTER_MASS_ENERGY);
 	for(int i=0;i<4;i++)
 	{
 		if(Tracks[i]==tracks_end) continue;
@@ -511,6 +511,7 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 		fDedx.fill(i,  Tracks[i]);
 		fTof.fill (i,  Tracks[i]);
 	}
+	fMdc.fill_mass(cfg.CENTER_MASS_ENERGY,  Tracks,  tracks_end);
 	//Monte Carlo information
 	if(fEvent.run<0)
 	{

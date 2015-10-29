@@ -22,9 +22,15 @@
 
 struct RootMdc : public RootTuple
 {
-	Mass_t M;
+	//Mass_t M;
 	Track_t T;
+
+	NTuple::Item<double> Mrec;
+	NTuple::Item<double> npid;
+	NTuple::Array<double>  M23;
+
 	virtual void init(void);
 	virtual void init_tuple(void);
 	virtual void fill(int i,  EvtRecTrackIterator & track);
+	virtual void fill_mass(EvtRecTrackIterator & track1,  EvtRecTrackIterator & track2);
 };

@@ -39,6 +39,11 @@ using CLHEP::HepLorentzVector;
 #include "SelectionConfig.h"
 #include "PhysConst.h"
 
+inline HepLorentzVector getTotalMomentum(double Wcm)
+{
+	return HepLorentzVector(Wcm*sin(0.5*BEPC_CROSSING_ANGLE),0,0,Wcm);
+};
+
 inline void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
 {
   ro = -9999;
@@ -190,4 +195,43 @@ inline double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterato
   }
   HepLorentzVector Pmis = P_psip - pionP[0] - pionP[1] - kaonP[0] - kaonP[1];
   return Pmis.m2();
+}
+
+
+inline double getMissingMass2(double Wcm,  TrackVector_t & T, std::vector<int> & pid)
+{
+	HepLorentzVector Ptotal = getTotalMomentum(Wcm);
+	HepLorentzVector P(T.size());
+	HepLorentzVector Psum;
+	for(int i=0; i<T.size(); i++)
+	{
+		if(!(*T[i])->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating missing mass (getMissingMass2)");
+    RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
+		P[i] =  mdcTrk->p4(XMASS[pid]);
+		Psum+=P[i];
+	}
+  HepLorentzVector Pmis = Ptotal - Psum;
+  return Pmis.m2();
+}
+
+inline double getInvariantMass2(TrackVector_t & T, std::vector<int> & pid)
+{
+	HepLorentzVector Psum;
+	for(int i=0; i<T.size(); i++)
+	{
+		if(!(*T[i])->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating invariant mass (getInvariantMass2)");
+    RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
+		P[i] =  mdcTrk->p4(XMASS[pid]);
+		Psum+=P[i];
+	}
+  return Psum.m2();
+}
+
+inline double getPionRecoilMass(Wcm,  EvtRecTrackIterator & t1,  EvtRecTrackIterator & t2)
+{
+	std::vector<int> pid(2, ID_PION);
+	TrackVector_t T(2);
+	T[0] = t1;
+	T[1] = t2;
+	return sqrt(getMissingMass2(Wcm, T,  pid));
 }

@@ -19,14 +19,18 @@
 
 void RootMdc::init_tuple(void)
 {
-	M.add_to_tuple(tuple);
+	//M.add_to_tuple(tuple);
 	T.add_to_tuple(tuple);
+	tuple->addItem ("Mrec", Mrec); //array size must be = 4
+	tuple->addItem ("npid", npid,0,5); //array size must be = 4
+	tuple->addIndexedItem ("M23", npid, M23);
 }
 
 
 void RootMdc::init(void)
 {
   T.ntrack=4;
+	npid =5;
 }
 
 
@@ -63,4 +67,43 @@ void RootMdc::fill(int i, EvtRecTrackIterator & track)
 	{
 		T.E[i] = 0;
 	}
+}
+
+void RootMdc::fill_mass(double W,  TrackVector_t & tracks,   EvtRecTrackIterator & end)
+{
+	npid=5;
+
+	for(int pid =0; pid <5;pid++)
+	{
+		pids[2]=pid;
+		pids[3]=pid;
+		if(tracks[2] != end && tracks[3] != end)
+		{
+			std::vector<int> pids(2, pid);
+			TrackVector_t T(2);
+			T[0] = tracks[2];
+			T[1] = tracks[3];
+			M23[pid] = sqrt(getInvariantMass2(T, pids));
+		}
+		else
+		{
+			std::vector<int> pids(3);
+			pids[0] = ID_PION;
+			pids[1] = ID_PION;
+			pids[2] = pid;
+			TrackVector_t T(3);
+			T[0] = tracks[0];
+			T[1] = tracks[1];
+			if(tracks[2] != end)
+			{
+				T[2] = tracks[2];
+			}
+			if(tracks[3] != end)
+			{
+				T[2] = tracks[3];
+			}
+			M23[pid]  = sqrt(getMissingMass2(W, T, pids));
+		}
+	}
+	Mrec = getPionRecoilMass(W, tracks[0],  tracks[1]);
 }
