@@ -25,7 +25,8 @@ const double JPSI_MASS     = 3.096916; //GeV
 const double PSIP_MASS     = 3.686109; //GeV PDG-2014
 
 enum  {ID_KAON=0, ID_MUON=1, ID_ELECTRON=2, ID_PION=3, ID_PROTON=4};
-extern const double XMASS[5];
+
+extern double XMASS[5];
 
 
 const double BEPC_CROSSING_ANGLE=0.022;
