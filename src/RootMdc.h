@@ -28,7 +28,7 @@ struct RootMdc : public RootTuple
 	Track_t T;
 
 	NTuple::Item<double> Mrec;
-	NTuple::Item<double> npid;
+	NTuple::Item<long> npid;
 	NTuple::Array<double>  M23;
 
 	virtual void init(void);
