@@ -152,7 +152,6 @@ struct SelectionHelper_t
 
 	bool passPid(const vector<double> & pchi2)
 	{
-		result = false;
 		const double & chi2 = pchi2[channel]; //current chi2
 
 		if( chi2 > cfg->MAX_PID_CHI2)
