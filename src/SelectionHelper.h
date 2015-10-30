@@ -166,21 +166,20 @@ struct SelectionHelper_t
 		switch(channel)
 		{
 			case ID_KAON:
-			//	if( 
-		////				chi2 <  pchi2[ID_PION]   &&
-			//			chi2 <  pchi2[ID_MUON]
-			//		)
-			//	{
+				if( 
+						chi2 <  pchi2[ID_MUON]
+					)
+				{
 					result = true;
-			//	}
+				}
 				break;
 			case ID_MUON:
-				//if( 
-				//		chi2 <  pchi2[ID_KAON]
-				//	)
-				//{
+				if( 
+						chi2 <  pchi2[ID_KAON]
+					)
+				{
 					result = true;
-				//}
+				}
 				break;
 				break;
 			default:
