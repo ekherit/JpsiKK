@@ -356,7 +356,7 @@ StatusCode JpsiKK::execute()
 	//I decided to save double record if event pass both
 	//selection creteria for kaon and muons
 	int chan[2] = {ID_KAON,  ID_MUON};
-	for(int i = 0; i<2;i++)
+	for(int i = 1; i>=0 ;i--)
 	{
 		bool plus  = psh.pass && psh.channel == chan[i];
 		bool minus = nsh.pass && nsh.channel == chan[i];
