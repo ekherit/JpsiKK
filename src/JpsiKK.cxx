@@ -206,7 +206,7 @@ StatusCode JpsiKK::execute()
 			std::cout << setw(width) << "event written";
 			std::cout << setw(width) << "kaons";
 			std::cout << setw(width) << "muons";
-			std::cout << setw(width) << "kaons and muons";
+			std::cout << setw(width) << "Ku";
 			std::cout << endl;
 		}
 		std::cout << setw(20) << event_proceed;
@@ -336,16 +336,16 @@ StatusCode JpsiKK::execute()
 	{
 		//kinfit(pion_pair,  other_negative_tracks,  negative_sh);
 		nsh.kinfit(pion_pair,  other_negative_tracks.front());
-		//nsh.totalPass();
-		nsh.dummyPass();
+		nsh.totalPass();
+		//nsh.dummyPass();
 	}
 
 	if(!other_positive_tracks.empty()) 
 	{
 		//kinfit(pion_pair,  other_positive_tracks,  positive_sh);
 		psh.kinfit(pion_pair,  other_positive_tracks.front());
-		//psh.totalPass();
-		psh.dummyPass();
+		psh.totalPass();
+		//psh.dummyPass();
 	}
 
 
