@@ -23,8 +23,9 @@ void RootMdc::init_tuple(void)
 	//M.add_to_tuple(tuple);
 	T.add_to_tuple(tuple);
 	tuple->addItem ("Mrec", Mrec); //array size must be = 4
-	tuple->addItem ("npid", npid,0,5); //array size must be = 4
+	tuple->addItem ("npid", npid,0,5); 
 	tuple->addIndexedItem ("M23", npid, M23);
+	tuple->addIndexedItem ("Mmis", npid, Mmis);
 }
 
 
@@ -83,6 +84,7 @@ void RootMdc::fill_mass(double Wcm,  TrackVector_t & tracks,   EvtRecTrackIterat
 			T[0] = tracks[2];
 			T[1] = tracks[3];
 			M23[pid] = sqrt(getInvariantMass2(T, pids));
+			Mmis[pid] = sqrt(getMissingMass2(Wcm, T, pids));
 		}
 		else
 		{
@@ -101,7 +103,8 @@ void RootMdc::fill_mass(double Wcm,  TrackVector_t & tracks,   EvtRecTrackIterat
 			{
 				T[2] = tracks[3];
 			}
-			M23[pid]  = sqrt(getMissingMass2(Wcm, T, pids));
+			M23[pid]  = 0;
+			Mmis[pid]  = sqrt(getMissingMass2(Wcm, T, pids));
 		}
 	}
 	Mrec = getPionRecoilMass(Wcm, tracks[0],  tracks[1]);
