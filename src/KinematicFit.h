@@ -35,7 +35,7 @@ struct KinematicFit_t
 	std::vector<HepLorentzVector> P;
 };
 
-bool vertex_fit(const std::vector<WTrackParameter> & input_tracks,  std::vector<WTrackParameter> output_tracks)
+bool vertex_fit(const std::vector<WTrackParameter> & input_tracks,  std::vector<WTrackParameter> & output_tracks)
 {
   //vertex fit - уточним вершины
   //initial vertex
@@ -109,7 +109,7 @@ bool kinematic_fit(
 	}
 
   //vertex fit - уточним вершины
-	std::vector<WTrackParameter> VertexWTrk(Tracks.size());
+	std::vector<WTrackParameter> VertexWTrk;
 	if(!vertex_fit(WTrk, VertexWTrk)) return false;
 
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
