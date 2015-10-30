@@ -74,21 +74,6 @@ typedef HepGeom::Point3D<double> HepPoint3D;
 
 #include "KinematicFit.h"
 
-enum
-{
-	OTHER_NEGATIVE_TRACK=1, 
-	OTHER_POSITIVE_TRACK=2, 
-	OTHER_TWO_TRACKS=3, 
-	OTHER_NO_TRACK=0
-};
-
-enum
-{
-	CHAN_KAONS = ID_KAON, 
-	CHAN_MUONS = ID_MUON, 
-	CHAN_KAON_MUON  = 10, 
-	CHAN_MUON_KAON  = 11
-};
 
 const  double XMASS[5] = {KAON_MASS, MUON_MASS, ELECTRON_MASS, PION_MASS, PROTON_MASS};
 
@@ -356,7 +341,8 @@ StatusCode JpsiKK::execute()
 	//I decided to save double record if event pass both
 	//selection creteria for kaon and muons
 	int chan[2] = {ID_KAON,  ID_MUON};
-	for(int i = 1; i>=0 ;i--)
+	//for(int i = 1; i>=0 ;i--)
+	for(int i = 0; i<2 ;i++)
 	{
 		bool plus  = psh.pass && psh.channel == chan[i];
 		bool minus = nsh.pass && nsh.channel == chan[i];
@@ -438,11 +424,11 @@ StatusCode JpsiKK::execute()
 
 		switch(fEvent.channel)
 		{
-			case CHAN_KAONS:
+			case ID_KAON:
 				fEvent.KK = 1;
 				event_with_kaons++;
 				break;
-			case CHAN_MUONS:
+			case ID_MUON:
 				fEvent.uu = 1;
 				event_with_muons++;
 				break;
