@@ -198,12 +198,11 @@ StatusCode JpsiKK::execute()
   if(10000 <= event_proceed && event_proceed % 10000 ==0) isprint = true;
   if(isprint)
   {
-    std::cout << "proceed event: " << setw(15) << event_proceed<<", ";
-    std::cout << "event write: "   << setw(15) << event_write<< ",  ";
-    std::cout << "kaons: "   << setw(15) << event_with_kaons << ",  ";
-    std::cout << "muons "   << setw(15) << event_with_muons << ",  ";
-    std::cout << "Kmu "   << setw(15) << event_with_kaons_and_muons << ",  ";
-    std::cout << "good knm fit "   << setw(15) << good_kinematic_fit;
+		std::cout << setw(15) << event_proceed << " event proceed,";
+		std::cout << setw(15) << event_write <<  " written,";
+		std::cout << setw(15) << event_with_kaons <<  "KK,";
+		std::cout << setw(15) << event_with_muons <<  "uu,";
+		std::cout << setw(15) << event_with_kaons_and_muons <<  "Ku,";
     std::cout << std::endl;
   }
   event_proceed++;
