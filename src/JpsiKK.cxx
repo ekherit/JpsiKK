@@ -199,20 +199,21 @@ StatusCode JpsiKK::execute()
   if(10000 <= event_proceed && event_proceed % 10000 ==0) isprint = true;
   if(isprint)
   {
+		int width=15;
 		if(nprints % 10 == 0)
 		{
-			std::cout << setw(15) << "event proceed";
-			std::cout << setw(15) << "event written";
-			std::cout << setw(15) << "KK events";
-			std::cout << setw(15) << "uu events";
-			std::cout << setw(15) << "Ku events";
+			std::cout << setw(width) << "event proceed";
+			std::cout << setw(width) << "event written";
+			std::cout << setw(width) << "KK events";
+			std::cout << setw(width) << "uu events";
+			std::cout << setw(width) << "Ku events";
 			std::cout << endl;
 		}
-		std::cout << setw(15) << event_proceed;
-		std::cout << setw(15) << event_write;
-		std::cout << setw(15) << event_with_kaons;
-		std::cout << setw(15) << event_with_muons;
-		std::cout << setw(15) << event_with_kaons_and_muons;
+		std::cout << setw(width) << event_proceed;
+		std::cout << setw(width) << event_write;
+		std::cout << setw(width) << event_with_kaons;
+		std::cout << setw(width) << event_with_muons;
+		std::cout << setw(width) << event_with_kaons_and_muons;
     std::cout << std::endl;
 		nprints ++;
   }
