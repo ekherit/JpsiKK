@@ -267,7 +267,7 @@ struct SelectionHelper_t
 		pid_list.push_back(ID_KAON);
 		pid_list.push_back(ID_MUON);
 		//pid_list.push_back(ID_ELECTRON);
-		pid_list.push_back(ID_PROTON);
+		//pid_list.push_back(ID_PROTON);
 		for(std::list<int>::iterator pid = pid_list.begin(); pid!=pid_list.end() ; pid++)
 		{
 			if(KF[*pid].chi2 < KF[channel].chi2)
