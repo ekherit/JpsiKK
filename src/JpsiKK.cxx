@@ -202,14 +202,14 @@ StatusCode JpsiKK::execute()
 		static long nprints  = 0;
 		if(nprints % 10 == 0)
 		{
-			std::cout << setw(width) << "# event proceed";
+			std::cout << setw(20) << "# event proceed";
 			std::cout << setw(width) << "event written";
-			std::cout << setw(width) << "KK events";
-			std::cout << setw(width) << "uu events";
-			std::cout << setw(width) << "Ku events";
+			std::cout << setw(width) << "kaons";
+			std::cout << setw(width) << "muons";
+			std::cout << setw(width) << "kaons and muons";
 			std::cout << endl;
 		}
-		std::cout << setw(width) << event_proceed;
+		std::cout << setw(20) << event_proceed;
 		std::cout << setw(width) << event_write;
 		std::cout << setw(width) << event_with_kaons;
 		std::cout << setw(width) << event_with_muons;
