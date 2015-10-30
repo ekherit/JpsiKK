@@ -167,8 +167,8 @@ struct SelectionHelper_t
 		{
 			case ID_KAON:
 				if( 
-						chi2 <  pchi2[ID_MUON] &&
-						chi2 <  pchi2[ID_PION]
+						chi2 <  pchi2[ID_MUON]
+//           &&chi2 <  pchi2[ID_PION]
 					)
 				{
 					result = true;
