@@ -55,7 +55,7 @@ class JpsiKK : public Algorithm
   long int event_with_protons;
   long int event_with_electrons;
 
-	long int nprints;
+	//long int nprints;
 
   RootEvent  fEvent;   //signal event essential information
   //RootPid    fPid;     //Paritlce id information

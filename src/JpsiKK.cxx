@@ -162,7 +162,6 @@ StatusCode JpsiKK::initialize(void)
   event_with_electrons=0;
   event_with_protons=0;
   good_kinematic_fit=0;
-	nprint_head  = 0;
 	if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
 
 	try
@@ -200,9 +199,10 @@ StatusCode JpsiKK::execute()
   if(isprint)
   {
 		int width=15;
+		static long nprints  = 0;
 		if(nprints % 10 == 0)
 		{
-			std::cout << setw(width) << "event proceed";
+			std::cout << setw(width) << "# event proceed";
 			std::cout << setw(width) << "event written";
 			std::cout << setw(width) << "KK events";
 			std::cout << setw(width) << "uu events";
