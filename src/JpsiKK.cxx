@@ -214,6 +214,7 @@ StatusCode JpsiKK::execute()
 		std::cout << setw(15) << event_with_muons;
 		std::cout << setw(15) << event_with_kaons_and_muons;
     std::cout << std::endl;
+		nprints ++;
   }
   event_proceed++;
 
