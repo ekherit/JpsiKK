@@ -88,26 +88,23 @@ bool kinematic_fit(
 	for(int i=0;i<Tracks.size();i++)
 	{
 		KalTrk[i] = (*Tracks[i])->mdcKalTrack();
-		else
+		switch(pids[i])
 		{
-			switch(pids[i])
-			{
-				case ID_KAON:
-					WTrk[i] = WTrackParameter(XMASS[pids[i]], KalTrk[i]->getZHelixK(),  KalTrk[i]->getZErrorK());
-					break;
-				case ID_MUON:
-					WTrk[i] = WTrackParameter(XMASS[pids[i]], KalTrk[i]->getZHelixMu(), KalTrk[i]->getZErrorMu());
-					break;
-				case ID_ELECTRON:
-					WTrk[i] = WTrackParameter(XMASS[pids[i]], KalTrk[i]->getZHelixE(),  KalTrk[i]->getZErrorE());
-					break;
-				case ID_PION:
-					WTrk[i] = WTrackParameter(XMASS[pids[i]], KalTrk[i]->getZHelix(),   KalTrk[i]->getZError());
-					break;
-				case ID_PROTON:
-					WTrk[i] = WTrackParameter(XMASS[pids[i]], KalTrk[i]->getZHelixP(),  KalTrk[i]->getZErrorP());
-					break;
-			}
+			case ID_KAON:
+				WTrk[i] = WTrackParameter(XMASS[pids[i]], KalTrk[i]->getZHelixK(),  KalTrk[i]->getZErrorK());
+				break;
+			case ID_MUON:
+				WTrk[i] = WTrackParameter(XMASS[pids[i]], KalTrk[i]->getZHelixMu(), KalTrk[i]->getZErrorMu());
+				break;
+			case ID_ELECTRON:
+				WTrk[i] = WTrackParameter(XMASS[pids[i]], KalTrk[i]->getZHelixE(),  KalTrk[i]->getZErrorE());
+				break;
+			case ID_PION:
+				WTrk[i] = WTrackParameter(XMASS[pids[i]], KalTrk[i]->getZHelix(),   KalTrk[i]->getZError());
+				break;
+			case ID_PROTON:
+				WTrk[i] = WTrackParameter(XMASS[pids[i]], KalTrk[i]->getZHelixP(),  KalTrk[i]->getZErrorP());
+				break;
 		}
 	}
 
