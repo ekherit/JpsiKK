@@ -266,7 +266,7 @@ struct SelectionHelper_t
 		std::list<int> pid_list;
 		pid_list.push_back(ID_KAON);
 		pid_list.push_back(ID_MUON);
-		pid_list.push_back(ID_ELECTRON);
+		//pid_list.push_back(ID_ELECTRON);
 		pid_list.push_back(ID_PROTON);
 		for(std::list<int>::iterator pid = pid_list.begin(); pid!=pid_list.end() ; pid++)
 		{
