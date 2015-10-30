@@ -152,15 +152,12 @@ struct SelectionHelper_t
 
 	bool passPid(const vector<double> & pchi2)
 	{
-		bool & result = pass_pid;
 		result = false;
 		const double & chi2 = pchi2[channel]; //current chi2
 
-		//global cut
 		if( chi2 > cfg->MAX_PID_CHI2)
 		{
-			result = false;
-			return result;
+			return false;
 		}
 
 		switch(channel)
@@ -171,7 +168,7 @@ struct SelectionHelper_t
 //           &&chi2 <  pchi2[ID_PION]
 					)
 				{
-					result = true;
+					pass_pid = true;
 				}
 				break;
 			case ID_MUON:
@@ -179,14 +176,14 @@ struct SelectionHelper_t
 						chi2 <  pchi2[ID_KAON]
 					)
 				{
-					result = true;
+					pass_pid = true;
 				}
 				break;
 				break;
 			default:
 				break;
 		}
-		return result;
+		return pass_pid;
 	}
 
 	bool passMyPid(void)
@@ -224,55 +221,28 @@ struct SelectionHelper_t
 		KF = ::kinfit(tracks,  cfg->CENTER_MASS_ENERGY);
 	}
 
-	//apply together particle id and kinematic fit 
-	//cut using MAX_KIN_CHI2
-
-	//bool kinfit(SelectionHelper_t & kfp)
-	//{
-	//	kfp.good_kinematic_fit = kinfit(kfp.tracks,  kfp.channel,  kfp.kin_chi2,  kfp.P,  kfp.W);
-	//	return kfp.good_kinematic_fit;
-	//}
-
-
-	//bool kinfit(
-	//		TrackPair_t & pion_pair,
-	//		TrackList_t & other_tracks
-	//		)
-	//{
-	//	SelectionHelper_t tmp_kfp(*this);
-	//	tmp_kfp.tracks.resize(3);
-	//	tmp_kfp.tracks[0]=pion_pair.first;
-	//	tmp_kfp.tracks[1]=pion_pair.second;
-	//	kin_chi2=2e100;
-	//	for(TrackList_t::iterator i=other_tracks.begin(); i!=other_tracks.end(); ++i)
-	//	{
-	//		EvtRecTrackIterator track = *i;
-	//		tmp_kfp.tracks[2] = track;
-	//		if(::kinfit(tmp_kfp.tracks,  tmp_kfp.channel,  tmp_kfp.kin_chi2,  tmp_kfp.P,  cfg->CENTER_MASS_ENERGY))
-	//		{
-	//			good_kinematic_fit = true;
-	//			if(tmp_kfp.kin_chi2 < kin_chi2)
-	//			{
-	//				*this = tmp_kfp;
-	//			}
-	//		}
-	//	}
-	//	return  good_kinematic_fit;
-	//}
-
 	void select_channel_by_kinematic_fit(void)
 	{
-		channel = ID_ELECTRON; //preselect some hypotesa
-		std::list<int> pid_list;
-		pid_list.push_back(ID_KAON);
-		pid_list.push_back(ID_MUON);
-		//pid_list.push_back(ID_ELECTRON);
-		//pid_list.push_back(ID_PROTON);
-		for(std::list<int>::iterator pid = pid_list.begin(); pid!=pid_list.end() ; pid++)
+		//channel = ID_ELECTRON; //preselect some hypotesa
+		//std::list<int> pid_list;
+		//pid_list.push_back(ID_KAON);
+		//pid_list.push_back(ID_MUON);
+		////pid_list.push_back(ID_ELECTRON);
+		////pid_list.push_back(ID_PROTON);
+		//for(std::list<int>::iterator pid = pid_list.begin(); pid!=pid_list.end() ; pid++)
+		//{
+		//	if(KF[*pid].chi2 < KF[channel].chi2)
+		//	{
+		//		channel = *pid;
+		//	}
+		//}
+		
+		channel = 4; //preselect some hypotesa
+		for(int i=0;i<2;i++)
 		{
-			if(KF[*pid].chi2 < KF[channel].chi2)
+			if(KF[i].chi2 < KF[channel].chi2)
 			{
-				channel = *pid;
+				channel = i;
 			}
 		}
 	}
