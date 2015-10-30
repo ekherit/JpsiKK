@@ -43,7 +43,8 @@ using CLHEP::HepLorentzVector;
 
 inline HepLorentzVector getTotalMomentum(double Wcm)
 {
-	return HepLorentzVector(Wcm*sin(0.5*BEPC_CROSSING_ANGLE),0,0,Wcm);
+	//return HepLorentzVector(Wcm*sin(0.5*BEPC_CROSSING_ANGLE),0,0,Wcm);
+	return HepLorentzVector(Wcm*tan(0.5*BEPC_CROSSING_ANGLE),0,0,Wcm/cos(0.5*BEPC_CROSSING_ANGLE));
 }
 
 inline void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
