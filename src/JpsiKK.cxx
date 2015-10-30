@@ -162,6 +162,7 @@ StatusCode JpsiKK::initialize(void)
   event_with_electrons=0;
   event_with_protons=0;
   good_kinematic_fit=0;
+	nprint_head  = 0;
 	if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
 
 	try
@@ -198,11 +199,20 @@ StatusCode JpsiKK::execute()
   if(10000 <= event_proceed && event_proceed % 10000 ==0) isprint = true;
   if(isprint)
   {
-		std::cout << setw(15) << event_proceed << " event proceed,";
-		std::cout << setw(15) << event_write <<  " written,";
-		std::cout << setw(15) << event_with_kaons <<  "KK,";
-		std::cout << setw(15) << event_with_muons <<  "uu,";
-		std::cout << setw(15) << event_with_kaons_and_muons <<  "Ku,";
+		if(nprints % 10 == 0)
+		{
+			std::cout << setw(15) << "event proceed";
+			std::cout << setw(15) << "event written";
+			std::cout << setw(15) << "KK events";
+			std::cout << setw(15) << "uu events";
+			std::cout << setw(15) << "Ku events";
+			std::cout << endl;
+		}
+		std::cout << setw(15) << event_proceed;
+		std::cout << setw(15) << event_write;
+		std::cout << setw(15) << event_with_kaons;
+		std::cout << setw(15) << event_with_muons;
+		std::cout << setw(15) << event_with_kaons_and_muons;
     std::cout << std::endl;
   }
   event_proceed++;
