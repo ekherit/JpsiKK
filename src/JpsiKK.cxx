@@ -359,23 +359,28 @@ StatusCode JpsiKK::execute()
 	//selection creteria for kaon and muons
 	int chan[2] = {ID_KAON,  ID_MUON};
 	//for(int i = 1; i>=0 ;i--)
-	for(int i = 0; i<2 ;i++)
+	std::list<int> pid_list;
+	pid_list.push_back(ID_KAON);
+	pid_list.push_back(ID_MUON);
+	for(std::list<int>::iterator chan = pid_list.begin(); chan!=pid_list.end() ; chan++)
+	//for(int i = 0; i<2 ;i++)
 	{
 		fEvent.init();
-		bool plus  = psh.pass && psh.channel == chan[i];
-		bool minus = nsh.pass && nsh.channel == chan[i];
+		bool plus  = psh.pass && psh.channel == *chan;
+		bool minus = nsh.pass && nsh.channel == *chan;
 		if(!plus && !minus) continue;
 
+		//selection fEvent.sing,  fEvnet.kchi[pid] and fEvent.pchi[pid]
 		if (plus && minus) //four track case
 		{
 			fEvent.sign = 0;
 
-			fEvent.kin_chi2 = 0.5*(nsh.getKinChi2(chan[i])  + psh.getKinChi2(chan[i]));
-			fEvent.pid_chi2 = 0.5*(nsh.getPidChi2(chan[i])  + psh.getPidChi2(chan[i]));
+			fEvent.kin_chi2 = 0.5*(nsh.getKinChi2(*chan)  + psh.getKinChi2(*chan));
+			fEvent.pid_chi2 = 0.5*(nsh.getPidChi2(*chan)  + psh.getPidChi2(*chan));
 
 			Pkf.resize(4);
-			std::vector<HepLorentzVector> Pp = psh.getMomentum(chan[i]);
-			std::vector<HepLorentzVector> Pm = nsh.getMomentum(chan[i]);
+			std::vector<HepLorentzVector> Pp = psh.getMomentum(*chan);
+			std::vector<HepLorentzVector> Pm = nsh.getMomentum(*chan);
 			for(int k=0;k<Pkf.size();k++)
 			{
 				Pkf[k] = 0.5*(Pp[k]+Pm[k]);
@@ -403,7 +408,7 @@ StatusCode JpsiKK::execute()
 				sh = & nsh;
 			}
 
-			Pkf = sh->getMomentum(chan[i]);
+			Pkf = sh->getMomentum(*chan);
 			Tracks = sh->tracks; 
 			Tracks.push_back(tracks_end);
 			//now positive tracks on the first place,  swap it
@@ -419,8 +424,8 @@ StatusCode JpsiKK::execute()
 				fEvent.pchi[pid] = sh->getPidChi2(pid);
 			}
 		}
-		fEvent.kin_chi2 = fEvent.kchi[chan[i]];
-		fEvent.pid_chi2 = fEvent.pchi[chan[i]];
+		fEvent.kin_chi2 = fEvent.kchi[*chan];
+		fEvent.pid_chi2 = fEvent.pchi[*chan];
 
 		fEvent.KK = 0;
 		fEvent.uu = 0;
@@ -434,7 +439,7 @@ StatusCode JpsiKK::execute()
 			fEvent.Ku = 1;
 			event_with_kaons_and_muons++;
 		}
-		switch(chan[i])
+		switch(*chan)
 		{
 			case ID_KAON:
 				fEvent.KK = 1;
@@ -447,12 +452,13 @@ StatusCode JpsiKK::execute()
 			default:
 				continue;
 		}
+
+		fEvent.channel=*chan;
 		fEvent.run=eventHeader->runNumber();
 		fEvent.event=eventHeader->eventNumber();
 		fEvent.time=eventHeader->time();
 		fEvent.npid = 5;
 
-		fEvent.channel=chan[i];
 		fEvent.ngood_charged_track = good_charged_tracks.size();
 		fEvent.ngood_neutral_track = good_neutral_tracks.size();
 		fEvent.npositive_track = positive_charged_tracks.size();
