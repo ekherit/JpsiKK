@@ -361,27 +361,10 @@ StatusCode JpsiKK::execute()
 	//for(int i = 1; i>=0 ;i--)
 	for(int i = 0; i<2 ;i++)
 	{
+		fEvent.init();
 		bool plus  = psh.pass && psh.channel == chan[i];
 		bool minus = nsh.pass && nsh.channel == chan[i];
 		if(!plus && !minus) continue;
-		fEvent.init();
-		fEvent.run=eventHeader->runNumber();
-		fEvent.event=eventHeader->eventNumber();
-		fEvent.time=eventHeader->time();
-		fEvent.KK = 0;
-		fEvent.uu = 0;
-		fEvent.Ku = 0;
-		if(psh.pass &&  nsh.pass && 
-				(
-				 (psh.channel == ID_KAON && nsh.channel == ID_MUON) || (psh.channel == ID_MUON && nsh.channel == ID_KAON) 
-				)
-			)
-		{
-			fEvent.Ku = 1;
-			event_with_kaons_and_muons++;
-		}
-		fEvent.channel=chan[i];
-		fEvent.npid = 5;
 
 		if (plus && minus) //four track case
 		{
@@ -401,7 +384,7 @@ StatusCode JpsiKK::execute()
 			Tracks = nsh.tracks;
 			Tracks.push_back(psh.tracks[2]);
 
-			for(int pid=0;pid<fEvent.npid;pid++)
+			for(int pid=0;pid<5;pid++)
 			{
 				fEvent.kchi[pid] = 0.5*(nsh.getKinChi2(pid)  + psh.getKinChi2(pid));
 				fEvent.pchi[pid] = 0.5*(nsh.getPidChi2(pid)  + psh.getPidChi2(pid));
@@ -430,7 +413,7 @@ StatusCode JpsiKK::execute()
 				std::swap(Tracks[2],  Tracks[3]);
 			}
 			//no negative charged tracks go first
-			for(int pid=0;pid<fEvent.npid;pid++)
+			for(int pid=0;pid<5;pid++)
 			{
 				fEvent.kchi[pid] = sh->getKinChi2(pid);
 				fEvent.pchi[pid] = sh->getPidChi2(pid);
@@ -439,21 +422,37 @@ StatusCode JpsiKK::execute()
 		fEvent.kin_chi2 = fEvent.kchi[chan[i]];
 		fEvent.pid_chi2 = fEvent.pchi[chan[i]];
 
+		fEvent.KK = 0;
+		fEvent.uu = 0;
+		fEvent.Ku = 0;
+		if(psh.pass &&  nsh.pass && 
+				(
+				 (psh.channel == ID_KAON && nsh.channel == ID_MUON) || (psh.channel == ID_MUON && nsh.channel == ID_KAON) 
+				)
+			)
+		{
+			fEvent.Ku = 1;
+			event_with_kaons_and_muons++;
+		}
 		switch(fEvent.channel)
 		{
-			case CHAN_KAONS:
-//			case ID_KAON:
+			case ID_KAON:
 				fEvent.KK = 1;
 				event_with_kaons++;
 				break;
-			case CHAN_MUONS:
-//			case ID_MUON:
+			case ID_MUON:
 				fEvent.uu = 1;
 				event_with_muons++;
 				break;
 			default:
 				continue;
 		}
+		fEvent.run=eventHeader->runNumber();
+		fEvent.event=eventHeader->eventNumber();
+		fEvent.time=eventHeader->time();
+		fEvent.npid = 5;
+
+		fEvent.channel=chan[i];
 		fEvent.ngood_charged_track = good_charged_tracks.size();
 		fEvent.ngood_neutral_track = good_neutral_tracks.size();
 		fEvent.npositive_track = positive_charged_tracks.size();
