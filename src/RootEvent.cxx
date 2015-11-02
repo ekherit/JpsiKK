@@ -64,8 +64,6 @@ void RootEvent::init_tuple(void)
 
 void RootEvent::init(void)
 {
-  T.ntrack=4;
-	npid = 5; //number of particle id hypotesis
 }
 
 void RootEvent::fill(const std::vector<HepLorentzVector> & Pkf,  double CENTER_MASS_ENERGY)

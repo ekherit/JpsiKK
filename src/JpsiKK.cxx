@@ -336,18 +336,14 @@ StatusCode JpsiKK::execute()
 
 	if(!other_negative_tracks.empty()) 
 	{
-		//kinfit(pion_pair,  other_negative_tracks,  negative_sh);
 		nsh.kinfit(pion_pair,  other_negative_tracks.front());
 		nsh.totalPass();
-		//nsh.dummyPass();
 	}
 
 	if(!other_positive_tracks.empty()) 
 	{
-		//kinfit(pion_pair,  other_positive_tracks,  positive_sh);
 		psh.kinfit(pion_pair,  other_positive_tracks.front());
 		psh.totalPass();
-		//psh.dummyPass();
 	}
 
 
@@ -357,15 +353,11 @@ StatusCode JpsiKK::execute()
 
 	//I decided to save double record if event pass both
 	//selection creteria for kaon and muons
-	int chan[2] = {ID_KAON,  ID_MUON};
-	//for(int i = 1; i>=0 ;i--)
 	std::list<int> pid_list;
 	pid_list.push_back(ID_KAON);
 	pid_list.push_back(ID_MUON);
 	for(std::list<int>::iterator chan = pid_list.begin(); chan!=pid_list.end() ; chan++)
-	//for(int i = 0; i<2 ;i++)
 	{
-		fEvent.init();
 		bool plus  = psh.pass && psh.channel == *chan;
 		bool minus = nsh.pass && nsh.channel == *chan;
 		if(!plus && !minus) continue;
@@ -430,6 +422,7 @@ StatusCode JpsiKK::execute()
 		fEvent.KK = 0;
 		fEvent.uu = 0;
 		fEvent.Ku = 0;
+		//case of mixed event K/mu
 		if(psh.pass &&  nsh.pass && 
 				(
 				 (psh.channel == ID_KAON && nsh.channel == ID_MUON) || (psh.channel == ID_MUON && nsh.channel == ID_KAON) 

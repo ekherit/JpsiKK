@@ -225,9 +225,7 @@ struct SelectionHelper_t
 		std::list<int> pid_list;
 		pid_list.push_back(ID_KAON);
 		pid_list.push_back(ID_MUON);
-		//pid_list.push_back(ID_ELECTRON);
-		//pid_list.push_back(ID_PROTON);
-		channel = ID_KAON; //preselect some hypotesa
+		channel = pid_list.front(); //preselect some hypotesa
 		for(std::list<int>::iterator pid = pid_list.begin(); pid!=pid_list.end() ; pid++)
 		{
 			if(KF[*pid].chi2 < KF[channel].chi2)
@@ -235,15 +233,6 @@ struct SelectionHelper_t
 				channel = *pid;
 			}
 		}
-		
-		//channel = 4; //preselect some hypotesa
-		//for(int i=0;i<2;i++)
-		//{
-		//	if(KF[i].chi2 < KF[channel].chi2)
-		//	{
-		//		channel = i;
-		//	}
-		//}
 	}
 
 	void select_channel_by_kinematic_fit_and_pid(void)
