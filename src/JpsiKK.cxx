@@ -75,6 +75,23 @@ typedef HepGeom::Point3D<double> HepPoint3D;
 #include "KinematicFit.h"
 
 
+enum
+{
+	OTHER_NEGATIVE_TRACK=1, 
+	OTHER_POSITIVE_TRACK=2, 
+	OTHER_TWO_TRACKS=3, 
+	OTHER_NO_TRACK=0
+};
+
+enum
+{
+	CHAN_KAONS = ID_KAON, 
+	CHAN_MUONS = ID_MUON, 
+	CHAN_KAON_MUON  = 10, 
+	CHAN_MUON_KAON  = 11
+};
+
+
 const  double XMASS[5] = {KAON_MASS, MUON_MASS, ELECTRON_MASS, PION_MASS, PROTON_MASS};
 
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -424,11 +441,13 @@ StatusCode JpsiKK::execute()
 
 		switch(fEvent.channel)
 		{
-			case ID_KAON:
+			case CHAN_KAONS:
+//			case ID_KAON:
 				fEvent.KK = 1;
 				event_with_kaons++;
 				break;
-			case ID_MUON:
+			case CHAN_MUONS:
+//			case ID_MUON:
 				fEvent.uu = 1;
 				event_with_muons++;
 				break;
