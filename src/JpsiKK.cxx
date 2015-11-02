@@ -434,7 +434,7 @@ StatusCode JpsiKK::execute()
 			fEvent.Ku = 1;
 			event_with_kaons_and_muons++;
 		}
-		switch(fEvent.channel)
+		switch(chan[i])
 		{
 			case ID_KAON:
 				fEvent.KK = 1;
