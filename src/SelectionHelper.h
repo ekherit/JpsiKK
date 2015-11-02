@@ -222,28 +222,28 @@ struct SelectionHelper_t
 
 	void select_channel_by_kinematic_fit(void)
 	{
-		//channel = ID_ELECTRON; //preselect some hypotesa
-		//std::list<int> pid_list;
-		//pid_list.push_back(ID_KAON);
-		//pid_list.push_back(ID_MUON);
-		////pid_list.push_back(ID_ELECTRON);
-		////pid_list.push_back(ID_PROTON);
-		//for(std::list<int>::iterator pid = pid_list.begin(); pid!=pid_list.end() ; pid++)
-		//{
-		//	if(KF[*pid].chi2 < KF[channel].chi2)
-		//	{
-		//		channel = *pid;
-		//	}
-		//}
-		
-		channel = 4; //preselect some hypotesa
-		for(int i=0;i<2;i++)
+		channel = ID_ELECTRON; //preselect some hypotesa
+		std::list<int> pid_list;
+		pid_list.push_back(ID_KAON);
+		pid_list.push_back(ID_MUON);
+		//pid_list.push_back(ID_ELECTRON);
+		//pid_list.push_back(ID_PROTON);
+		for(std::list<int>::iterator pid = pid_list.begin(); pid!=pid_list.end() ; pid++)
 		{
-			if(KF[i].chi2 < KF[channel].chi2)
+			if(KF[*pid].chi2 < KF[channel].chi2)
 			{
-				channel = i;
+				channel = *pid;
 			}
 		}
+		
+		//channel = 4; //preselect some hypotesa
+		//for(int i=0;i<2;i++)
+		//{
+		//	if(KF[i].chi2 < KF[channel].chi2)
+		//	{
+		//		channel = i;
+		//	}
+		//}
 	}
 
 	void select_channel_by_kinematic_fit_and_pid(void)
