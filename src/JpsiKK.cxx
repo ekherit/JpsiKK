@@ -451,7 +451,7 @@ StatusCode JpsiKK::execute()
 				fEvent.uu = 1;
 				event_with_muons++;
 				break;
-			case default:
+			default:
 				continue;
 		}
 		fEvent.ngood_charged_track = good_charged_tracks.size();
