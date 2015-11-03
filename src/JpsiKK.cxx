@@ -339,13 +339,9 @@ StatusCode JpsiKK::execute()
 			Pkf.resize(4);
 			std::vector<HepLorentzVector> Pp = psh.getMomentum(*chan);
 			std::vector<HepLorentzVector> Pm = nsh.getMomentum(*chan);
-			cout << Pp[2].px() << " " <<  Pp[2].py() <<  Pp[2].pz() << Pp[2].e() << endl;
-			cout << Pm[3].px() << " " <<  Pm[3].py() <<  Pm[3].pz() << Pm[3].e() << endl;
 
-			cout << Pp[3].px() << " " <<  Pp[3].py() <<  Pp[3].pz() << Pp[3].e() << endl;
-			cout << Pm[2].px() << " " <<  Pm[2].py() <<  Pm[2].pz() << Pm[2].e() << endl;
-
-			for(int k=0;k<Pkf.size();k++)
+			std::swap(Pp[2], Pp[3]);
+			for(int k=0;i<2;k++)
 			{
 				Pkf[k] = 0.5*(Pp[k]+Pm[k]);
 			}
