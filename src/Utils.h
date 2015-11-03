@@ -201,22 +201,6 @@ inline std::list<EvtRecTrackIterator> createGoodNeutralTrackList(
 //  return Pmis.m2();
 //}
 
-inline double getMissingMass2(TrackVector_t & T, std::vector<int> & pid)
-{
-	HepLorentzVector Ptotal = getTotalMomentum();
-	std::vector<HepLorentzVector> P(T.size());
-	HepLorentzVector Psum;
-	for(int i=0; i<T.size(); i++)
-	{
-		if(!(*T[i])->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating missing mass (getMissingMass2)");
-    RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
-		P[i] =  mdcTrk->p4(XMASS[pid[i]]);
-		Psum+=P[i];
-	}
-  HepLorentzVector Pmis = Ptotal - Psum;
-  return Pmis.m2();
-}
-
 inline double getMissingMass2(double Wcm,  TrackVector_t & T, std::vector<int> & pid)
 {
 	HepLorentzVector Ptotal = getTotalMomentum(Wcm);
