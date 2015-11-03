@@ -25,6 +25,8 @@ void RootMdc::init_tuple(void)
 	tuple->addItem ("Mrec", Mrec); //array size must be = 4
 	tuple->addItem ("npid", npid,0,5); 
 	tuple->addIndexedItem ("M23", npid, M23);
+	tuple->addIndexedItem ("M12", npid, M23);
+	tuple->addIndexedItem ("M03", npid, M03);
 	tuple->addIndexedItem ("Mmis", npid, Mmis);
 }
 
@@ -79,12 +81,15 @@ void RootMdc::fill_mass(TrackVector_t & tracks,   EvtRecTrackIterator & end)
 	{
 		if(tracks[2] != end && tracks[3] != end)
 		{
-			std::vector<int> pids(2, pid);
-			TrackVector_t T(2);
-			T[0] = tracks[2];
-			T[1] = tracks[3];
-			M23[pid] = sqrt(getInvariantMass2(T, pids));
-			Mmis[pid] = sqrt(getMissingMass2(T, pids));
+			std::vector<int> pids(4);
+			pids[0] = ID_PION;
+			pids[1] = ID_PION;
+			pids[2] = pid;
+			pids[3] = pid;
+			M23[pid] = sqrt(getInvariantMass2(pids[2], tracks[2], pids[3], tracks[3]));
+			M12[pid] = sqrt(getInvariantMass2(pids[1], tracks[1], pids[2], tracks[2]));
+			M03[pid] = sqrt(getInvariantMass2(pids[0], tracks[0], pids[3], tracks[3]));
+			Mmis[pid] = sqrt(getMissingMass2(tracks, pids));
 		}
 		else
 		{
@@ -98,10 +103,14 @@ void RootMdc::fill_mass(TrackVector_t & tracks,   EvtRecTrackIterator & end)
 			if(tracks[2] != end)
 			{
 				T[2] = tracks[2];
+				M12[pid]  = sqrt(getInvariantMass2(pids[1], tracks[1], pid, tracks[2]));
+				M03[pid]  = 0;
 			}
 			if(tracks[3] != end)
 			{
 				T[2] = tracks[3];
+				M12[pid]  = 0;
+				M03[pid]  = sqrt(getInvariantMass2(pids[1], tracks[1], pid, tracks[3]));
 			}
 			M23[pid]  = 0;
 			Mmis[pid]  = sqrt(getMissingMass2(T, pids));

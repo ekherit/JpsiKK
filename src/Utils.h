@@ -175,6 +175,17 @@ inline double getInvariantMass2(TrackVector_t & T, std::vector<int> & pid)
   return Psum.m2();
 }
 
+inline double getInvariantMass2(int pid1,  EvtRecTrackIterator & t1,  int pid2, EvtRecTrackIterator & t2)
+{
+	std::vector<int> pids(2);
+	pids[0] = pid1;
+	pids[1] = pid2;
+	TrackVector_t T(2);
+	T[0] = t1;
+	T[1] = t2;
+	return getInvariantMass2(T, pids);
+}
+
 inline double getPionRecoilMass(double Wcm,  EvtRecTrackIterator & t1,  EvtRecTrackIterator & t2)
 {
 	std::vector<int> pid(2, ID_PION);

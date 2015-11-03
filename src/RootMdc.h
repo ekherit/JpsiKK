@@ -30,6 +30,8 @@ struct RootMdc : public RootTuple
 	NTuple::Item<double> Mrec;
 	NTuple::Item<long> npid;
 	NTuple::Array<double>  M23;
+	NTuple::Array<double>  M12;
+	NTuple::Array<double>  M03;
 	NTuple::Array<double>  Mmis;
 
 	virtual void init(void);
