@@ -251,7 +251,7 @@ StatusCode JpsiKK::execute()
 			if(in(p, cfg.MIN_PION_MOMENTUM, cfg.MAX_PION_MOMENTUM)) 
 			{
 				if(q>0) positive_pion_tracks.push_back(itTrk);
-				if(q<0) negative_charged_tracks.push_back(itTrk);
+				if(q<0) negative_pion_tracks.push_back(itTrk);
 			}
 			//preselect muon and kaon candidates
 			if(in(p, std::min(cfg.MIN_KAON_MOMENTUM, cfg.MIN_MUON_MOMENTUM), std::max(cfg.MAX_KAON_MOMENTUM, cfg.MAX_MUON_MOMENTUM)))
