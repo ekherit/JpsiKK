@@ -147,8 +147,8 @@ bool kinematic_fit(
     for(int i=0;i<kft.P.size();i++)
     {
       kft.P[i] = kmfit->pfit(i);
-			cout << "pfit[" << i << "]" << kft.P[i].px() << " " << kft.P[i].py() << " " << kft.P[i].pz() << " " << kft.P[i].E() << endl; 
-			cout << "wtrp[" << i << "]" << kmfit->wTrackInfit()[i].p().px() << " " << kmfit->wTrackInfit()[i].p().py() << " " << kmfit->wTrackInfit()[i].p().pz() << " " << kmfit->wTrackInfit()[i].p().E() << endl; 
+			cout << "pfit[" << i << "]" << kft.P[i].px() << " " << kft.P[i].py() << " " << kft.P[i].pz() << " " << kft.P[i].e() << endl; 
+			cout << "wtrp[" << i << "]" << kmfit->wTrackInfit()[i].p().px() << " " << kmfit->wTrackInfit()[i].p().py() << " " << kmfit->wTrackInfit()[i].p().pz() << " " << kmfit->wTrackInfit()[i].p().e() << endl; 
     }
 		kft.success = true;
   }
