@@ -241,37 +241,27 @@ StatusCode JpsiKK::execute()
     bool barrel = c < cfg.EMC_BARREL_MAX_COS_THETA;
     if(barrel) 
     {
-      if(q>0) 
-      {
-        positive_charged_tracks.push_back(itTrk);
-        if(cfg.MIN_PION_MOMENTUM < p && p<cfg.MAX_PION_MOMENTUM) 
-        {
-          positive_pion_tracks.push_back(itTrk);
-        }
-        if(p>std::min(cfg.MIN_KAON_MOMENTUM, cfg.MIN_MUON_MOMENTUM))
-        {
-          if((*itTrk)->isEmcShowerValid())
-          {
-            other_positive_tracks.push_back(itTrk);
-          }
-        }
-      }
-      if(q<0) 
-      {
-        negative_charged_tracks.push_back(itTrk);
-        if(cfg.MIN_PION_MOMENTUM < p &&  p<cfg.MAX_PION_MOMENTUM) 
-        {
-          negative_pion_tracks.push_back(itTrk);
-        }
-        if(p>std::min(cfg.MIN_KAON_MOMENTUM, cfg.MIN_MUON_MOMENTUM))
-        {
-          if((*itTrk)->isEmcShowerValid())
-          {
-            other_negative_tracks.push_back(itTrk);
-          }
-        }
-      }
+			//fill charged tracks list. It will not be used in selection
       charged_tracks.push_back(itTrk);
+			//fill positive and negative chargned track list not used in selection
+			if(q>0) positive_charged_tracks.push_back(itTrk);
+			if(q<0) negative_charged_tracks.push_back(itTrk);
+
+			//preselect pion candidates
+			if(in(p, cfg.MIN_PION_MOMENTUM, cfg.MAX_PION_MOMENTUM)) 
+			{
+				if(q>0) positive_pion_tracks.push_back(itTrk);
+				if(q<0) negative_charged_tracks.push_back(itTrk);
+			}
+			//preselect muon and kaon candidates
+			if(in(p, std::min(cfg.MIN_KAON_MOMENTUM, cfg.MIN_MUON_MOMENTUM), std::min(cfg.MAX_KAON_MOMENTUM, cfg.MAX_MUON_MOMENTUM)))
+			{
+				if((*itTrk)->isEmcShowerValid())
+				{
+					if(q>0) other_positive_tracks.push_back(itTrk);
+					if(q<0) other_negative_tracks.push_back(itTrk);
+				}
+			}
     }
   }
 
@@ -281,9 +271,7 @@ StatusCode JpsiKK::execute()
     for(TrackList_t::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
     {
       TrackPair_t pair(*i,*j);
-      //double M_recoil = get_recoil__mass(pair, PION_MASS,  cfg.CENTER_MASS_ENERGY);
-      double M_recoil = getPionRecoilMass(*i, *j);
-      if(cfg.MIN_RECOIL_MASS < M_recoil && M_recoil < cfg.MAX_RECOIL_MASS) 
+      if( in(getPionRecoilMass(*i, *j),  cfg.MIN_RECOIL_MASS, cfg.MAX_RECOIL_MASS)) 
       {
         pion_pairs.push_back(pair);
       }
@@ -296,8 +284,7 @@ StatusCode JpsiKK::execute()
 		//find the best pion pair using closest value to JPSI_MASS
 		for(TrackPairList_t::iterator p=pion_pairs.begin();p!=pion_pairs.end();p++)
 		{
-			if(fabs(get_recoil__mass(*p,PION_MASS, cfg.CENTER_MASS_ENERGY) - JPSI_MASS) <  fabs(get_recoil__mass(pion_pair,PION_MASS, cfg.CENTER_MASS_ENERGY) - JPSI_MASS)) pion_pair = *p;
-			//if(fabs(getPionRecoilMass(cfg.CENTER_MASS_ENERGY, p->first,  p->second) - JPSI_MASS) <  fabs(getPionRecoilMass(cfg.CENTER_MASS_ENERGY)get_recoil__mass(pion_pair,PION_MASS, cfg.CENTER_MASS_ENERGY) - JPSI_MASS)) pion_pair = *p;
+			if(fabs(getPionRecoilMass(p->first,  p->second)- JPSI_MASS) <  fabs(getPionRecoilMass(pion_pair.first,  pion_pair.second) - JPSI_MASS)) pion_pair = *p;
 		}
 	}
 	//now we have one pion pair candidate
@@ -491,7 +478,7 @@ void JpsiKK::init_tuple(A & a,  const char * dir, const char * title)
 void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  TrackVector_t & Tracks)
 {
   SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
-	fEvent.fill(Pkf,  cfg.CENTER_MASS_ENERGY);
+	fEvent.fill(Pkf);
 	//fPid.ntrack=4;
 	fMdc.T.ntrack=4;
 	fDedx.ntrack=4;
@@ -506,7 +493,7 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 		fDedx.fill(i,  Tracks[i]);
 		fTof.fill (i,  Tracks[i]);
 	}
-	fMdc.fill_mass(cfg.CENTER_MASS_ENERGY,  Tracks,  tracks_end);
+	fMdc.fill_mass(Tracks,  tracks_end);
 	//Monte Carlo information
 	if(fEvent.run<0)
 	{

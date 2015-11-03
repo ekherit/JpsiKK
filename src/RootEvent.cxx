@@ -67,9 +67,9 @@ void RootEvent::init(void)
 {
 }
 
-void RootEvent::fill(const std::vector<HepLorentzVector> & Pkf,  double CENTER_MASS_ENERGY)
+void RootEvent::fill(const std::vector<HepLorentzVector> & Pkf)
 {
-  M.Mrec = (getTotalMomentum(CENTER_MASS_ENERGY) - Pkf[0] - Pkf[1]).m();
+  M.Mrec = (getTotalMomentum() - Pkf[0] - Pkf[1]).m();
 
   M.M012 = (Pkf[0]+Pkf[1]+Pkf[2]).m();
   M.M013 = (Pkf[0]+Pkf[1]+Pkf[3]).m();

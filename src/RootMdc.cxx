@@ -71,7 +71,7 @@ void RootMdc::fill(int i, EvtRecTrackIterator & track)
 	}
 }
 
-void RootMdc::fill_mass(double Wcm,  TrackVector_t & tracks,   EvtRecTrackIterator & end)
+void RootMdc::fill_mass(TrackVector_t & tracks,   EvtRecTrackIterator & end)
 {
 	npid=5;
 
@@ -84,7 +84,7 @@ void RootMdc::fill_mass(double Wcm,  TrackVector_t & tracks,   EvtRecTrackIterat
 			T[0] = tracks[2];
 			T[1] = tracks[3];
 			M23[pid] = sqrt(getInvariantMass2(T, pids));
-			Mmis[pid] = sqrt(getMissingMass2(Wcm, T, pids));
+			Mmis[pid] = sqrt(getMissingMass2(T, pids));
 		}
 		else
 		{
@@ -104,8 +104,8 @@ void RootMdc::fill_mass(double Wcm,  TrackVector_t & tracks,   EvtRecTrackIterat
 				T[2] = tracks[3];
 			}
 			M23[pid]  = 0;
-			Mmis[pid]  = sqrt(getMissingMass2(Wcm, T, pids));
+			Mmis[pid]  = sqrt(getMissingMass2(T, pids));
 		}
 	}
-	Mrec = getPionRecoilMass(Wcm, tracks[0],  tracks[1]);
+	Mrec = getPionRecoilMass(tracks[0],  tracks[1]);
 }

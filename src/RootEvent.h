@@ -67,5 +67,5 @@ struct RootEvent : public RootTuple
 	virtual void init(void);
 	virtual void init_tuple(void);
 
-	virtual void fill(const std::vector<HepLorentzVector> & Pkf,  double W);
+	virtual void fill(const std::vector<HepLorentzVector> & Pkf);
 };
