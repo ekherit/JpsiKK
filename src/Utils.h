@@ -141,66 +141,6 @@ inline std::list<EvtRecTrackIterator> createGoodNeutralTrackList(
 
 
 
-//inline double get_invariant_mass2(TrackPair_t & pair, double mass)
-//{
-//  EvtRecTrackIterator  itTrk[2] = {pair.first, pair.second};
-//  HepLorentzVector  P[2];
-//  for(int k=0;k<2;k++)
-//  {
-//    if(!(*itTrk[k])->isMdcTrackValid()) break; 
-//    RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
-//    P[k] = mdcTrk->p4(mass);
-//  }
-//  HepLorentzVector P_sum = P[0]+P[1];
-//  return P_sum.m2();
-//}
-//
-//inline double get_recoil__mass(EvtRecTrackIterator & trk1, EvtRecTrackIterator & trk2, double mass,  double W /*  total energy */)
-//{
-//  EvtRecTrackIterator  itTrk[2] = {trk1, trk2};
-//  HepLorentzVector  P[2];
-//  for(int k=0;k<2;k++)
-//  {
-//    if(!(*itTrk[k])->isMdcTrackValid()) break; 
-//    RecMdcTrack *mdcTrk = (*itTrk[k])->mdcTrack();
-//    P[k] = mdcTrk->p4(mass);
-//  }
-//  HepLorentzVector P_psip(W*sin(0.011),0,0,W); //initial vector of psip
-//  HepLorentzVector P_sum = P[0]+P[1];
-//  HepLorentzVector P_recoil = P_psip - P_sum;
-//  return P_recoil.m();
-//}
-//
-//inline double get_recoil__mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> p, double mass,  double W)
-//{
-//  return get_recoil__mass(p.first, p.second, mass,  W);
-//}
-//
-//
-//inline double get_missing_mass(std::pair<EvtRecTrackIterator, EvtRecTrackIterator> pions, std::pair<EvtRecTrackIterator, EvtRecTrackIterator> kaons,  double W)
-//{
-//  EvtRecTrackIterator  PionTrk[2] = {pions.first, pions.second};
-//  EvtRecTrackIterator  KaonTrk[2] = {kaons.first, kaons.second};
-//  HepLorentzVector P_psip(W*sin(0.011),0,0,W); //initial vector of psip
-//  HepLorentzVector  pionP[2];
-//  HepLorentzVector  kaonP[2];
-//  for(int k=0;k<2;k++)
-//  {
-//    pionP[k] = HepLorentzVector(0,0,0,0);
-//    if(!(*PionTrk[k])->isMdcTrackValid()) break; 
-//    RecMdcTrack *mdcTrk = (*PionTrk[k])->mdcTrack();
-//    pionP[k] = mdcTrk->p4(PION_MASS);
-//  }
-//  for(int k=0;k<2;k++)
-//  {
-//    kaonP[k] = HepLorentzVector(0,0,0,0);
-//    if(!(*KaonTrk[k])->isMdcTrackValid()) break; 
-//    RecMdcTrack *mdcTrk = (*KaonTrk[k])->mdcTrack();
-//    kaonP[k] = mdcTrk->p4(KAON_MASS);
-//  }
-//  HepLorentzVector Pmis = P_psip - pionP[0] - pionP[1] - kaonP[0] - kaonP[1];
-//  return Pmis.m2();
-//}
 
 inline double getMissingMass2(double Wcm,  TrackVector_t & T, std::vector<int> & pid)
 {

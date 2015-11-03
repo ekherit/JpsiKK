@@ -32,6 +32,7 @@ struct KinematicFit_t
 {
 	bool success;
 	double chi2;
+	std::vector<WTrackParameter>  wtracks;
 	std::vector<HepLorentzVector> P;
 };
 
@@ -77,11 +78,16 @@ bool vertex_fit(const std::vector<WTrackParameter> & input_tracks,  std::vector<
 
 bool kinematic_fit(
 		std::vector<int> & pids,  //  particle id for all supposed tracks in event 
-		const std::vector<EvtRecTrackIterator> & Tracks,  // list of registered tracks it supposed to be less then pids size
-    std::vector<HepLorentzVector> & P,     //4momentum fit result
-    double & chi2,  //chi2 result of the fit, 
-		const double W //center of mass energy
+		const std::vector<EvtRecTrackIterator> & Tracks,
+		KinematicFit_t & kft
     )
+//bool kinematic_fit(
+//		std::vector<int> & pids,  //  particle id for all supposed tracks in event 
+//		const std::vector<EvtRecTrackIterator> & Tracks,  // list of registered tracks it supposed to be less then pids size
+//    std::vector<HepLorentzVector> & P,     //4momentum fit result
+//    double & chi2,  //chi2 result of the fit, 
+//		const double W //center of mass energy
+//    )
 {
 	std::vector<RecMdcKalTrack*> KalTrk(Tracks.size());
 	std::vector<WTrackParameter> WTrk(Tracks.size());
@@ -125,23 +131,32 @@ bool kinematic_fit(
 		kmfit->AddMissTrack(i,XMASS[pids[i]]);
 	}
 	//total momentum of tracks
-  kmfit->AddFourMomentum(0,  getTotalMomentum(W));
-  if(!kmfit->Fit(0)) return false;
+  kmfit->AddFourMomentum(0,  getTotalMomentum());
+  if(!kmfit->Fit(0)) 
+	{
+		kft.success = false;
+		return false;
+	}
   bool oksq = kmfit->Fit();
   if(oksq) 
   {
-    chi2  = kmfit->chisq();
-		P.resize(pids.size());
+    kft.chi2  = kmfit->chisq();
+		kft.wtracks = kmfit->wTrackInfit();
+		kft.wtracks.resize(pids.size());
+		kft.P.resize(pids.size());
     for(int i=0;i<P.size();i++)
     {
-      P[i] = kmfit->pfit(i);
+      kft.P[i] = kmfit->pfit(i);
+			cout << "pfit[" << i << "]" << kft.P[i].px() << " " << kft.P[i].py() << " " << kft.P[i].pz() << " " << kft.P[i].E() << endl; 
+			cout << "wtrp[" << i << "]" << kmfit->wTrackInfit()[i].p().px() << " " << kmfit->wTrackInfit()[i].p().py() << " " << kmfit->wTrackInfit()[i].p().pz() << " " << kmfit->wTrackInfit()[i].p().E() << endl; 
     }
+		kft.success = true;
   }
   return oksq;
 }
 
 
-inline std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator> & Tracks,  const double CENTER_MASS_ENERGY)
+inline std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator> & Tracks)
 {
 		/* Tracks[0] - pi-
 		 * Tracks[1] - pi+
@@ -158,9 +173,8 @@ inline std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator>
 		pids[3] = pid;
 		KinematicFit_t & k = theKFV[pid];
 		k.chi2=std::numeric_limits<double>::max();
-		k.P.resize(5);
 		k.success = false;
-		k.success = kinematic_fit(pids, Tracks, k.P,  k.chi2,  CENTER_MASS_ENERGY);
+		kinematic_fit(pids, Tracks, k);
 	}
 	return theKFV;
 }

@@ -217,7 +217,7 @@ struct SelectionHelper_t
 		tracks[0] = pion_pair.first;
 		tracks[1] = pion_pair.second;
 		tracks[2] = track;
-		KF = ::kinfit(tracks,  cfg->CENTER_MASS_ENERGY);
+		KF = ::kinfit(tracks);
 	}
 
 	void select_channel_by_kinematic_fit(void)
