@@ -254,7 +254,7 @@ StatusCode JpsiKK::execute()
 				if(q<0) negative_charged_tracks.push_back(itTrk);
 			}
 			//preselect muon and kaon candidates
-			if(in(p, std::min(cfg.MIN_KAON_MOMENTUM, cfg.MIN_MUON_MOMENTUM), std::min(cfg.MAX_KAON_MOMENTUM, cfg.MAX_MUON_MOMENTUM)))
+			if(in(p, std::min(cfg.MIN_KAON_MOMENTUM, cfg.MIN_MUON_MOMENTUM), std::max(cfg.MAX_KAON_MOMENTUM, cfg.MAX_MUON_MOMENTUM)))
 			{
 				if((*itTrk)->isEmcShowerValid())
 				{
@@ -271,6 +271,7 @@ StatusCode JpsiKK::execute()
     for(TrackList_t::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
     {
       TrackPair_t pair(*i,*j);
+			cout << "Pion recoil mass = " << getPionRecoilMass(*i, *j) << endl;
       if( in(getPionRecoilMass(*i, *j),  cfg.MIN_RECOIL_MASS, cfg.MAX_RECOIL_MASS)) 
       {
         pion_pairs.push_back(pair);
