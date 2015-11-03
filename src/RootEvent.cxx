@@ -17,6 +17,7 @@
 #include "RootEvent.h"
 #include "PhysConst.h"
 #include "utils.h"
+#include "Utils.h"
 
 void RootEvent::init_tuple(void)
 {
@@ -68,9 +69,7 @@ void RootEvent::init(void)
 
 void RootEvent::fill(const std::vector<HepLorentzVector> & Pkf,  double CENTER_MASS_ENERGY)
 {
-  HepLorentzVector Pcm(CENTER_MASS_ENERGY*sin(0.011),0,0,CENTER_MASS_ENERGY); 
-
-  M.Mrec = (Pcm - Pkf[0] - Pkf[1]).m();
+  M.Mrec = (getTotalMomentum(CENTER_MASS_ENERGY) - Pkf[0] - Pkf[1]).m();
 
   M.M012 = (Pkf[0]+Pkf[1]+Pkf[2]).m();
   M.M013 = (Pkf[0]+Pkf[1]+Pkf[3]).m();

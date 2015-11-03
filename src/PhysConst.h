@@ -30,4 +30,4 @@ extern const double XMASS[5];
 
 
 const double BEPC_CROSSING_ANGLE=0.022;
-//double BEPC_BEAM_ENERGY
+extern double BEAM_CENTER_MASS_ENERGY;

@@ -75,24 +75,8 @@ typedef HepGeom::Point3D<double> HepPoint3D;
 #include "KinematicFit.h"
 
 
-enum
-{
-	OTHER_NEGATIVE_TRACK=1, 
-	OTHER_POSITIVE_TRACK=2, 
-	OTHER_TWO_TRACKS=3, 
-	OTHER_NO_TRACK=0
-};
-
-enum
-{
-	CHAN_KAONS = ID_KAON, 
-	CHAN_MUONS = ID_MUON, 
-	CHAN_KAON_MUON  = 10, 
-	CHAN_MUON_KAON  = 11
-};
-
-
 const  double XMASS[5] = {KAON_MASS, MUON_MASS, ELECTRON_MASS, PION_MASS, PROTON_MASS};
+double BEAM_CENTER_MASS_ENERGY = PSIP_MASS;
 
 JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   Algorithm(name, pSvcLocator)
@@ -165,6 +149,7 @@ StatusCode JpsiKK::initialize(void)
   event_with_protons=0;
   good_kinematic_fit=0;
 	if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
+	BEAM_CENTER_MASS_ENERGY = cfg.CENTER_MASS_ENERGY;
 
 	try
 	{
@@ -296,7 +281,8 @@ StatusCode JpsiKK::execute()
     for(TrackList_t::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
     {
       TrackPair_t pair(*i,*j);
-      double M_recoil = get_recoil__mass(pair, PION_MASS,  cfg.CENTER_MASS_ENERGY);
+      //double M_recoil = get_recoil__mass(pair, PION_MASS,  cfg.CENTER_MASS_ENERGY);
+      double M_recoil = getPionRecoilMass(*i, *j);
       if(cfg.MIN_RECOIL_MASS < M_recoil && M_recoil < cfg.MAX_RECOIL_MASS) 
       {
         pion_pairs.push_back(pair);
@@ -304,7 +290,6 @@ StatusCode JpsiKK::execute()
     }
   //SELECTION CODE we must have at list one pion pair
   if(pion_pairs.empty()) return StatusCode::SUCCESS; //we must have at list one pion pair
-	//if(pion_pairs.size()!=1) return StatusCode::SUCCESS; //exacly one pion pair
   TrackPair_t pion_pair = pion_pairs.front();
 	if(pion_pairs.size()>1)
 	{
@@ -312,19 +297,13 @@ StatusCode JpsiKK::execute()
 		for(TrackPairList_t::iterator p=pion_pairs.begin();p!=pion_pairs.end();p++)
 		{
 			if(fabs(get_recoil__mass(*p,PION_MASS, cfg.CENTER_MASS_ENERGY) - JPSI_MASS) <  fabs(get_recoil__mass(pion_pair,PION_MASS, cfg.CENTER_MASS_ENERGY) - JPSI_MASS)) pion_pair = *p;
+			//if(fabs(getPionRecoilMass(cfg.CENTER_MASS_ENERGY, p->first,  p->second) - JPSI_MASS) <  fabs(getPionRecoilMass(cfg.CENTER_MASS_ENERGY)get_recoil__mass(pion_pair,PION_MASS, cfg.CENTER_MASS_ENERGY) - JPSI_MASS)) pion_pair = *p;
 		}
 	}
 	//now we have one pion pair candidate
 
   //SELECTION CODE
-  //keep only specific signature
   //if(positive_charged_tracks.size()!=2 || negative_charged_tracks.size()!=2) return StatusCode::SUCCESS;
-
-  //log << MSG::ERROR << "good charged tracks: " << charged_tracks.size() << " (" << negative_charged_tracks.size() << ", " << positive_charged_tracks.size() << endmsg;
-  //log << MSG::ERROR << "pions: " << negative_pion_tracks.size()  << ", " << positive_pion_tracks.size() << endmsg;
-  //log << MSG::ERROR << "other: " << other_negative_tracks.size()  << ", " << other_positive_tracks.size() << endmsg;
-  //log << MSG::ERROR << "pion pairs: " << pion_pairs.size() << endmsg;
-
 
   //if no other particles
 	if(other_negative_tracks.empty() && other_positive_tracks.empty()) return StatusCode::SUCCESS;
