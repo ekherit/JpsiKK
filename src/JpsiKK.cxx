@@ -341,7 +341,7 @@ StatusCode JpsiKK::execute()
 			std::vector<HepLorentzVector> Pm = nsh.getMomentum(*chan);
 
 			std::swap(Pp[2], Pp[3]);
-			for(int k=0;i<2;k++)
+			for(int k=0;k<4;k++)
 			{
 				Pkf[k] = 0.5*(Pp[k]+Pm[k]);
 			}
