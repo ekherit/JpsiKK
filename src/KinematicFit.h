@@ -34,6 +34,11 @@ struct KinematicFit_t
 	double chi2;
 	std::vector<WTrackParameter>  wtracks;
 	std::vector<HepLorentzVector> P;
+	KinematicFit_t(void)
+	{
+		chi2=std::numeric_limits<double>::max();
+		success = false;
+	}
 };
 
 bool vertex_fit(const std::vector<WTrackParameter> & input_tracks,  std::vector<WTrackParameter> & output_tracks)
@@ -142,13 +147,12 @@ bool kinematic_fit(
   {
     kft.chi2  = kmfit->chisq();
 		kft.wtracks = kmfit->wTrackInfit();
-		kft.wtracks.resize(pids.size());
 		kft.P.resize(pids.size());
     for(int i=0;i<kft.P.size();i++)
     {
       kft.P[i] = kmfit->pfit(i);
-			cout << "pfit[" << i << "]" << kft.P[i].px() << " " << kft.P[i].py() << " " << kft.P[i].pz() << " " << kft.P[i].e() << endl; 
-			cout << "wtrp[" << i << "]" << kmfit->wTrackInfit()[i].p().px() << " " << kmfit->wTrackInfit()[i].p().py() << " " << kmfit->wTrackInfit()[i].p().pz() << " " << kmfit->wTrackInfit()[i].p().e() << endl; 
+			//cout << "pfit[" << i << "]" << kft.P[i].px() << " " << kft.P[i].py() << " " << kft.P[i].pz() << " " << kft.P[i].e() << endl; 
+			//cout << "wtrp[" << i << "]" << kmfit->wTrackInfit()[i].p().px() << " " << kmfit->wTrackInfit()[i].p().py() << " " << kmfit->wTrackInfit()[i].p().pz() << " " << kmfit->wTrackInfit()[i].p().e() << endl; 
     }
 		kft.success = true;
   }
@@ -171,10 +175,7 @@ inline std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator>
 	{
 		pids[2] = pid;
 		pids[3] = pid;
-		KinematicFit_t & k = theKFV[pid];
-		k.chi2=std::numeric_limits<double>::max();
-		k.success = false;
-		kinematic_fit(pids, Tracks, k);
+		kinematic_fit(pids, Tracks, theKFV[pid]);
 	}
 	return theKFV;
 }
