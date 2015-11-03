@@ -44,10 +44,9 @@ using CLHEP::HepLorentzVector;
 
 inline HepLorentzVector getTotalMomentum(double Wcm = BEAM_CENTER_MASS_ENERGY)
 {
-	//return HepLorentzVector(Wcm*sin(0.5*BEPC_CROSSING_ANGLE),0,0,Wcm);
-	cout << "In getTotalMomentum: Wcm = " << Wcm << endl;
-	cout << "BEPC_CROSSING_ANGLE = " << BEPC_CROSSING_ANGLE << endl;
 	return HepLorentzVector(Wcm*tan(0.5*BEPC_CROSSING_ANGLE),0,0,Wcm/cos(0.5*BEPC_CROSSING_ANGLE));
+	//I think formula below is wrong 
+	//return HepLorentzVector(Wcm*sin(0.5*BEPC_CROSSING_ANGLE),0,0,Wcm);
 }
 
 inline void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, double phi)
