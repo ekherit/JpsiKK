@@ -144,7 +144,7 @@ bool kinematic_fit(
 		kft.wtracks = kmfit->wTrackInfit();
 		kft.wtracks.resize(pids.size());
 		kft.P.resize(pids.size());
-    for(int i=0;i<P.size();i++)
+    for(int i=0;i<kft.P.size();i++)
     {
       kft.P[i] = kmfit->pfit(i);
 			cout << "pfit[" << i << "]" << kft.P[i].px() << " " << kft.P[i].py() << " " << kft.P[i].pz() << " " << kft.P[i].E() << endl; 
