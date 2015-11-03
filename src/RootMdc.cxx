@@ -25,7 +25,7 @@ void RootMdc::init_tuple(void)
 	tuple->addItem ("Mrec", Mrec); //array size must be = 4
 	tuple->addItem ("npid", npid,0,5); 
 	tuple->addIndexedItem ("M23", npid, M23);
-	tuple->addIndexedItem ("M12", npid, M23);
+	tuple->addIndexedItem ("M12", npid, M12);
 	tuple->addIndexedItem ("M03", npid, M03);
 	tuple->addIndexedItem ("Mmis", npid, Mmis);
 }
