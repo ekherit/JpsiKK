@@ -303,13 +303,15 @@ StatusCode JpsiKK::execute()
 	if(!other_negative_tracks.empty()) 
 	{
 		nsh.kinfit(pion_pair,  other_negative_tracks.front());
-		nsh.totalPass();
+		//nsh.totalPass();
+    nsh.dummyPass();
 	}
 
 	if(!other_positive_tracks.empty()) 
 	{
 		psh.kinfit(pion_pair,  other_positive_tracks.front());
-		psh.totalPass();
+		//psh.totalPass();
+    psh.dummyPass();
 	}
 
 
