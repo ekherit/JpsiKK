@@ -131,6 +131,8 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("MAX_KIN_CHI2", cfg.MAX_KIN_CHI2 = 40); //GeV^2
   declareProperty("MAX_PID_CHI2", cfg.MAX_PID_CHI2 = 40); //GeV^2
 
+  declareProperty("PASS_KIN_PID_CUT", cfg.PASS_KIN_PID_CUT = false); //GeV^2
+
 }
 
 
@@ -300,17 +302,16 @@ StatusCode JpsiKK::execute()
 	SelectionHelper_t psh(cfg); //for positive kinematic fit
 
 
-  bool dummy_pass = true;
 	if(!other_negative_tracks.empty()) 
 	{
 		nsh.kinfit(pion_pair,  other_negative_tracks.front());
-		nsh.totalPass(dummy_pass);
+		nsh.totalPass(cfg.PASS_KIN_PID_CUT);
 	}
 
 	if(!other_positive_tracks.empty()) 
 	{
 		psh.kinfit(pion_pair,  other_positive_tracks.front());
-		psh.totalPass(dummy_pass);
+		psh.totalPass(cfg.PASS_KIN_PID_CUT);
 	}
 
 
