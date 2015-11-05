@@ -85,14 +85,9 @@ bool kinematic_fit(
 		const std::vector<EvtRecTrackIterator> & Tracks,
 		KinematicFit_t & kft
     )
-//bool kinematic_fit(
-//		std::vector<int> & pids,  //  particle id for all supposed tracks in event 
-//		const std::vector<EvtRecTrackIterator> & Tracks,  // list of registered tracks it supposed to be less then pids size
-//    std::vector<HepLorentzVector> & P,     //4momentum fit result
-//    double & chi2,  //chi2 result of the fit, 
-//		const double W //center of mass energy
-//    )
 {
+  kft.P.resize(pids.size());
+  kft.success = false;
 	std::vector<RecMdcKalTrack*> KalTrk(Tracks.size());
 	std::vector<WTrackParameter> WTrk(Tracks.size());
 	for(int i=0;i<Tracks.size();i++)
@@ -138,7 +133,6 @@ bool kinematic_fit(
   kmfit->AddFourMomentum(0,  getTotalMomentum());
   if(!kmfit->Fit(0)) 
 	{
-		kft.success = false;
 		return false;
 	}
   bool oksq = kmfit->Fit();
@@ -146,7 +140,6 @@ bool kinematic_fit(
   {
     kft.chi2  = kmfit->chisq();
 		//kft.wtracks = kmfit->wTrackInfit();
-		kft.P.resize(pids.size());
     for(int i=0;i<kft.P.size();i++)
     {
       kft.P[i] = kmfit->pfit(i);

@@ -300,7 +300,7 @@ StatusCode JpsiKK::execute()
 	SelectionHelper_t psh(cfg); //for positive kinematic fit
 
 
-  bool dummy_pass = false;
+  bool dummy_pass = true;
 	if(!other_negative_tracks.empty()) 
 	{
 		nsh.kinfit(pion_pair,  other_negative_tracks.front());
