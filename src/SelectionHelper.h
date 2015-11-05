@@ -271,32 +271,15 @@ struct SelectionHelper_t
 		return true;
 	}
 
-	bool totalPass(void)
+	bool totalPass(bool dummy=false)
 	{
 		pass = false;
 		select_channel_by_kinematic_fit(); //after this we allways has channel
 		passKinematic();
 		passElectrons();
 		passPid();
-		//clog << "channel = " << channel << endl;
-		//if(!passKinematic()) return false;
-		//clog << "pass_kinematic = " << pass_kinematic << endl;
-		//if(!passElectrons()) return false;
-		//clog << "pass_electrons = " << pass_electron << endl;
-		//if(!passPid()) return false;
-		//clog << "pass_pid = " << pass_pid << endl;
-		//clog << "kin_chi2 = " << KF[channel].chi2 << " " ;
-		//clog << "pass_pid: " << pass_pid << "  pid_chi2 = " <<  pid_chi2[channel] << " " ;
-		//clog << "pass_electron: " << pass_electron << endl;
 		pass = pass_kinematic && pass_electron && pass_pid;
-		return pass;
-	}
-
-	bool dummyPass(void)
-	{
-		select_channel_by_kinematic_fit();
-		setPid();
-		pass = true;
+    if(dummy)  pass=true;
 		return pass;
 	}
 
