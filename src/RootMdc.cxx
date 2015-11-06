@@ -58,7 +58,7 @@ void RootMdc::fill(int i, EvtRecTrackIterator & track)
 	T.y[i]  = mdcTrk->y();
 	T.z[i]  = mdcTrk->z();
 	double rvxy,rvz,rvphi;
-	calculate_vertex(mdcTrk,rvxy,rvz,rvphi); 
+	calculate_vertex((*track)->mdcTrack(),rvxy,rvz,rvphi); 
 	T.vxy[i] = rvxy;
 	T.vz[i]  = rvz; 
 	T.vphi[i] = rvphi; 
