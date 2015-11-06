@@ -41,7 +41,8 @@ void RootMdc::init(void)
 void RootMdc::fill(int i, EvtRecTrackIterator & track)
 {
 	if(!(*track)->isMdcTrackValid()) return; 
-	RecMdcTrack  *mdcTrk = (*track)->mdcTrack();
+	//RecMdcTrack  *mdcTrk = (*track)->mdcTrack();
+  RecMdcKalTrack * mdcTrk = (*track)->mdcKalTrack();
 	T.trackId[i] = mdcTrk->trackId();
 	T.q[i] = mdcTrk->charge(); 
 	T.p[i] = mdcTrk->p();
