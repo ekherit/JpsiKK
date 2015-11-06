@@ -186,6 +186,17 @@ inline double getInvariantMass2(int pid1,  EvtRecTrackIterator & t1,  int pid2, 
 	return getInvariantMass2(T, pids);
 }
 
+inline double getInvariantMass2(int pid, EvtRecTrackIterator & t1, HepLorentzVector & v)
+{
+  if(!(*Tt)->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating invariant mass (getInvariantMass2)");
+  RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
+  return (v + mdcTrk->p4(XMASS[pid])).m2();
+}
+
+
+
+
+
 inline double getPionRecoilMass(double Wcm,  EvtRecTrackIterator & t1,  EvtRecTrackIterator & t2)
 {
 	std::vector<int> pid(2, ID_PION);

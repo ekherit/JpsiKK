@@ -73,7 +73,7 @@ void RootMdc::fill(int i, EvtRecTrackIterator & track)
 	}
 }
 
-void RootMdc::fill_mass(TrackVector_t & tracks,   EvtRecTrackIterator & end)
+void RootMdc::fill_mass(TrackVector_t & tracks,   EvtRecTrackIterator & end, std::vector<HepLorentzVector> & P)
 {
 	npid=5;
 
@@ -105,14 +105,16 @@ void RootMdc::fill_mass(TrackVector_t & tracks,   EvtRecTrackIterator & end)
 				T[2] = tracks[2];
 				M12[pid]  = sqrt(getInvariantMass2(pids[1], tracks[1], pid, tracks[2]));
 				M03[pid]  = 0;
+        M23[pid]  = sqrt(getInvariantMass2(pid,tracks[2], P[3]));
 			}
 			if(tracks[3] != end)
 			{
 				T[2] = tracks[3];
 				M12[pid]  = 0;
-				M03[pid]  = sqrt(getInvariantMass2(pids[1], tracks[1], pid, tracks[3]));
+				M03[pid]  = sqrt(getInvariantMass2(pids[0], tracks[0], pid, tracks[3]));
+        M23[pid]  = sqrt(getInvariantMass2(pid,tracks[3], P[2]));
 			}
-			M23[pid]  = 0;
+			//M23[pid]  = 0;
 			Mmis[pid]  = sqrt(getMissingMass2(T, pids));
 		}
 	}

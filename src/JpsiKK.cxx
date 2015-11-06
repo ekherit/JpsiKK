@@ -497,7 +497,7 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 		fDedx.fill(i,  Tracks[i]);
 		fTof.fill (i,  Tracks[i]);
 	}
-	fMdc.fill_mass(Tracks,  tracks_end);
+	fMdc.fill_mass(Tracks,  tracks_end, Pkf);
 	//Monte Carlo information
 	if(fEvent.run<0)
 	{
