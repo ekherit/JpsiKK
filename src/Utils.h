@@ -186,10 +186,10 @@ inline double getInvariantMass2(int pid1,  EvtRecTrackIterator & t1,  int pid2, 
 	return getInvariantMass2(T, pids);
 }
 
-inline double getInvariantMass2(int pid, EvtRecTrackIterator & t1, HepLorentzVector & v)
+inline double getInvariantMass2(int pid, EvtRecTrackIterator & track, HepLorentzVector & v)
 {
-  if(!(*Tt)->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating invariant mass (getInvariantMass2)");
-  RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
+  if(!(*track)->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating invariant mass (getInvariantMass2)");
+  RecMdcTrack *mdcTrk = (*track)->mdcTrack();
   return (v + mdcTrk->p4(XMASS[pid])).m2();
 }
 
