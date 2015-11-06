@@ -73,7 +73,7 @@ void RootMdc::fill(int i, EvtRecTrackIterator & track)
 	}
 }
 
-void RootMdc::fill_mass(TrackVector_t & tracks,   EvtRecTrackIterator & end, std::vector<HepLorentzVector> & P)
+void RootMdc::fill_mass(TrackVector_t & tracks,   EvtRecTrackIterator & end, const std::vector<HepLorentzVector> & P)
 {
 	npid=5;
 
