@@ -192,7 +192,7 @@ inline double getInvariantMass2(int pid, EvtRecTrackIterator & track, const HepL
 {
   if(!(*track)->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating invariant mass (getInvariantMass2)");
   //RecMdcTrack *mdcTrk = (*track)->mdcTrack();
-  RecMdcKalTrack *mdcTrk = (*T[i])->mdcKalTrack();
+  RecMdcKalTrack *mdcTrk = (*track)->mdcKalTrack();
   return (v + mdcTrk->p4(XMASS[pid])).m2();
 }
 
