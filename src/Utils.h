@@ -150,7 +150,8 @@ inline double getMissingMass2(double Wcm,  TrackVector_t & T, std::vector<int> &
 	for(int i=0; i<T.size(); i++)
 	{
 		if(!(*T[i])->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating missing mass (getMissingMass2)");
-    RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
+    //RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
+    RecMdcKalTrack *mdcTrk = (*T[i])->mdcKalTrack();
 		P[i] =  mdcTrk->p4(XMASS[pid[i]]);
 		Psum+=P[i];
 	}
@@ -169,7 +170,8 @@ inline double getInvariantMass2(TrackVector_t & T, std::vector<int> & pid)
 	for(int i=0; i<T.size(); i++)
 	{
 		if(!(*T[i])->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating invariant mass (getInvariantMass2)");
-    RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
+    //RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
+    RecMdcKalTrack *mdcTrk = (*T[i])->mdcKalTrack();
 		Psum += (mdcTrk->p4(XMASS[pid[i]]));;
 	}
   return Psum.m2();
@@ -189,7 +191,8 @@ inline double getInvariantMass2(int pid1,  EvtRecTrackIterator & t1,  int pid2, 
 inline double getInvariantMass2(int pid, EvtRecTrackIterator & track, const HepLorentzVector & v)
 {
   if(!(*track)->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating invariant mass (getInvariantMass2)");
-  RecMdcTrack *mdcTrk = (*track)->mdcTrack();
+  //RecMdcTrack *mdcTrk = (*track)->mdcTrack();
+  RecMdcKalTrack *mdcTrk = (*T[i])->mdcKalTrack();
   return (v + mdcTrk->p4(XMASS[pid])).m2();
 }
 
