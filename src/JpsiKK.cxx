@@ -305,7 +305,7 @@ StatusCode JpsiKK::execute()
 
 
 
-  std::list<SelectionHelper> sh_list;
+  std::list<SelectionHelper_t> sh_list;
   if(neg)
   {
     sh_list.push_back(SelectionHelper_t);
