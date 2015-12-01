@@ -221,7 +221,7 @@ struct SelectionHelper_t
 
 	void kinfit(
 			TrackPair_t & pion_pair,
-			EvtRecTrackIterator & track_minus
+			EvtRecTrackIterator & track_minus,
 			EvtRecTrackIterator & track_plus
 			)
 	{

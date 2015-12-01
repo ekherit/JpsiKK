@@ -143,14 +143,15 @@ StatusCode JpsiKK::initialize(void)
   log << MSG::INFO << "in initialize()" << endmsg;
   event_proceed=0;
   event_write = 0;
-  event_with_kaons=0;
-  event_with_muons=0;
-  positive_kaon_event_number = 0; //count only positive kinematic fit
-  negative_kaon_event_number = 0; //count only negative kinematic fit
-  positive_muon_event_number = 0;
-  negative_muon_event_number = 0;
-  kaons_event_number = 0;
-  muons_event_number = 0;
+  theCounter.clear();
+  //event_with_kaons=0;
+  //event_with_muons=0;
+  //positive_kaon_event_number = 0; //count only positive kinematic fit
+  //negative_kaon_event_number = 0; //count only negative kinematic fit
+  //positive_muon_event_number = 0;
+  //negative_muon_event_number = 0;
+  //kaons_event_number = 0;
+  //muons_event_number = 0;
 
   //event_with_kaons_and_muons=0;
   //event_with_pions=0;
