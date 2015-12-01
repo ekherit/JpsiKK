@@ -132,7 +132,12 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("MAX_PID_CHI2", cfg.MAX_PID_CHI2 = 40); //GeV^2
 
   declareProperty("PASS_KIN_PID_CUT", cfg.PASS_KIN_PID_CUT = false); //GeV^2
-  declareProperty("CHECK_MUC", cfg.CHECK_MUC = true); 
+
+  declareProperty("FILL_MUC", cfg.FILL_MUC = true); 
+  declareProperty("FILL_MDC", cfg.FILL_MDC = true); 
+  declareProperty("FILL_EMC", cfg.FILL_EMC = true); 
+  declareProperty("FILL_TOF", cfg.FILL_TOF = true); 
+  declareProperty("FILL_DEDX", cfg.FILL_DEDX = true); 
 }
 
 

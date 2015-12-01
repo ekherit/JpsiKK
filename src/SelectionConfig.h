@@ -67,6 +67,10 @@ struct SelectionConfig
 	double MAX_PID_CHI2; //maximum chi2 for my PID
 
 
-  bool CHECK_MUC;
+  bool FILL_MDC;
+  bool FILL_EMC;
+  bool FILL_DEDX;
+  bool FILL_TOF;
+  bool FILL_MUC;
 
 };
