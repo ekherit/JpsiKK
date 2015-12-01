@@ -349,7 +349,7 @@ StatusCode JpsiKK::execute()
         }
         if(charge<0 && pos)
         {
-          Tracks[3] = otrk[1];
+          Tracks[3] = other_positive_tracks.front();
         }
         if(charge>0)
         {
@@ -357,7 +357,7 @@ StatusCode JpsiKK::execute()
           std::swap(Tracks[2],  Tracks[3]);
           if(neg)
           {
-            Tracks[2] = otrk[0];
+            Tracks[2] = other_negative_tracks.front();
           }
         }
 
