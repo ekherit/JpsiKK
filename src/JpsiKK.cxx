@@ -399,6 +399,12 @@ StatusCode JpsiKK::execute()
         fEvent.kin_chi2 = sh.getKinChi2(*chan);
         fEvent.pid_chi2 = sh.getPidChi2(*chan);
 
+        for(int pid=0;pid<5;pid++)
+        {
+          fEvent.kchi[pid] = sh.getKinChi2(pid);
+          fEvent.pchi[pid] = sh.getPidChi2(pid);
+        }
+
         fEvent.run=eventHeader->runNumber();
         fEvent.event=eventHeader->eventNumber();
         fEvent.time=eventHeader->time();
