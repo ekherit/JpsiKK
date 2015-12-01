@@ -193,16 +193,19 @@ StatusCode JpsiKK::execute()
 //  if(100 <= event_proceed && event_proceed < 1000 && event_proceed % 100 ==0) isprint = true;
 //  if(1000 <= event_proceed && event_proceed < 10000 && event_proceed % 1000 ==0) isprint = true;
 //  if(10000 <= event_proceed && event_proceed % 10000 ==0) isprint = true;
-
-  bool isprint = event_proceed < 10;
   //isprint |= 10    <= event_proceed && event_proceed < 100 && event_proceed % 10 ==0;
   //isprint |= 100   <= event_proceed && event_proceed < 1000 && event_proceed % 100 ==0;
   //isprint |= 1000  <= event_proceed && event_proceed < 10000 && event_proceed % 1000 ==0;
   //isprint |= 10000 <= event_proceed && event_proceed % 10000 == 0;
-  isprint |= event_proceed % 10    == 0  &&  event_proceed < 10*10    ;
-  isprint |= event_proceed % 100   == 0  &&  event_proceed < 100*10   ;
-  isprint |= event_proceed % 1000  == 0  &&  event_proceed < 1000*10  ;
-  isprint |= event_proceed % 10000 == 0;
+  bool isprint = false;
+  int every = 1;
+  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
+  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
+  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
+  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
+  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
+  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
+  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
   if(isprint)
   {
 		static long nprints  = 0;
@@ -429,17 +432,17 @@ StatusCode JpsiKK::execute()
 
 StatusCode JpsiKK::finalize()
 {
-  std::cout << "============== Selection Result =====================";
+  std::cout << "============== Selection Result =====================" << std::cout;
   printSelectionDigest(true);
   std::cout << "main selection efficiency:" << std::endl;
-  std::cout << "eps4C(K+K) = " << double(theCounter[ID_KAON][0][4])/event_proceed << std::endl;
-  std::cout << "eps4C(u+u) = " << double(theCounter[ID_MUON][0][4])/event_proceed << std::endl;
-  std::cout << "eps4C(K+K)/eps(u+u) = " << double(theCounter[ID_MUON][0][4])/theCounter[ID_MUON][0][4] << std::endl;
+  std::cout << "eps4C(K+K)  = " << double(theCounter[ID_KAON][0][4])/event_proceed << std::endl;
+  std::cout << "eps4C(u+u-) = " << double(theCounter[ID_MUON][0][4])/event_proceed << std::endl;
+  std::cout << "eps4C(K+K)/eps(u+u-) = " << double(theCounter[ID_MUON][0][4])/double(theCounter[ID_MUON][0][4]) << std::endl;
   std::cout << "geometry and tracking efficiency";
-  std::cout << "N4(K+)/(N3(K+)+N4(K+)) = " << theCounter[ID_KAON][+1][4]/(theCounter[ID_KAON][+1][3]  + theCounter[ID_KAON][+1][4]) << std::endl;
-  std::cout << "N4(K-)/(N3(K-)-N4(K-)) = " << theCounter[ID_KAON][-1][4]/(theCounter[ID_KAON][-1][3]  + theCounter[ID_KAON][-1][4]) << std::endl;
-  std::cout << "N4(u+)/(N3(u+)+N4(u+)) = " << theCounter[ID_MUON][+1][4]/(theCounter[ID_MUON][+1][3]  + theCounter[ID_MUON][+1][4]) << std::endl;
-  std::cout << "N4(u-)/(N3(u-)-N4(u-)) = " << theCounter[ID_MUON][-1][4]/(theCounter[ID_MUON][-1][3]  + theCounter[ID_MUON][-1][4]) << std::endl;
+  std::cout << "N4(K+)/(N3(K+)+N4(K+)) = " << double(theCounter[ID_KAON][+1][4])/double(theCounter[ID_KAON][+1][3]  + theCounter[ID_KAON][+1][4]) << std::endl;
+  std::cout << "N4(K-)/(N3(K-)-N4(K-)) = " << double(theCounter[ID_KAON][-1][4])/double(theCounter[ID_KAON][-1][3]  + theCounter[ID_KAON][-1][4]) << std::endl;
+  std::cout << "N4(u+)/(N3(u+)+N4(u+)) = " << double(theCounter[ID_MUON][+1][4])/double(theCounter[ID_MUON][+1][3]  + theCounter[ID_MUON][+1][4]) << std::endl;
+  std::cout << "N4(u-)/(N3(u-)-N4(u-)) = " << double(theCounter[ID_MUON][-1][4])/double(theCounter[ID_MUON][-1][3]  + theCounter[ID_MUON][-1][4]) << std::endl;
   return StatusCode::SUCCESS;
 }
 
@@ -516,25 +519,26 @@ void JpsiKK::writeTuples(void)
 
 void JpsiKK::printSelectionDigest(bool head)
 {
+  int big_width=20;
   int width=15;
   if(head)
   {
-    std::cout << setw(20) << "# event proceed";
-    std::cout << setw(20) << "event written";
-    std::cout << setw(width) << "N4(K+K-)";
-    std::cout << setw(width) << "N3(K+)";
-    std::cout << setw(width) << "N4(K+)";
-    std::cout << setw(width) << "N3(K-)";
-    std::cout << setw(width) << "N4(K-)";
-    std::cout << setw(width) << "N4(u+u-)";
-    std::cout << setw(width) << "N3(u+)";
-    std::cout << setw(width) << "N4(u+)";
-    std::cout << setw(width) << "N3(u-)";
-    std::cout << setw(width) << "N4(u-)";
+    std::cout << setw(big_width) << "# event proceed";
+    std::cout << " " << setw(big_width)    << "event written";
+    std::cout << " " << setw(width) << "N4(K+K-)";
+    std::cout << " " << setw(width) << "N3(K+)";
+    std::cout << " " << setw(width) << "N4(K+)";
+    std::cout << " " << setw(width) << "N3(K-)";
+    std::cout << " " << setw(width) << "N4(K-)";
+    std::cout << " " << setw(width) << "N4(u+u-)";
+    std::cout << " " << setw(width) << "N3(u+)";
+    std::cout << " " << setw(width) << "N4(u+)";
+    std::cout << " " << setw(width) << "N3(u-)";
+    std::cout << " " << setw(width) << "N4(u-)";
     std::cout << endl;
   }
-  std::cout << " " << setw(20)    << event_proceed;
-  std::cout << " " << setw(width) << event_write;
+  std::cout << setw(big_width)    << event_proceed;
+  std::cout << " " << setw(big_width) << event_write;
   int Pids[2] = {ID_KAON,ID_MUON};
   for(int pid = 0; pid < 2; pid++)
   {
