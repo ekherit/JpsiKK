@@ -198,14 +198,14 @@ StatusCode JpsiKK::execute()
   //isprint |= 1000  <= event_proceed && event_proceed < 10000 && event_proceed % 1000 ==0;
   //isprint |= 10000 <= event_proceed && event_proceed % 10000 == 0;
   bool isprint = false;
-  int every = 1;
-  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
-  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
-  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
-  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
-  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
-  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
-  isprint |= event_proceed % every == 0  &&  event_proceed < every*=10;
+  long int every = 1;
+  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
+  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
+  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
+  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
+  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
+  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
+  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
   if(isprint)
   {
 		static long nprints  = 0;
