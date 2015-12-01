@@ -132,7 +132,7 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("MAX_PID_CHI2", cfg.MAX_PID_CHI2 = 40); //GeV^2
 
   declareProperty("PASS_KIN_PID_CUT", cfg.PASS_KIN_PID_CUT = false); //GeV^2
-
+  declareProperty("CHECK_MUC", cfg.CHECK_MUC = true); 
 }
 
 
@@ -163,14 +163,15 @@ StatusCode JpsiKK::initialize(void)
 
 	try
 	{
-		init_tuple(fEvent,      "FILE1/event","Signal events pi+pi- K+K-, or pi+pi- mu+mu-");
-		init_tuple(fMdc,        "FILE1/mdc","Mdc info for signal");
-		init_tuple(fDedx,       "FILE1/dedx","Dedx info for signal");
-		init_tuple(fEmc,        "FILE1/emc","Emc info for signal");
-		init_tuple(fTof,        "FILE1/tof","Tof info for signal");
+		init_tuple(fEvent,      "FILE1/event",  "Signal events pi+pi- K+K-, or pi+pi- mu+mu-");
+		init_tuple(fMdc,        "FILE1/mdc",    "Main Drift Chamber");
+		init_tuple(fDedx,       "FILE1/dedx",   "Dedx info for signal");
+		init_tuple(fEmc,        "FILE1/emc",    "Electromagnetic Calorimeter");
+		init_tuple(fTof,        "FILE1/tof",    "Time of Flight");
 		init_tuple(fNeutral,    "FILE1/neutral","Good neutral tracks");
-		init_tuple(fMC,         "FILE1/mc","Monte Carlo truth information");
-		init_tuple(fMCTopo,     "FILE1/mctopo","Monte Carlo truth information topology");
+		init_tuple(fMC,         "FILE1/mc",     "Monte Carlo truth information");
+		init_tuple(fMCTopo,     "FILE1/mctopo", "Monte Carlo truth information topology");
+		init_tuple(fMuc,        "FILE1/muc",    "MUon chamber information");
 		//init_tuple(this, fPid,        "FILE1/pid","particle id");
 	}
 	catch(std::runtime_error & error)
@@ -187,12 +188,12 @@ StatusCode JpsiKK::execute()
   log << MSG::INFO << "executing" << endreq;
 
   SmartDataPtr<Event::EventHeader> eventHeader(eventSvc(),"/Event/EventHeader");
-//  bool isprint=false;
-//  if(event_proceed<10) isprint=true;
-//  if(10 <= event_proceed && event_proceed < 100 && event_proceed % 10 ==0) isprint=true;
-//  if(100 <= event_proceed && event_proceed < 1000 && event_proceed % 100 ==0) isprint = true;
-//  if(1000 <= event_proceed && event_proceed < 10000 && event_proceed % 1000 ==0) isprint = true;
-//  if(10000 <= event_proceed && event_proceed % 10000 ==0) isprint = true;
+  //  bool isprint=false;
+  //  if(event_proceed<10) isprint=true;
+  //  if(10 <= event_proceed && event_proceed < 100 && event_proceed % 10 ==0) isprint=true;
+  //  if(100 <= event_proceed && event_proceed < 1000 && event_proceed % 100 ==0) isprint = true;
+  //  if(1000 <= event_proceed && event_proceed < 10000 && event_proceed % 1000 ==0) isprint = true;
+  //  if(10000 <= event_proceed && event_proceed % 10000 ==0) isprint = true;
   //isprint |= 10    <= event_proceed && event_proceed < 100 && event_proceed % 10 ==0;
   //isprint |= 100   <= event_proceed && event_proceed < 1000 && event_proceed % 100 ==0;
   //isprint |= 1000  <= event_proceed && event_proceed < 10000 && event_proceed % 1000 ==0;
@@ -484,14 +485,16 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 	fDedx.ntrack=4;
 	fEmc.ntrack=4;
 	fTof.ntrack=4;
+  fMuc.ntrack=4;
 	//fMdc.M.Mrec = get_recoil__mass(Tracks[0], Tracks[1], PION_MASS,  cfg.CENTER_MASS_ENERGY);
 	for(int i=0;i<4;i++)
 	{
 		if(Tracks[i]==tracks_end) continue;
-		fEmc.fill (i,  Tracks[i]);
-		fMdc.fill (i,  Tracks[i]);
-		fDedx.fill(i,  Tracks[i]);
-		fTof.fill (i,  Tracks[i]);
+		if(cfg.FILL_EMC)  fEmc.fill (i,  Tracks[i]);
+		if(cfg.FILL_MDC)  fMdc.fill (i,  Tracks[i]);
+		if(cfg.FILL_DEDX) fDedx.fill(i,  Tracks[i]);
+		if(cfg.FILL_TOF)  fTof.fill (i,  Tracks[i]);
+    if(cfg.FILL_MUC)  fMuc.fill (i,  Tracks[i]);
 	}
 	fMdc.fill_mass(Tracks,  tracks_end, Pkf);
 	//Monte Carlo information
@@ -512,15 +515,16 @@ void JpsiKK::writeTuples(void)
 {
 	if(fEvent.run<0)
 	{
-		fMC.tuple->write();
-		fMCTopo.tuple->write();
+		fMC.write();
+		fMCTopo.write();
 	}
-  fEvent.tuple->write();
-  //fPid.tuple->write();
-  fMdc.tuple->write();
-  fEmc.tuple->write();
-  fDedx.tuple->write();
-  fTof.tuple->write();
+  fEvent.write();
+  //fPid.write();
+  if(cfg.FILL_MDC)  fMdc.write();
+  if(cfg.FILL_EMC)  fEmc.write();
+  if(cfg.FILL_DEDX) fDedx.write();
+  if(cfg.FILL_TOF)  fTof.write();
+  if(cfg.FILL_MUC)  fMuc.write();
   //fNeutral.tuple->write();
   event_write++;
 }

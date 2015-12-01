@@ -77,6 +77,7 @@ class JpsiKK : public Algorithm
   RootMC     fMC;     //Monte Carlo truth
   RootMCTopo fMCTopo; //Monte Carlo topology
   RootEmc    fNeutral; //neutral tracks
+  RootMuc    fMuc; //Muon chamber
 
 	template <class A> 
 		void init_tuple(A & a,  const char * dir, const char * title);

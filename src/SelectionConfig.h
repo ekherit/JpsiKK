@@ -65,4 +65,8 @@ struct SelectionConfig
 
 	double MAX_KIN_CHI2; //maximum chi2 for kinematic fit
 	double MAX_PID_CHI2; //maximum chi2 for my PID
+
+
+  bool CHECK_MUC;
+
 };

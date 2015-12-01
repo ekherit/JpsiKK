@@ -27,4 +27,5 @@ struct RootTuple
 		virtual void init(void)=0;
 		virtual void init_tuple(void)=0;
 		virtual void fill(EvtRecTrackIterator & track) {};
+    virtual void write(void) { tuple->write(); }
 };
