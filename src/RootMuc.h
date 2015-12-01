@@ -6,6 +6,7 @@
 
 struct RootMuc : public RootTuple
 {
+  NTuple::Item<long>    valid; //number of selected tracks. Some of them dont have muc information
   NTuple::Item<long>    ntrack; //number of selected tracks. Some of them dont have muc information
   NTuple::Array<double>   status; //status status=1: single seed cluster; status=2: splitted from multi-seeds cluster.
   NTuple::Array<double>   type; //seed mode. 0: ext, 1: emc, 2: muc

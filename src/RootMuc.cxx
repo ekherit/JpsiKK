@@ -2,6 +2,7 @@
 
 void RootMuc::init_tuple(void)
 {
+  tuple->addItem ("valid",  valid, 0,1); //good nuetral track in event
   tuple->addItem ("ntrack",       ntrack, 0, 4); //good nuetral track in event
   tuple->addIndexedItem ("status",   ntrack, status);
   tuple->addIndexedItem ("type",     ntrack, type);
@@ -21,11 +22,13 @@ void RootMuc::init_tuple(void)
 void RootMuc::init(void)
 {
   ntrack=4;
+  valid = false;
 }
 
 void RootMuc::fill(int i,  EvtRecTrackIterator & itTrk)
 {
-  if((*itTrk)->isMucTrackValid())
+  valid = (*itTrk)->isMucTrackValid();
+  if(valid==1)
   {
     RecMucTrack *mucTrk = (*itTrk)->mucTrack();
     status[i]= mucTrk->status();
@@ -40,6 +43,10 @@ void RootMuc::fill(int i,  EvtRecTrackIterator & itTrk)
     nhitmax[i] = mucTrk->maxHitsInLayer();
     brlast[i] = mucTrk->brLastLayer();
     eclast[i] = mucTrk->ecLastLayer();
+  }
+  else 
+  {
+    depth[i] = - 999;
   }
 }
 
