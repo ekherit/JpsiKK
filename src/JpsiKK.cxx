@@ -344,7 +344,7 @@ StatusCode JpsiKK::execute()
         int charge=0;
         if(Tracks.size()==3) 
         {
-          charge = getMdcTrack(Tracks[2])->q();
+          charge = getMdcTrack(Tracks[2])->charge();
           Tracks.push_back(evtRecTrkCol->end()); //workout 3trk case
         }
         if(charge<0 && pos)
