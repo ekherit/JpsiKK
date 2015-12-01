@@ -90,38 +90,7 @@ class JpsiKK : public Algorithm
 	std::list<EvtRecTrackIterator> good_charged_tracks;
 	EvtRecTrackIterator tracks_end; //a flag of the end of the track
 
-  void printSelectionDigest(bool head=false)
-  {
-		int width=15;
-    if(head)
-    {
-			std::cout << setw(20) << "# event proceed";
-			std::cout << setw(20) << "event written";
-			std::cout << setw(width) << "N4(K+K-)";
-      std::cout << setw(width) << "N3(K+)";
-      std::cout << setw(width) << "N4(K+)";
-      std::cout << setw(width) << "N3(K-)";
-      std::cout << setw(width) << "N4(K-)";
-			std::cout << setw(width) << "N4(u+u-)";
-      std::cout << setw(width) << "N3(u+)";
-      std::cout << setw(width) << "N4(u+)";
-      std::cout << setw(width) << "N3(u-)";
-      std::cout << setw(width) << "N4(u-)";
-			std::cout << endl;
-    }
-		std::cout << " " << setw(20)    << event_proceed;
-		std::cout << " " << setw(width) << event_write;
-    int Pids[2] = {ID_KAON,ID_MUON};
-    for(int pid = 0; pid < 2; pid++)
-    {
-      std::cout << " " << setw(width) << theCounter[pid][0][4];
-      std::cout << " " << setw(width) << theCounter[pid][+1][3];
-      std::cout << " " << setw(width) << theCounter[pid][+1][4];
-      std::cout << " " << setw(width) << theCounter[pid][-1][3];
-      std::cout << " " << setw(width) << theCounter[pid][-1][4];
-    }
-    std::cout << endl;
-  }
+  void printSelectionDigest(bool head=false);
 };
 
 #endif
