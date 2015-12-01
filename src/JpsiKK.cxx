@@ -308,21 +308,21 @@ StatusCode JpsiKK::execute()
   std::list<SelectionHelper_t> sh_list;
   if(neg)
   {
-    sh_list.push_back(SelectionHelper_t);
+    sh_list.push_back(SelectionHelper_t(cfg));
     SelectionHelper_t & sh = sh_list.back();
 		sh.kinfit(pion_pair, other_negative_tracks.front());
 		sh.totalPass(cfg.PASS_KIN_PID_CUT);
   }
   if(pos)
   {
-    sh_list.push_back(SelectionHelper_t);
+    sh_list.push_back(SelectionHelper_t(cfg));
     SelectionHelper_t & sh = sh_list.back();
 		sh.kinfit(pion_pair, other_positive_tracks.front());
 		sh.totalPass(cfg.PASS_KIN_PID_CUT);
   }
   if(pos && neg)
   {
-    sh_list.push_back(SelectionHelper_t);
+    sh_list.push_back(SelectionHelper_t(cfg));
     SelectionHelper_t & sh = sh_list.back();
     sh.kinfit(pion_pair, other_negative_tracks.front(), other_positive_tracks.front());
 		sh.totalPass(cfg.PASS_KIN_PID_CUT);
