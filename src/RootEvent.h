@@ -43,9 +43,10 @@ struct RootEvent : public RootTuple
 
 	NTuple::Item<long>    sign;   //signature of the event shows missed particle  01(K- or mu-), 10 (K+ or mu+),  11 (KK or uu or Ku or uK)
 	NTuple::Item<long>    channel;     //J/psi decay channel 0 -- kaons, 1 -- muons,  10 -- muK,  11 - Kmu
+	NTuple::Item<long>    K;     //KK Jpsi decay event
+	NTuple::Item<long>    u;     //KK Jpsi decay event
 	NTuple::Item<long>    KK;     //KK Jpsi decay event
 	NTuple::Item<long>    uu;     //MuMu event
-	NTuple::Item<long>    Ku;     //K mu or mu K events 
 
 
 	Mass_t  M;

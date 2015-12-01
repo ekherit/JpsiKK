@@ -37,7 +37,8 @@ void RootEvent::init_tuple(void)
   tuple->addItem ("channel", channel); //decay channel of the J/psi
   tuple->addItem ("KK", KK); //KK decay channel of the J/psi
   tuple->addItem ("uu", uu); //mu-mu decay channel of the J/psi
-  tuple->addItem ("Ku", Ku); //Kmu or muK events
+  tuple->addItem ("K", K); //Kmu or muK events
+  tuple->addItem ("u", u); //Kmu or muK events
 
 	M.add_to_tuple(tuple);
   //tuple->addItem ("Mee",   kM[ID_ELECTRON]);

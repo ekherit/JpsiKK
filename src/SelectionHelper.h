@@ -219,6 +219,20 @@ struct SelectionHelper_t
 		KF = ::kinfit(tracks);
 	}
 
+	void kinfit(
+			TrackPair_t & pion_pair,
+			EvtRecTrackIterator & track_minus
+			EvtRecTrackIterator & track_plus
+			)
+	{
+		tracks.resize(4);
+		tracks[0] = pion_pair.first;
+		tracks[1] = pion_pair.second;
+		tracks[2] = track_minus;
+		tracks[3] = track_plus;
+		KF = ::kinfit(tracks);
+	}
+
 	void select_channel_by_kinematic_fit(void)
 	{
 		std::list<int> pid_list;

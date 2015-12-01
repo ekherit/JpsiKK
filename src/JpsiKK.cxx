@@ -145,11 +145,18 @@ StatusCode JpsiKK::initialize(void)
   event_write = 0;
   event_with_kaons=0;
   event_with_muons=0;
-  event_with_kaons_and_muons=0;
-  event_with_pions=0;
-  event_with_electrons=0;
-  event_with_protons=0;
-  good_kinematic_fit=0;
+  positive_kaon_event_number = 0; //count only positive kinematic fit
+  negative_kaon_event_number = 0; //count only negative kinematic fit
+  positive_muon_event_number = 0;
+  negative_muon_event_number = 0;
+  kaons_event_number = 0;
+  muons_event_number = 0;
+
+  //event_with_kaons_and_muons=0;
+  //event_with_pions=0;
+  //event_with_electrons=0;
+  //event_with_protons=0;
+  //good_kinematic_fit=0;
 	if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
 	BEAM_CENTER_MASS_ENERGY = cfg.CENTER_MASS_ENERGY;
 
@@ -193,16 +200,22 @@ StatusCode JpsiKK::execute()
 		{
 			std::cout << setw(20) << "# event proceed";
 			std::cout << setw(width) << "event written";
-			std::cout << setw(width) << "kaons";
-			std::cout << setw(width) << "muons";
-			std::cout << setw(width) << "Ku";
+			std::cout << setw(width) << "N(K+K-)";
+			std::cout << setw(width) << "N(u+u-)";
+      std::cout << setw(width) << "N(K-)";
+      std::cout << setw(width) << "N(K+);
+      std::cout << setw(width) << "N(u-)";
+      std::cout << setw(width) << "N(u+)";
 			std::cout << endl;
 		}
 		std::cout << setw(20) << event_proceed;
 		std::cout << setw(width) << event_write;
-		std::cout << setw(width) << event_with_kaons;
-		std::cout << setw(width) << event_with_muons;
-		std::cout << setw(width) << event_with_kaons_and_muons;
+		std::cout << setw(width) << kaons_event_number;
+		std::cout << setw(width) << muons_event_number;
+		std::cout << setw(width) << negative_kaon_event_number;
+		std::cout << setw(width) << positive_kaon_event_number;
+		std::cout << setw(width) << negative_muon_event_number;
+		std::cout << setw(width) << positive_muon_event_number;
     std::cout << std::endl;
 		nprints ++;
   }
@@ -297,164 +310,150 @@ StatusCode JpsiKK::execute()
   //if no other particles
 	if(other_negative_tracks.empty() && other_positive_tracks.empty()) return StatusCode::SUCCESS;
 
-
-	SelectionHelper_t nsh(cfg); //for negative kinematic fit
-	SelectionHelper_t psh(cfg); //for positive kinematic fit
-
-
-	if(!other_negative_tracks.empty()) 
-	{
-		nsh.kinfit(pion_pair,  other_negative_tracks.front());
-		nsh.totalPass(cfg.PASS_KIN_PID_CUT);
-	}
-
-	if(!other_positive_tracks.empty()) 
-	{
-		psh.kinfit(pion_pair,  other_positive_tracks.front());
-		psh.totalPass(cfg.PASS_KIN_PID_CUT);
-	}
+  bool pos = !other_positive_tracks.empty();
+  bool neg = !other_negative_tracks.empty();
 
 
-	TrackVector_t Tracks;
-	std::vector<HepLorentzVector> Pkf;
-	SelectionHelper_t * sh;
 
-	//I decided to save double record if event pass both
-	//selection creteria for kaon and muons
+  std::list<SelectionHelper> sh_list;
+  if(neg)
+  {
+    sh_list.push_back(SelectionHelper_t);
+    SelectionHelper_t & sh = shl.back();
+		sh.kinfit(pion_pair, other_negative_tracks.front());
+		sh.totalPass(cfg.PASS_KIN_PID_CUT);
+  }
+  if(pos)
+  {
+    sh_list.push_back(SelectionHelper_t);
+    SelectionHelper_t & sh = shl.back();
+		sh.kinfit(pion_pair, other_positive_tracks.front());
+		sh.totalPass(cfg.PASS_KIN_PID_CUT);
+  }
+  if(pos && neg)
+  {
+    sh_list.push_back(SelectionHelper_t);
+    SelectionHelper_t & sh = shl.back();
+    sh.kinfit(pion_pair, other_negative_tracks.front(), other_positive_tracks.front());
+		sh.totalPass(cfg.PASS_KIN_PID_CUT);
+  }
+
 	std::list<int> pid_list;
 	pid_list.push_back(ID_KAON);
 	pid_list.push_back(ID_MUON);
-	for(std::list<int>::iterator chan = pid_list.begin(); chan!=pid_list.end() ; chan++)
-	{
-		bool plus  = psh.pass && psh.channel == *chan;
-		bool minus = nsh.pass && nsh.channel == *chan;
-		if(!plus && !minus) continue;
+  for(std::list<SelectionHelper_t>::iterator it = sh_list.begin(); it!=sh_list.end(); it++)
+  {
+    SelectionHelper_t & sh = *it;
+    for(std::list<int>::iterator chan = pid_list.begin(); chan!=pid_list.end() ; chan++)
+    {
+      bool pass  = sh.pass && sh.channel == *chan;
+      if(pass)
+      {
+        std::vector<HepLorentzVector> Pkf = sh.getMomentum(*chan);
+        TrackVector_t Tracks = sh.tracks; 
+        int charge=0;
+        if(Tracks.size()==3) 
+        {
+          charge = getMdcTrack(Tracks[2])->q();
+          Tracks.push_back(evtRecTrkCol->end()); //workout 3trk case
+        }
+        if(charge<0 && pos)
+        {
+          Tracks[3] = otrk[1];
+        }
+        if(charge>0)
+        {
+          std::swap(Pkf[2],  Pkf[3]);
+          std::swap(Tracks[2],  Tracks[3]);
+          if(neg)
+          {
+            Tracks[2] = otrk[0];
+          }
+        }
 
-		//selection fEvent.sing,  fEvnet.kchi[pid] and fEvent.pchi[pid]
-		if (plus && minus) //four track case
-		{
-			fEvent.sign = 0;
+        fEvent.channel=*chan;
+        fEvent.sign=charge;
+        fEvent.K=0;
+        fEvent.KK=0;
+        fEvent.u=0;
+        fEvent.uu=0;
+        switch(*chan)
+        {
+          case ID_KAON:
+            if(charge==0) 
+            {
+              fEvent.KK=1;
+              kaons_event_number++;
+            }
+            else 
+            {
+              fEvent.K = 1;
+              if(charge>0) positive_kaon_event_number++;
+              if(charge<0) negative_kaon_event_number++;
+            }
+            break;
+          case ID_MUON:
+            if(charge==0) 
+            {
+              fEvent.uu=1;
+              muons_event_number++;
+            }
+            else 
+            {
+              fEvent.u = 1;
+              if(charge>0) positive_muon_event_number++;
+              if(charge<0) negative_muon_event_number++;
+            }
+            break;
+        }
+        fEvent.kin_chi2 = sh.getKinChi2(*chan);
+        fEvent.pid_chi2 = sh.getPidChi2(*chan);
 
-			fEvent.kin_chi2 = 0.5*(nsh.getKinChi2(*chan)  + psh.getKinChi2(*chan));
-			fEvent.pid_chi2 = 0.5*(nsh.getPidChi2(*chan)  + psh.getPidChi2(*chan));
+        fEvent.run=eventHeader->runNumber();
+        fEvent.event=eventHeader->eventNumber();
+        fEvent.time=eventHeader->time();
+        fEvent.npid = 5;
 
-			Pkf.resize(4);
-			std::vector<HepLorentzVector> Pp = psh.getMomentum(*chan);
-			std::vector<HepLorentzVector> Pm = nsh.getMomentum(*chan);
+        fEvent.ngood_charged_track = good_charged_tracks.size();
+        fEvent.ngood_neutral_track = good_neutral_tracks.size();
+        fEvent.npositive_track = positive_charged_tracks.size();
+        fEvent.nnegative_track = negative_charged_tracks.size();
+        fEvent.npositive_pions = positive_pion_tracks.size();
+        fEvent.nnegative_pions = negative_pion_tracks.size();
+        fEvent.npion_pairs = pion_pairs.size();
+        try
+        {
+          fillTuples(Pkf, Tracks);
+          writeTuples();
+        }
+        catch(std::runtime_error & error)
+        {
+          log << MSG::ERROR  << error.what() << endmsg;
+          return StatusCode::FAILURE;
+        }
 
-			std::swap(Pp[2], Pp[3]);
-			for(int k=0;k<4;k++)
-			{
-				Pkf[k] = 0.5*(Pp[k]+Pm[k]);
-			}
-
-			Tracks = nsh.tracks;
-			Tracks.push_back(psh.tracks[2]);
-
-			for(int pid=0;pid<5;pid++)
-			{
-				fEvent.kchi[pid] = 0.5*(nsh.getKinChi2(pid)  + psh.getKinChi2(pid));
-				fEvent.pchi[pid] = 0.5*(nsh.getPidChi2(pid)  + psh.getPidChi2(pid));
-			}
-		}
-		else
-		{
-			if (plus)
-			{
-				fEvent.sign = +1;
-				sh = & psh;
-			}
-			if (minus)
-			{
-				fEvent.sign = -1;
-				sh = & nsh;
-			}
-
-			Pkf = sh->getMomentum(*chan);
-			Tracks = sh->tracks; 
-			Tracks.push_back(tracks_end);
-			//now positive tracks on the first place,  swap it
-			if(plus)
-			{
-				std::swap(Pkf[2],  Pkf[3]);
-				std::swap(Tracks[2],  Tracks[3]);
-			}
-			//no negative charged tracks go first
-			for(int pid=0;pid<5;pid++)
-			{
-				fEvent.kchi[pid] = sh->getKinChi2(pid);
-				fEvent.pchi[pid] = sh->getPidChi2(pid);
-			}
-		}
-		fEvent.kin_chi2 = fEvent.kchi[*chan];
-		fEvent.pid_chi2 = fEvent.pchi[*chan];
-
-		fEvent.KK = 0;
-		fEvent.uu = 0;
-		fEvent.Ku = 0;
-		//case of mixed event K/mu
-		if(psh.pass &&  nsh.pass && 
-				(
-				 (psh.channel == ID_KAON && nsh.channel == ID_MUON) || (psh.channel == ID_MUON && nsh.channel == ID_KAON) 
-				)
-			)
-		{
-			fEvent.Ku = 1;
-			event_with_kaons_and_muons++;
-		}
-		switch(*chan)
-		{
-			case ID_KAON:
-				fEvent.KK = 1;
-				event_with_kaons++;
-				break;
-			case ID_MUON:
-				fEvent.uu = 1;
-				event_with_muons++;
-				break;
-			default:
-				continue;
-		}
-
-		fEvent.channel=*chan;
-		fEvent.run=eventHeader->runNumber();
-		fEvent.event=eventHeader->eventNumber();
-		fEvent.time=eventHeader->time();
-		fEvent.npid = 5;
-
-		fEvent.ngood_charged_track = good_charged_tracks.size();
-		fEvent.ngood_neutral_track = good_neutral_tracks.size();
-		fEvent.npositive_track = positive_charged_tracks.size();
-		fEvent.nnegative_track = negative_charged_tracks.size();
-		fEvent.npositive_pions = positive_pion_tracks.size();
-		fEvent.nnegative_pions = negative_pion_tracks.size();
-		fEvent.npion_pairs = pion_pairs.size();
-		//define initial four-momentum
-		try
-		{
-			fillTuples(Pkf, Tracks);
-			writeTuples();
-		}
-		catch(std::runtime_error & error)
-		{
-			log << MSG::ERROR  << error.what() << endmsg;
-			return StatusCode::FAILURE;
-		}
-	}
+      }
+    }
+  }
   return StatusCode::SUCCESS;
 }
 
+
+
 StatusCode JpsiKK::finalize()
 {
-  std::cout << "Event proceed: " << event_proceed << std::endl;
-  std::cout << "Event selected: " << event_write << std::endl;
-  std::cout << "Event with kaons: " << event_with_kaons << std::endl;
-  std::cout << "Event with muons: " << event_with_muons << std::endl;
-  std::cout << "Event with kaons and muons: " << event_with_kaons_and_muons << std::endl;
-  std::cout << "Event with pions: " << event_with_pions << std::endl;
-  std::cout << "Event with electron: " << event_with_electrons << std::endl;
-  std::cout << "Event with proton: " << event_with_protons << std::endl;
-  std::cout << "Good kinematic fits: " << good_kinematic_fit << std::endl;
+    std::cout << "============== Selection Result =====================";
+		std::cout << setw(20)    << event_proceed;
+		std::cout << setw(width) << event_write;
+		std::cout << setw(width) << kaons_event_number;
+		std::cout << setw(width) << muons_event_number;
+		std::cout << setw(width) << negative_kaon_event_number;
+		std::cout << setw(width) << positive_kaon_event_number;
+		std::cout << setw(width) << negative_muon_event_number;
+		std::cout << setw(width) << positive_muon_event_number;
+    std::cout << std::endl;
+    //std::cout << "Geometry and tracking selection efficiency" << std::endl;
+    //std::cout << "eps(K-) = " << double(kaons_event_number);
   return StatusCode::SUCCESS;
 }
 

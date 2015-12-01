@@ -217,3 +217,10 @@ inline double getPionRecoilMass(EvtRecTrackIterator & t1,  EvtRecTrackIterator &
 	T[1] = t2;
 	return sqrt(getMissingMass2(T,  pid));
 }
+
+RecMdcTrack * getMdcTrack(EvtRecTrackIterator & track)
+{
+  EvtRecTrackIterator & itTrk = *track;
+  if(!(*itTrk)->isMdcTrackValid()) throw std::runtime_error("No MDC info"); 
+  return (*itTrk)->mdcTrack();
+}
