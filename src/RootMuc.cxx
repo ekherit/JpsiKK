@@ -23,7 +23,7 @@ void RootMuc::init(void)
   ntrack=4;
 }
 
-void RootEmc::fill(int i,  EvtRecTrackIterator & itTrk)
+void RootMuc::fill(int i,  EvtRecTrackIterator & itTrk)
 {
   if((*itTrk)->isMucTrackValid())
   {
