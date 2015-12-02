@@ -15,6 +15,12 @@
 // =====================================================================================
 
 #include "RooMcbPdf.h"
-#include "Selector.h"
 #include "RootEvent.h"
 #include "RootMC.h"
+#include "RootMCTopo.h"
+#include "RootMdc.h"
+#include "RootTof.h"
+#include "RootEmc.h"
+#include "RootMuc.h"
+#include "RootNeutral.h"
+#include "RootDedx.h"

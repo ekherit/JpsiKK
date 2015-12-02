@@ -17,15 +17,16 @@ testMcbFit : testMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o
 CombMcbFit : CombMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o
 		g++  -o CombMcbFit   RooMcbPdf.o CombMcbFit.cpp $(CXXFLAGS) $(LIBS)
 
-libFit.so : RooMcbPdf.o libFitDict.o  Selector.C RootEvent.C RootMC.C
+libFit.so : RooMcbPdf.o libFitDict.o   RootEvent.C RootMC.C
 		g++ -fPIC -shared  RooMcbPdf.o -o libFit.so libFitDict.o $(LIBS)
 
 RooMcbPdf.o : RooMcbPdf.cpp
 		g++ -fPIC -o RooMcbPdf.o $(CXXFLAGS) -c RooMcbPdf.cpp $(LIBS)
 
+ROOT_ADAPTORS = RootEvent.o RootMC.o RootMdc.o RootEmc.o RootTof.o RootDedx.o RootMuc.o RootNeutral.o RootMCTopo.o
 
-select : select.cpp RootEvent.o Selector.o 
-		g++ -std=c++1y Selector.o RootEvent.o RootMC.o libFitDict.o RooMcbPdf.o -o select select.cpp $(CXXFLAGS) $(LIBS)
+select : select.cpp $(ROOT_ADAPTORS)
+		g++ -std=c++1y  $(ROOT_ADAPTORS) libFitDict.o RooMcbPdf.o -o select select.cpp $(CXXFLAGS) $(LIBS)
 	
 libFitDict.o :  libFitDict.cxx
 		g++ -o libFitDict.o $(CXXFLAGS) -c libFitDict.cxx
@@ -34,19 +35,34 @@ libFitDict.cxx : libFit.h libFitLinkDef.h
 		rootcint -f libFitDict.cxx -c libFit.h libFitLinkDef.h
 
 
-
-
 RootEvent.o : 
 	  g++ -o RootEvent.o $(CXXFLAGS) $(LIBS) -c RootEvent.C
-
-Selector.o : 
-	  g++ -o Selector.o $(CXXFLAGS) $(LIBS)  -c Selector.C
 
 RootMC.o : 
 	  g++ -o RootMC.o $(CXXFLAGS) $(LIBS)  -c RootMC.C
 
+RootMdc.o : 
+	  g++ -o RootMdc.o $(CXXFLAGS) $(LIBS) -c RootMdc.C
+
+RootEmc.o : 
+	  g++ -o RootEmc.o $(CXXFLAGS) $(LIBS) -c RootEmc.C
+
+RootTof.o : 
+	  g++ -o RootTof.o $(CXXFLAGS) $(LIBS) -c RootTof.C
+
+RootDedx.o : 
+	  g++ -o RootDedx.o $(CXXFLAGS) $(LIBS) -c RootDedx.C
+
+RootMCTopo.o : 
+	  g++ -o RootMCTopo.o $(CXXFLAGS) $(LIBS) -c RootMCTopo.C
+
+RootMuc.o : 
+	  g++ -o RootMuc.o $(CXXFLAGS) $(LIBS) -c RootMuc.C
+
+RootNeutral.o : 
+	  g++ -o RootNeutral.o $(CXXFLAGS) $(LIBS) -c RootNeutral.C
 
 
 
 clean :
-			rm -f *.o *.so *~ *.pcm testMcbFit CombMcbFit libFitDict.o libFitDict.cxx libFit.so
+			rm -f *.o *.so *~ *.pcm testMcbFit CombMcbFit libFitDict.o libFitDict.cxx libFit.so  $(ROOT_ADAPTORS)

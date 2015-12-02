@@ -48,6 +48,7 @@ AutoDict*
 mctopo
 CombMcbFit
 testMcbFit
+select
 
 note/*.log
 note/*.aux

@@ -29,10 +29,7 @@
 #include <TFile.h>
 #include <TCut.h>
 
-
-#include "Selector.h"
-#include "RootEvent.h"
-#include "RootMC.h"
+#include "libFit.h"
 
 using namespace std;
 
@@ -135,9 +132,10 @@ int main(int argc, char ** argv)
   //new TCanvas;
   //event->Draw("Mrec",cut );
 
-  string filename = "../data/test_selections/testmcKKuu.root";
+  string filename = "sample.root";
   RootEvent event(load_tree("event",filename));
-  RootMC mc(load_tree("mc",filename));
+  RootMC    mc(load_tree("mc",filename));
+  RootMdc   mdc(load_tree("mdc",filename));
 
   Long64_t nentries = event.fChain->GetEntriesFast();
 
@@ -152,7 +150,10 @@ int main(int argc, char ** argv)
     nb = event.fChain->GetEntry(jentry);   nbytes += nb;
     nb = mc.fChain->GetEntry(jentry);
     // if (Cut(ientry) < 0) continue;
-    cout << jentry << " " << event.Mrec << " " << event.p[0] << " " << mc.p[0] << " " << event.p[0]-mc.p[0] << endl;
+    if(event.kin_chi2<40)
+    {
+      cout << jentry << " " << event.Mrec << " " << event.p[0] << " " << mc.p[0] << " " << (event.p[0]-mc.p[0])/event.p[0]*100 << endl;
+    }
 
   }
 

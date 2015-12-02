@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
 // Wed Dec  2 20:01:56 2015 by ROOT version 6.04/10
-// from TTree event/Signal events pi+pi- K+K-, or pi+pi- mu+mu-
+// from TTree mdc/Main Drift Chamber
 // found on file: sample.root
 //////////////////////////////////////////////////////////
 
-#ifndef RootEvent_h
-#define RootEvent_h
+#ifndef RootMdc_h
+#define RootMdc_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -14,7 +14,7 @@
 
 // Header file for the classes stored in the TTree if any.
 
-class RootEvent {
+class RootMdc {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -22,32 +22,7 @@ public :
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
    // Declaration of leaf types
-   Int_t           run;
-   Int_t           event;
-   Int_t           time;
-   Int_t           ngtrack;
-   Int_t           ngntrack;
-   Int_t           nptrack;
-   Int_t           nntrack;
-   Int_t           nppions;
-   Int_t           nnpions;
-   Int_t           npion_pairs;
    Int_t           ntrack;
-   Int_t           sign;
-   Int_t           channel;
-   Int_t           KK;
-   Int_t           uu;
-   Int_t           K;
-   Int_t           u;
-   Double_t        Mrec;
-   Double_t        M012;
-   Double_t        M013;
-   Double_t        M023;
-   Double_t        M123;
-   Double_t        M03;
-   Double_t        M12;
-   Double_t        M01;
-   Double_t        M23;
    Int_t           trackId[4];   //[ntrack]
    Double_t        q[4];   //[ntrack]
    Double_t        E[4];   //[ntrack]
@@ -66,40 +41,15 @@ public :
    Double_t        vz[4];   //[ntrack]
    Double_t        vphi[4];   //[ntrack]
    Double_t        depth[4];   //[ntrack]
-   Double_t        kin_chi2;
-   Double_t        pid_chi2;
+   Double_t        Mrec;
    Int_t           npid;
-   Double_t        kchi[5];   //[npid]
-   Double_t        pchi[5];   //[npid]
-   Double_t        kM[5];   //[npid]
+   Double_t        M23[5];   //[npid]
+   Double_t        M12[5];   //[npid]
+   Double_t        M03[5];   //[npid]
+   Double_t        Mmis[5];   //[npid]
 
    // List of branches
-   TBranch        *b_run;   //!
-   TBranch        *b_event;   //!
-   TBranch        *b_time;   //!
-   TBranch        *b_ngtrack;   //!
-   TBranch        *b_ngntrack;   //!
-   TBranch        *b_nptrack;   //!
-   TBranch        *b_nntrack;   //!
-   TBranch        *b_nppions;   //!
-   TBranch        *b_nnpions;   //!
-   TBranch        *b_npion_pairs;   //!
    TBranch        *b_ntrack;   //!
-   TBranch        *b_sign;   //!
-   TBranch        *b_channel;   //!
-   TBranch        *b_KK;   //!
-   TBranch        *b_uu;   //!
-   TBranch        *b_K;   //!
-   TBranch        *b_u;   //!
-   TBranch        *b_Mrec;   //!
-   TBranch        *b_M012;   //!
-   TBranch        *b_M013;   //!
-   TBranch        *b_M023;   //!
-   TBranch        *b_M123;   //!
-   TBranch        *b_M03;   //!
-   TBranch        *b_M12;   //!
-   TBranch        *b_M01;   //!
-   TBranch        *b_M23;   //!
    TBranch        *b_trackId;   //!
    TBranch        *b_q;   //!
    TBranch        *b_E;   //!
@@ -118,15 +68,15 @@ public :
    TBranch        *b_vz;   //!
    TBranch        *b_vphi;   //!
    TBranch        *b_depth;   //!
-   TBranch        *b_kin_chi2;   //!
-   TBranch        *b_pid_chi2;   //!
+   TBranch        *b_Mrec;   //!
    TBranch        *b_npid;   //!
-   TBranch        *b_kchi;   //!
-   TBranch        *b_pchi;   //!
-   TBranch        *b_kM;   //!
+   TBranch        *b_M23;   //!
+   TBranch        *b_M12;   //!
+   TBranch        *b_M03;   //!
+   TBranch        *b_Mmis;   //!
 
-   RootEvent(TTree *tree=0);
-   virtual ~RootEvent();
+   RootMdc(TTree *tree=0);
+   virtual ~RootMdc();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
@@ -138,8 +88,8 @@ public :
 
 #endif
 
-#ifdef RootEvent_cxx
-RootEvent::RootEvent(TTree *tree) : fChain(0) 
+#ifdef RootMdc_cxx
+RootMdc::RootMdc(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -148,25 +98,25 @@ RootEvent::RootEvent(TTree *tree) : fChain(0)
       if (!f || !f->IsOpen()) {
          f = new TFile("sample.root");
       }
-      f->GetObject("event",tree);
+      f->GetObject("mdc",tree);
 
    }
    Init(tree);
 }
 
-RootEvent::~RootEvent()
+RootMdc::~RootMdc()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t RootEvent::GetEntry(Long64_t entry)
+Int_t RootMdc::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t RootEvent::LoadTree(Long64_t entry)
+Long64_t RootMdc::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -179,7 +129,7 @@ Long64_t RootEvent::LoadTree(Long64_t entry)
    return centry;
 }
 
-void RootEvent::Init(TTree *tree)
+void RootMdc::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -195,32 +145,7 @@ void RootEvent::Init(TTree *tree)
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
-   fChain->SetBranchAddress("run", &run, &b_run);
-   fChain->SetBranchAddress("event", &event, &b_event);
-   fChain->SetBranchAddress("time", &time, &b_time);
-   fChain->SetBranchAddress("ngtrack", &ngtrack, &b_ngtrack);
-   fChain->SetBranchAddress("ngntrack", &ngntrack, &b_ngntrack);
-   fChain->SetBranchAddress("nptrack", &nptrack, &b_nptrack);
-   fChain->SetBranchAddress("nntrack", &nntrack, &b_nntrack);
-   fChain->SetBranchAddress("nppions", &nppions, &b_nppions);
-   fChain->SetBranchAddress("nnpions", &nnpions, &b_nnpions);
-   fChain->SetBranchAddress("npion_pairs", &npion_pairs, &b_npion_pairs);
    fChain->SetBranchAddress("ntrack", &ntrack, &b_ntrack);
-   fChain->SetBranchAddress("sign", &sign, &b_sign);
-   fChain->SetBranchAddress("channel", &channel, &b_channel);
-   fChain->SetBranchAddress("KK", &KK, &b_KK);
-   fChain->SetBranchAddress("uu", &uu, &b_uu);
-   fChain->SetBranchAddress("K", &K, &b_K);
-   fChain->SetBranchAddress("u", &u, &b_u);
-   fChain->SetBranchAddress("Mrec", &Mrec, &b_Mrec);
-   fChain->SetBranchAddress("M012", &M012, &b_M012);
-   fChain->SetBranchAddress("M013", &M013, &b_M013);
-   fChain->SetBranchAddress("M023", &M023, &b_M023);
-   fChain->SetBranchAddress("M123", &M123, &b_M123);
-   fChain->SetBranchAddress("M03", &M03, &b_M03);
-   fChain->SetBranchAddress("M12", &M12, &b_M12);
-   fChain->SetBranchAddress("M01", &M01, &b_M01);
-   fChain->SetBranchAddress("M23", &M23, &b_M23);
    fChain->SetBranchAddress("trackId", trackId, &b_trackId);
    fChain->SetBranchAddress("q", q, &b_q);
    fChain->SetBranchAddress("E", E, &b_E);
@@ -239,16 +164,16 @@ void RootEvent::Init(TTree *tree)
    fChain->SetBranchAddress("vz", vz, &b_vz);
    fChain->SetBranchAddress("vphi", vphi, &b_vphi);
    fChain->SetBranchAddress("depth", depth, &b_depth);
-   fChain->SetBranchAddress("kin_chi2", &kin_chi2, &b_kin_chi2);
-   fChain->SetBranchAddress("pid_chi2", &pid_chi2, &b_pid_chi2);
+   fChain->SetBranchAddress("Mrec", &Mrec, &b_Mrec);
    fChain->SetBranchAddress("npid", &npid, &b_npid);
-   fChain->SetBranchAddress("kchi", kchi, &b_kchi);
-   fChain->SetBranchAddress("pchi", pchi, &b_pchi);
-   fChain->SetBranchAddress("kM", kM, &b_kM);
+   fChain->SetBranchAddress("M23", M23, &b_M23);
+   fChain->SetBranchAddress("M12", M12, &b_M12);
+   fChain->SetBranchAddress("M03", M03, &b_M03);
+   fChain->SetBranchAddress("Mmis", Mmis, &b_Mmis);
    Notify();
 }
 
-Bool_t RootEvent::Notify()
+Bool_t RootMdc::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -259,18 +184,18 @@ Bool_t RootEvent::Notify()
    return kTRUE;
 }
 
-void RootEvent::Show(Long64_t entry)
+void RootMdc::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t RootEvent::Cut(Long64_t entry)
+Int_t RootMdc::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef RootEvent_cxx
+#endif // #ifdef RootMdc_cxx
