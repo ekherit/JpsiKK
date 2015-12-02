@@ -15,3 +15,6 @@
 // =====================================================================================
 
 #include "RooMcbPdf.h"
+#include "Selector.h"
+#include "RootEvent.h"
+#include "RootMC.h"

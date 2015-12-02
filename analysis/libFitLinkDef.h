@@ -21,5 +21,8 @@
 
 //#pragma link C++ class ModifiedCrystalBall;
 #pragma link C++ class RooMcbPdf;
+#pragma link C++ class RootEvent;
+#pragma link C++ class RootMC;
+#pragma link C++ class Selector;
 
 #endif
