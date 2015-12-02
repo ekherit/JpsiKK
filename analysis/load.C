@@ -439,6 +439,7 @@ void add_uniform_events(TH1 * h,  double n)
 	}
 }
 
+/*
 
 
 //#include <RooFit.h>
@@ -760,3 +761,4 @@ void gaus_fit(TH1 * h)
 	h->Fit("fun");
 
 }
+*/

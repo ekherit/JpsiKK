@@ -43,228 +43,70 @@ namespace std {} using namespace std;
 // Header files passed via #pragma extra_include
 
 namespace ROOT {
-   static void *new_ModifiedCrystalBall(void *p = 0);
-   static void *newArray_ModifiedCrystalBall(Long_t size, void *p);
-   static void delete_ModifiedCrystalBall(void *p);
-   static void deleteArray_ModifiedCrystalBall(void *p);
-   static void destruct_ModifiedCrystalBall(void *p);
-   static void streamer_ModifiedCrystalBall(TBuffer &buf, void *obj);
+   static TClass *RooMcbPdf_Dictionary();
+   static void RooMcbPdf_TClassManip(TClass*);
+   static void *new_RooMcbPdf(void *p = 0);
+   static void *newArray_RooMcbPdf(Long_t size, void *p);
+   static void delete_RooMcbPdf(void *p);
+   static void deleteArray_RooMcbPdf(void *p);
+   static void destruct_RooMcbPdf(void *p);
 
    // Function generating the singleton type initializer
-   static TGenericClassInfo *GenerateInitInstanceLocal(const ::ModifiedCrystalBall*)
+   static TGenericClassInfo *GenerateInitInstanceLocal(const ::RooMcbPdf*)
    {
-      ::ModifiedCrystalBall *ptr = 0;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::ModifiedCrystalBall >(0);
+      ::RooMcbPdf *ptr = 0;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::RooMcbPdf));
       static ::ROOT::TGenericClassInfo 
-         instance("ModifiedCrystalBall", ::ModifiedCrystalBall::Class_Version(), "ModifiedCrystalBall.h", 20,
-                  typeid(::ModifiedCrystalBall), DefineBehavior(ptr, ptr),
-                  &::ModifiedCrystalBall::Dictionary, isa_proxy, 16,
-                  sizeof(::ModifiedCrystalBall) );
-      instance.SetNew(&new_ModifiedCrystalBall);
-      instance.SetNewArray(&newArray_ModifiedCrystalBall);
-      instance.SetDelete(&delete_ModifiedCrystalBall);
-      instance.SetDeleteArray(&deleteArray_ModifiedCrystalBall);
-      instance.SetDestructor(&destruct_ModifiedCrystalBall);
-      instance.SetStreamerFunc(&streamer_ModifiedCrystalBall);
+         instance("RooMcbPdf", "RooMcbPdf.h", 19,
+                  typeid(::RooMcbPdf), DefineBehavior(ptr, ptr),
+                  &RooMcbPdf_Dictionary, isa_proxy, 0,
+                  sizeof(::RooMcbPdf) );
+      instance.SetNew(&new_RooMcbPdf);
+      instance.SetNewArray(&newArray_RooMcbPdf);
+      instance.SetDelete(&delete_RooMcbPdf);
+      instance.SetDeleteArray(&deleteArray_RooMcbPdf);
+      instance.SetDestructor(&destruct_RooMcbPdf);
       return &instance;
    }
-   TGenericClassInfo *GenerateInitInstance(const ::ModifiedCrystalBall*)
+   TGenericClassInfo *GenerateInitInstance(const ::RooMcbPdf*)
    {
-      return GenerateInitInstanceLocal((::ModifiedCrystalBall*)0);
+      return GenerateInitInstanceLocal((::RooMcbPdf*)0);
    }
    // Static variable to force the class initialization
-   static ::ROOT::TGenericClassInfo *_R__UNIQUE_(Init) = GenerateInitInstanceLocal((const ::ModifiedCrystalBall*)0x0); R__UseDummy(_R__UNIQUE_(Init));
-} // end of namespace ROOT
-
-//______________________________________________________________________________
-atomic_TClass_ptr ModifiedCrystalBall::fgIsA(0);  // static to hold class pointer
-
-//______________________________________________________________________________
-const char *ModifiedCrystalBall::Class_Name()
-{
-   return "ModifiedCrystalBall";
-}
-
-//______________________________________________________________________________
-const char *ModifiedCrystalBall::ImplFileName()
-{
-   return ::ROOT::GenerateInitInstanceLocal((const ::ModifiedCrystalBall*)0x0)->GetImplFileName();
-}
-
-//______________________________________________________________________________
-int ModifiedCrystalBall::ImplFileLine()
-{
-   return ::ROOT::GenerateInitInstanceLocal((const ::ModifiedCrystalBall*)0x0)->GetImplFileLine();
-}
-
-//______________________________________________________________________________
-TClass *ModifiedCrystalBall::Dictionary()
-{
-   fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::ModifiedCrystalBall*)0x0)->GetClass();
-   return fgIsA;
-}
-
-//______________________________________________________________________________
-TClass *ModifiedCrystalBall::Class()
-{
-   if (!fgIsA.load()) { R__LOCKGUARD2(gInterpreterMutex); fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::ModifiedCrystalBall*)0x0)->GetClass(); }
-   return fgIsA;
-}
-
-//______________________________________________________________________________
-void ModifiedCrystalBall::Streamer(TBuffer &R__b)
-{
-   // Stream an object of class ModifiedCrystalBall.
-
-   UInt_t R__s, R__c;
-   if (R__b.IsReading()) {
-      Version_t R__v = R__b.ReadVersion(&R__s, &R__c); if (R__v) { }
-      RooAbsPdf::Streamer(R__b);
-      fX.Streamer(R__b);
-      fSigma.Streamer(R__b);
-      {
-         vector<RooRealProxy> &R__stl =  fStaple;
-         R__stl.clear();
-         int R__i, R__n;
-         R__b >> R__n;
-         R__stl.reserve(R__n);
-         for (R__i = 0; R__i < R__n; R__i++) {
-            RooRealProxy R__t;
-            R__t.Streamer(R__b);
-            R__stl.push_back(R__t);
-         }
-      }
-      {
-         vector<RooRealProxy> &R__stl =  fN;
-         R__stl.clear();
-         int R__i, R__n;
-         R__b >> R__n;
-         R__stl.reserve(R__n);
-         for (R__i = 0; R__i < R__n; R__i++) {
-            RooRealProxy R__t;
-            R__t.Streamer(R__b);
-            R__stl.push_back(R__t);
-         }
-      }
-      R__b.CheckByteCount(R__s, R__c, ModifiedCrystalBall::IsA());
-   } else {
-      R__c = R__b.WriteVersion(ModifiedCrystalBall::IsA(), kTRUE);
-      RooAbsPdf::Streamer(R__b);
-      fX.Streamer(R__b);
-      fSigma.Streamer(R__b);
-      {
-         vector<RooRealProxy> &R__stl =  fStaple;
-         int R__n=int(R__stl.size());
-         R__b << R__n;
-         if(R__n) {
-            vector<RooRealProxy>::iterator R__k;
-            for (R__k = R__stl.begin(); R__k != R__stl.end(); ++R__k) {
-            ((RooRealProxy&)(*R__k)).Streamer(R__b);
-            }
-         }
-      }
-      {
-         vector<RooRealProxy> &R__stl =  fN;
-         int R__n=int(R__stl.size());
-         R__b << R__n;
-         if(R__n) {
-            vector<RooRealProxy>::iterator R__k;
-            for (R__k = R__stl.begin(); R__k != R__stl.end(); ++R__k) {
-            ((RooRealProxy&)(*R__k)).Streamer(R__b);
-            }
-         }
-      }
-      R__b.SetByteCount(R__c, kTRUE);
-   }
-}
-
-namespace ROOT {
-   // Wrappers around operator new
-   static void *new_ModifiedCrystalBall(void *p) {
-      return  p ? new(p) ::ModifiedCrystalBall : new ::ModifiedCrystalBall;
-   }
-   static void *newArray_ModifiedCrystalBall(Long_t nElements, void *p) {
-      return p ? new(p) ::ModifiedCrystalBall[nElements] : new ::ModifiedCrystalBall[nElements];
-   }
-   // Wrapper around operator delete
-   static void delete_ModifiedCrystalBall(void *p) {
-      delete ((::ModifiedCrystalBall*)p);
-   }
-   static void deleteArray_ModifiedCrystalBall(void *p) {
-      delete [] ((::ModifiedCrystalBall*)p);
-   }
-   static void destruct_ModifiedCrystalBall(void *p) {
-      typedef ::ModifiedCrystalBall current_t;
-      ((current_t*)p)->~current_t();
-   }
-   // Wrapper around a custom streamer member function.
-   static void streamer_ModifiedCrystalBall(TBuffer &buf, void *obj) {
-      ((::ModifiedCrystalBall*)obj)->::ModifiedCrystalBall::Streamer(buf);
-   }
-} // end of namespace ROOT for class ::ModifiedCrystalBall
-
-namespace ROOT {
-   static TClass *vectorlERooRealProxygR_Dictionary();
-   static void vectorlERooRealProxygR_TClassManip(TClass*);
-   static void *new_vectorlERooRealProxygR(void *p = 0);
-   static void *newArray_vectorlERooRealProxygR(Long_t size, void *p);
-   static void delete_vectorlERooRealProxygR(void *p);
-   static void deleteArray_vectorlERooRealProxygR(void *p);
-   static void destruct_vectorlERooRealProxygR(void *p);
-
-   // Function generating the singleton type initializer
-   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<RooRealProxy>*)
-   {
-      vector<RooRealProxy> *ptr = 0;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<RooRealProxy>));
-      static ::ROOT::TGenericClassInfo 
-         instance("vector<RooRealProxy>", -2, "vector", 214,
-                  typeid(vector<RooRealProxy>), DefineBehavior(ptr, ptr),
-                  &vectorlERooRealProxygR_Dictionary, isa_proxy, 0,
-                  sizeof(vector<RooRealProxy>) );
-      instance.SetNew(&new_vectorlERooRealProxygR);
-      instance.SetNewArray(&newArray_vectorlERooRealProxygR);
-      instance.SetDelete(&delete_vectorlERooRealProxygR);
-      instance.SetDeleteArray(&deleteArray_vectorlERooRealProxygR);
-      instance.SetDestructor(&destruct_vectorlERooRealProxygR);
-      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<RooRealProxy> >()));
-      return &instance;
-   }
-   // Static variable to force the class initialization
-   static ::ROOT::TGenericClassInfo *_R__UNIQUE_(Init) = GenerateInitInstanceLocal((const vector<RooRealProxy>*)0x0); R__UseDummy(_R__UNIQUE_(Init));
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_(Init) = GenerateInitInstanceLocal((const ::RooMcbPdf*)0x0); R__UseDummy(_R__UNIQUE_(Init));
 
    // Dictionary for non-ClassDef classes
-   static TClass *vectorlERooRealProxygR_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal((const vector<RooRealProxy>*)0x0)->GetClass();
-      vectorlERooRealProxygR_TClassManip(theClass);
+   static TClass *RooMcbPdf_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal((const ::RooMcbPdf*)0x0)->GetClass();
+      RooMcbPdf_TClassManip(theClass);
    return theClass;
    }
 
-   static void vectorlERooRealProxygR_TClassManip(TClass* ){
+   static void RooMcbPdf_TClassManip(TClass* ){
    }
 
 } // end of namespace ROOT
 
 namespace ROOT {
    // Wrappers around operator new
-   static void *new_vectorlERooRealProxygR(void *p) {
-      return  p ? ::new((::ROOT::TOperatorNewHelper*)p) vector<RooRealProxy> : new vector<RooRealProxy>;
+   static void *new_RooMcbPdf(void *p) {
+      return  p ? new(p) ::RooMcbPdf : new ::RooMcbPdf;
    }
-   static void *newArray_vectorlERooRealProxygR(Long_t nElements, void *p) {
-      return p ? ::new((::ROOT::TOperatorNewHelper*)p) vector<RooRealProxy>[nElements] : new vector<RooRealProxy>[nElements];
+   static void *newArray_RooMcbPdf(Long_t nElements, void *p) {
+      return p ? new(p) ::RooMcbPdf[nElements] : new ::RooMcbPdf[nElements];
    }
    // Wrapper around operator delete
-   static void delete_vectorlERooRealProxygR(void *p) {
-      delete ((vector<RooRealProxy>*)p);
+   static void delete_RooMcbPdf(void *p) {
+      delete ((::RooMcbPdf*)p);
    }
-   static void deleteArray_vectorlERooRealProxygR(void *p) {
-      delete [] ((vector<RooRealProxy>*)p);
+   static void deleteArray_RooMcbPdf(void *p) {
+      delete [] ((::RooMcbPdf*)p);
    }
-   static void destruct_vectorlERooRealProxygR(void *p) {
-      typedef vector<RooRealProxy> current_t;
+   static void destruct_RooMcbPdf(void *p) {
+      typedef ::RooMcbPdf current_t;
       ((current_t*)p)->~current_t();
    }
-} // end of namespace ROOT for class vector<RooRealProxy>
+} // end of namespace ROOT for class ::RooMcbPdf
 
 namespace {
   void TriggerDictionaryInitialization_libFitDict_Impl() {
@@ -273,7 +115,7 @@ namespace {
 0
     };
     static const char* includePaths[] = {
-"/usr/local/root-6.04/include/root",
+"/usr/local/root-6.04.10/include/root",
 "/home/nikolaev/work/BES/JpsiKK/analysis/",
 0
     };
@@ -283,7 +125,7 @@ R"DICTFWDDCLS(
 #pragma clang diagnostic ignored "-Wignored-attributes"
 #pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
 extern int __Cling_Autoloading_Map;
-class __attribute__((annotate(R"ATTRDUMP(Your description goes here...)ATTRDUMP"))) __attribute__((annotate("$clingAutoload$libFit.h")))  ModifiedCrystalBall;
+class __attribute__((annotate("$clingAutoload$libFit.h")))  RooMcbPdf;
 )DICTFWDDCLS";
     static const char* payloadCode = R"DICTPAYLOAD(
 
@@ -297,7 +139,7 @@ class __attribute__((annotate(R"ATTRDUMP(Your description goes here...)ATTRDUMP"
 #undef  _BACKWARD_BACKWARD_WARNING_H
 )DICTPAYLOAD";
     static const char* classesHeaders[]={
-"ModifiedCrystalBall", payloadCode, "@",
+"RooMcbPdf", payloadCode, "@",
 nullptr};
 
     static bool isInitialized = false;

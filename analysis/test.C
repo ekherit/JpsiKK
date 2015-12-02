@@ -18,7 +18,7 @@
 #include "CrystalBall.h"
 
 #include "analize.h"
-void test(void)
+void test2(void)
 {
 	gROOT->Reset();
 	gSystem->Load("libFit.so");
@@ -29,3 +29,13 @@ void test(void)
 	gSystem->CompileMacro("load.C","kO","","/tmp");
 }
 
+void test(void)
+{
+	gROOT->Reset();
+	gSystem->Load("libFit.so");
+  gSystem->Load("mctopo/libMcTopo.so");
+  gSystem->AddIncludePath("-I$HOME/work -I./mctop");
+	gSystem->CompileMacro("CrystalBall.cpp","kO","","/tmp");
+	gSystem->CompileMacro("analize.C","kO","","/tmp");
+	//gSystem->CompileMacro("load.C","kO","","/tmp");
+}

@@ -19,6 +19,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class ModifiedCrystalBall;
+//#pragma link C++ class ModifiedCrystalBall;
+#pragma link C++ class RooMcbPdf;
 
 #endif
