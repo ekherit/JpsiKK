@@ -495,6 +495,7 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 	for(int i=0;i<4;i++)
 	{
 		if(Tracks[i]==tracks_end) continue;
+    fEvent.fill(i,Tracks[i]);
 		if(cfg.FILL_EMC)  fEmc.fill (i,  Tracks[i]);
 		if(cfg.FILL_MDC)  fMdc.fill (i,  Tracks[i]);
 		if(cfg.FILL_DEDX) fDedx.fill(i,  Tracks[i]);

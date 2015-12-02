@@ -72,6 +72,15 @@ void RootMdc::fill(int i, EvtRecTrackIterator & track)
 	{
 		T.E[i] = 0;
 	}
+  if((*track)->isMucTrackValid())
+  {
+    RecMucTrack *mucTrk = (*track)->mucTrack();
+    T.depth[i]= mucTrk->depth();
+  }
+  else 
+  {
+    T.depth[i] = - 9999;
+  }
 }
 
 void RootMdc::fill_mass(TrackVector_t & tracks,   EvtRecTrackIterator & end, const std::vector<HepLorentzVector> & P)

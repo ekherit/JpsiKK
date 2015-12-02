@@ -1,8 +1,13 @@
-all : testMcbFit CombMcbFit libFit.so
+all : testMcbFit CombMcbFit libFit.so select
 
 #LIBS = `root-config --libs` -lMinuit  -lboost_program_options -lRooFit -lMinuit -lRooFitCore -lgsl -lgslcblas
-LIBS = `root-config --libs` -lMinuit  -lboost_program_options -lRooFit -lMinuit -lRooFitCore
-CXXFLAGS = `root-config --cflags`  -std=c++1y -fPIC
+
+LIBBOOST = -lboost_system -lboost_program_options -lboost_filesystem
+LIBROOT = `root-config --libs` -lMinuit   -lRooFit -lMinuit -lRooFitCore
+LIBS = $(LIBROOT) $(LIBBOOST)
+
+ROOTFLAGS = `root-config --cflags`
+CXXFLAGS =   -std=c++1y -fPIC $(ROOTFLAGS)
 
 BINDIR=$(HOME)/work/bin
 
@@ -24,6 +29,10 @@ libFitDict.o :  libFitDict.cxx
 
 libFitDict.cxx : libFit.h libFitLinkDef.h
 		rootcint -f libFitDict.cxx -c libFit.h libFitLinkDef.h
+
+
+select : select.cpp
+		g++ -std=c++1y -o select select.cpp $(CXXFLAGS) $(LIBS)
 
 
 

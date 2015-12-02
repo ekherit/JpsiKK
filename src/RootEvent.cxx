@@ -83,7 +83,7 @@ void RootEvent::fill(const std::vector<HepLorentzVector> & Pkf)
   M.M23 =  (Pkf[2]+Pkf[3]).m();
 
 	T.ntrack = Pkf.size();
-	for ( int i=0;i<4;i++)
+	for(int i=0;i<4;i++)
 	{
 		T.q[i]  = i%2 == 0 ? -1 : +1;
 		T.E[i]  = Pkf[i].e();
@@ -102,4 +102,17 @@ void RootEvent::fill(const std::vector<HepLorentzVector> & Pkf)
 		T.vz[i]=0;
 		T.vphi[i]=0;
 	}
+}
+
+void RootEvent::fill(int i,  EvtRecTrackIterator & itTrk)
+{
+  if((*itTrk)->isMucTrackValid())
+  {
+    RecMucTrack *mucTrk = (*itTrk)->mucTrack();
+    T.depth[i]= mucTrk->depth();
+  }
+  else 
+  {
+    T.depth[i] = - 9999;
+  }
 }

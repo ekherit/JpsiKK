@@ -33,6 +33,7 @@ struct Track_t
 	NTuple::Array<double> theta,phi;
 	NTuple::Array<double> x, y, z, r; //poca coordinate of track
 	NTuple::Array<double> vxy, vz, vphi; //poca coordinate of track
+  NTuple::Array<double> depth; //depth in muon system
 	virtual void add_to_tuple(NTuple::Tuple * tuple)
 	{
 		tuple->addItem ("ntrack", ntrack,0,4); //array size must be = 4
@@ -53,6 +54,7 @@ struct Track_t
 		tuple->addIndexedItem ("vxy",   ntrack, vxy);
 		tuple->addIndexedItem ("vz",    ntrack, vz);
 		tuple->addIndexedItem ("vphi",  ntrack, vphi);
+		tuple->addIndexedItem ("depth",  ntrack, depth);
 	}
 
 };
