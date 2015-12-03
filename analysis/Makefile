@@ -26,7 +26,7 @@ RooMcbPdf.o : RooMcbPdf.cpp
 ROOT_ADAPTORS = RootEvent.o RootMC.o RootMdc.o RootEmc.o RootTof.o RootDedx.o RootMuc.o RootNeutral.o RootMCTopo.o
 
 select : select.cpp $(ROOT_ADAPTORS)
-		g++ -std=c++1y  $(ROOT_ADAPTORS) libFitDict.o RooMcbPdf.o -o select select.cpp $(CXXFLAGS) $(LIBS)
+		g++ -std=c++1y  $(ROOT_ADAPTORS) libFitDict.o RooMcbPdf.o mctopo/McTopo.o mctopo/McTopoBase.o -o select select.cpp $(CXXFLAGS) $(LIBS)
 	
 libFitDict.o :  libFitDict.cxx
 		g++ -o libFitDict.o $(CXXFLAGS) -c libFitDict.cxx

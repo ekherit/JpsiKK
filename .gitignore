@@ -43,6 +43,7 @@ AutoDict*
 *_cpp.d
 *_C.d
 *_rdict.pcm
+*Dict.cxx
 
 
 mctopo
@@ -60,5 +61,6 @@ note/note.pdf
 
 tmp
 data
+*.root
 
 
