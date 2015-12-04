@@ -125,7 +125,6 @@ struct SelectionHelper_t
 		std::fill(chi2.begin(), chi2.end(), 0);
 		for(int i=2;i<tracks.size();i++)
 		{
-			//if(tracks[i]==end) continue;
 			PID->setRecTrack((*tracks[i]));
 			PID->setMethod(PID->methodProbability());
 			PID->setChiMinCut(4);
