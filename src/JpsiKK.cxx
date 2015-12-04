@@ -448,13 +448,13 @@ StatusCode JpsiKK::finalize()
     eps_trk_error[ch][q] = sqrt(eps_trk[ch][q]*(1.0 - eps_trk[ch][q])/double(theCounter[ch][-1][3]  + theCounter[ch][-1][4] + theCounter[ch][+1][3]  + theCounter[ch][+1][4]));
   }
 
-  std::cout << "    ε(K-) = "  <<  eps_trk[ID_KAON][-1] << " ± " << eps_trk_error[ID_KAON]<< std::endl;
-  std::cout << "    ε(K+) = "  <<  eps_trk[ID_KAON][+1] << " ± " << eps_trk_error[ID_KAON]<< std::endl;
-  std::cout << "    ε(u-) = "  <<  eps_trk[ID_MUON][-1] << " ±" << eps_trk_error[ID_MUON]<< std::endl;
-  std::cout << "    ε(u+) = "  <<  eps_trk[ID_MUON][+1] << " ± " << eps_trk_error[ID_MUON]<< std::endl;
-  std::cout << "    ε(K)  = "  <<   eps_trk[ID_KAON][0] << " ± " << eps_trk_error[ID_KAON]<< std::endl;
-  std::cout << "    ε(u)  = "  <<   eps_trk[ID_MUON][0] << " ± " << eps_trk_error[ID_MUON]<< std::endl;
-  std::cout << "    ε(K)/ε(u)  = "  <<   eps_trk[ID_MUON][0]/eps_trk[ID_MUON][0] << " ± " <<  eps_trk[ID_MUON][0]/eps_trk[ID_MUON][0] * sqrt(sq(eps_trk_error[ID_MUON]/eps_trk[ID_MUON]) + sq(eps_trk_error[ID_MUON]/eps_trk[ID_MUON]))<< std::endl;
+  std::cout << "    ε(K-) = "  <<  eps_trk[ID_KAON][-1] << " ± " << eps_trk_error[ID_KAON][-1]<< std::endl;
+  std::cout << "    ε(K+) = "  <<  eps_trk[ID_KAON][+1] << " ± " << eps_trk_error[ID_KAON][+1]<< std::endl;
+  std::cout << "    ε(u-) = "  <<  eps_trk[ID_MUON][-1] << " ±"  << eps_trk_error[ID_MUON][-1]<< std::endl;
+  std::cout << "    ε(u+) = "  <<  eps_trk[ID_MUON][+1] << " ± " << eps_trk_error[ID_MUON][+1]<< std::endl;
+  std::cout << "    ε(K)  = "  <<   eps_trk[ID_KAON][0] << " ± " << eps_trk_error[ID_KAON][0]<< std::endl;
+  std::cout << "    ε(u)  = "  <<   eps_trk[ID_MUON][0] << " ± " << eps_trk_error[ID_MUON][0]<< std::endl;
+  std::cout << "    ε(K)/ε(u)  = "  <<   eps_trk[ID_MUON][0]/eps_trk[ID_MUON][0] << " ± " <<  eps_trk[ID_MUON][0]/eps_trk[ID_MUON][0] * sqrt(sq(eps_trk_error[ID_MUON][0]/eps_trk[ID_MUON][0]) + sq(eps_trk_error[ID_MUON][0]/eps_trk[ID_MUON][0]))<< std::endl;
   return StatusCode::SUCCESS;
 }
 
