@@ -296,6 +296,7 @@ struct SelectionHelper_t
     pass &= pass_electron;
     pass &= pass_pid;
     pass &= pass_barrel;
+    std::cout << "pass_kin = " << pass_kinematic << " pass_electron=" << pass_electron << " pass_pid = " << pass_pid << " pass_barrel=" << pass_barrel << "  pass=" << pass << std::endl;
     if(dummy)  pass=true;
 		return pass;
 	}
