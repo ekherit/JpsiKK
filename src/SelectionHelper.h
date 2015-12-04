@@ -293,7 +293,7 @@ struct SelectionHelper_t
 		passPid();
     BarrelPass();
 		pass = pass_kinematic && pass_electron && pass_pid;
-    pass |= barrel_pass;
+    pass &= barrel_pass;
     if(dummy)  pass=true;
 		return pass;
 	}
