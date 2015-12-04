@@ -286,13 +286,12 @@ struct SelectionHelper_t
 
 	bool totalPass(bool dummy=false)
 	{
-		pass = false;
 		select_channel_by_kinematic_fit(); //after this we allways has channel
 		passKinematic();
 		passElectrons();
 		passPid();
     BarrelPass();
-    pass &= pass_kinematic;
+    pass = pass_kinematic;
     pass &= pass_electron;
     pass &= pass_pid;
     pass &= pass_barrel;
