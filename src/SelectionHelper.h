@@ -51,18 +51,11 @@ struct SelectionHelper_t
 	bool pass_kinematic;    //pass kinematic cut
 	bool pass_pid;          //pass pid cut
 	bool pass_electron;     //pass electron cut
+  bool barrel_pass;       //barrel pass
 	bool pass;           		//total pass
-
-
-
-	//bool good_kinematic_fit; //result  of the kinematic fit 
-	//double kin_chi2;         //chi2
-	//std::vector<HepLorentzVector>  P;
 	std::vector<EvtRecTrackIterator> tracks;
-	//EvtRecTrackIterator end;
 
 	std::vector <KinematicFit_t> KF;  //kinematic fit for different hypo
-	//std::vector<double>    kin_chi2;
 	std::vector<double>  mypid_chi2;
 	std::vector<double>    pid_chi2; //ParticleId chi2
 	std::vector<double>        prob; //the probability 
@@ -71,13 +64,11 @@ struct SelectionHelper_t
 	void init(void)
 	{
 		channel = -1;
-		//good_kinematic_fit = false;
-		//kin_chi2 = 1e100;
-		//mypid_chi2=1e100;
 		pass_kinematic = false;
 		pass_pid = false;
 		pass_electron = false;
 		pass = false;
+    barrel_pass = false;
 	}
 
 	SelectionHelper_t(const SelectionConfig & c) : cfg(&c)
@@ -285,6 +276,14 @@ struct SelectionHelper_t
 		return true;
 	}
 
+  bool BarrelPass(void)
+  {
+    double c1 = fabs(cos(KF[channel].P[2].theta()));
+    double c2 = fabs(cos(KF[channel].P[3].theta()));
+    bool barrel_pass = c1 < cfg->EMC_BARREL_MAX_COS_THETA && c2 < cfg->cfg->EMC_BARREL_MAX_COS_THETA;
+    return barrel_pass;
+  }
+
 	bool totalPass(bool dummy=false)
 	{
 		pass = false;
@@ -292,7 +291,9 @@ struct SelectionHelper_t
 		passKinematic();
 		passElectrons();
 		passPid();
+    BarrelPass();
 		pass = pass_kinematic && pass_electron && pass_pid;
+    pass |= barrel_pass;
     if(dummy)  pass=true;
 		return pass;
 	}

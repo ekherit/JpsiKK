@@ -428,7 +428,7 @@ StatusCode JpsiKK::finalize()
   std::cout << "    ε4C(K+K)  = " << double(theCounter[ID_KAON][0][4])/event_proceed << std::endl;
   std::cout << "    ε4C(u+u-) = " << double(theCounter[ID_MUON][0][4])/event_proceed << std::endl;
   std::cout << "    ε4C(K+K)/ε(u+u-) = " << double(theCounter[ID_KAON][0][4])/double(theCounter[ID_MUON][0][4]) << std::endl;
-  std::cout << "geometry and tracking efficiency" << std::endl;
+  std::cout << "tracking efficiency" << std::endl;
   std::cout << "    N4(K+)/(N3(K+)+N4(K+)) = " << double(theCounter[ID_KAON][+1][4])/double(theCounter[ID_KAON][+1][3]  + theCounter[ID_KAON][+1][4]) << std::endl;
   std::cout << "    N4(K-)/(N3(K-)+N4(K-)) = " << double(theCounter[ID_KAON][-1][4])/double(theCounter[ID_KAON][-1][3]  + theCounter[ID_KAON][-1][4]) << std::endl;
   std::cout << "    N4(u+)/(N3(u+)+N4(u+)) = " << double(theCounter[ID_MUON][+1][4])/double(theCounter[ID_MUON][+1][3]  + theCounter[ID_MUON][+1][4]) << std::endl;
