@@ -180,7 +180,7 @@ StatusCode JpsiKK::execute()
 
   SmartDataPtr<Event::EventHeader> eventHeader(eventSvc(),"/Event/EventHeader");
   static unsigned long  every = 1;
-  if(jentry > every*10 && every<1e3) every*=10;
+  if(event_proceed > every*10 && every<1e3) every*=10;
   if(event_proceed % every == 0 )
   {
 		static unsigned long nprints  = 0;
