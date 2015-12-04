@@ -279,8 +279,8 @@ struct SelectionHelper_t
   {
     double c1 = fabs(cos(KF[channel].P[2].theta()));
     double c2 = fabs(cos(KF[channel].P[3].theta()));
-    std::cout << c1 << " " << c2 <<  " "  <<  cfg->EMC_BARREL_MAX_COS_THETA << std::endl;
-    pass_barrel = c1 < cfg->EMC_BARREL_MAX_COS_THETA && c2 < cfg->EMC_BARREL_MAX_COS_THETA;
+    pass_barrel = (c1 < cfg->EMC_BARREL_MAX_COS_THETA) && (c2 < cfg->EMC_BARREL_MAX_COS_THETA);
+    std::cout << c1 << " " << c2 <<  " "  <<  cfg->EMC_BARREL_MAX_COS_THETA << " pass_barrel  = " << pass_barrel << std::endl;
     return pass_barrel;
   }
 
