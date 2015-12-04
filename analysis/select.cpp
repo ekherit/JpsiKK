@@ -32,7 +32,9 @@
 
 #include "libFit.h"
 
-#include "mctopo/McTopo.h"
+//#include "mctopo/RootMCTopo.h"
+
+#include "mctopo/mctopo.h"
 
 using namespace std;
 
@@ -147,7 +149,7 @@ int main(int argc, char ** argv)
   RootMC    mc(load_tree("mc",filename));
   RootMdc   mdc(load_tree("mdc",filename));
   //RootMCTopo   mctopo(load_tree("mctopo",filename));
-  McTopo mctopo(load_tree("mctopo",filename));
+  RootMCTopo mctopo(load_tree("mctopo",filename));
   int NBINS_KK= 200;
   int NBINS_UU= 500;
   double MRANGE=0.09;
@@ -211,7 +213,6 @@ int main(int argc, char ** argv)
     nb = mc.fChain->GetEntry(jentry);
     nb = mctopo.fChain->GetEntry(jentry);
     N0++; //count total number of events proceed
-    //mctopo.hash =  mctopo.hash();
     if(MIN_RECOIL_MASS <= event.Mrec && event.Mrec <= MAX_RECOIL_MASS)
       if(event.pid_chi2 <= PID_CHI2)
         if(event.kin_chi2 <= KIN_CHI2)
@@ -247,7 +248,7 @@ int main(int argc, char ** argv)
       //static long nprints  = 0;
       //nprints ++;
       std::cout << setw(15) << N0 << setw(15) << NKK << setw(15) << Nuu;
-      std::cout << "  hash = " << setw(10) << std::hex << mctopo.hash() << "    " << std::dec << mctopo.info();
+      std::cout << "  hash = " << setw(10) << std::hex << mctopo_hash(&mctopo) << "    " << std::dec << mctopo_info(&mctopo);
       std::cout << std::endl;
     }
   }
