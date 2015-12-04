@@ -47,23 +47,7 @@ class JpsiKK : public Algorithm
 	//some online counters
 	long int event_proceed;
 	long int event_write;
-  //long int event_with_kaons_and_muons;
-  //long int good_kinematic_fit;
-  //long int event_with_pions;
-  //long int event_with_protons;
-  //long int event_with_electrons;
-
-  //long int event_with_kaons;  //count 4C kinematic fit for kaons
-  //long int event_with_muons;  //count 4C kinematic fit for muons
-
-  //long int kaons_event_number;
-  //long int muons_event_number;
-  //long int positive_kaon_event_number; //count only positive kinematic fit
-  //long int negative_kaon_event_number; //count only negative kinematic fit
-  //long int positive_muon_event_number;
-  //long int negative_muon_event_number;
-
-  //counter of the selected events
+  //counter of the selected events theCounter[channel][charge][number of tracks]
   std::map< int, std::map< int, std::map < int, long int> > > theCounter;
 
 	//long int nprints;

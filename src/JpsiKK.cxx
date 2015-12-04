@@ -149,20 +149,6 @@ StatusCode JpsiKK::initialize(void)
   event_proceed=0;
   event_write = 0;
   theCounter.clear();
-  //event_with_kaons=0;
-  //event_with_muons=0;
-  //positive_kaon_event_number = 0; //count only positive kinematic fit
-  //negative_kaon_event_number = 0; //count only negative kinematic fit
-  //positive_muon_event_number = 0;
-  //negative_muon_event_number = 0;
-  //kaons_event_number = 0;
-  //muons_event_number = 0;
-
-  //event_with_kaons_and_muons=0;
-  //event_with_pions=0;
-  //event_with_electrons=0;
-  //event_with_protons=0;
-  //good_kinematic_fit=0;
 	if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
 	BEAM_CENTER_MASS_ENERGY = cfg.CENTER_MASS_ENERGY;
 
@@ -193,16 +179,6 @@ StatusCode JpsiKK::execute()
   log << MSG::INFO << "executing" << endreq;
 
   SmartDataPtr<Event::EventHeader> eventHeader(eventSvc(),"/Event/EventHeader");
-  //  bool isprint=false;
-  //  if(event_proceed<10) isprint=true;
-  //  if(10 <= event_proceed && event_proceed < 100 && event_proceed % 10 ==0) isprint=true;
-  //  if(100 <= event_proceed && event_proceed < 1000 && event_proceed % 100 ==0) isprint = true;
-  //  if(1000 <= event_proceed && event_proceed < 10000 && event_proceed % 1000 ==0) isprint = true;
-  //  if(10000 <= event_proceed && event_proceed % 10000 ==0) isprint = true;
-  //isprint |= 10    <= event_proceed && event_proceed < 100 && event_proceed % 10 ==0;
-  //isprint |= 100   <= event_proceed && event_proceed < 1000 && event_proceed % 100 ==0;
-  //isprint |= 1000  <= event_proceed && event_proceed < 10000 && event_proceed % 1000 ==0;
-  //isprint |= 10000 <= event_proceed && event_proceed % 10000 == 0;
   bool isprint = false;
   long int every = 1;
   isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
