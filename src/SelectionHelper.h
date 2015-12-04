@@ -290,8 +290,8 @@ struct SelectionHelper_t
 		passKinematic();
 		passElectrons();
 		passPid();
-    //BarrelPass();
-		pass = pass_kinematic && pass_electron && pass_pid;
+    BarrelPass();
+		pass = pass_kinematic && pass_electron && pass_pid && barrel_pass;
     //pass &= barrel_pass;
     if(dummy)  pass=true;
 		return pass;
