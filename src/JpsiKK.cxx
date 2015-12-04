@@ -427,8 +427,8 @@ StatusCode JpsiKK::finalize()
   std::cout << "main selection efficiency:" << std::endl;
   std::cout << "    ε4C(K+K)  = " << double(theCounter[ID_KAON][0][4])/event_proceed << std::endl;
   std::cout << "    ε4C(u+u-) = " << double(theCounter[ID_MUON][0][4])/event_proceed << std::endl;
-  std::cout << "    ε4C(K+K)/ε(u+u-) = " << double(theCounter[ID_KAON][0][4])/double(theCounter[ID_MUON][0][4]) << std::endl;
-  std::cout << "tracking efficiency: ε(+) = N4(-)/(N3(-)+N4(-))" << std::endl;
+  std::cout << "    ε4C(K+K)/ε4C(u+u-) = " << double(theCounter[ID_KAON][0][4])/double(theCounter[ID_MUON][0][4]) << std::endl;
+  std::cout << "tracking efficiency: ε(+track) = N4(-track)/(N3(-track)+N4(-track))" << std::endl;
   std::map< int , std::map < int, double> > eps_trk; //tracking efficiency
 
   for(int ch = 0; ch<2; ch++)
