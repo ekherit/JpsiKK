@@ -18,9 +18,11 @@
 #include <list>
 #include <string> 
 #include <regex>
+#include <unordered_map>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include <boost/functional/hash.hpp>
 
 
 #include <TTree.h>
@@ -31,8 +33,6 @@
 #include <TH1F.h>
 
 #include "libFit.h"
-
-//#include "mctopo/RootMCTopo.h"
 
 #include "mctopo/mctopo.h"
 
@@ -93,6 +93,34 @@ double mshift(double m)
 {
   return MSCALE*(m-MJPSI_SHIFT);
 }
+struct Index_t
+{
+  int channel;
+  int charge;
+  int tracks;
+  bool operator==(const Index_t & other) const
+  {
+    //return std::tie(channel,charge,tracks) == std::tie(other.channel,other.charge,other.tracks);
+    return channel==other.channel && charge == other.charge && tracks==other.tracks;
+  }
+
+  std::size_t hash(void) const
+  {
+    std::size_t seed = 0;
+    boost::hash_combine(seed, channel);
+    boost::hash_combine(seed, charge);
+    boost::hash_combine(seed, tracks);
+    return seed;
+  }
+};
+
+struct IndexHash_t
+{
+  std::size_t operator()(Index_t const& i) const
+  {
+    return i.hash();
+  }
+};
 
 #include <TROOT.h>
 #include <TApplication.h>
@@ -108,9 +136,11 @@ int main(int argc, char ** argv)
   std::string tree_name;
   std::string tree_file;
   unsigned long long N;
+  unsigned long MAX_EVERY;
   opt_desc.add_options()
     ("help,h","Print this help")
-    ("input", po::value<std::string>(&tree_file), "Root file (.root) with the data")
+    ("input", po::value<std::string>(&tree_file)->default_value("sample.root"), "Root file (.root) with the data")
+    ("max_every", po::value<unsigned long>(&MAX_EVERY)->default_value(1e4), "Maximum every for printing")
     ("rad",  "Fit by rad gaus")
     ("simple",  "Simple model gaus + power + exp")
     ;
@@ -127,9 +157,10 @@ int main(int argc, char ** argv)
     std::cerr << "WARGNING: configuration: "<< po_error.what() << std::endl;
   }
 
-  if(opt.count("help") && !opt.count("input"))
+
+  if(opt.count("help"))
   {
-    std::cout << "Usage: CombMcbFit <root_file>" << std::endl;
+    std::cout << "Usage: " << argv[0] <<  " <root_file>" << std::endl;
     std::clog << opt_desc;
     return 0;
   }
@@ -144,7 +175,7 @@ int main(int argc, char ** argv)
   //new TCanvas;
   //event->Draw("Mrec",cut );
 
-  string filename = "sample.root";
+  string filename = tree_file;
   RootEvent event(load_tree("event",filename));
   RootMC    mc(load_tree("mc",filename));
   RootMdc   mdc(load_tree("mdc",filename));
@@ -187,6 +218,16 @@ int main(int argc, char ** argv)
   Long64_t NKK=0;
   Long64_t Nuu=0;
 
+  const int KAON = 0;
+  const int MUON = 1;
+  //std::map< int, std::map< int, std::map < int, long int> > > theCounter;
+
+
+
+
+  std::unordered_map<Index_t, long int, IndexHash_t > theCounter;
+
+  
   for (Long64_t jentry=0; jentry<nentries;jentry++)
   {
     Long64_t ientry;
@@ -235,19 +276,14 @@ int main(int argc, char ** argv)
             mctopo_treeUU->Fill();
             Nuu++;
           }
+          Index_t index = {event.channel, event.sign, event.ngtrack};
+          theCounter[index]++;
         }
-    bool isprint = false;
-    long int every = 1;
-    auto check_print  = [&](void)
+    static unsigned long every = 1;
+    if(jentry > every*10 && every<MAX_EVERY) every*=10;
+    if(jentry % every==0 || jentry==nentries-1)
     {
-      isprint |= N0 % every == 0  &&  N0 < (every*=10);
-    };
-    for(int checks=0;checks<5;checks++) check_print();
-    if(isprint)
-    {
-      //static long nprints  = 0;
-      //nprints ++;
-      std::cout << setw(15) << N0 << setw(15) << NKK << setw(15) << Nuu;
+      std::cout << setw(15) << jentry << setw(15) << NKK << setw(15) << Nuu;
       std::cout << "  hash = " << setw(10) << std::hex << mctopo_hash(&mctopo) << "    " << std::dec << mctopo_info(&mctopo);
       std::cout << std::endl;
     }
@@ -259,5 +295,7 @@ int main(int argc, char ** argv)
   event_treeUU->Write();
   mctopo_treeUU->Write();
   file.Close();
+
+  //std::cout << theCounter[{0,0,4}] << std::endl;
   theApp.Run();
 }

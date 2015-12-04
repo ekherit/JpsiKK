@@ -179,15 +179,11 @@ StatusCode JpsiKK::execute()
   log << MSG::INFO << "executing" << endreq;
 
   SmartDataPtr<Event::EventHeader> eventHeader(eventSvc(),"/Event/EventHeader");
-  bool isprint = false;
-  long int every = 1;
-  for(int power = 0; power<4; power++) //max print every 1e4 events
+  static unsigned long  every = 1;
+  if(jentry > every*10 && every<1e3) every*=10;
+  if(event_proceed % every == 0 )
   {
-    isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
-  }
-  if(isprint)
-  {
-		static long nprints  = 0;
+		static unsigned long nprints  = 0;
     printSelectionDigest(nprints % 20 == 0);
 		nprints ++;
   }
