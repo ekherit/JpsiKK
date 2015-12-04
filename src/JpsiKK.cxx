@@ -181,13 +181,10 @@ StatusCode JpsiKK::execute()
   SmartDataPtr<Event::EventHeader> eventHeader(eventSvc(),"/Event/EventHeader");
   bool isprint = false;
   long int every = 1;
-  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
-  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
-  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
-  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
-  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
-  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
-  isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
+  for(int power = 0; power<5; power++) //max print every 1e4 events
+  {
+    isprint |= event_proceed % every == 0  &&  event_proceed < (every*=10);
+  }
   if(isprint)
   {
 		static long nprints  = 0;
