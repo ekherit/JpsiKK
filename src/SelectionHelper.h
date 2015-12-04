@@ -280,7 +280,6 @@ struct SelectionHelper_t
     double c1 = fabs(cos(KF[channel].P[2].theta()));
     double c2 = fabs(cos(KF[channel].P[3].theta()));
     pass_barrel = (c1 < cfg->EMC_BARREL_MAX_COS_THETA) && (c2 < cfg->EMC_BARREL_MAX_COS_THETA);
-    std::cout << c1 << " " << c2 <<  " "  <<  cfg->EMC_BARREL_MAX_COS_THETA << " pass_barrel  = " << pass_barrel << std::endl;
     return pass_barrel;
   }
 
@@ -295,7 +294,7 @@ struct SelectionHelper_t
     pass &= pass_electron;
     pass &= pass_pid;
     pass &= pass_barrel;
-    std::cout << "pass_kin = " << pass_kinematic << " pass_electron=" << pass_electron << " pass_pid = " << pass_pid << " pass_barrel=" << pass_barrel << "  pass=" << pass << std::endl;
+  //  std::cout << "pass_kin = " << pass_kinematic << " pass_electron=" << pass_electron << " pass_pid = " << pass_pid << " pass_barrel=" << pass_barrel << "  pass=" << pass << std::endl;
     if(dummy)  pass=true;
 		return pass;
 	}
