@@ -67,8 +67,8 @@ struct SelectionHelper_t
 		pass_kinematic = false;
 		pass_pid = false;
 		pass_electron = false;
+    pass_barrel = false;
 		pass = false;
-    barrel_pass = false;
 	}
 
 	SelectionHelper_t(const SelectionConfig & c) : cfg(&c)
