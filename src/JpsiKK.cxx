@@ -430,24 +430,31 @@ StatusCode JpsiKK::finalize()
   std::cout << "    ε4C(K+K)/ε4C(u+u-) = " << double(theCounter[ID_KAON][0][4])/double(theCounter[ID_MUON][0][4]) << std::endl;
   std::cout << "tracking efficiency: ε(+track) = N4(-track)/(N3(-track)+N4(-track))" << std::endl;
   std::map< int , std::map < int, double> > eps_trk; //tracking efficiency
+  std::map< int , std::map < int, double> > eps_trk_error; //tracking efficiency
 
   for(int ch = 0; ch<2; ch++)
   {
     int q;
     q = -1;
     eps_trk[ch][q]  =  double(theCounter[ch][-q][4])/double(theCounter[ch][-q][3]  + theCounter[ch][-q][4]);
+    eps_trk_error[ch][q] = sqrt(eps_trk[ch][q]*(1.0 - eps_trk[ch][q])/double(theCounter[ch][-q][3]  + theCounter[ch][-q][4]));
+
     q = +1;
     eps_trk[ch][q]  =  double(theCounter[ch][-q][4])/double(theCounter[ch][-q][3]  + theCounter[ch][-q][4]);
-    eps_trk[ch][0]  =  double(theCounter[ch][-1][4] + theCounter[ch][+1][4] )/double(theCounter[ch][-1][3]  + theCounter[ch][-1][4] + theCounter[ch][+1][3]  + theCounter[ch][+1][4]);
+    eps_trk_error[ch][q] = sqrt(eps_trk[ch][q]*(1.0 - eps_trk[ch][q])/double(theCounter[ch][-q][3]  + theCounter[ch][-q][4]));
+
+    q = 0;
+    eps_trk[ch][q]  =  double(theCounter[ch][-1][4] + theCounter[ch][+1][4] )/double(theCounter[ch][-1][3]  + theCounter[ch][-1][4] + theCounter[ch][+1][3]  + theCounter[ch][+1][4]);
+    eps_trk_error[ch][q] = sqrt(eps_trk[ch][q]*(1.0 - eps_trk[ch][q])/double(theCounter[ch][-1][3]  + theCounter[ch][-1][4] + theCounter[ch][+1][3]  + theCounter[ch][+1][4]));
   }
 
-  std::cout << "    ε(K-) = " <<  eps_trk[ID_KAON][-1] << std::endl;
-  std::cout << "    ε(K+) = "  <<  eps_trk[ID_KAON][+1] << std::endl;
-  std::cout << "    ε(u-) = " <<  eps_trk[ID_MUON][-1] << std::endl;
-  std::cout << "    ε(u+) = "  <<  eps_trk[ID_MUON][+1] << std::endl;
-  std::cout << "    ε(K)  = "  <<   eps_trk[ID_KAON][0] << std::endl;
-  std::cout << "    ε(u)  = "  <<   eps_trk[ID_MUON][0] << std::endl;
-  std::cout << "    ε(K)/ε(u)  = "  <<   eps_trk[ID_KAON][0]/eps_trk[ID_MUON][0] << std::endl;
+  std::cout << "    ε(K-) = "  <<  eps_trk[ID_KAON][-1] << " ± " << eps_trk_error[ID_KAON]<< std::endl;
+  std::cout << "    ε(K+) = "  <<  eps_trk[ID_KAON][+1] << " ± " << eps_trk_error[ID_KAON]<< std::endl;
+  std::cout << "    ε(u-) = "  <<  eps_trk[ID_MUON][-1] << " ±" << eps_trk_error[ID_MUON]<< std::endl;
+  std::cout << "    ε(u+) = "  <<  eps_trk[ID_MUON][+1] << " ± " << eps_trk_error[ID_MUON]<< std::endl;
+  std::cout << "    ε(K)  = "  <<   eps_trk[ID_KAON][0] << " ± " << eps_trk_error[ID_KAON]<< std::endl;
+  std::cout << "    ε(u)  = "  <<   eps_trk[ID_MUON][0] << " ± " << eps_trk_error[ID_MUON]<< std::endl;
+  std::cout << "    ε(K)/ε(u)  = "  <<   eps_trk[ID_MUON][0]/eps_trk[ID_MUON][0] << " ± " <<  eps_trk[ID_MUON][0]/eps_trk[ID_MUON][0] * sqrt(sq(eps_trk_error[ID_MUON]/eps_trk[ID_MUON]) + sq(eps_trk_error[ID_MUON]/eps_trk[ID_MUON]))<< std::endl;
   return StatusCode::SUCCESS;
 }
 
