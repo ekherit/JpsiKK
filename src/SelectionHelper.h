@@ -51,7 +51,7 @@ struct SelectionHelper_t
 	bool pass_kinematic;    //pass kinematic cut
 	bool pass_pid;          //pass pid cut
 	bool pass_electron;     //pass electron cut
-  bool barrel_pass;       //barrel pass
+  bool pass_barrel;       //barrel pass
 	bool pass;           		//total pass
 	std::vector<EvtRecTrackIterator> tracks;
 
@@ -279,8 +279,8 @@ struct SelectionHelper_t
   {
     double c1 = fabs(cos(KF[channel].P[2].theta()));
     double c2 = fabs(cos(KF[channel].P[3].theta()));
-    bool barrel_pass = c1 < cfg->EMC_BARREL_MAX_COS_THETA && c2 < cfg->EMC_BARREL_MAX_COS_THETA;
-    return barrel_pass;
+    pass_barrel = c1 < cfg->EMC_BARREL_MAX_COS_THETA && c2 < cfg->EMC_BARREL_MAX_COS_THETA;
+    return pass_barrel;
   }
 
 	bool totalPass(bool dummy=false)
@@ -291,8 +291,10 @@ struct SelectionHelper_t
 		passElectrons();
 		passPid();
     BarrelPass();
-		pass = pass_kinematic && pass_electron && pass_pid && barrel_pass;
-    //pass &= barrel_pass;
+    pass &= pass_kinematic;
+    pass &= pass_electron;
+    pass &= pass_pid;
+    pass &= pass_barrel;
     if(dummy)  pass=true;
 		return pass;
 	}
