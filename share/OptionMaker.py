@@ -246,8 +246,20 @@ class OptionMaker:
             print TemplateInputFile
             TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s%s.root" % (self.jobPrefix,runs_string)))
             print TemplateOutputFile
-
             print "end group"
+            target_file_name = os.path.join(self.targetDir,"%s-sel%s.cfg" % (self.jobPrefix, runs_string))
+            source_file = open(self.templateFile, 'r')
+            target_file = open(target_file_name, 'w')
+            TemplateRandomSeed = str(random.randint(0,2**32))
+            for line in source_file:
+                line = re.sub("TEMPLATE_INPUT_FILE", TemplateInputFile, line)
+                line = re.sub("TEMPLATE_OUTPUT_FILE",TemplateOutputFile, line)
+                line = re.sub("TEMPLATE_RANDOM_SEED",TemplateRandomSeed, line)
+                line = re.sub("TEMPLATE_EVENT_NUMBER",str(self.eventNumber), line)
+                line = re.sub("TEMPLATE_RUN_NUMBER",str(self.runNumber), line)
+                target_file.write(line)
+            source_file.close()
+            target_file.close()
 
     def make_sim(self):
         for job in range(0, self.jobNumber):
