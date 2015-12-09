@@ -62,7 +62,7 @@ def group_files(run_map, n) :
             tmp_list=[]
             count=0
             tmp_list.append(ri)
-        count++
+        count=count+1
     return run_info_list
 
 #create comma separated and qouted list of files
