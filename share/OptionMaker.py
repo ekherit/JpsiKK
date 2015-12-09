@@ -227,7 +227,10 @@ class OptionMaker:
     def make_sel2(self):
         self.run_string()
         runinfo_list = group_files(self.runMap,2)
-        print runinfo_list
+        for list in runinfo_items:
+            for ri in list:
+                for f in ri.files
+                    print ri,"  ", f
 
     def make_sim(self):
         for job in range(0, self.jobNumber):
