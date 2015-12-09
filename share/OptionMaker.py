@@ -229,10 +229,18 @@ class OptionMaker:
         runinfo_list = group_files(self.runMap,2)
         for rilst in runinfo_list:
             print "begin group"
+            runs=[]
             for ri in rilst:
+                runs.append(ri.run)
                 print ri.run
                 for f in ri.files:
                     print "         ", f
+            runs.sort()
+            runs_string=""
+            for run in runs:
+                runs_string+=("_%07d" % run )
+            print runs_string
+
             print "end group"
 
     def make_sim(self):
