@@ -119,6 +119,7 @@ class OptionMaker:
         self.jobNumber=int(options.job_number)
         self.jobPrefix=options.job_prefix
         self.runs=options.runs
+        self.runNumber = options.run_number;
 
         if len(args) < 1:
             print 'Specify the action: "sel",  "sim",  "rec"'
@@ -130,7 +131,7 @@ class OptionMaker:
             self.fileFilter = ".*(\d{4,7}).*.dst"
             self.fileList = filter_file_list(create_file_list(self.dataDir), self.fileFilter)
             self.templateFile = "selection.cfg"
-            self.group(".*[^\d](\d{4,7})[^\d].*.dst")
+            self.group(".*[^\d](\d{4,7})[^\d].*.dst", self.runNumber)
 
         if args[0] == "simulation" or args[0] == "sim":
             self.SimulationMode = True
@@ -145,7 +146,7 @@ class OptionMaker:
             self.fileList =filter_file_list(create_file_list(self.dataDir),  self.fileFilter)
             #print self.fileList
             print "Making reconstruction config files."
-            self.group(".*(\d{5,7}).rtraw")
+            self.group(".*(\d{5,7}).rtraw",self.runNumber)
 
         self.templateFile = lookup(self.templateFile,  self.TEMPLATE_DIR)
         print "Setup template file: ",  self.templateFile
