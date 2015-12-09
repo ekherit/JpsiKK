@@ -226,7 +226,7 @@ class OptionMaker:
 
     def make_sel2(self):
         self.run_string()
-        runinfo_list = group_files(self.runMap,2)
+        runinfo_list = group_files(self.runMap,3)
         for rilst in runinfo_list:
             print "begin group"
             runs=[]
