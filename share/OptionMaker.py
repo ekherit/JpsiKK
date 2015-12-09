@@ -41,6 +41,30 @@ def create_run_dict(files,reg):
                 RunMap[run]=[file]
     return RunMap
 
+
+class RunInfo:
+    run  = 0
+    files = []
+    def __init__(self, Run, Files):
+        self.run = Run
+        self.files = Files
+
+def group_files(run_map, n) :
+    run_info_list = []
+    count=0
+    tmp_list=[]
+    for run, files in run_map.items():
+        RunInfo ri(run,files)
+        if count < n :
+            tmp_list.append(ri) 
+        else
+            run_info_list.append(tmp_list)
+            tmp_list=[]
+            count=0
+            tmp_list.append(ri)
+        count++
+    return run_info_list
+
 #create comma separated and qouted list of files
 def make_files_string(files):
     files_string=''
@@ -99,7 +123,7 @@ class OptionMaker:
             print 'Specify the action: "sel",  "sim",  "rec"'
             sys.exit(1)
 
-        if(args[0] == "selection" or args[0]=="sel"):
+        if(args[0] == "selection" or args[0]=="sel" or args[0] == "sel2"):
             self.SelectionMode=True
             #self.fileFilter=".*run_(\d\d\d\d\d\d\d).*.dst"
             self.fileFilter = ".*(\d{4,7}).*.dst"
@@ -172,7 +196,10 @@ class OptionMaker:
             return
 
         if self.SelectionMode:
-            self.make_sel()
+            if(args[0]=="sel2"):
+                self.make_sel2()
+            else :
+                self.make_sel()
             return
 
 
@@ -199,6 +226,11 @@ class OptionMaker:
                 target_file.write(line)
             source_file.close()
             target_file.close()
+
+    def make_sel2(self):
+        self.run_string()
+        runinfo_list = group_files(runMap,2)
+        print runinfo_list
 
     def make_sim(self):
         for job in range(0, self.jobNumber):
