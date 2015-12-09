@@ -53,8 +53,8 @@ JpsiKK.MAX_PID_CHI2 = 40;
 JpsiKK.PASS_KIN_PID_CUT=false;
 
 JpsiKK.FILL_MDC=true;
-JpsiKK.FILL_EMC=true;
-JpsiKK.FILL_TOF=true;
-JpsiKK.FILL_DEDX=true;
-JpsiKK.FILL_MUC=true;
+JpsiKK.FILL_EMC=false;
+JpsiKK.FILL_TOF=false;
+JpsiKK.FILL_DEDX=false;
+JpsiKK.FILL_MUC=false;
 
