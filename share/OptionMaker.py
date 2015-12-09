@@ -226,27 +226,20 @@ class OptionMaker:
 
     def make_sel2(self):
         self.run_string()
-        runinfo_list = group_files(self.runMap,3)
+        runinfo_list = group_files(self.runMap,2)
         for rilst in runinfo_list:
-            print "begin group"
             runs=[]
             files = []
             for ri in rilst:
                 runs.append(ri.run)
-                print ri.run
                 for f in ri.files:
                     files.append(f)
-                    print "         ", f
             runs.sort()
             runs_string=""
             for run in runs:
                 runs_string+=("_%07d" % run )
-            print runs_string
             TemplateInputFile = make_files_string(files)
-            print TemplateInputFile
             TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s%s.root" % (self.jobPrefix,runs_string)))
-            print TemplateOutputFile
-            print "end group"
             target_file_name = os.path.join(self.targetDir,"%s-sel%s.cfg" % (self.jobPrefix, runs_string))
             source_file = open(self.templateFile, 'r')
             target_file = open(target_file_name, 'w')
