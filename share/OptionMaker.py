@@ -241,7 +241,7 @@ class OptionMaker:
             TemplateInputFile = make_files_string(files)
             TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s%s.root" % (self.jobPrefix,runs_string)))
             target_file_name = os.path.join(self.targetDir,"%s-sel%s.cfg" % (self.jobPrefix, runs_string))
-            print "Creating ", target_file_name, "  for runs: ", runs_string
+            print "Creating ", target_file_name, "  for runs: ", runs
             source_file = open(self.templateFile, 'r')
             target_file = open(target_file_name, 'w')
             TemplateRandomSeed = str(random.randint(0,2**32))
