@@ -230,16 +230,20 @@ class OptionMaker:
         for rilst in runinfo_list:
             print "begin group"
             runs=[]
+            files = []
             for ri in rilst:
                 runs.append(ri.run)
                 print ri.run
                 for f in ri.files:
+                    files.append(f)
                     print "         ", f
             runs.sort()
             runs_string=""
             for run in runs:
                 runs_string+=("_%07d" % run )
             print runs_string
+            TemplateInputFile = make_files_string(files)
+            print TemplateInputFile
 
             print "end group"
 
