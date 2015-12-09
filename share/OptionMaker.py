@@ -196,10 +196,7 @@ class OptionMaker:
             return
 
         if self.SelectionMode:
-            if(args[0]=="sel2"):
-                self.make_sel2()
-            else :
-                self.make_sel()
+            self.make_sel2()
             return
 
 
