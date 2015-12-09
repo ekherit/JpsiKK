@@ -244,6 +244,8 @@ class OptionMaker:
             print runs_string
             TemplateInputFile = make_files_string(files)
             print TemplateInputFile
+            TemplateOutputFile = os.path.abspath(os.path.join(self.targetDir,"%s%s.root" % (self.jobPrefix,runs_string)))
+            print TemplateOutputFile
 
             print "end group"
 
