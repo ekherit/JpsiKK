@@ -80,7 +80,7 @@ def lookup( f, d):
         f = os.path.join(d,f)
     if os.path.exists(f):
         f = os.path.realpath(os.path.abspath(f))
-        print f
+        #print f
     else :
         print 'File ',  f,  ' doest exists'
         sys.exit(1)
