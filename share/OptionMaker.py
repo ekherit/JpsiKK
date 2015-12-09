@@ -57,7 +57,7 @@ def group_files(run_map, n) :
         ri = RunInfo(run,files)
         if count < n :
             tmp_list.append(ri) 
-        else
+        else :
             run_info_list.append(tmp_list)
             tmp_list=[]
             count=0
