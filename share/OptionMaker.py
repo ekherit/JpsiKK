@@ -228,10 +228,12 @@ class OptionMaker:
         self.run_string()
         runinfo_list = group_files(self.runMap,2)
         for rilst in runinfo_list:
+            print "begin group"
             for ri in rilst:
                 print ri.run
                 for f in ri.files:
                     print "         ", f
+            print "end group"
 
     def make_sim(self):
         for job in range(0, self.jobNumber):
