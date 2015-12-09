@@ -230,7 +230,7 @@ class OptionMaker:
         for list in runinfo_list:
             for ri in list:
                 for f in ri.files:
-                    print ri,"  ", f
+                    print ri.run,"  ", f
 
     def make_sim(self):
         for job in range(0, self.jobNumber):
