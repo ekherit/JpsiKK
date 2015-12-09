@@ -109,6 +109,7 @@ class OptionMaker:
     SelectionMode = True
     SimulationMode = False
     ReconstructionMode = False
+    RunInfoList = []
 
 
     def __init__(self, options, args):
@@ -173,6 +174,7 @@ class OptionMaker:
         self.runFilter=run_filter
         self.runNumber = run_number
         self.runMap = create_run_dict(self.fileList, run_filter)
+        self.RunInfoList = group_files(self.runMap,run_number);
         #self.runMap.sort()
 
     def setup_template_file(self, template_file, target_dir):
@@ -226,8 +228,8 @@ class OptionMaker:
 
     def make_sel2(self):
         self.run_string()
-        runinfo_list = group_files(self.runMap,2)
-        for rilst in runinfo_list:
+        #runinfo_list = group_files(self.runMap,2)
+        for rilst in self.RunInfoList:
             runs=[]
             files = []
             for ri in rilst:
@@ -250,7 +252,6 @@ class OptionMaker:
                 line = re.sub("TEMPLATE_OUTPUT_FILE",TemplateOutputFile, line)
                 line = re.sub("TEMPLATE_RANDOM_SEED",TemplateRandomSeed, line)
                 line = re.sub("TEMPLATE_EVENT_NUMBER",str(self.eventNumber), line)
-                line = re.sub("TEMPLATE_RUN_NUMBER",str(self.runNumber), line)
                 target_file.write(line)
             source_file.close()
             target_file.close()
