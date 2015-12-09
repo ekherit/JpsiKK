@@ -226,7 +226,7 @@ class OptionMaker:
 
     def make_sel2(self):
         self.run_string()
-        runinfo_list = group_files(runMap,2)
+        runinfo_list = group_files(self.runMap,2)
         print runinfo_list
 
     def make_sim(self):
