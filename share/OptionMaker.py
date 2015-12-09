@@ -320,7 +320,7 @@ class OptionMaker:
             #reset range
             first_run=run
             last_run=run
-        for r in range_list:
-            print r
+        #for r in range_list:
+        #    print r
 
 
