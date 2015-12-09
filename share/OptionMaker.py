@@ -229,7 +229,7 @@ class OptionMaker:
         runinfo_list = group_files(self.runMap,2)
         for list in runinfo_items:
             for ri in list:
-                for f in ri.files
+                for f in ri.files:
                     print ri,"  ", f
 
     def make_sim(self):
