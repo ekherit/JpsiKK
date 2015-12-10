@@ -148,6 +148,14 @@ class OptionMaker:
             print "Making reconstruction config files."
             self.group(".*(\d{5,7}).rtraw",self.runNumber)
 
+        if(args[0] == "pbs"):
+            self.PbsMode=True
+            #self.fileFilter=".*run_(\d\d\d\d\d\d\d).*.dst"
+            self.fileFilter = ".*(\d{4,7}).*.cfg"
+            self.fileList = filter_file_list(create_file_list(self.dataDir), self.fileFilter)
+            self.templateFile = "pbs.sh"
+            self.group(".*[^\d](\d{4,7})[^\d].*.cfg", self.runNumber)
+
         self.templateFile = lookup(self.templateFile,  self.TEMPLATE_DIR)
         print "Setup template file: ",  self.templateFile
 
@@ -256,6 +264,9 @@ class OptionMaker:
                 target_file.write(line)
             source_file.close()
             target_file.close()
+
+    def make_pbs(self):
+
 
     def make_sim(self):
         for job in range(0, self.jobNumber):
