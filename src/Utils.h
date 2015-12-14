@@ -151,7 +151,7 @@ inline double getMissingMass2(double Wcm,  TrackVector_t & T, std::vector<int> &
 	{
 		if(!T[i]->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating missing mass (getMissingMass2)");
     //RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
-    RecMdcKalTrack *mdcTrk = (*T[i])->mdcKalTrack();
+    RecMdcKalTrack *mdcTrk = T[i]->mdcKalTrack();
 		P[i] =  mdcTrk->p4(XMASS[pid[i]]);
 		Psum+=P[i];
 	}
@@ -169,7 +169,7 @@ inline double getInvariantMass2(TrackVector_t & T, std::vector<int> & pid)
 	HepLorentzVector Psum;
 	for(int i=0; i<T.size(); i++)
 	{
-		if(!(*T[i])->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating invariant mass (getInvariantMass2)");
+		if(!T[i]->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating invariant mass (getInvariantMass2)");
     //RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
     RecMdcKalTrack *mdcTrk = T[i]->mdcKalTrack();
 		Psum += (mdcTrk->p4(XMASS[pid[i]]));;
@@ -238,18 +238,14 @@ double getPi0Mass(TrackList_t & glist)
       //EvtRecTrackIterator & track2 = *ti2;
       //RecEmcShower *emcTrk1 = (*track1)->emcShower();
       //RecEmcShower *emcTrk2 = (*track2)->emcShower();
-      RecEmcShower * emcTrk[2];
-      double E[2];
-      double theta[2];
-      double phi[2];
       HepLorentzVector p[2];
       for(int idx=0;idx<2;idx++)
       {
-        emcTrk[idx] = (*track[idx])->emcShower();
-        E[idx]  =  emcTrk->energy();
-        theta[idx] =  emcTrk->theta();
-        phi[idx] =  emcTrk->phi();
-        p[idx] = HepLorentzVector(E[idx]*sin(theta[idx])*cos(phi[idx]), E[idx]*sin(theta[idx])*sin(phi[idx]),E[idx]*cos(theta[idx]), E[idx]);
+        RecEmcShower * emcTrk = (*track[idx])->emcShower();
+        double E = emcTrk->energy();
+        double theta = emcTrk->theta();
+        double phi = emcTrk->phi();
+        p[idx] = HepLorentzVector(E*sin(theta)*cos(phi), E*sin(theta)*sin(phi),E*cos(theta), E);
       }
       HepLorentzVector psum = p[0]+p[1];
       double m = psum.m();
