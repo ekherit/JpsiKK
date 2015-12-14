@@ -246,7 +246,7 @@ double getPi0Mass(TrackList_t & glist)
       HepLorentzVector p[2];
       for(int idx=0;idx<2;idx++)
       {
-        emcTrk[idx] = (*(*track[idx]))->emcShower();
+        emcTrk[idx] = (*track[idx])->emcShower();
         E[idx]  =  emcTrk->energy();
         theta[idx] =  emcTrk->theta();
         phi[idx] =  emcTrk->phi();
