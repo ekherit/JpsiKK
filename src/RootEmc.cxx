@@ -58,7 +58,7 @@ void RootEmc::fill(list<EvtRecTrack*> & good_neutral_tracks)
 {
 	ntrack=std::min(good_neutral_tracks.size(), size_t(ARRAY_SIZE));
 	int idx=0;
-	for(list<EvtRecTrackIterator>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
+	for(list<EvtRecTrack*>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
 	{
 		EvtRecTrack   *Trk = *track;
 		RecEmcShower *emcTrk = Trk->emcShower();
