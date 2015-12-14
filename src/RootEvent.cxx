@@ -62,6 +62,8 @@ void RootEvent::init_tuple(void)
   //tuple->addIndexedItem ("probpi", T.ntrack,  prob[ID_PION]);
   //tuple->addIndexedItem ("probk",  T.ntrack,  prob[ID_KAON]);
   //tuple->addIndexedItem ("probp",  T.ntrack,  prob[ID_PROTON]);
+
+  tuple->addItem ("Mpi0", Mpi0);
 }
 
 void RootEvent::init(void)
