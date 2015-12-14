@@ -225,7 +225,7 @@ inline RecMdcTrack * getMdcTrack(EvtRecTrack *  track)
   return track->mdcTrack();
 }
 
-double getPi0Mass(TrackList_t & glist)
+inline double getPi0Mass(TrackList_t & glist)
 {
   double M = 10;
   TrackList_t::iterator track[2];
