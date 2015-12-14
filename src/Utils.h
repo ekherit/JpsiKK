@@ -229,11 +229,10 @@ double getPi0Mass(TrackList_t & glist)
 {
   double M = 10;
   TrackList_t::iterator track[2];
-  for(TrackList_t::iterator track[0] = glist.begin() ; track[0] != glist.end() ; track[0]++)
+  for(track[0] = glist.begin() ; track[0] != glist.end() ; track[0]++)
   {
     TrackList_t::iterator track[1]=track[0];
-    track[1]++;
-    for(; track[1] !=glist.end() ; track[1]++)
+    for(++track[1]; track[1] !=glist.end() ; track[1]++)
     {
       //EvtRecTrackIterator & track1 = *ti1;
       //EvtRecTrackIterator & track2 = *ti2;
