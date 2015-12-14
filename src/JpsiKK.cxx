@@ -196,11 +196,8 @@ StatusCode JpsiKK::execute()
 
   //fill initial value of the selected event
 
-  std::clog << "Before finding good charged tracks\n";
   good_charged_tracks=createGoodChargedTrackList(cfg, evtRecEvent, evtRecTrkCol);
-  std::clog << "after finding good charged tracks\n";
   good_neutral_tracks=createGoodNeutralTrackList(cfg, evtRecEvent, evtRecTrkCol);
-  std::clog << "after finding good neutral tracks\n";
 
   //SELECTION CODE
   if( cfg.MAX_NEUTRAL_TRACKS < good_neutral_tracks.size()) return StatusCode::SUCCESS;
@@ -215,7 +212,6 @@ StatusCode JpsiKK::execute()
   TrackList_t negative_pion_tracks; //selected pion tracks for specific cut
   TrackList_t other_positive_tracks; //other positive tracks for specific cut
   TrackList_t other_negative_tracks; //other positive tracks for specific cut
-  std::clog << "Before finding pion pairs\n";
   for(TrackList_t::iterator track=good_charged_tracks.begin(); track!=good_charged_tracks.end(); track++)
   {
     //EvtRecTrackIterator & itTrk = *track;
@@ -252,10 +248,8 @@ StatusCode JpsiKK::execute()
     }
   }
 
-  std::clog << "after finding pion tracks\n";
 
   //create pion pairs
-  std::clog << "Before creating pion pairs\n";
   TrackPairList_t pion_pairs;
   for(TrackList_t::iterator i=negative_pion_tracks.begin(); i!=negative_pion_tracks.end(); ++i)
     for(TrackList_t::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
@@ -266,7 +260,6 @@ StatusCode JpsiKK::execute()
         pion_pairs.push_back(pair);
       }
     }
-  std::clog << "After creating pion pairs\n";
   //SELECTION CODE we must have at list one pion pair
   if(pion_pairs.empty()) return StatusCode::SUCCESS; //we must have at list one pion pair
   TrackPair_t pion_pair = pion_pairs.front();
@@ -291,7 +284,6 @@ StatusCode JpsiKK::execute()
 
 
 
-  std::clog << "Before selection helper\n";
   std::list<SelectionHelper_t> sh_list;
   if(neg)
   {
@@ -314,12 +306,10 @@ StatusCode JpsiKK::execute()
     sh.kinfit(pion_pair, other_negative_tracks.front(), other_positive_tracks.front());
 		sh.totalPass(cfg.PASS_KIN_PID_CUT);
   }
-  std::clog << "After selection helper\n";
 
 	std::list<int> pid_list;
 	pid_list.push_back(ID_KAON);
 	pid_list.push_back(ID_MUON);
-  std::clog << "Before filling\n";
   for(std::list<SelectionHelper_t>::iterator it = sh_list.begin(); it!=sh_list.end(); it++)
   {
     SelectionHelper_t & sh = *it;
@@ -405,7 +395,6 @@ StatusCode JpsiKK::execute()
         fEvent.npion_pairs = pion_pairs.size();
         try
         {
-          std::clog << "Before fill ntuples\n";
           fillTuples(Pkf, Tracks);
           writeTuples();
         }
@@ -487,7 +476,6 @@ void JpsiKK::init_tuple(A & a,  const char * dir, const char * title)
 void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  TrackVector_t & Tracks)
 {
   SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
-  clog << "Before fEvent.fill(Pkf)" << std::endl;
 	fEvent.fill(Pkf);
   fEvent.Mpi0 = getPi0Mass(good_neutral_tracks);
 	//fPid.ntrack=4;
@@ -497,7 +485,6 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 	fTof.ntrack=4;
   fMuc.ntrack=4;
 	//fMdc.M.Mrec = get_recoil__mass(Tracks[0], Tracks[1], PION_MASS,  cfg.CENTER_MASS_ENERGY);
-  std::clog << "Before track loop" << std::endl;
 	for(int i=0;i<4;i++)
 	{
 		if(Tracks[i]==0) continue;
@@ -508,7 +495,6 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 		if(cfg.FILL_TOF)  fTof.fill (i,  Tracks[i]);
     if(cfg.FILL_MUC)  fMuc.fill (i,  Tracks[i]);
 	}
-  std::clog << "Before fill mass \n";
 	fMdc.fill_mass(Tracks, Pkf);
 	//Monte Carlo information
 	if(fEvent.run<0)
@@ -521,13 +507,11 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 		fMCTopo.fill(mcParticleCol);
 		fMC.fill(Pkf, mcParticleCol);
 	}
-  std::clog << "Before neutral fill\n";
 	fNeutral.fill(good_neutral_tracks);
 }
 
 void JpsiKK::writeTuples(void)
 {
-  std::clog << "Before write tuples\n";
 	if(fEvent.run<0)
 	{
 		fMC.write();
@@ -542,7 +526,6 @@ void JpsiKK::writeTuples(void)
   if(cfg.FILL_MUC)  fMuc.write();
   //fNeutral.tuple->write();
   event_write++;
-  std::clog << "after write tuples\n";
 }
 
 void JpsiKK::printSelectionDigest(bool head)
