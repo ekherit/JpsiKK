@@ -235,10 +235,10 @@ double getPi0Mass(TrackList_t & glist)
     track[1]++;
     for(; track[1] !=glist.end() ; track[1]++)
     {
-      EvtRecTrackIterator & track1 = *ti1;
-      EvtRecTrackIterator & track2 = *ti2;
-      RecEmcShower *emcTrk1 = (*track1)->emcShower();
-      RecEmcShower *emcTrk2 = (*track2)->emcShower();
+      //EvtRecTrackIterator & track1 = *ti1;
+      //EvtRecTrackIterator & track2 = *ti2;
+      //RecEmcShower *emcTrk1 = (*track1)->emcShower();
+      //RecEmcShower *emcTrk2 = (*track2)->emcShower();
       RecEmcShower * emcTrk[2];
       double E[2];
       double theta[2];
