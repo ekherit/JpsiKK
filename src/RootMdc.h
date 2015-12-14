@@ -36,6 +36,6 @@ struct RootMdc : public RootTuple
 
 	virtual void init(void);
 	virtual void init_tuple(void);
-	virtual void fill(int i,  EvtRecTrackIterator * track);
+	virtual void fill(int i,  EvtRecTrack * track);
 	virtual void fill_mass(TrackVector_t&, EvtRecTrack *, const std::vector<HepLorentzVector> & P);
 };
