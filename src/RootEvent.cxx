@@ -104,11 +104,11 @@ void RootEvent::fill(const std::vector<HepLorentzVector> & Pkf)
 	}
 }
 
-void RootEvent::fill(int i,  EvtRecTrackIterator & itTrk)
+void RootEvent::fill(int i,  EvtRecTrack * Trk)
 {
-  if((*itTrk)->isMucTrackValid())
+  if(Trk->isMucTrackValid())
   {
-    RecMucTrack *mucTrk = (*itTrk)->mucTrack();
+    RecMucTrack *mucTrk = Trk->mucTrack();
     T.depth[i]= mucTrk->depth();
   }
   else 

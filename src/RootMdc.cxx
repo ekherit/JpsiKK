@@ -38,11 +38,11 @@ void RootMdc::init(void)
 }
 
 
-void RootMdc::fill(int i, EvtRecTrackIterator & track)
+void RootMdc::fill(int i, EvtRecTrack * track)
 {
-	if(!(*track)->isMdcTrackValid()) return; 
+	if(!track->isMdcTrackValid()) return; 
 	//RecMdcTrack  *mdcTrk = (*track)->mdcTrack();
-  RecMdcKalTrack * mdcTrk = (*track)->mdcKalTrack();
+  RecMdcKalTrack * mdcTrk = track->mdcKalTrack();
 	T.trackId[i] = mdcTrk->trackId();
 	T.q[i] = mdcTrk->charge(); 
 	T.p[i] = mdcTrk->p();
@@ -58,23 +58,23 @@ void RootMdc::fill(int i, EvtRecTrackIterator & track)
 	T.y[i]  = mdcTrk->y();
 	T.z[i]  = mdcTrk->z();
 	double rvxy,rvz,rvphi;
-	calculate_vertex((*track)->mdcTrack(),rvxy,rvz,rvphi); 
+	calculate_vertex(track->mdcTrack(),rvxy,rvz,rvphi); 
 	T.vxy[i] = rvxy;
 	T.vz[i]  = rvz; 
 	T.vphi[i] = rvphi; 
 
-	if((*track)->isEmcShowerValid())
+	if(track->isEmcShowerValid())
 	{
-		RecEmcShower *emcTrk = (*track)->emcShower();
+		RecEmcShower *emcTrk = track->emcShower();
 		T.E[i] = emcTrk->energy();
 	}
 	else
 	{
 		T.E[i] = 0;
 	}
-  if((*track)->isMucTrackValid())
+  if(track->isMucTrackValid())
   {
-    RecMucTrack *mucTrk = (*track)->mucTrack();
+    RecMucTrack *mucTrk = track->mucTrack();
     T.depth[i]= mucTrk->depth();
   }
   else 
@@ -83,13 +83,13 @@ void RootMdc::fill(int i, EvtRecTrackIterator & track)
   }
 }
 
-void RootMdc::fill_mass(TrackVector_t & tracks,   EvtRecTrackIterator & end, const std::vector<HepLorentzVector> & P)
+void RootMdc::fill_mass(TrackVector_t & tracks, const std::vector<HepLorentzVector> & P)
 {
 	npid=5;
 
 	for(int pid =0; pid <5;pid++)
 	{
-		if(tracks[2] != end && tracks[3] != end)
+		if(tracks[2] != 0 && tracks[3] != 0)
 		{
 			std::vector<int> pids(4);
 			pids[0] = ID_PION;
@@ -110,14 +110,14 @@ void RootMdc::fill_mass(TrackVector_t & tracks,   EvtRecTrackIterator & end, con
 			TrackVector_t T(3);
 			T[0] = tracks[0];
 			T[1] = tracks[1];
-			if(tracks[2] != end)
+			if(tracks[2] != 0)
 			{
 				T[2] = tracks[2];
 				M12[pid]  = sqrt(getInvariantMass2(pids[1], tracks[1], pid, tracks[2]));
 				M03[pid]  = 0;
         M23[pid]  = sqrt(getInvariantMass2(pid,tracks[2], P[3]));
 			}
-			if(tracks[3] != end)
+			if(tracks[3] != 0)
 			{
 				T[2] = tracks[3];
 				M12[pid]  = 0;

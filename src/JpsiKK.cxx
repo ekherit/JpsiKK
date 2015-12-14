@@ -192,7 +192,6 @@ StatusCode JpsiKK::execute()
   //  Get information about reconstructed events
   SmartDataPtr<EvtRecEvent> evtRecEvent(eventSvc(), EventModel::EvtRec::EvtRecEvent);
   SmartDataPtr<EvtRecTrackCol> evtRecTrkCol(eventSvc(),  EventModel::EvtRec::EvtRecTrackCol);
-	tracks_end = evtRecTrkCol->end();
 
 
   //fill initial value of the selected event
@@ -215,9 +214,10 @@ StatusCode JpsiKK::execute()
   TrackList_t other_negative_tracks; //other positive tracks for specific cut
   for(TrackList_t::iterator track=good_charged_tracks.begin(); track!=good_charged_tracks.end(); track++)
   {
-    EvtRecTrackIterator & itTrk = *track;
-    if(!(*itTrk)->isMdcTrackValid()) continue; 
-    RecMdcTrack *mdcTrk = (*itTrk)->mdcTrack();
+    //EvtRecTrackIterator & itTrk = *track;
+    EvtRecTrack *Trk = *track;
+    if(!Trk->isMdcTrackValid()) continue; 
+    RecMdcTrack *mdcTrk = Trk->mdcTrack();
     double c = fabs(cos(mdcTrk->theta()));
     double p = mdcTrk->p();
     double q = mdcTrk->charge();
@@ -225,24 +225,24 @@ StatusCode JpsiKK::execute()
     if(barrel) 
     {
 			//fill charged tracks list. It will not be used in selection
-      charged_tracks.push_back(itTrk);
+      charged_tracks.push_back(Trk);
 			//fill positive and negative chargned track list not used in selection
-			if(q>0) positive_charged_tracks.push_back(itTrk);
-			if(q<0) negative_charged_tracks.push_back(itTrk);
+			if(q>0) positive_charged_tracks.push_back(Trk);
+			if(q<0) negative_charged_tracks.push_back(Trk);
 
 			//preselect pion candidates
 			if(in(p, cfg.MIN_PION_MOMENTUM, cfg.MAX_PION_MOMENTUM)) 
 			{
-				if(q>0) positive_pion_tracks.push_back(itTrk);
-				if(q<0) negative_pion_tracks.push_back(itTrk);
+				if(q>0) positive_pion_tracks.push_back(Trk);
+				if(q<0) negative_pion_tracks.push_back(Trk);
 			}
 			//preselect muon and kaon candidates
 			if(in(p, std::min(cfg.MIN_KAON_MOMENTUM, cfg.MIN_MUON_MOMENTUM), std::max(cfg.MAX_KAON_MOMENTUM, cfg.MAX_MUON_MOMENTUM)))
 			{
-				if((*itTrk)->isEmcShowerValid())
+				if(Trk->isEmcShowerValid())
 				{
-					if(q>0) other_positive_tracks.push_back(itTrk);
-					if(q<0) other_negative_tracks.push_back(itTrk);
+					if(q>0) other_positive_tracks.push_back(Trk);
+					if(q<0) other_negative_tracks.push_back(Trk);
 				}
 			}
     }
@@ -323,7 +323,7 @@ StatusCode JpsiKK::execute()
         if(Tracks.size()==3) 
         {
           charge = getMdcTrack(Tracks[2])->charge();
-          Tracks.push_back(evtRecTrkCol->end()); //workout 3trk case
+          Tracks.push_back(0); //workout 3trk case
         }
         if(charge<0 && pos)
         {
@@ -486,7 +486,7 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 	//fMdc.M.Mrec = get_recoil__mass(Tracks[0], Tracks[1], PION_MASS,  cfg.CENTER_MASS_ENERGY);
 	for(int i=0;i<4;i++)
 	{
-		if(Tracks[i]==tracks_end) continue;
+		if(Tracks[i]==0) continue;
     fEvent.fill(i,Tracks[i]);
 		if(cfg.FILL_EMC)  fEmc.fill (i,  Tracks[i]);
 		if(cfg.FILL_MDC)  fMdc.fill (i,  Tracks[i]);
@@ -494,7 +494,7 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 		if(cfg.FILL_TOF)  fTof.fill (i,  Tracks[i]);
     if(cfg.FILL_MUC)  fMuc.fill (i,  Tracks[i]);
 	}
-	fMdc.fill_mass(Tracks,  tracks_end, Pkf);
+	fMdc.fill_mass(Tracks, Pkf);
 	//Monte Carlo information
 	if(fEvent.run<0)
 	{

@@ -25,12 +25,12 @@ void RootMuc::init(void)
   valid = false;
 }
 
-void RootMuc::fill(int i,  EvtRecTrackIterator & itTrk)
+void RootMuc::fill(int i,  EvtRecTrack * Trk)
 {
-  valid = (*itTrk)->isMucTrackValid();
+  valid = Trk->isMucTrackValid();
   if(valid==1)
   {
-    RecMucTrack *mucTrk = (*itTrk)->mucTrack();
+    RecMucTrack *mucTrk = Trk->mucTrack();
     status[i]= mucTrk->status();
     type[i]= mucTrk->type();
     depth[i]= mucTrk->depth();

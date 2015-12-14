@@ -21,10 +21,16 @@
 
 #include "EvtRecEvent/EvtRecTrack.h"
 
-typedef std::pair<EvtRecTrackIterator, EvtRecTrackIterator> TrackPair_t;
+//typedef std::pair<EvtRecTrackIterator, EvtRecTrackIterator> TrackPair_t;
+//typedef std::list<TrackPair_t> TrackPairList_t;
+//typedef std::list<EvtRecTrackIterator> TrackList_t;
+//typedef std::vector<EvtRecTrackIterator> TrackVector_t;
+
+typedef std::pair<EvtRecTrack*, EvtRecTrack*> TrackPair_t;
 typedef std::list<TrackPair_t> TrackPairList_t;
-typedef std::list<EvtRecTrackIterator> TrackList_t;
-typedef std::vector<EvtRecTrackIterator> TrackVector_t;
+typedef std::list<EvtRecTrack*> TrackList_t;
+typedef std::vector<EvtRecTrack*> TrackVector_t;
+
 
 inline TrackVector_t make_track_vector(TrackPair_t & pair1, TrackPair_t & pair2)
 {

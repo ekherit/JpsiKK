@@ -51,7 +51,7 @@ void RootPid::init(void)
   ntrack=4;
 }
 
-void RootPid::fill(int i,  EvtRecTrackIterator & track)
+void RootPid::fill(int i,  EvtRecTrack * track)
 {
 	//PID->setRecTrack((*Tracks[i]));
 	//PID->calculate();

@@ -37,6 +37,6 @@ struct RootMC : public RootTuple
 	NTuple::Array<double> theta,phi;
 	virtual void init(void);
 	virtual void init_tuple(void);
-	virtual void fill(EvtRecTrackIterator & track){};
+	virtual void fill(EvtRecTrackIterator * track){};
 	virtual void fill(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Event::McParticleCol *);
 };

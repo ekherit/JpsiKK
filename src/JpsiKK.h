@@ -71,9 +71,8 @@ class JpsiKK : public Algorithm
 	void writeTuples(void);
 
 
-	std::list<EvtRecTrackIterator> good_neutral_tracks;
-	std::list<EvtRecTrackIterator> good_charged_tracks;
-	EvtRecTrackIterator tracks_end; //a flag of the end of the track
+	std::list<EvtRecTrack*> good_neutral_tracks;
+	std::list<EvtRecTrack*> good_charged_tracks;
 
   void printSelectionDigest(bool head=false);
 };

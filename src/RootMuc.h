@@ -22,5 +22,5 @@ struct RootMuc : public RootTuple
   NTuple::Array<double>   eclast; //last layer in end cup
   virtual void init(void);
   virtual void init_tuple(void);
-  virtual void fill(int, EvtRecTrackIterator&);
+  virtual void fill(int, EvtRecTrack *);
 };

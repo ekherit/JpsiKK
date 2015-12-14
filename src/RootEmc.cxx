@@ -41,11 +41,11 @@ void RootEmc::init(void)
   }
 }
 
-void RootEmc::fill(int i,  EvtRecTrackIterator & track)
+void RootEmc::fill(int i,  EvtRecTrack * track)
 {
-	if((*track)->isEmcShowerValid())
+	if(track->isEmcShowerValid())
 	{
-		RecEmcShower *emcTrk = (*track)->emcShower();
+		RecEmcShower *emcTrk = track->emcShower();
 		E[i] = emcTrk->energy();
 		theta[i] = emcTrk->theta();
 		phi[i] = emcTrk->phi();
@@ -54,14 +54,14 @@ void RootEmc::fill(int i,  EvtRecTrackIterator & track)
 }
 
 
-void RootEmc::fill(list<EvtRecTrackIterator> & good_neutral_tracks)
+void RootEmc::fill(list<EvtRecTrack*> & good_neutral_tracks)
 {
 	ntrack=std::min(good_neutral_tracks.size(), size_t(ARRAY_SIZE));
 	int idx=0;
 	for(list<EvtRecTrackIterator>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
 	{
-		EvtRecTrackIterator  itTrk = *track;
-		RecEmcShower *emcTrk = (*itTrk)->emcShower();
+		EvtRecTrack   *Trk = *track;
+		RecEmcShower *emcTrk = Trk->emcShower();
 		E[idx]  =  emcTrk->energy();
 		theta[idx] =  emcTrk->theta();
 		phi[idx] =  emcTrk->phi();

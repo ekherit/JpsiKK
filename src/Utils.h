@@ -88,13 +88,13 @@ inline void calculate_vertex(RecMdcTrack *mdcTrk, double & ro, double  & z, doub
 }
 
 
-inline std::list<EvtRecTrackIterator> createGoodChargedTrackList(
+inline std::list<EvtRecTrack*> createGoodChargedTrackList(
 		SelectionConfig & cfg, 
 		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
 		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
 		)
 {
-  std::list<EvtRecTrackIterator> good_charged_tracks;
+  std::list<EvtRecTrack*> good_charged_tracks;
   for(unsigned i = 0; i < evtRecEvent->totalCharged(); i++)
   {
     EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + i;
@@ -105,18 +105,18 @@ inline std::list<EvtRecTrackIterator> createGoodChargedTrackList(
     calculate_vertex(mdcTrk,rvxy,rvz,rvphi); //find distance to interaction point
     bool IP_track = fabs(rvz)< cfg.IP_MAX_Z && fabs(rvxy)<cfg.IP_MAX_RHO;  //tracks begin near interaction point
     bool good_track = IP_track && fabs(cos(mdcTrk->theta()))<cfg.MAX_COS_THETA; //track is good
-    if(good_track) good_charged_tracks.push_back(itTrk);
+    if(good_track) good_charged_tracks.push_back(*itTrk);
   }
 	return good_charged_tracks;
 }
 
-inline std::list<EvtRecTrackIterator> createGoodNeutralTrackList(
+inline std::list<EvtRecTrack*> createGoodNeutralTrackList(
 		SelectionConfig & cfg, 
 		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
 		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
 		)
 {
-	std::list<EvtRecTrackIterator> good_neutral_tracks;
+	std::list<EvtRecTrack*> good_neutral_tracks;
 	//collect good neutral track
 	for(int i = evtRecEvent->totalCharged(); i<evtRecEvent->totalTracks(); i++)
 	{
@@ -133,7 +133,7 @@ inline std::list<EvtRecTrackIterator> createGoodNeutralTrackList(
 		if(barrel_good_track  || endcup_good_track) 
 		{
 			//cout << "Energy of good neutral track: " << E << endl;
-			good_neutral_tracks.push_back(itTrk);
+			good_neutral_tracks.push_back(*itTrk);
 		}
 	}
 	return good_neutral_tracks;
@@ -149,7 +149,7 @@ inline double getMissingMass2(double Wcm,  TrackVector_t & T, std::vector<int> &
 	HepLorentzVector Psum;
 	for(int i=0; i<T.size(); i++)
 	{
-		if(!(*T[i])->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating missing mass (getMissingMass2)");
+		if(!T[i]->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating missing mass (getMissingMass2)");
     //RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
     RecMdcKalTrack *mdcTrk = (*T[i])->mdcKalTrack();
 		P[i] =  mdcTrk->p4(XMASS[pid[i]]);
@@ -171,13 +171,13 @@ inline double getInvariantMass2(TrackVector_t & T, std::vector<int> & pid)
 	{
 		if(!(*T[i])->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating invariant mass (getInvariantMass2)");
     //RecMdcTrack *mdcTrk = (*T[i])->mdcTrack();
-    RecMdcKalTrack *mdcTrk = (*T[i])->mdcKalTrack();
+    RecMdcKalTrack *mdcTrk = T[i]->mdcKalTrack();
 		Psum += (mdcTrk->p4(XMASS[pid[i]]));;
 	}
   return Psum.m2();
 }
 
-inline double getInvariantMass2(int pid1,  EvtRecTrackIterator & t1,  int pid2, EvtRecTrackIterator & t2)
+inline double getInvariantMass2(int pid1,  EvtRecTrack * t1,  int pid2, EvtRecTrack *t2)
 {
 	std::vector<int> pids(2);
 	pids[0] = pid1;
@@ -188,11 +188,11 @@ inline double getInvariantMass2(int pid1,  EvtRecTrackIterator & t1,  int pid2, 
 	return getInvariantMass2(T, pids);
 }
 
-inline double getInvariantMass2(int pid, EvtRecTrackIterator & track, const HepLorentzVector & v)
+inline double getInvariantMass2(int pid, EvtRecTrack * track, const HepLorentzVector & v)
 {
-  if(!(*track)->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating invariant mass (getInvariantMass2)");
+  if(!track->isMdcTrackValid()) throw std::runtime_error("Bad track at calculating invariant mass (getInvariantMass2)");
   //RecMdcTrack *mdcTrk = (*track)->mdcTrack();
-  RecMdcKalTrack *mdcTrk = (*track)->mdcKalTrack();
+  RecMdcKalTrack *mdcTrk = track->mdcKalTrack();
   return (v + mdcTrk->p4(XMASS[pid])).m2();
 }
 
@@ -200,7 +200,7 @@ inline double getInvariantMass2(int pid, EvtRecTrackIterator & track, const HepL
 
 
 
-inline double getPionRecoilMass(double Wcm,  EvtRecTrackIterator & t1,  EvtRecTrackIterator & t2)
+inline double getPionRecoilMass(double Wcm,  EvtRecTrack * t1,  EvtRecTrack  * t2)
 {
 	std::vector<int> pid(2, ID_PION);
 	TrackVector_t T(2);
@@ -209,7 +209,7 @@ inline double getPionRecoilMass(double Wcm,  EvtRecTrackIterator & t1,  EvtRecTr
 	return sqrt(getMissingMass2(Wcm, T,  pid));
 }
 
-inline double getPionRecoilMass(EvtRecTrackIterator & t1,  EvtRecTrackIterator & t2)
+inline double getPionRecoilMass(EvtRecTrack * t1,  EvtRecTrack * t2)
 {
 	std::vector<int> pid(2, ID_PION);
 	TrackVector_t T(2);
@@ -218,11 +218,11 @@ inline double getPionRecoilMass(EvtRecTrackIterator & t1,  EvtRecTrackIterator &
 	return sqrt(getMissingMass2(T,  pid));
 }
 
-inline RecMdcTrack * getMdcTrack(EvtRecTrackIterator & itTrk)
+inline RecMdcTrack * getMdcTrack(EvtRecTrack *  track)
 {
 //  EvtRecTrackIterator & itTrk = *track;
-  if(!(*itTrk)->isMdcTrackValid()) throw std::runtime_error("No MDC info"); 
-  return (*itTrk)->mdcTrack();
+  if(!track->isMdcTrackValid()) throw std::runtime_error("No MDC info"); 
+  return track->mdcTrack();
 }
 
 double getPi0Mass(TrackList_t & glist)
@@ -245,7 +245,7 @@ double getPi0Mass(TrackList_t & glist)
       HepLorentzVector p[2];
       for(int idx=0;idx<2;idx++)
       {
-        emcTrk[idx] = track[idx]->emcShower();
+        emcTrk[idx] = (*track[idx])->emcShower();
         E[idx]  =  emcTrk->energy();
         theta[idx] =  emcTrk->theta();
         phi[idx] =  emcTrk->phi();
