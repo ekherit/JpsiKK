@@ -196,8 +196,11 @@ StatusCode JpsiKK::execute()
 
   //fill initial value of the selected event
 
+  std::clog << "Before finding good charged tracks\n";
   good_charged_tracks=createGoodChargedTrackList(cfg, evtRecEvent, evtRecTrkCol);
+  std::clog << "after finding good charged tracks\n";
   good_neutral_tracks=createGoodNeutralTrackList(cfg, evtRecEvent, evtRecTrkCol);
+  std::clog << "after finding good neutral tracks\n";
 
   //SELECTION CODE
   if( cfg.MAX_NEUTRAL_TRACKS < good_neutral_tracks.size()) return StatusCode::SUCCESS;
@@ -212,6 +215,7 @@ StatusCode JpsiKK::execute()
   TrackList_t negative_pion_tracks; //selected pion tracks for specific cut
   TrackList_t other_positive_tracks; //other positive tracks for specific cut
   TrackList_t other_negative_tracks; //other positive tracks for specific cut
+  std::clog << "Before finding pion pairs\n";
   for(TrackList_t::iterator track=good_charged_tracks.begin(); track!=good_charged_tracks.end(); track++)
   {
     //EvtRecTrackIterator & itTrk = *track;
@@ -248,7 +252,10 @@ StatusCode JpsiKK::execute()
     }
   }
 
+  std::clog << "after finding pion tracks\n";
+
   //create pion pairs
+  std::clog << "Before creating pion pairs\n";
   TrackPairList_t pion_pairs;
   for(TrackList_t::iterator i=negative_pion_tracks.begin(); i!=negative_pion_tracks.end(); ++i)
     for(TrackList_t::iterator j=positive_pion_tracks.begin(); j!=positive_pion_tracks.end(); ++j)
@@ -259,6 +266,7 @@ StatusCode JpsiKK::execute()
         pion_pairs.push_back(pair);
       }
     }
+  std::clog << "After creating pion pairs\n";
   //SELECTION CODE we must have at list one pion pair
   if(pion_pairs.empty()) return StatusCode::SUCCESS; //we must have at list one pion pair
   TrackPair_t pion_pair = pion_pairs.front();
@@ -283,6 +291,7 @@ StatusCode JpsiKK::execute()
 
 
 
+  std::clog << "Before selection helper\n";
   std::list<SelectionHelper_t> sh_list;
   if(neg)
   {
@@ -305,10 +314,12 @@ StatusCode JpsiKK::execute()
     sh.kinfit(pion_pair, other_negative_tracks.front(), other_positive_tracks.front());
 		sh.totalPass(cfg.PASS_KIN_PID_CUT);
   }
+  std::clog << "After selection helper\n";
 
 	std::list<int> pid_list;
 	pid_list.push_back(ID_KAON);
 	pid_list.push_back(ID_MUON);
+  std::clog << "Before filling\n";
   for(std::list<SelectionHelper_t>::iterator it = sh_list.begin(); it!=sh_list.end(); it++)
   {
     SelectionHelper_t & sh = *it;
@@ -394,6 +405,7 @@ StatusCode JpsiKK::execute()
         fEvent.npion_pairs = pion_pairs.size();
         try
         {
+          std::clog << "Before fill ntuples\n";
           fillTuples(Pkf, Tracks);
           writeTuples();
         }
