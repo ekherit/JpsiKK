@@ -224,3 +224,38 @@ inline RecMdcTrack * getMdcTrack(EvtRecTrackIterator & itTrk)
   if(!(*itTrk)->isMdcTrackValid()) throw std::runtime_error("No MDC info"); 
   return (*itTrk)->mdcTrack();
 }
+
+double getPi0Mass(TrackList_t & glist)
+{
+  double M = 10;
+  TrackList_t::iterator track[2];
+  for(TrackList_t::iterator track[0] = glist.begin() ; track[0] != glist.end() ; track[0]++)
+  {
+    TrackList_t::iterator track[1]=track[0];
+    track[1]++;
+    for(; track[1] !=glist.end() ; track[1]++)
+    {
+      EvtRecTrackIterator & track1 = *ti1;
+      EvtRecTrackIterator & track2 = *ti2;
+      RecEmcShower *emcTrk1 = (*track1)->emcShower();
+      RecEmcShower *emcTrk2 = (*track2)->emcShower();
+      RecEmcShower * emcTrk[2];
+      double E[2];
+      double theta[2];
+      double phi[2];
+      HepLorentzVector p[2];
+      for(int idx=0;idx<2;idx++)
+      {
+        emcTrk[idx] = (*(*track[idx]))->emcShower();
+        E[idx]  =  emcTrk->energy();
+        theta[idx] =  emcTrk->theta();
+        phi[idx] =  emcTrk->phi();
+        p[idx] = HepLorentzVector(E[idx]*sin(theta[idx])*cos(phi[idx]), E[idx]*sin(theta[idx])*sin(phi[idx]),E[idx]*cos(theta[idx]), E[idx]);
+      }
+      HepLorentzVector psum = p[0]+p[1];
+      double m = psum.m();
+      if(fabs(m-PION_MASS) < fabs(M-PION_MASS)) M = m;
+    }
+  }
+  return M;
+}

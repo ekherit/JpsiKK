@@ -65,6 +65,9 @@ struct RootEvent : public RootTuple
 	NTuple::Array<double> prob[5]; //probability from ParticleID
 	NTuple::Array<double> pchi2[5];//my particle id chi square different hypo
 
+
+  NTuple::Item<double> Mpi0; //invariant mass of two gamma most close to pi0 mezon
+
 	virtual void init(void);
 	virtual void init_tuple(void);
 
