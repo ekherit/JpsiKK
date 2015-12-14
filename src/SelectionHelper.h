@@ -41,7 +41,7 @@ using CLHEP::HepLorentzVector;
 #include "KinematicFit.h"
 
 
-extern  std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator> & Tracks,  const double CENTER_MASS_ENERGY);
+extern  std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrac*> & Tracks,  const double CENTER_MASS_ENERGY);
 
 
 struct SelectionHelper_t
@@ -53,7 +53,7 @@ struct SelectionHelper_t
 	bool pass_electron;     //pass electron cut
   bool pass_barrel;       //barrel pass
 	bool pass;           		//total pass
-	std::vector<EvtRecTrackIterator> tracks;
+	std::vector<EvtRecTrack*> tracks;
 
 	std::vector <KinematicFit_t> KF;  //kinematic fit for different hypo
 	std::vector<double>  mypid_chi2;
@@ -88,9 +88,8 @@ struct SelectionHelper_t
 		pass_electron = false;
 		for(int i=2;i<tracks.size();i++)
 		{
-			//if(tracks[i]==end) continue;
-			RecMdcTrack  * mdcTrk = (*tracks[i])->mdcTrack();
-			RecEmcShower * emcTrk = (*tracks[i])->emcShower();
+			RecMdcTrack  * mdcTrk = tracks[i]->mdcTrack();
+			RecEmcShower * emcTrk = tracks[i]->emcShower();
 			double EpRatio = emcTrk->energy()/mdcTrk->p();
 			if( 
 					in(EpRatio, MIN_EP_RATIO[channel],  MAX_EP_RATIO[channel] ) 
@@ -125,7 +124,7 @@ struct SelectionHelper_t
 		std::fill(chi2.begin(), chi2.end(), 0);
 		for(int i=2;i<tracks.size();i++)
 		{
-			PID->setRecTrack((*tracks[i]));
+			PID->setRecTrack(tracks[i]);
 			PID->setMethod(PID->methodProbability());
 			PID->setChiMinCut(4);
 			PID->usePidSys(PID->useDedx() | PID->useTof1() | PID->useTof2() | PID->useMuc());
@@ -199,7 +198,7 @@ struct SelectionHelper_t
 
 	void kinfit(
 			TrackPair_t & pion_pair,
-			EvtRecTrackIterator & track
+			EvtRecTrack* track
 			)
 	{
 		tracks.resize(3);
@@ -211,8 +210,8 @@ struct SelectionHelper_t
 
 	void kinfit(
 			TrackPair_t & pion_pair,
-			EvtRecTrackIterator & track_minus,
-			EvtRecTrackIterator & track_plus
+			EvtRecTrack * track_minus,
+			EvtRecTrack * track_plus
 			)
 	{
 		tracks.resize(4);
@@ -313,6 +312,4 @@ struct SelectionHelper_t
 	{
 		return KF[pid].P;
 	}
-
-
 };

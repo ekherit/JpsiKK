@@ -82,7 +82,7 @@ bool vertex_fit(const std::vector<WTrackParameter> & input_tracks,  std::vector<
 
 bool kinematic_fit(
 		std::vector<int> & pids,  //  particle id for all supposed tracks in event 
-		const std::vector<EvtRecTrackIterator> & Tracks,
+		const std::vector<EvtRecTrack*> & Tracks,
 		KinematicFit_t & kft
     )
 {
@@ -92,7 +92,7 @@ bool kinematic_fit(
 	std::vector<WTrackParameter> WTrk(Tracks.size());
 	for(int i=0;i<Tracks.size();i++)
 	{
-		KalTrk[i] = (*Tracks[i])->mdcKalTrack();
+		KalTrk[i] = Tracks[i]->mdcKalTrack();
 		switch(pids[i])
 		{
 			case ID_KAON:
@@ -150,7 +150,7 @@ bool kinematic_fit(
 }
 
 
-inline std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrackIterator> & Tracks)
+inline std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrack*> & Tracks)
 {
 		/* Tracks[0] - pi-
 		 * Tracks[1] - pi+
