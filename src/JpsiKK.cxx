@@ -489,9 +489,7 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
   SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
   clog << "Before fEvent.fill(Pkf)" << std::endl;
 	fEvent.fill(Pkf);
-  fEvent.Mpi0 = 0;
-  getPi0Mass(good_neutral_tracks);
-  //fEvent.Mpi0 = ;
+  fEvent.Mpi0 = getPi0Mass(good_neutral_tracks);
 	//fPid.ntrack=4;
 	fMdc.T.ntrack=4;
 	fDedx.ntrack=4;
