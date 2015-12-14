@@ -41,7 +41,7 @@ using CLHEP::HepLorentzVector;
 #include "KinematicFit.h"
 
 
-extern  std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrac*> & Tracks,  const double CENTER_MASS_ENERGY);
+extern  std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrack*> & Tracks,  const double CENTER_MASS_ENERGY);
 
 
 struct SelectionHelper_t
