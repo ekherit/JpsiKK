@@ -46,7 +46,7 @@ void RootEmc::init(void)
 
 void RootEmc::fill(int i,  EvtRecTrack * track, 
 		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
-		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol);
+		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol)
 {
 	if(track->isEmcShowerValid())
 	{
