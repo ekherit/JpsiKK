@@ -172,7 +172,7 @@ inline std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrack*> & Trac
 
 
 
-inline double kinefit_3pi(
+inline double kinfit_3pi(
     TrackVector_t & Tq,  //charged tracks
     TrackList_t &  T0, 
     double & chi2) //list of all neutral tracks
