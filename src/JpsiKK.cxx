@@ -399,7 +399,7 @@ StatusCode JpsiKK::execute()
         fEvent.npion_pairs = pion_pairs.size();
         try
         {
-          fillTuples(Pkf, Tracks);
+          fillTuples(Pkf, Tracks, evtRecEvent, evtRecTrkCol);
           writeTuples();
         }
         catch(std::runtime_error & error)
