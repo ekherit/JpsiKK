@@ -70,7 +70,7 @@ void RootEmc::fill(list<EvtRecTrack*> & good_neutral_tracks,
 	for(list<EvtRecTrack*>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end() && idx< ARRAY_SIZE; track++, idx++)
 	{
 		EvtRecTrack   *Trk = *track;
-    if(Trk->isEmcShowerValid()) continue;
+    if(!Trk->isEmcShowerValid()) continue;
     RecEmcShower *emcTrk = Trk->emcShower();
     E[idx]  =  emcTrk->energy();
     theta[idx] =  emcTrk->theta();
