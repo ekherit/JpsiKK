@@ -178,6 +178,7 @@ inline double kinfit_3pi(
     double & chi2) //list of all neutral tracks
 {
   chi2=1e100;
+  double Mpi0=-10; //best pi0 mass
 	std::vector<RecMdcKalTrack*> KalTrk(Tq.size());
 	std::vector<WTrackParameter> WTrk(Tq.size());
 	for(int i=0;i<Tq.size();i++)
@@ -189,7 +190,6 @@ inline double kinfit_3pi(
 	if(!vertex_fit(WTrk, VertexWTrk)) return Mpi0;
 
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
-  double Mpi0=10; //best pi0 mass
   if(T0.empty()) return Mpi0;
 
   //now loop over  neutral tracks and find best
