@@ -219,11 +219,11 @@ inline double kinfit_3pi(
       kmfit->AddTrack(5,0,emcTrk[1]);
 
       kmfit->AddResonance(0,0.1349766, 4,5); //pi0 particle
-      //kmfit->AddResonance(1,JPSI_MASS, 2,3,4,5); //jpsi particle
-      kmfit->AddFourMomentum(1,  getTotalMomentum()); //total momeunum
+      kmfit->AddResonance(1,JPSI_MASS, 2,3,4,5); //jpsi particle
+      kmfit->AddFourMomentum(2,  getTotalMomentum()); //total momeunum
       if(!kmfit->Fit(0)) continue;
       if(!kmfit->Fit(1)) continue;
-      //if(!kmfit->Fit(2)) continue;
+      if(!kmfit->Fit(2)) continue;
       bool oksq = kmfit->Fit();
       if(oksq)
       {
