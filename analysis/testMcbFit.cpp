@@ -26,6 +26,7 @@ TROOT root("polarimeter","polarimeter", initfuncs);
 
 #include <TFile.h>
 #include <TH1F.h>
+#include <TH1D.h>
 #include <TH2F.h>
 
 #include <RooFitResult.h>
@@ -50,8 +51,8 @@ using namespace std;
 int main(int argc,  char ** argv)
 {
   if(argc<2) return 1;
-	TFile file(argv[1]);
-	TH1 * his = (TH1*)file.Get("hMrecUU");
+	TFile file(argv[2]);
+	TH1 * his = (TH1*)file.Get(argv[1]);
 	TApplication theApp("root_app", &argc, argv);
 
 	double Mmin  = his->GetXaxis()->GetXmin();
@@ -104,8 +105,8 @@ int main(int argc,  char ** argv)
 	sig_shapes.add(mcb);             sig_yields.add(mcb_yield);
 	RooAddPdf complexSignal("complexSignal", "signal with small gaus",  sig_shapes,  sig_yields);
 
-	//RooRealVar poly_c1("poly_c1","coefficient of x^1 term",0, -10, 10);
-	RooRealVar poly_c1("poly_c1","coefficient of x^1 term",0);
+	RooRealVar poly_c1("poly_c1","coefficient of x^1 term",0, -10, 10);
+	//RooRealVar poly_c1("poly_c1","coefficient of x^1 term",0);
 	RooPolynomial bkgd_poly("bkgd_poly", "linear function for background", Mrec, RooArgList(poly_c1));	
 
 

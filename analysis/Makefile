@@ -5,7 +5,7 @@ LIBROOT = `root-config --libs` -lMinuit   -lRooFit -lMinuit -lRooFitCore
 LIBS = $(LIBROOT) $(LIBBOOST)
 
 ROOTFLAGS = `root-config --cflags`
-CXXFLAGS =   -std=c++14 -fPIC $(ROOTFLAGS)
+CXXFLAGS =   -std=c++1y -fPIC $(ROOTFLAGS)
 
 BINDIR=$(HOME)/work/bin
 
