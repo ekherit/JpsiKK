@@ -67,15 +67,15 @@ void RootEmc::fill(list<EvtRecTrack*> & good_neutral_tracks,
 {
 	ntrack=std::min(good_neutral_tracks.size(), size_t(ARRAY_SIZE));
 	int idx=0;
-	for(list<EvtRecTrack*>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end(); track++)
+	for(list<EvtRecTrack*>::iterator track=good_neutral_tracks.begin(); track!=good_neutral_tracks.end() && idx< ARRAY_SIZE; track++, idx++)
 	{
 		EvtRecTrack   *Trk = *track;
-		RecEmcShower *emcTrk = Trk->emcShower();
-		E[idx]  =  emcTrk->energy();
-		theta[idx] =  emcTrk->theta();
-		phi[idx] =  emcTrk->phi();
-		time[idx] = emcTrk->time();
+    if(Trk->isEmcShowerValid()) continue;
+    RecEmcShower *emcTrk = Trk->emcShower();
+    E[idx]  =  emcTrk->energy();
+    theta[idx] =  emcTrk->theta();
+    phi[idx] =  emcTrk->phi();
+    time[idx] = emcTrk->time();
     dangle[idx] =  180/(CLHEP::pi)*angle_to_close_charged(emcTrk, evtRecEvent, evtRecTrkCol);
-		idx++;
-	}
+  }
 }

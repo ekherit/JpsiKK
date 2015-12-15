@@ -177,6 +177,7 @@ inline double kinfit_3pi(
     TrackList_t &  T0, 
     double & chi2) //list of all neutral tracks
 {
+  chi2=1e100;
 	std::vector<RecMdcKalTrack*> KalTrk(Tq.size());
 	std::vector<WTrackParameter> WTrk(Tq.size());
 	for(int i=0;i<Tq.size();i++)
@@ -185,10 +186,9 @@ inline double kinfit_3pi(
     WTrk[i] = WTrackParameter(XMASS[ID_KAON], KalTrk[i]->getZHelix(),   KalTrk[i]->getZError());
 	}
 	std::vector<WTrackParameter> VertexWTrk;
-	if(!vertex_fit(WTrk, VertexWTrk)) return 1e100;
+	if(!vertex_fit(WTrk, VertexWTrk)) return Mpi0;
 
   KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
-  chi2=1e100;
   double Mpi0=10; //best pi0 mass
   if(T0.empty()) return Mpi0;
 
@@ -206,7 +206,7 @@ inline double kinfit_3pi(
       }
       if(Tq.size()==3)
       {
-        kmfit->AddMissTrack(Tq.size(),XMASS[ID_PION]);
+        kmfit->AddMissTrack(3,XMASS[ID_PION]);
       }
 
       HepLorentzVector Pg[2]; //photon four-momentum
@@ -219,17 +219,18 @@ inline double kinfit_3pi(
       kmfit->AddTrack(5,0,emcTrk[1]);
 
       kmfit->AddResonance(0,0.1349766, 4,5); //pi0 particle
-      kmfit->AddResonance(1,JPSI_MASS, 2,3,4,5); //jpsi particle
+      //kmfit->AddResonance(1,JPSI_MASS, 2,3,4,5); //jpsi particle
       kmfit->AddFourMomentum(2,  getTotalMomentum()); //total momeunum
       if(!kmfit->Fit(0)) continue;
       if(!kmfit->Fit(1)) continue;
-      if(!kmfit->Fit(2)) continue;
+      //if(!kmfit->Fit(2)) continue;
       bool oksq = kmfit->Fit();
       if(oksq)
       {
         double chi2_tmp = kmfit->chisq();
         if(chi2_tmp < chi2)
         {
+          std::clog << "3pi kin chi2 = " << chi2 << std::endl;
           chi2 = chi2_tmp;
           Pg[0] = kmfit->pfit(4);
           Pg[1] = kmfit->pfit(5);
