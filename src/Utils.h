@@ -170,7 +170,8 @@ inline double angle_to_close_charged(
       }
       if(dang>=200) continue;
     }
-};
+    return dang;
+}
 
 
 inline std::list<EvtRecTrack*> createGoodNeutralTrackList2(
@@ -196,7 +197,7 @@ inline std::list<EvtRecTrack*> createGoodNeutralTrackList2(
 		bool barrel_good_track = hit_barrel && (E > cfg.EMC_BARREL_MIN_ENERGY);
 		bool endcup_good_track = hit_endcup && (E > cfg.EMC_ENDCUP_MIN_ENERGY);
 
-    double angle_to_charged  =  180/(CLHEP::pi) * angle_to_charged(emcTrk,evtRecEvent, evtRecTrkCol);
+    double angle_to_charged  =  180/(CLHEP::pi) * angle_to_close_charged(emcTrk,evtRecEvent, evtRecTrkCol);
     bool close_charged_track = fabs(angle_to_charged) < cfg.NEUTRAL_CLOSE_CHARGED_ANGLE;
 
     if(close_charged_track) continue;
