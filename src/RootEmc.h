@@ -17,6 +17,8 @@
 #pragma once
 
 #include "RootTuple.h"
+#include "EvtRecEvent/EvtRecEvent.h"
+#include "EvtRecEvent/EvtRecTrack.h"
 
 struct RootEmc : public RootTuple
 {
