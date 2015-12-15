@@ -141,6 +141,7 @@ JpsiKK::JpsiKK(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("FILL_EMC", cfg.FILL_EMC = true); 
   declareProperty("FILL_TOF", cfg.FILL_TOF = true); 
   declareProperty("FILL_DEDX", cfg.FILL_DEDX = true); 
+  declareProperty("FILL_NEUTRAL", cfg.FILL_NEUTRAL = true); 
 }
 
 
@@ -530,7 +531,7 @@ void JpsiKK::writeTuples(void)
   if(cfg.FILL_DEDX) fDedx.write();
   if(cfg.FILL_TOF)  fTof.write();
   if(cfg.FILL_MUC)  fMuc.write();
-  //fNeutral.tuple->write();
+  if(cfg.FILL_NEUTRAL) fNeutral.tuple->write();
   event_write++;
 }
 

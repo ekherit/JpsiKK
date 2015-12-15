@@ -74,5 +74,6 @@ struct SelectionConfig
   bool FILL_DEDX;
   bool FILL_TOF;
   bool FILL_MUC;
+  bool FILL_NEUTRAL;
 
 };
