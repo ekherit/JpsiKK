@@ -54,7 +54,7 @@ struct SelectionHelper_t
 	bool pass_electron;     //pass electron cut
   bool pass_barrel;       //barrel pass
 	bool pass;           		//total pass
-	std::vector<EvtRecTrack*> tracks;
+	TrackVector_t tracks;
 
 	std::vector <KinematicFit_t> KF;  //kinematic fit for different hypo
 	std::vector<double>  mypid_chi2;
@@ -214,7 +214,7 @@ struct SelectionHelper_t
 		tracks[1] = pion_pair.second;
 		tracks[2] = track;
 		KF = ::kinfit(tracks);
-    Mpi0 = ::kinfit(tracks,good_neutral_tracks,kin_chi2_3pi);
+    Mpi0 = ::kinfit_3pi(tracks,good_neutral_tracks,kin_chi2_3pi);
 	}
 
 	void kinfit(
@@ -230,7 +230,7 @@ struct SelectionHelper_t
 		tracks[2] = track_minus;
 		tracks[3] = track_plus;
 		KF = ::kinfit(tracks);
-    Mpi0 = ::kinfit(tracks,good_neutral_tracks,kin_chi2_3pi);
+    Mpi0 = ::kinfit_3pi(tracks,good_neutral_tracks,kin_chi2_3pi);
 	}
 
 	void select_channel_by_kinematic_fit(void)

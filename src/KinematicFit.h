@@ -174,7 +174,8 @@ inline std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrack*> & Trac
 
 inline double kinefit_3pi(
     TrackVector_t & Tq,  //charged tracks
-    TrackList_t &  T0, double & chi2) //list of all neutral tracks
+    TrackList_t &  T0, 
+    double & chi2) //list of all neutral tracks
 {
 	std::vector<RecMdcKalTrack*> KalTrk(Tq.size());
 	std::vector<WTrackParameter> WTrk(Tq.size());
