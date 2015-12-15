@@ -172,3 +172,73 @@ inline std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrack*> & Trac
 
 
 
+inline double kinefit_3pi(
+    TrackVector_t & Tq,  //charged tracks
+    TrackList_t &  T0, double & chi2) //list of all neutral tracks
+{
+	std::vector<RecMdcKalTrack*> KalTrk(Tq.size());
+	std::vector<WTrackParameter> WTrk(Tq.size());
+	for(int i=0;i<Tq.size();i++)
+	{
+		KalTrk[i] = Tq[i]->mdcKalTrack();
+    WTrk[i] = WTrackParameter(XMASS[ID_KAON], KalTrk[i]->getZHelix(),   KalTrk[i]->getZError());
+	}
+	std::vector<WTrackParameter> VertexWTrk;
+	if(!vertex_fit(WTrk, VertexWTrk)) return 1e100;
+
+  KalmanKinematicFit * kmfit = KalmanKinematicFit::instance();
+  chi2=1e100;
+  double Mpi0=10; //best pi0 mass
+  if(T0.empty()) return Mpi0;
+
+  //now loop over  neutral tracks and find best
+  TrackList_t::iterator track[2];
+  for(track[0] = T0.begin() ; track[0] != T0.end() ; track[0]++)
+  {
+    track[1]=track[0];
+    for(++track[1]; track[1] !=T0.end() ; track[1]++)
+    {
+      kmfit->init();
+      for(int i=0;i<Tq.size();i++)
+      {
+        kmfit->AddTrack(i,VertexWTrk[i]);
+      }
+      if(Tq.size()==3)
+      {
+        kmfit->AddMissTrack(Tq.size(),XMASS[ID_PION]);
+      }
+
+      HepLorentzVector Pg[2]; //photon four-momentum
+      RecEmcShower * emcTrk[2];
+      for(int idx=0;idx<2;idx++)
+      {
+        emcTrk[idx] = (*track[idx])->emcShower();
+      }
+      kmfit->AddTrack(4,0,emcTrk[0]);
+      kmfit->AddTrack(5,0,emcTrk[1]);
+
+      kmfit->AddResonance(0,0.1349766, 4,5); //pi0 particle
+      kmfit->AddResonance(1,JPSI_MASS, 2,3,4,5); //jpsi particle
+      kmfit->AddFourMomentum(2,  getTotalMomentum()); //total momeunum
+      if(!kmfit->Fit(0)) continue;
+      if(!kmfit->Fit(1)) continue;
+      if(!kmfit->Fit(2)) continue;
+      bool oksq = kmfit->Fit();
+      if(oksq)
+      {
+        double chi2_tmp = kmfit->chisq();
+        if(chi2_tmp < chi2)
+        {
+          chi2 = chi2_tmp;
+          Pg[0] = kmfit->pfit(4);
+          Pg[1] = kmfit->pfit(5);
+          Mpi0 = (Pg[0]+Pg[1]).m();
+        }
+      }
+    }
+  }
+  return Mpi0;
+}
+
+
+

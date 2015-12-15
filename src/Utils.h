@@ -305,10 +305,6 @@ inline double getPi0Mass(TrackList_t & glist)
     track[1]=track[0];
     for(++track[1]; track[1] !=glist.end() ; track[1]++)
     {
-      //EvtRecTrackIterator & track1 = *ti1;
-      //EvtRecTrackIterator & track2 = *ti2;
-      //RecEmcShower *emcTrk1 = (*track1)->emcShower();
-      //RecEmcShower *emcTrk2 = (*track2)->emcShower();
       HepLorentzVector p[2];
       for(int idx=0;idx<2;idx++)
       {

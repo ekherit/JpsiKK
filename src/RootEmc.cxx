@@ -19,7 +19,7 @@
 #include "RootEmc.h"
 #include "Utils.h"
 
-int RootEmc::ARRAY_SIZE = 100;
+int RootEmc::ARRAY_SIZE = 15;
 
 void RootEmc::init_tuple(void)
 {

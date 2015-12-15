@@ -64,6 +64,7 @@ void RootEvent::init_tuple(void)
   //tuple->addIndexedItem ("probp",  T.ntrack,  prob[ID_PROTON]);
 
   tuple->addItem ("Mpi0", Mpi0);
+  tuple->addItem ("kin_chi2_3pi", kin_chi2_3pi);
 }
 
 void RootEvent::init(void)

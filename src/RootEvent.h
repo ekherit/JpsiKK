@@ -67,6 +67,7 @@ struct RootEvent : public RootTuple
 
 
   NTuple::Item<double> Mpi0; //invariant mass of two gamma most close to pi0 mezon
+  NTuple::Item<double> kin_chi2_3pi; //invariant mass of two gamma most close to pi0 mezon
 
 	virtual void init(void);
 	virtual void init_tuple(void);

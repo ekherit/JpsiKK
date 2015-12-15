@@ -42,6 +42,7 @@ using CLHEP::HepLorentzVector;
 
 
 extern  std::vector<KinematicFit_t> kinfit(const std::vector<EvtRecTrack*> & Tracks,  const double CENTER_MASS_ENERGY);
+//extern double kinefit_3pi( TrackVector_t & Tq,  TrackList_t &  T0, double & chi2);
 
 
 struct SelectionHelper_t
@@ -61,6 +62,10 @@ struct SelectionHelper_t
 	std::vector<double>        prob; //the probability 
 
 
+  double Mpi0;
+  double kin_chi2_3pi;
+
+
 	void init(void)
 	{
 		channel = -1;
@@ -69,6 +74,8 @@ struct SelectionHelper_t
 		pass_electron = false;
     pass_barrel = false;
 		pass = false;
+    Mpi0=10;
+    kin_chi2_3pi=300;
 	}
 
 	SelectionHelper_t(const SelectionConfig & c) : cfg(&c)
@@ -198,7 +205,8 @@ struct SelectionHelper_t
 
 	void kinfit(
 			TrackPair_t & pion_pair,
-			EvtRecTrack* track
+			EvtRecTrack* track,
+      TrackList_t & good_neutral_tracks
 			)
 	{
 		tracks.resize(3);
@@ -206,12 +214,14 @@ struct SelectionHelper_t
 		tracks[1] = pion_pair.second;
 		tracks[2] = track;
 		KF = ::kinfit(tracks);
+    Mpi0 = ::kinfit(tracks,good_neutral_tracks,kin_chi2_3pi);
 	}
 
 	void kinfit(
 			TrackPair_t & pion_pair,
 			EvtRecTrack * track_minus,
-			EvtRecTrack * track_plus
+			EvtRecTrack * track_plus,
+      TrackList_t & good_neutral_tracks
 			)
 	{
 		tracks.resize(4);
@@ -220,6 +230,7 @@ struct SelectionHelper_t
 		tracks[2] = track_minus;
 		tracks[3] = track_plus;
 		KF = ::kinfit(tracks);
+    Mpi0 = ::kinfit(tracks,good_neutral_tracks,kin_chi2_3pi);
 	}
 
 	void select_channel_by_kinematic_fit(void)
