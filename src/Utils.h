@@ -139,29 +139,13 @@ inline std::list<EvtRecTrack*> createGoodNeutralTrackList(
 	return good_neutral_tracks;
 }
 
-inline std::list<EvtRecTrack*> createGoodNeutralTrackList2(
-		SelectionConfig & cfg, 
+
+inline double angle_to_close_charged(
+    RecEmcShower * emcTrk,
 		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
 		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
-		)
+    )
 {
-	std::list<EvtRecTrack*> good_neutral_tracks;
-	//collect good neutral track
-	for(int i = evtRecEvent->totalCharged(); i<evtRecEvent->totalTracks(); i++)
-	{
-		EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + i;
-		if(!(*itTrk)->isEmcShowerValid()) continue; //keep only valid neutral tracks
-		RecEmcShower *emcTrk = (*itTrk)->emcShower();
-    double theta = emcTrk->theta();
-    double phi = emcTrk->phi();
-		double c =  fabs(cos(theta)); //abs cos theta
-		double E  =  emcTrk->energy();
-		bool hit_barrel = (c <= cfg.EMC_BARREL_MAX_COS_THETA);
-		bool hit_endcup = (cfg.EMC_ENDCUP_MIN_COS_THETA <=c) && (c <= cfg.EMC_ENDCUP_MAX_COS_THETA);
-		//barrel and endcup calorimeters have different energy threshold
-		bool barrel_good_track = hit_barrel && (E > cfg.EMC_BARREL_MIN_ENERGY);
-		bool endcup_good_track = hit_endcup && (E > cfg.EMC_ENDCUP_MIN_ENERGY);
-
     Hep3Vector emcpos(emcTrk->x(), emcTrk->y(), emcTrk->z());
     double dthe = 200.;
     double dphi = 200.;
@@ -186,9 +170,37 @@ inline std::list<EvtRecTrack*> createGoodNeutralTrackList2(
       }
       if(dang>=200) continue;
     }
-    bool close_charged_track = fabs(dang) < cfg.NEUTRAL_CLOSE_CHARGED_ANGLE * 180./(CLHEP::pi);
+};
+
+
+inline std::list<EvtRecTrack*> createGoodNeutralTrackList2(
+		SelectionConfig & cfg, 
+		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
+		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
+		)
+{
+	std::list<EvtRecTrack*> good_neutral_tracks;
+	//collect good neutral track
+	for(int i = evtRecEvent->totalCharged(); i<evtRecEvent->totalTracks(); i++)
+	{
+		EvtRecTrackIterator itTrk=evtRecTrkCol->begin() + i;
+		if(!(*itTrk)->isEmcShowerValid()) continue; //keep only valid neutral tracks
+		RecEmcShower *emcTrk = (*itTrk)->emcShower();
+    double theta = emcTrk->theta();
+    double phi = emcTrk->phi();
+		double c =  fabs(cos(theta)); //abs cos theta
+		double E  =  emcTrk->energy();
+		bool hit_barrel = (c <= cfg.EMC_BARREL_MAX_COS_THETA);
+		bool hit_endcup = (cfg.EMC_ENDCUP_MIN_COS_THETA <=c) && (c <= cfg.EMC_ENDCUP_MAX_COS_THETA);
+		//barrel and endcup calorimeters have different energy threshold
+		bool barrel_good_track = hit_barrel && (E > cfg.EMC_BARREL_MIN_ENERGY);
+		bool endcup_good_track = hit_endcup && (E > cfg.EMC_ENDCUP_MIN_ENERGY);
+
+    double angle_to_charged  =  180/(CLHEP::pi) * angle_to_charged(emcTrk,evtRecEvent, evtRecTrkCol);
+    bool close_charged_track = fabs(angle_to_charged) < cfg.NEUTRAL_CLOSE_CHARGED_ANGLE;
 
     if(close_charged_track) continue;
+
 		if(barrel_good_track  || endcup_good_track) 
 		{
 			good_neutral_tracks.push_back(*itTrk);

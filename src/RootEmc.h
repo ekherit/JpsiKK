@@ -26,9 +26,16 @@ struct RootEmc : public RootTuple
 	NTuple::Array<double> theta;
 	NTuple::Array<double> phi;
 	NTuple::Array<double> time;
+  NTuple::Array<double> dangle; //angle to close charged
 	virtual void init(void);
 	virtual void init_tuple(void);
 	virtual void fill(EvtRecTrack * track) {};
-	virtual void fill(int i,  EvtRecTrack * track);
-	virtual void fill(list<EvtRecTrack*> & tracks);
+
+	virtual void fill(int i,  EvtRecTrack * track,
+		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
+		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol);
+      
+	virtual void fill(list<EvtRecTrack*> & tracks, 
+		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
+		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol);
 };

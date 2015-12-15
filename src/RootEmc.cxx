@@ -17,6 +17,7 @@
 #include <algorithm>
 
 #include "RootEmc.h"
+#include "Utils.h"
 
 int RootEmc::ARRAY_SIZE = 100;
 
@@ -27,6 +28,7 @@ void RootEmc::init_tuple(void)
   tuple->addIndexedItem ("theta", ntrack, theta);
   tuple->addIndexedItem ("phi",   ntrack, phi);
   tuple->addIndexedItem ("time",  ntrack, time);
+  tuple->addIndexedItem ("dangle",  ntrack, dangle);
 }
 
 void RootEmc::init(void)
@@ -38,10 +40,13 @@ void RootEmc::init(void)
     theta[i] = -1000;;
     phi[i] = -1000;
     time[i] = -1000;
+    dangle[i] = 200;
   }
 }
 
-void RootEmc::fill(int i,  EvtRecTrack * track)
+void RootEmc::fill(int i,  EvtRecTrack * track, 
+		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
+		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol);
 {
 	if(track->isEmcShowerValid())
 	{
@@ -50,11 +55,15 @@ void RootEmc::fill(int i,  EvtRecTrack * track)
 		theta[i] = emcTrk->theta();
 		phi[i] = emcTrk->phi();
 		time[i] = emcTrk->time();
+    dangle[i] = 180/(CLHEP::pi)*angle_to_close_charged(emcTrk, evtRecEvent, evtRecTrkCol);
 	}
 }
 
 
-void RootEmc::fill(list<EvtRecTrack*> & good_neutral_tracks)
+void RootEmc::fill(list<EvtRecTrack*> & good_neutral_tracks,
+		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
+		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
+    )
 {
 	ntrack=std::min(good_neutral_tracks.size(), size_t(ARRAY_SIZE));
 	int idx=0;
@@ -66,6 +75,7 @@ void RootEmc::fill(list<EvtRecTrack*> & good_neutral_tracks)
 		theta[idx] =  emcTrk->theta();
 		phi[idx] =  emcTrk->phi();
 		time[idx] = emcTrk->time();
+    dangle[idx] =  180/(CLHEP::pi)*angle_to_close_charged(emcTrk, evtRecEvent, evtRecTrkCol);
 		idx++;
 	}
 }

@@ -476,7 +476,10 @@ void JpsiKK::init_tuple(A & a,  const char * dir, const char * title)
   }
 }
 
-void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  TrackVector_t & Tracks)
+void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  TrackVector_t & Tracks,
+		SmartDataPtr<EvtRecEvent>    & evtRecEvent, 
+		SmartDataPtr<EvtRecTrackCol> & evtRecTrkCol
+    )
 {
   SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
 	fEvent.fill(Pkf);
@@ -492,7 +495,7 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 	{
 		if(Tracks[i]==0) continue;
     fEvent.fill(i,Tracks[i]);
-		if(cfg.FILL_EMC)  fEmc.fill (i,  Tracks[i]);
+    if(cfg.FILL_EMC)  fEmc.fill (i,  Tracks[i], evtRecEvent, evtRecTrkCol);
 		if(cfg.FILL_MDC)  fMdc.fill (i,  Tracks[i]);
 		if(cfg.FILL_DEDX) fDedx.fill(i,  Tracks[i]);
 		if(cfg.FILL_TOF)  fTof.fill (i,  Tracks[i]);
@@ -510,7 +513,7 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 		fMCTopo.fill(mcParticleCol);
 		fMC.fill(Pkf, mcParticleCol);
 	}
-	fNeutral.fill(good_neutral_tracks);
+	fNeutral.fill(good_neutral_tracks,evtRecEvent, evtRecTrkCol);
 }
 
 void JpsiKK::writeTuples(void)
