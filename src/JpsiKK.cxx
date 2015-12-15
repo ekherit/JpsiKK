@@ -380,6 +380,9 @@ StatusCode JpsiKK::execute()
         fEvent.kin_chi2 = sh.getKinChi2(*chan);
         fEvent.pid_chi2 = sh.getPidChi2(*chan);
 
+        fEvent.kin_chi2_3pi = sh.kin_chi2_3pi;
+        fEvent.Mpi0 = sh.Mpi0;
+
         for(int pid=0;pid<5;pid++)
         {
           fEvent.kchi[pid] = sh.getKinChi2(pid);
@@ -485,7 +488,7 @@ void  JpsiKK::fillTuples(const std::vector<CLHEP::HepLorentzVector> & Pkf,  Trac
 {
   SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(),  EventModel::MC::McParticleCol);
 	fEvent.fill(Pkf);
-  fEvent.Mpi0 = getPi0Mass(good_neutral_tracks);
+  //fEvent.Mpi0 = getPi0Mass(good_neutral_tracks);
 	//fPid.ntrack=4;
 	fMdc.T.ntrack=4;
 	fDedx.ntrack=4;
