@@ -277,7 +277,7 @@ inline double kinfit_3pi_missed_gamma(
     RecEmcShower * emcTrk1=(*it1)->emcShower();
 
     kmfit->AddTrack(4,0,emcTrk1);
-    kmfit->AddMissTrack(5,0);
+    kmfit->AddMissTrack(5,0.0);
 
     kmfit->AddResonance(0,0.1349766, 4,5); //pi0 particle
     kmfit->AddResonance(1,JPSI_MASS, 2,3,4,5); //jpsi particle
