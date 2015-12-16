@@ -234,6 +234,11 @@ struct SelectionHelper_t
     Mpi0 = ::kinfit_3pi(tracks,good_neutral_tracks,kin_chi2_3pi);
   }
 
+  void kinfit_4pi_2g_missed_gamma(TrackVector_t & tracks, TrackList_t & good_neutral_tracks)
+  {
+    Mpi0 = ::kinfit_3pi_missed_gamma(tracks,good_neutral_tracks,kin_chi2_3pi);
+  }
+
 
 
 

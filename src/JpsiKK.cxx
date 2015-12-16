@@ -326,7 +326,8 @@ StatusCode JpsiKK::execute()
         std::vector<HepLorentzVector> Pkf = sh.getMomentum(*chan);
         TrackVector_t Tracks = sh.tracks; 
         //kinematic fit for suppress Ψ(2S) → π+π-(J/Ψ → π-(ρ(770)+ → (π0 → ɣɣ)π+)) = ɣɣπ+π+π-π- (final state)
-        sh.kinfit_4pi_2g(Tracks,good_neutral_tracks);
+        //sh.kinfit_4pi_2g(Tracks,good_neutral_tracks);
+        sh.kinfit_4pi_2g_missed_gamma(Tracks,good_neutral_tracks);
         int charge=0;
         if(Tracks.size()==3) 
         {
