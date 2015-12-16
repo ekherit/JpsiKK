@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Dec  2 20:01:56 2015 by ROOT version 6.04/10
+// Wed Dec 16 09:37:40 2015 by ROOT version 6.04/12
 // from TTree muc/MUon chamber information
 // found on file: sample.root
 //////////////////////////////////////////////////////////

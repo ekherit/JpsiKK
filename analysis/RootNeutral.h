@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Dec  2 20:01:56 2015 by ROOT version 6.04/10
+// Wed Dec 16 09:37:40 2015 by ROOT version 6.04/12
 // from TTree neutral/Good neutral tracks
 // found on file: sample.root
 //////////////////////////////////////////////////////////
@@ -23,10 +23,11 @@ public :
 
    // Declaration of leaf types
    Int_t           ntrack;
-   Double_t        E[100];   //[ntrack]
-   Double_t        theta[100];   //[ntrack]
-   Double_t        phi[100];   //[ntrack]
-   Double_t        time[100];   //[ntrack]
+   Double_t        E[15];   //[ntrack]
+   Double_t        theta[15];   //[ntrack]
+   Double_t        phi[15];   //[ntrack]
+   Double_t        time[15];   //[ntrack]
+   Double_t        dangle[15];   //[ntrack]
 
    // List of branches
    TBranch        *b_ntrack;   //!
@@ -34,6 +35,7 @@ public :
    TBranch        *b_theta;   //!
    TBranch        *b_phi;   //!
    TBranch        *b_time;   //!
+   TBranch        *b_dangle;   //!
 
    RootNeutral(TTree *tree=0);
    virtual ~RootNeutral();
@@ -110,6 +112,7 @@ void RootNeutral::Init(TTree *tree)
    fChain->SetBranchAddress("theta", theta, &b_theta);
    fChain->SetBranchAddress("phi", phi, &b_phi);
    fChain->SetBranchAddress("time", time, &b_time);
+   fChain->SetBranchAddress("dangle", dangle, &b_dangle);
    Notify();
 }
 
