@@ -219,10 +219,11 @@ inline double kinfit_3pi(
       kmfit->AddResonance(0,0.1349766, 4,5); //pi0 particle
       //kmfit->AddResonance(1,JPSI_MASS, 2,3,4,5); //jpsi particle
       kmfit->AddFourMomentum(1,  getTotalMomentum()); //total momeunum
-      if(!kmfit->Fit(0)) continue;
-      if(!kmfit->Fit(1)) continue;
+      //if(!kmfit->Fit(0)) continue;
+      //if(!kmfit->Fit(1)) continue;
       //if(!kmfit->Fit(2)) continue;
       bool oksq = kmfit->Fit();
+      std::cout << "E1 = " << emcTrk1->energy() << " E2=" << emcTrk2->energy() << " oksq=" << oksq << " " << kmfit->shisq() " " ;
       if(oksq)
       {
         if(kmfit->chisq() < chi2)
@@ -231,6 +232,7 @@ inline double kinfit_3pi(
           Pg[0] = kmfit->pfit(4);
           Pg[1] = kmfit->pfit(5);
           Mpi0 = (Pg[0]+Pg[1]).m();
+          std::cout << " Mpi0=" << Mpi0 << std::endl;
         }
       }
     }
