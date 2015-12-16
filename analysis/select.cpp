@@ -21,6 +21,7 @@
 #include <unordered_map>
 
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/program_options.hpp>
 #include <boost/functional/hash.hpp>
 
@@ -46,11 +47,23 @@ list<string> get_file_list_in_dir(string dirname)
   boost::filesystem::path dir(dirname);
   regex re(".+.root");
   smatch match;
-  for (directory_iterator itr(dir); itr!=directory_iterator(); ++itr)
+  if(is_directory(dir))
   {
-    auto file = absolute(itr->path());
-    auto & name = file.string();
-    if(file.extension()==".root") lst.push_back(name);
+    for (directory_iterator itr(dir); itr!=directory_iterator(); ++itr)
+    {
+      auto file = absolute(itr->path());
+      auto & name = file.string();
+      if(file.extension()==".root") lst.push_back(name);
+    }
+  }
+  else 
+  {
+    if(is_regular_file(dir))
+    {
+      auto file = absolute(dir);
+      auto & name = file.string();
+      if(file.extension()==".root") lst.push_back(name);
+    }
   }
   lst.sort();
   return lst;
