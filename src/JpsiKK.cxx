@@ -363,7 +363,7 @@ StatusCode JpsiKK::execute()
             else 
             {
               fEvent.K = 1;
-              kin_chi2_3pi = sh
+              kin_chi2_3pi = sh.kin_chi2_3pi;
             }
             break;
           case ID_MUON:
