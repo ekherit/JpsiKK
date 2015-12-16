@@ -177,7 +177,8 @@ inline double kinfit_3pi(
     TrackList_t &  T0,   //neutral tracks
     double & chi2)       //list of all neutral tracks
 {
-  chi2=300;
+  const double MAX_CHI2=1000;
+  chi2=MAX_CHI2;
   double Mpi0=-10; //best pi0 mass
 	std::vector<RecMdcKalTrack*> KalTrk(Tq.size());
 	std::vector<WTrackParameter> WTrk(Tq.size());
@@ -200,7 +201,7 @@ inline double kinfit_3pi(
     for(it2; it2 != T0.end() ; it2++)
     {
       kmfit->init();
-      kmfit->setChisqCut(1000);
+      kmfit->setChisqCut(MAX_CHI2);
       for(int i=0;i<Tq.size();i++)
       {
         kmfit->AddTrack(i,VertexWTrk[i]);
