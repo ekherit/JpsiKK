@@ -223,7 +223,7 @@ inline double kinfit_3pi(
       //if(!kmfit->Fit(1)) continue;
       //if(!kmfit->Fit(2)) continue;
       bool oksq = kmfit->Fit();
-      std::cout << "E1 = " << emcTrk1->energy() << " E2=" << emcTrk2->energy() << " oksq=" << oksq << " " << kmfit->chisq() << " " ;
+      std::cout << "E1 = " << emcTrk1->energy() << " E2=" << emcTrk2->energy() << " oksq=" << oksq << " " << kmfit->chisq() << " " << std::endl;
       if(oksq)
       {
         if(kmfit->chisq() < chi2)
