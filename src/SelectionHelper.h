@@ -205,8 +205,7 @@ struct SelectionHelper_t
 
 	void kinfit(
 			TrackPair_t & pion_pair,
-			EvtRecTrack* track,
-      TrackList_t & good_neutral_tracks
+			EvtRecTrack* track
 			)
 	{
 		tracks.resize(3);
@@ -214,14 +213,12 @@ struct SelectionHelper_t
 		tracks[1] = pion_pair.second;
 		tracks[2] = track;
 		KF = ::kinfit(tracks);
-    Mpi0 = ::kinfit_3pi(tracks,good_neutral_tracks,kin_chi2_3pi);
 	}
 
 	void kinfit(
 			TrackPair_t & pion_pair,
 			EvtRecTrack * track_minus,
-			EvtRecTrack * track_plus,
-      TrackList_t & good_neutral_tracks
+			EvtRecTrack * track_plus
 			)
 	{
 		tracks.resize(4);
@@ -230,8 +227,15 @@ struct SelectionHelper_t
 		tracks[2] = track_minus;
 		tracks[3] = track_plus;
 		KF = ::kinfit(tracks);
-    Mpi0 = ::kinfit_3pi(tracks,good_neutral_tracks,kin_chi2_3pi);
 	}
+
+  void kinfit_4pi_2g(TrackVector_t & tracks, TrackList_t & good_neutral_tracks)
+  {
+    Mpi0 = ::kinfit_3pi(tracks,good_neutral_tracks,kin_chi2_3pi);
+  }
+
+
+
 
 	void select_channel_by_kinematic_fit(void)
 	{

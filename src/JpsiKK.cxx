@@ -293,7 +293,7 @@ StatusCode JpsiKK::execute()
   {
     sh_list.push_back(SelectionHelper_t(cfg));
     SelectionHelper_t & sh = sh_list.back();
-		sh.kinfit(pion_pair, other_negative_tracks.front(), good_neutral_tracks);
+		sh.kinfit(pion_pair, other_negative_tracks.front());
 		sh.totalPass(cfg.PASS_KIN_PID_CUT);
 
   }
@@ -301,14 +301,14 @@ StatusCode JpsiKK::execute()
   {
     sh_list.push_back(SelectionHelper_t(cfg));
     SelectionHelper_t & sh = sh_list.back();
-		sh.kinfit(pion_pair, other_positive_tracks.front(), good_neutral_tracks);
+		sh.kinfit(pion_pair, other_positive_tracks.front());
 		sh.totalPass(cfg.PASS_KIN_PID_CUT);
   }
   if(pos && neg)
   {
     sh_list.push_back(SelectionHelper_t(cfg));
     SelectionHelper_t & sh = sh_list.back();
-    sh.kinfit(pion_pair, other_negative_tracks.front(), other_positive_tracks.front(), good_neutral_tracks);
+    sh.kinfit(pion_pair, other_negative_tracks.front(), other_positive_tracks.front());
 		sh.totalPass(cfg.PASS_KIN_PID_CUT);
   }
 
@@ -325,6 +325,8 @@ StatusCode JpsiKK::execute()
       {
         std::vector<HepLorentzVector> Pkf = sh.getMomentum(*chan);
         TrackVector_t Tracks = sh.tracks; 
+        //kinematic fit for suppress Ψ(2S) → π+π-(J/Ψ → π-(ρ(770)+ → (π0 → ɣɣ)π+)) = ɣɣπ+π+π-π- (final state)
+        sh.kinfit_4pi_2g(Tracks,good_neutral_tracks);
         int charge=0;
         if(Tracks.size()==3) 
         {
@@ -361,6 +363,7 @@ StatusCode JpsiKK::execute()
             else 
             {
               fEvent.K = 1;
+              kin_chi2_3pi = sh
             }
             break;
           case ID_MUON:
@@ -557,6 +560,7 @@ void JpsiKK::printSelectionDigest(bool head)
     std::cout << " " << setw(width) << "N4(u+)";
     std::cout << " " << setw(width) << "N3(u-)";
     std::cout << " " << setw(width) << "N4(u-)";
+    std::cout << " " << setw(width) << "chi2(3pi)";
     std::cout << endl;
   }
   std::cout << setw(big_width)    << event_proceed;
@@ -570,6 +574,7 @@ void JpsiKK::printSelectionDigest(bool head)
     std::cout << " " << setw(width) << theCounter[pid][-1][3];
     std::cout << " " << setw(width) << theCounter[pid][-1][4];
   }
+  std::cout << " " << setw(width) << kin_chi2_3pi;
   std::cout << endl;
 }
 

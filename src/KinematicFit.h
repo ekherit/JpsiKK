@@ -193,11 +193,11 @@ inline double kinfit_3pi(
   if(T0.empty()) return Mpi0;
 
   //now loop over  neutral tracks and find best
-  TrackList_t::iterator track[2];
-  for(track[0] = T0.begin() ; track[0] != T0.end() ; track[0]++)
+  for(TrackList_t::iterator it1 = T0.begin() ; it1 != T0.end() ; it1++)
   {
-    track[1]=track[0];
-    for(++track[1]; track[1] !=T0.end() ; track[1]++)
+    TrackList_t::iterator it2=it1;
+    it2++;
+    for(it2; it2 != T0.end() ; it2++)
     {
       kmfit->init();
       for(int i=0;i<Tq.size();i++)
@@ -210,28 +210,24 @@ inline double kinfit_3pi(
       }
 
       HepLorentzVector Pg[2]; //photon four-momentum
-      RecEmcShower * emcTrk[2];
-      for(int idx=0;idx<2;idx++)
-      {
-        emcTrk[idx] = (*track[idx])->emcShower();
-      }
-      kmfit->AddTrack(4,0,emcTrk[0]);
-      kmfit->AddTrack(5,0,emcTrk[1]);
+      RecEmcShower * emcTrk1=(*it1)->emcShower();
+      RecEmcShower * emcTrk2=(*it2)->emcShower();
+
+      kmfit->AddTrack(4,0,emcTrk1);
+      kmfit->AddTrack(5,0,emcTrk2);
 
       kmfit->AddResonance(0,0.1349766, 4,5); //pi0 particle
-      kmfit->AddResonance(1,JPSI_MASS, 2,3,4,5); //jpsi particle
-      kmfit->AddFourMomentum(2,  getTotalMomentum()); //total momeunum
+      //kmfit->AddResonance(1,JPSI_MASS, 2,3,4,5); //jpsi particle
+      kmfit->AddFourMomentum(1,  getTotalMomentum()); //total momeunum
       if(!kmfit->Fit(0)) continue;
       if(!kmfit->Fit(1)) continue;
-      if(!kmfit->Fit(2)) continue;
+      //if(!kmfit->Fit(2)) continue;
       bool oksq = kmfit->Fit();
       if(oksq)
       {
-        double chi2_tmp = kmfit->chisq();
-        if(chi2_tmp < chi2)
+        if(kmfit->chisq() < chi2)
         {
-          std::clog << "3pi kin chi2 = " << chi2 << std::endl;
-          chi2 = chi2_tmp;
+          chi2 =  kmfit->chisq();
           Pg[0] = kmfit->pfit(4);
           Pg[1] = kmfit->pfit(5);
           Mpi0 = (Pg[0]+Pg[1]).m();

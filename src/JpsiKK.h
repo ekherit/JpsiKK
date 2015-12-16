@@ -63,6 +63,9 @@ class JpsiKK : public Algorithm
   RootEmc    fNeutral; //neutral tracks
   RootMuc    fMuc; //Muon chamber
 
+
+  double kin_chi2_3pi;
+
 	template <class A> 
 		void init_tuple(A & a,  const char * dir, const char * title);
 
