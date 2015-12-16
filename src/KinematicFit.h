@@ -184,7 +184,7 @@ inline double kinfit_3pi(
 	for(int i=0;i<Tq.size();i++)
 	{
 		KalTrk[i] = Tq[i]->mdcKalTrack();
-    WTrk[i] = WTrackParameter(XMASS[ID_KAON], KalTrk[i]->getZHelix(),   KalTrk[i]->getZError());
+    WTrk[i] = WTrackParameter(XMASS[ID_PION], KalTrk[i]->getZHelix(),   KalTrk[i]->getZError());
 	}
 	std::vector<WTrackParameter> VertexWTrk;
 	if(!vertex_fit(WTrk, VertexWTrk)) return Mpi0;
@@ -252,7 +252,7 @@ inline double kinfit_3pi_missed_gamma(
 	for(int i=0;i<Tq.size();i++)
 	{
 		KalTrk[i] = Tq[i]->mdcKalTrack();
-    WTrk[i] = WTrackParameter(XMASS[ID_KAON], KalTrk[i]->getZHelix(),   KalTrk[i]->getZError());
+    WTrk[i] = WTrackParameter(XMASS[ID_PION], KalTrk[i]->getZHelix(),   KalTrk[i]->getZError());
 	}
 	std::vector<WTrackParameter> VertexWTrk;
 	if(!vertex_fit(WTrk, VertexWTrk)) return Mpi0;
