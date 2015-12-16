@@ -180,6 +180,7 @@ inline double kinfit_3pi(
   const double MAX_CHI2=1000;
   chi2=MAX_CHI2;
   double Mpi0=-10; //best pi0 mass
+  HepLorentzVector Pg[2]; //photon four-momentum
 	std::vector<RecMdcKalTrack*> KalTrk(Tq.size());
 	std::vector<WTrackParameter> WTrk(Tq.size());
 	for(int i=0;i<Tq.size();i++)
@@ -211,7 +212,6 @@ inline double kinfit_3pi(
         kmfit->AddMissTrack(3,XMASS[ID_PION]);
       }
 
-      HepLorentzVector Pg[2]; //photon four-momentum
       RecEmcShower * emcTrk1=(*it1)->emcShower();
       RecEmcShower * emcTrk2=(*it2)->emcShower();
 
@@ -225,7 +225,7 @@ inline double kinfit_3pi(
       if(!kmfit->Fit(1)) continue;
       if(!kmfit->Fit(2)) continue;
       bool oksq = kmfit->Fit();
-      std::cout << " Nq = " << Tq.size() << " E1 = " << emcTrk1->energy() << " E2=" << emcTrk2->energy() << " oksq=" << oksq << " " << kmfit->chisq() << " " << std::endl;
+      //std::cout << " Nq = " << Tq.size() << " E1 = " << emcTrk1->energy() << " E2=" << emcTrk2->energy() << " oksq=" << oksq << " " << kmfit->chisq() << " " << std::endl;
       if(oksq)
       {
         if(kmfit->chisq() < chi2)
@@ -234,7 +234,7 @@ inline double kinfit_3pi(
           Pg[0] = kmfit->pfit(4);
           Pg[1] = kmfit->pfit(5);
           Mpi0 = (Pg[0]+Pg[1]).m();
-          std::cout << " Mpi0=" << Mpi0 << std::endl;
+          //std::cout << " Mpi0=" << Mpi0 << std::endl;
         }
       }
     }
