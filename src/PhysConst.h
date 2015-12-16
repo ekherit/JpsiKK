@@ -21,6 +21,8 @@ const double KAON_MASS     = 0.493677; //GeV
 const double ELECTRON_MASS = 0.000510999;//GeV
 const double PROTON_MASS   = 0.93827231;//GeV
 
+const double PI0_MASS      = 0.1349766; //GeV
+
 const double JPSI_MASS     = 3.096916; //GeV
 const double PSIP_MASS     = 3.686109; //GeV PDG-2014
 
