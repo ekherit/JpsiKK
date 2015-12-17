@@ -57,6 +57,9 @@ void RootEvent::init_tuple(void)
   tuple->addIndexedItem ("pchi",  npid, pchi);
   tuple->addIndexedItem ("kM",  npid,     kM23);
 
+  tuple->addItem ("nkinbg", nkinbg,0,10);     
+  tuple->addIndexedItem ("kin_chi2_bg",  nkinbg, kin_chi2_bg);
+
   //tuple->addIndexedItem ("probe",  T.ntrack,  prob[ID_ELECTRON]);
   //tuple->addIndexedItem ("probmu", T.ntrack,  prob[ID_MUON]);
   //tuple->addIndexedItem ("probpi", T.ntrack,  prob[ID_PION]);

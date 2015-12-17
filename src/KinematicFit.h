@@ -177,7 +177,7 @@ inline double kinfit_3pi(
     TrackList_t &  T0,   //neutral tracks
     double & chi2)       //list of all neutral tracks
 {
-  const double MAX_CHI2=1000;
+  const double MAX_CHI2=100001;
   chi2=MAX_CHI2;
   double Mpi0=-10; //best pi0 mass
   HepLorentzVector Pg[2]; //photon four-momentum
@@ -247,7 +247,8 @@ inline double kinfit_3pi_missed_gamma(
     TrackList_t &  T0,   //neutral tracks
     double & chi2)       //list of all neutral tracks
 {
-  chi2=300;
+  const double MAX_CHI2=100001;
+  chi2=MAX_CHI2;
   double Mpi0=-10; //best pi0 mass
 	std::vector<RecMdcKalTrack*> KalTrk(Tq.size());
 	std::vector<WTrackParameter> WTrk(Tq.size());
@@ -266,6 +267,7 @@ inline double kinfit_3pi_missed_gamma(
   for(TrackList_t::iterator it1 = T0.begin() ; it1 != T0.end() ; it1++)
   {
     kmfit->init();
+    kmfit->setChisqCut(MAX_CHI2);
     for(int i=0;i<Tq.size();i++)
     {
       kmfit->AddTrack(i,VertexWTrk[i]);

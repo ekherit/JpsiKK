@@ -325,9 +325,10 @@ StatusCode JpsiKK::execute()
       {
         std::vector<HepLorentzVector> Pkf = sh.getMomentum(*chan);
         TrackVector_t Tracks = sh.tracks; 
+        fEvent.nkinbg=2;
         //kinematic fit for suppress Ψ(2S) → π+π-(J/Ψ → π-(ρ(770)+ → (π0 → ɣɣ)π+)) = ɣɣπ+π+π-π- (final state)
-        sh.kinfit_4pi_2g(Tracks,good_neutral_tracks);
-        //sh.kinfit_4pi_2g_missed_gamma(Tracks,good_neutral_tracks);
+        fEvent.kin_chi2_bg[0] = sh.kinfit_4pi_2g(good_neutral_tracks);
+        fEvent.kin_chi2_bg[1] = sh.kinfit_4pi_2g_missed_gamma(good_neutral_tracks);
         int charge=0;
         if(Tracks.size()==3) 
         {
@@ -364,7 +365,6 @@ StatusCode JpsiKK::execute()
             else 
             {
               fEvent.K = 1;
-              kin_chi2_3pi = sh.kin_chi2_3pi;
             }
             break;
           case ID_MUON:
@@ -386,6 +386,8 @@ StatusCode JpsiKK::execute()
 
         fEvent.kin_chi2_3pi = sh.kin_chi2_3pi;
         fEvent.Mpi0 = sh.Mpi0;
+
+
 
         for(int pid=0;pid<5;pid++)
         {

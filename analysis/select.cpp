@@ -359,7 +359,7 @@ int main(int argc, char ** argv)
           }
           //if(event.K==1 && event.ngntrack==0 && event.depth[2]<40 && event.depth[3] < 40)
           //if(event.K==1 && event.ngntrack==0 && mdc.E[2]/mdc.p[2]>0.26 && mdc.E[3]/mdc.p[3]>0.26)
-          if(event.K==1 && event.ngntrack==0)
+          if(event.K==1)
           {
             if( fabs(cos(event.theta[2])) < 0.8 && fabs(cos(event.theta[3])) <0.8)
             {

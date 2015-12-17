@@ -67,7 +67,15 @@ struct RootEvent : public RootTuple
 
 
   NTuple::Item<double> Mpi0; //invariant mass of two gamma most close to pi0 mezon
-  NTuple::Item<double> kin_chi2_3pi; //invariant mass of two gamma most close to pi0 mezon
+  //NTuple::Item<double> kin_chi2_3pi; //invariant mass of two gamma most close to pi0 mezon
+
+	NTuple::Item<long>    nkinbg;    //number background kinematic fits
+  NTuple::Array<double> kin_chi2_bg; //kinematic fit for the background
+  /*
+   * 0 -  Ψ(2S) → π+π-(J/Ψ → π-(ρ(770)+ → (π0 → ɣɣ)π+)) = ɣɣπ+π+π-π- (final state)
+   * 1 -  same and missed one gamma
+   * 
+   * */
 
 	virtual void init(void);
 	virtual void init_tuple(void);

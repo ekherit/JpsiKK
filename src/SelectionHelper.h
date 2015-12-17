@@ -65,6 +65,8 @@ struct SelectionHelper_t
   double Mpi0;
   double kin_chi2_3pi;
 
+  double kin_chi2_bg[2];
+
 
 	void init(void)
 	{
@@ -229,14 +231,16 @@ struct SelectionHelper_t
 		KF = ::kinfit(tracks);
 	}
 
-  void kinfit_4pi_2g(TrackVector_t & tracks, TrackList_t & good_neutral_tracks)
+  double kinfit_4pi_2g(TrackList_t & good_neutral_tracks)
   {
-    Mpi0 = ::kinfit_3pi(tracks,good_neutral_tracks,kin_chi2_3pi);
+    Mpi0 = ::kinfit_3pi(tracks,good_neutral_tracks,kin_chi2_bg[0]);
+    return kin_chi2_bg[0];
   }
 
-  void kinfit_4pi_2g_missed_gamma(TrackVector_t & tracks, TrackList_t & good_neutral_tracks)
+  double kinfit_4pi_2g_missed_gamma(TrackList_t & good_neutral_tracks)
   {
-    Mpi0 = ::kinfit_3pi_missed_gamma(tracks,good_neutral_tracks,kin_chi2_3pi);
+    Mpi0 = ::kinfit_3pi_missed_gamma(tracks,good_neutral_tracks,kin_chi2_bg[1]);
+    return kin_chi2_bg[1];
   }
 
 
