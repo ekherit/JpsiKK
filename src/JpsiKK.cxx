@@ -384,8 +384,8 @@ StatusCode JpsiKK::execute()
         fEvent.kin_chi2 = sh.getKinChi2(*chan);
         fEvent.pid_chi2 = sh.getPidChi2(*chan);
 
-        fEvent.kin_chi2_3pi = sh.kin_chi2_3pi;
-        fEvent.Mpi0 = sh.Mpi0;
+        //fEvent.kin_chi2_3pi = sh.kin_chi2_3pi;
+        //fEvent.Mpi0 = sh.Mpi0;
 
 
 
