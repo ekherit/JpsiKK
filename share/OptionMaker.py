@@ -211,8 +211,6 @@ class OptionMaker:
             return
 
 
-
-
     def make_sel(self):
         #print self.runMap
         self.run_string()
