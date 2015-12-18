@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Dec 16 09:37:40 2015 by ROOT version 6.04/12
+// Thu Dec 17 13:24:32 2015 by ROOT version 6.04/12
 // from TTree event/Signal events pi+pi- K+K-, or pi+pi- mu+mu-
 // found on file: sample.root
 //////////////////////////////////////////////////////////
@@ -72,8 +72,9 @@ public :
    Double_t        kchi[5];   //[npid]
    Double_t        pchi[5];   //[npid]
    Double_t        kM[5];   //[npid]
+   Int_t           nkinbg;
+   Double_t        kin_chi2_bg[10];   //[nkinbg]
    Double_t        Mpi0;
-   Double_t        kin_chi2_3pi;
 
    // List of branches
    TBranch        *b_run;   //!
@@ -126,8 +127,9 @@ public :
    TBranch        *b_kchi;   //!
    TBranch        *b_pchi;   //!
    TBranch        *b_kM;   //!
+   TBranch        *b_nkinbg;   //!
+   TBranch        *b_kin_chi2_bg;   //!
    TBranch        *b_Mpi0;   //!
-   TBranch        *b_kin_chi2_3pi;   //!
 
    RootEvent(TTree *tree=0);
    virtual ~RootEvent();
@@ -249,8 +251,9 @@ void RootEvent::Init(TTree *tree)
    fChain->SetBranchAddress("kchi", kchi, &b_kchi);
    fChain->SetBranchAddress("pchi", pchi, &b_pchi);
    fChain->SetBranchAddress("kM", kM, &b_kM);
+   fChain->SetBranchAddress("nkinbg", &nkinbg, &b_nkinbg);
+   fChain->SetBranchAddress("kin_chi2_bg", kin_chi2_bg, &b_kin_chi2_bg);
    fChain->SetBranchAddress("Mpi0", &Mpi0, &b_Mpi0);
-   fChain->SetBranchAddress("kin_chi2_3pi", &kin_chi2_3pi, &b_kin_chi2_3pi);
    Notify();
 }
 
