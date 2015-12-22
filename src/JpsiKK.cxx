@@ -397,8 +397,8 @@ StatusCode JpsiKK::execute()
           {
             if(Tracks[n]!=0) 
             {
-              RecMdcKalTrack *mdcTrk = T[n]->mdcKalTrack();
-              p[n] =  mdcTrk->p4(XMASS[pid[i]]);
+              RecMdcKalTrack *mdcTrk = Tracks[n]->mdcKalTrack();
+              p[n] =  mdcTrk->p4(XMASS[pid]);
             }
             else
             {
