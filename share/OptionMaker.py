@@ -125,7 +125,7 @@ class OptionMaker:
             print 'Specify the action: "sel",  "sim",  "rec"'
             sys.exit(1)
 
-        if(args[0] == "selection" or args[0]=="sel" or args[0] == "sel2"):
+        if(args[0] == "selection" or args[0]=="sel"):
             self.SelectionMode=True
             #self.fileFilter=".*run_(\d\d\d\d\d\d\d).*.dst"
             self.fileFilter = ".*(\d{4,7}).*.dst"
@@ -207,7 +207,7 @@ class OptionMaker:
             return
 
         if self.SelectionMode:
-            self.make_sel2()
+            self.make_sel()
             return
 
 
