@@ -52,7 +52,7 @@ options.add_option("-n", "--runs_per_job",type="int", dest="run_number", default
 options.add_option("-q", "--queue",dest="queue", default="besq", help="Queue name")
 (opt, args) = options.parse_args()
 
-dir="test"
+dir=args[0]
 files = filter_file_list(create_file_list(dir),".+.cfg$")
 files.sort()
 groups = group_files(files,opt.run_number)
@@ -60,16 +60,16 @@ groups = group_files(files,opt.run_number)
 pbs_file_list = []
 i=0
 for flist in groups:
-    pbs_name = "%s/%s-%04d.tcsh" % (dir , opt.job_prefix ,  i)
+    tcsh_file_name = "%s-%04d.tcsh" % (opt.job_prefix, i) 
+    pbs_name = "%s/%s" % (dir , tcsh_file_name )
     pbs_file = open(pbs_name, 'w')
     s="""#!/bin/tcsh
-#PBS -N """ + opt.job_prefix + """
-#PBS -o """ + pbs_name + """.log
+#PBS -N """ + tcsh_file_name + """
+#PBS -o """ + tcsh_file_name + """.log
 #PBS -j oe
-#PBS -q besq
+##PBS -q besq
 source /ihepbatch/bes/nikolaev/bin/boss664
 """
-    #print flist
     for f in flist:
         log = os.path.abspath(os.path.splitext(f)[0]+".log")
         s = s+ "boss.exe "+os.path.abspath(f)+" >& " + log + "\n"
@@ -80,7 +80,7 @@ source /ihepbatch/bes/nikolaev/bin/boss664
 
 submit_file_name = dir+"/"+"submit.sh"
 submit_file = open(submit_file_name, 'w')
-s = "!/bin/bash\n"
+s = "#!/bin/bash\n"
 for pbs_file  in pbs_file_list:
     s = s + "qsub -q " + opt.queue + " " +  os.path.abspath(pbs_file) + "\n"
 submit_file.write(s)
