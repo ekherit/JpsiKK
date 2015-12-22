@@ -383,16 +383,29 @@ StatusCode JpsiKK::execute()
 
         fEvent.kin_chi2 = sh.getKinChi2(*chan);
         fEvent.pid_chi2 = sh.getPidChi2(*chan);
-
-        //fEvent.kin_chi2_3pi = sh.kin_chi2_3pi;
-        //fEvent.Mpi0 = sh.Mpi0;
-
-
+        fEvent.pid_prob = sh.prob[*chan];
+        fEvent.mypid_chi2 = sh.mypid_chi2[*chan];
 
         for(int pid=0;pid<5;pid++)
         {
           fEvent.kchi[pid] = sh.getKinChi2(pid);
           fEvent.pchi[pid] = sh.getPidChi2(pid);
+          fEvent.prob[pid] = sh.prob[pid];
+          fEvent.mypchi[pid] = sh.mypid_chi2[pid];
+          HepLorentzVector p[4];
+          for(int n = 2; n<4; n++)
+          {
+            if(Tracks[n]!=0) 
+            {
+              RecMdcKalTrack *mdcTrk = T[n]->mdcKalTrack();
+              p[n] =  mdcTrk->p4(XMASS[pid[i]]);
+            }
+            else
+            {
+              p[n] = sh.KF[pid].P[n];
+            }
+          }
+          fEvent.kM23[pid] = (p[2]+p[3]).m();
         }
 
         fEvent.run=eventHeader->runNumber();

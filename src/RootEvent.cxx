@@ -41,33 +41,23 @@ void RootEvent::init_tuple(void)
   tuple->addItem ("u", u); //Kmu or muK events
 
 	M.add_to_tuple(tuple);
-  //tuple->addItem ("Mee",   kM[ID_ELECTRON]);
-  //tuple->addItem ("MKK",   kM[ID_KAON]);
-  //tuple->addItem ("Muu",   kM[ID_MUON]);
-  //tuple->addItem ("Mpp",   kM[ID_PROTON]);
-  //tuple->addItem ("Mpipi", kM[ID_PION]);
-
 	T.add_to_tuple(tuple);
 
   tuple->addItem ("kin_chi2", kin_chi2); 
   tuple->addItem ("pid_chi2", pid_chi2); 
+  tuple->addItem ("pid_prob", pid_prob); 
+  tuple->addItem ("mypid_chi2", mypid_chi2); 
 
   tuple->addItem ("npid", npid,0,5);     
-  tuple->addIndexedItem ("kchi",  npid, kchi);
-  tuple->addIndexedItem ("pchi",  npid, pchi);
-  tuple->addIndexedItem ("kM",  npid,     kM23);
+  tuple->addIndexedItem ("kchi",     npid, kchi);
+  tuple->addIndexedItem ("pchi",     npid, pchi);
+  tuple->addIndexedItem ("prob",     npid, prob);
+  tuple->addIndexedItem ("mypchi",  npid, mypchi);
+  tuple->addIndexedItem ("kM23",     npid,     kM23);
 
   tuple->addItem ("nkinbg", nkinbg,0,10);     
   tuple->addIndexedItem ("kin_chi2_bg",  nkinbg, kin_chi2_bg);
-
-  //tuple->addIndexedItem ("probe",  T.ntrack,  prob[ID_ELECTRON]);
-  //tuple->addIndexedItem ("probmu", T.ntrack,  prob[ID_MUON]);
-  //tuple->addIndexedItem ("probpi", T.ntrack,  prob[ID_PION]);
-  //tuple->addIndexedItem ("probk",  T.ntrack,  prob[ID_KAON]);
-  //tuple->addIndexedItem ("probp",  T.ntrack,  prob[ID_PROTON]);
-
   tuple->addItem ("Mpi0", Mpi0);
-  //tuple->addItem ("kin_chi2_3pi", kin_chi2_3pi);
 }
 
 void RootEvent::init(void)

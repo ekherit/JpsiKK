@@ -52,19 +52,20 @@ struct RootEvent : public RootTuple
 	Mass_t  M;
 
 	//here will be result of the kinematic fit and particle id
-	NTuple::Item<double>  kin_chi2; //kinematic chi2
-	NTuple::Item<double>  pid_chi2; //my prob  chi2
+	NTuple::Item<double>  kin_chi2;    //kinematic chi2
+	NTuple::Item<double>  pid_chi2;    //ParticleID chi2
+	NTuple::Item<double>  pid_prob;    //ParticleID probability
+	NTuple::Item<double>  mypid_chi2; //My particle id chi2
 
 	Track_t T;
 
-	NTuple::Item<long>    npid;    //number of particle id's
-	NTuple::Array<double> kchi;    //kinematik chi2
-	NTuple::Array<double> pchi;    //particle id chi square
+	NTuple::Item<long>    npid;      //number of particle id's
+	NTuple::Array<double> kchi;      //kinematik chi2
+	NTuple::Array<double> pchi;      //particle id chi square
+	NTuple::Array<double> prob;      //probability from ParticleID
+	NTuple::Array<double> mypchi;      //probability from ParticleID
+
 	NTuple::Array<double> kM23;      //Invariant mass for track 23 for different hyptotesis
-
-	NTuple::Array<double> prob[5]; //probability from ParticleID
-	NTuple::Array<double> pchi2[5];//my particle id chi square different hypo
-
 
   NTuple::Item<double> Mpi0; //invariant mass of two gamma most close to pi0 mezon
   //NTuple::Item<double> kin_chi2_3pi; //invariant mass of two gamma most close to pi0 mezon

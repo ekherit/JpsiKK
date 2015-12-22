@@ -112,8 +112,7 @@ struct SelectionHelper_t
 	void setMyPid(void)
 	{
 		vector<double> & chi2 = mypid_chi2;
-		chi2.resize(5);
-		std::fill(chi2.begin(), chi2.end(), 0);
+		chi2.resize(5,0);
 		for(int i=2;i<tracks.size();i++)
 		{
 			vector<double> chi2_tmp = get_chi2(tracks[i]);
@@ -129,14 +128,14 @@ struct SelectionHelper_t
 		ParticleID * PID = ParticleID::instance();
 		PID->init();
 		vector<double> & chi2 = pid_chi2;
-		chi2.resize(5);
-		std::fill(chi2.begin(), chi2.end(), 0);
+		chi2.resize(5,0.0);
+    prob.resize(5,1.0);
 		for(int i=2;i<tracks.size();i++)
 		{
 			PID->setRecTrack(tracks[i]);
 			PID->setMethod(PID->methodProbability());
 			PID->setChiMinCut(4);
-			PID->usePidSys(PID->useDedx() | PID->useTof1() | PID->useTof2() | PID->useMuc());
+			PID->usePidSys(PID->useDedx() | PID->useTof1() | PID->useTof2());
 			PID->identify(PID->all()); 
 			PID->calculate();
 			chi2[ID_KAON]     += PID->chi(3);
@@ -144,7 +143,14 @@ struct SelectionHelper_t
 			chi2[ID_PION]     += PID->chi(2);
 			chi2[ID_ELECTRON] += PID->chi(0);
 			chi2[ID_PROTON]   += PID->chi(4);
+
+			prob[ID_KAON]     *= PID->prob(3);
+			prob[ID_MUON]     *= PID->prob(1);
+			prob[ID_PION]     *= PID->prob(2);
+			prob[ID_ELECTRON] *= PID->prob(0);
+			prob[ID_PROTON]   *= PID->prob(4);
 		}
+    setMyPid();
 	}
 
 	bool passPid(const vector<double> & pchi2)
