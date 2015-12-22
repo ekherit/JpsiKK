@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Dec 17 13:24:32 2015 by ROOT version 6.04/12
+// Tue Dec 22 16:52:37 2015 by ROOT version 6.04/12
 // from TTree emc/Electromagnetic Calorimeter
 // found on file: sample.root
 //////////////////////////////////////////////////////////

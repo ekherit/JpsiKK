@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Dec 17 13:24:32 2015 by ROOT version 6.04/12
+// Tue Dec 22 16:52:37 2015 by ROOT version 6.04/12
 // from TTree event/Signal events pi+pi- K+K-, or pi+pi- mu+mu-
 // found on file: sample.root
 //////////////////////////////////////////////////////////
@@ -68,10 +68,14 @@ public :
    Double_t        depth[4];   //[ntrack]
    Double_t        kin_chi2;
    Double_t        pid_chi2;
+   Double_t        pid_prob;
+   Double_t        mypid_chi2;
    Int_t           npid;
    Double_t        kchi[5];   //[npid]
    Double_t        pchi[5];   //[npid]
-   Double_t        kM[5];   //[npid]
+   Double_t        prob[5];   //[npid]
+   Double_t        mypchi[5];   //[npid]
+   Double_t        kM23[5];   //[npid]
    Int_t           nkinbg;
    Double_t        kin_chi2_bg[10];   //[nkinbg]
    Double_t        Mpi0;
@@ -123,10 +127,14 @@ public :
    TBranch        *b_depth;   //!
    TBranch        *b_kin_chi2;   //!
    TBranch        *b_pid_chi2;   //!
+   TBranch        *b_pid_prob;   //!
+   TBranch        *b_mypid_chi2;   //!
    TBranch        *b_npid;   //!
    TBranch        *b_kchi;   //!
    TBranch        *b_pchi;   //!
-   TBranch        *b_kM;   //!
+   TBranch        *b_prob;   //!
+   TBranch        *b_mypchi;   //!
+   TBranch        *b_kM23;   //!
    TBranch        *b_nkinbg;   //!
    TBranch        *b_kin_chi2_bg;   //!
    TBranch        *b_Mpi0;   //!
@@ -247,10 +255,14 @@ void RootEvent::Init(TTree *tree)
    fChain->SetBranchAddress("depth", depth, &b_depth);
    fChain->SetBranchAddress("kin_chi2", &kin_chi2, &b_kin_chi2);
    fChain->SetBranchAddress("pid_chi2", &pid_chi2, &b_pid_chi2);
+   fChain->SetBranchAddress("pid_prob", &pid_prob, &b_pid_prob);
+   fChain->SetBranchAddress("mypid_chi2", &mypid_chi2, &b_mypid_chi2);
    fChain->SetBranchAddress("npid", &npid, &b_npid);
    fChain->SetBranchAddress("kchi", kchi, &b_kchi);
    fChain->SetBranchAddress("pchi", pchi, &b_pchi);
-   fChain->SetBranchAddress("kM", kM, &b_kM);
+   fChain->SetBranchAddress("prob", prob, &b_prob);
+   fChain->SetBranchAddress("mypchi", mypchi, &b_mypchi);
+   fChain->SetBranchAddress("kM23", kM23, &b_kM23);
    fChain->SetBranchAddress("nkinbg", &nkinbg, &b_nkinbg);
    fChain->SetBranchAddress("kin_chi2_bg", kin_chi2_bg, &b_kin_chi2_bg);
    fChain->SetBranchAddress("Mpi0", &Mpi0, &b_Mpi0);
