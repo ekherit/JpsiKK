@@ -171,6 +171,10 @@ int main(int argc, char ** argv)
   std::string tree_suffix;
   unsigned long long NMAX;
   unsigned long MAX_EVERY;
+  //selection parameters
+  double MRANGE;
+  double PID_CHI2;
+  double KIN_CHI2;
   opt_desc.add_options()
     ("help,h","Print this help")
     //("input", po::value<std::string>(&tree_file)->default_value("sample.root"), "Root file (.root) with the data")
@@ -181,6 +185,9 @@ int main(int argc, char ** argv)
     ("tree_suffix", po::value<std::string>(&tree_suffix)->default_value(""), "suffix for the tree")
     ("max_every", po::value<unsigned long>(&MAX_EVERY)->default_value(1e4), "Maximum every for printing")
     ("N", po::value<unsigned long long>(&NMAX)->default_value(std::numeric_limits<unsigned long long>::max()), "Maximum event number to proceed")
+    ("mrange", po::value<double>(&MRANGE)->default_value(0.09), "Pion recoil mass range")
+    ("kin_chi2", po::value<double>(&KIN_CHI2)->default_value(40), "Kinematic chi square cut")
+    ("pid_chi2", po::value<double>(&PID_CHI2)->default_value(20), "Particle id cut")
     ("rad",  "Fit by rad gaus")
     ("simple",  "Simple model gaus + power + exp")
     ;
@@ -221,7 +228,6 @@ int main(int argc, char ** argv)
 
   int NBINS_KK= 200;
   int NBINS_UU= 500;
-  double MRANGE=0.09;
   double MAX_RECOIL_MASS=MJPSI_SHIFT+MRANGE*0.5;
   double MIN_RECOIL_MASS=MJPSI_SHIFT-MRANGE*0.5;
 
@@ -293,8 +299,6 @@ int main(int argc, char ** argv)
   //std::cout << "Number of entries (GetEntries)" << event.fChain->GetEntries() << std::endl;
 
   Long64_t nbytes = 0, nb = 0;
-  double PID_CHI2=20;
-  double KIN_CHI2=40;
 
   Long64_t N0=0;
   Long64_t NKK=0;
@@ -313,29 +317,44 @@ int main(int argc, char ** argv)
     Long64_t ientry;
     ientry = event.LoadTree(jentry);
     if (ientry < 0)  break;
-    //ientry = mc.LoadTree(jentry);
-    //if (ientry < 0)
-    //{
-    //  cerr << "ERROR: mc.LoadTree() retururn " << ientry << endl;
-    //}
-    ientry = mctopo.LoadTree(jentry);
-    if (ientry < 0) 
+    if(event.run < 0) 
     {
-      cerr << "ERROR: mctopo.LoadTree() retururn " << ientry << endl;
+      //ientry = mc.LoadTree(jentry);
+      //if (ientry < 0)
+      //{
+      //  cerr << "ERROR: mc.LoadTree() retururn " << ientry << endl;
+      //}
+      ientry = mctopo.LoadTree(jentry);
+      if (ientry < 0) 
+      {
+        cerr << "ERROR: mctopo.LoadTree() retururn " << ientry << endl;
+      }
     }
     ientry = mdc.LoadTree(jentry);
 
     nb = event.fChain->GetEntry(jentry);   nbytes += nb;
+    if(nb < 0 )
+    {
+      cout <<  ientry << "run = " << event.run << " nb=" << nb << endl;
+      continue;
+    }
     //nb = mc.fChain->GetEntry(jentry);
-    nb = mctopo.fChain->GetEntry(jentry);
+    if(event.run<0)
+    {
+      nb = mctopo.fChain->GetEntry(jentry);
+    }
     nb = mdc.fChain->GetEntry(jentry);
     N0++; //count total number of events proceed
+    unsigned long hash=0;
+    if(event.run<0)  
+    {
+      hash = mctopo_hash(&mctopo);
+      mctopo.hash = hash;
+    }
     if(MIN_RECOIL_MASS <= event.Mrec && event.Mrec <= MAX_RECOIL_MASS)
       if(event.pid_chi2 <= PID_CHI2)
         if(event.kin_chi2 <= KIN_CHI2)
         {
-          auto hash = mctopo_hash(&mctopo);
-          mctopo.hash = hash;
           Index_t index = {event.channel, event.sign, event.ngtrack};
           if(event.KK==1) 
           {
@@ -344,7 +363,7 @@ int main(int argc, char ** argv)
             //hpid_chi2KK->Fill(pid_chi2);
             //hkin_chi2KK->Fill(kin_chi2);
             event_treeKK->Fill();
-            mctopo_treeKK->Fill();
+            if(event.run<0) mctopo_treeKK->Fill();
             hMrec[index]->Fill(mshift(event.Mrec));
           }
           if(event.uu==1) 
@@ -353,17 +372,16 @@ int main(int argc, char ** argv)
             //hpid_chi2UU->Fill(pid_chi2);
             //hkin_chi2UU->Fill(kin_chi2);
             event_treeUU->Fill();
-            mctopo_treeUU->Fill();
+            if(event.run<0) mctopo_treeUU->Fill();
             Nuu++;
             hMrec[index]->Fill(mshift(event.Mrec));
           }
-          //if(event.K==1 && event.ngntrack==0 && event.depth[2]<40 && event.depth[3] < 40)
-          //if(event.K==1 && event.ngntrack==0 && mdc.E[2]/mdc.p[2]>0.26 && mdc.E[3]/mdc.p[3]>0.26)
-          if(event.K==1)
+          bool Kchan = event.K==1 &&  event.ngntrack==0 &&  event.kin_chi2<10;
+          if(Kchan)
           {
             if( fabs(cos(event.theta[2])) < 0.8 && fabs(cos(event.theta[3])) <0.8)
             {
-              mctopo_treeK->Fill();
+              if(event.run<0) mctopo_treeK->Fill();
               event_treeK->Fill();
               mdc_treeK->Fill();
               hMrec[index]->Fill(mshift(event.Mrec));
@@ -372,7 +390,7 @@ int main(int argc, char ** argv)
           if(event.u==1)
           {
             event_treeU->Fill();
-            mctopo_treeU->Fill();
+            if(event.run<0) mctopo_treeU->Fill();
             hMrec[index]->Fill(mshift(event.Mrec));
           }
           theCounter[index]++;
@@ -381,8 +399,11 @@ int main(int argc, char ** argv)
     if(jentry > every*10 && every<MAX_EVERY) every*=10;
     if(jentry % every==0 || jentry==nentries-1)
     {
-      std::cout << setw(15) << jentry << setw(15) << NKK << setw(15) << Nuu;
-      std::cout << "  hash = " << setw(10) << std::hex << mctopo_hash(&mctopo) << "    " << std::dec << mctopo_info(&mctopo);
+      std::cout << setw(15) << jentry << setw(15) << event.run << setw(15) << NKK << setw(15) << Nuu;
+      if(event.run<0)
+      {
+        std::cout << "  hash = " << setw(10) << std::hex << hash << "    " << std::dec << mctopo_info(&mctopo);
+      }
       std::cout << std::endl;
     }
   }
@@ -406,16 +427,22 @@ int main(int argc, char ** argv)
   event_treeU->Write();
 
 
+
   //make usefull cuts 
-  TCut signal_cut("hash==0x3031ea55 || hash==0x846b22bf || hash==0xcdffabb3 || hash==0xecdbe915");
-  signal_cut.SetName("signal_cut");
-  //signal_cut.SetTitle("signal: Ψ(2S) → π+π-(J/Ψ → μ+μ-)");
+  TCut KK_cut("hash==0x3031ea55 || hash==0x846b22bf || hash==0xcdffabb3 || hash==0xecdbe915");
+  KK_cut.SetName("KK");
+
+  TCut UU_cut("hash==0x1397e7e7 || hash == 0x8ac60398 || hash == 0xaca004d7 || hash == 0xcf7de4a7 || hash == 0xdaa0af44");
+  UU_cut.SetName("uu");
+
   TCut bg1_cut("hash==0xcfe7a549 || hash==0x34525dce || hash==0x4d7eec07 || hash==0x59476175 || hash==0x758ebb38 || hash==0x7d41c6b4 || hash==0x8a4d7453 || hash==0xcb9192a5 || hash==0x34525dce || hash==0xcfe7a549 || hash==0xdbde283b || hash==0xffd88ffa");
   bg1_cut.SetName("bg1_cut");
   //bg1_cut.SetTitle("background: Ψ(2S) → π+π-(J/Ψ → π+(ρ(770)- → (π0 → ɣɣ)π-)) + rad + c.c.");
 
   bg1_cut.Write();
-  signal_cut.Write();
+  KK_cut.Write();
+  UU_cut.Write();
+
   file.Close();
 
   //std::cout << theCounter[{0,0,4}] << std::endl;

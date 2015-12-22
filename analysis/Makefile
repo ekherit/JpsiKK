@@ -25,7 +25,7 @@ RooMcbPdf.o : RooMcbPdf.cpp
 
 
 select : select.cpp $(ROOT_ADAPTORS) libFitDict.o RooMcbPdf.o
-		$(CXX) $< -o $@  $(CXXFLAGS) $(ROOT_ADAPTORS)      $(LIBS)
+		$(CXX) $< -o $(BINDIR)/kksel  $(CXXFLAGS) $(ROOT_ADAPTORS)      $(LIBS)
 	
 libFitDict.o :  libFitDict.cxx
 		$(CXX) -o $@  $(CXXFLAGS) -c $^
