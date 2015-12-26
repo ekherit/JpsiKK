@@ -21,7 +21,6 @@ def filter_file_list(files, reg):
     filtered_file_list = []
     for file in files:
         if re.match(r,file):
-            print file
             filtered_file_list += [file]
     return filtered_file_list
 
@@ -132,7 +131,10 @@ class OptionMaker:
             self.fileFilter = ".*(\d{4,7}).*.dst"
             self.fileList = filter_file_list(create_file_list(self.dataDir), self.fileFilter)
             self.templateFile = "selection.cfg"
-            self.group(".*[^\d](\d{4,7})[^\d].*.dst", self.runNumber)
+            if options.run_group == "":
+                self.group(".*[^\d](\d{4,7})[^\d].*.dst", self.runNumber)
+            else
+                self.group(options.run_group, self.runNumber)
 
         if args[0] == "simulation" or args[0] == "sim":
             self.SimulationMode = True

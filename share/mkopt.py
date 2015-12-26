@@ -26,6 +26,8 @@ opt.add_option("-n", "--runs_per_job",type="int", dest="run_number", default=1, 
 
 opt.add_option("-F", "--file_filter",dest="file_filter", default=".*(\d{4,7}).*.dst", help="dst file filter")
 
+opt.add_option("-R", "--run_group",dest="run_group", default="", help="run group")
+
 
 (options, args) = opt.parse_args()
 
