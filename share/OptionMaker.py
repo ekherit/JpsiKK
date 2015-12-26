@@ -134,6 +134,7 @@ class OptionMaker:
             if options.run_group == "":
                 self.group(".*[^\d](\d{4,7})[^\d].*.dst", self.runNumber)
             else:
+                print "Using run_group option: ", options.run_group
                 self.group(options.run_group, self.runNumber)
 
         if args[0] == "simulation" or args[0] == "sim":
