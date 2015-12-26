@@ -133,7 +133,7 @@ class OptionMaker:
             self.templateFile = "selection.cfg"
             if options.run_group == "":
                 self.group(".*[^\d](\d{4,7})[^\d].*.dst", self.runNumber)
-            else
+            else:
                 self.group(options.run_group, self.runNumber)
 
         if args[0] == "simulation" or args[0] == "sim":
