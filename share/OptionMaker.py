@@ -21,6 +21,7 @@ def filter_file_list(files, reg):
     filtered_file_list = []
     for file in files:
         if re.match(r,file):
+            print file
             filtered_file_list += [file]
     return filtered_file_list
 

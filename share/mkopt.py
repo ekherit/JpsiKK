@@ -24,6 +24,8 @@ opt.add_option("-f", "--force", action="store_true", dest="force", help="Force "
 
 opt.add_option("-n", "--runs_per_job",type="int", dest="run_number", default=1, help="Number of runs per job")
 
+opt.add_option("-F", "--file_filter",dest="file_filter", default=".*(\d{4,7}).*.dst", help="dst file filter")
+
 
 (options, args) = opt.parse_args()
 
