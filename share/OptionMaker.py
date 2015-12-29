@@ -238,7 +238,7 @@ class OptionMaker:
                 target_file.write(line)
             source_file.close()
             if option.energy != "":
-                target_file.write("JpsiKK.CENTER_MASS_ENERGY="+self.Energy+";\n"
+                target_file.write("JpsiKK.CENTER_MASS_ENERGY="+self.Energy+";\n")
             target_file.close()
 
     def make_sel2(self):
