@@ -28,6 +28,8 @@ opt.add_option("-F", "--file_filter",dest="file_filter", default=".*(\d{4,7}).*.
 
 opt.add_option("-R", "--run_group",dest="run_group", default="", help="run group")
 
+opt.add_option("-E", "--energy",dest="energy", default="", help="Center of mass energy")
+
 
 (options, args) = opt.parse_args()
 

@@ -234,6 +234,8 @@ class OptionMaker:
                 line = re.sub("TEMPLATE_EVENT_NUMBER",str(self.eventNumber), line)
                 line = re.sub("TEMPLATE_RUN_NUMBER",str(self.runNumber), line)
                 target_file.write(line)
+            if option.energy != "":
+                target_file.write("JpsiKK.CENTER_MASS_ENERGY="+option.energy+";\n"
             source_file.close()
             target_file.close()
 
