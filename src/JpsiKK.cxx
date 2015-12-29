@@ -313,6 +313,7 @@ StatusCode JpsiKK::execute()
     sh.kinfit(pion_pair, other_negative_tracks.front(), other_positive_tracks.front());
 		sh.totalPass(cfg.PASS_KIN_PID_CUT);
   }
+  std::clog << "JpsiKK.CENTER_MASS_ENERGY=" << BEAM_CENTER_MASS_ENERGY << std::endl;
 
 	std::list<int> pid_list;
 	pid_list.push_back(ID_KAON);
