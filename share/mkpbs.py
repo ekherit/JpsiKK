@@ -53,6 +53,7 @@ options.add_option("-q", "--queue",dest="queue", default="besq", help="Queue nam
 (opt, args) = options.parse_args()
 
 dir=args[0]
+absdir = os.path.abspath(dir)
 files = filter_file_list(create_file_list(dir),".+.cfg$")
 files.sort()
 groups = group_files(files,opt.run_number)
@@ -69,6 +70,7 @@ for flist in groups:
 #PBS -j oe
 ##PBS -q besq
 source /ihepbatch/bes/nikolaev/bin/boss664
+cd """ + absdir + """
 """
     for f in flist:
         log = os.path.abspath(os.path.splitext(f)[0]+".log")
