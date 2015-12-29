@@ -110,6 +110,7 @@ class OptionMaker:
     SimulationMode = False
     ReconstructionMode = False
     RunInfoList = []
+    Energy = ""
 
 
     def __init__(self, options, args):
@@ -119,7 +120,8 @@ class OptionMaker:
         self.jobNumber=int(options.job_number)
         self.jobPrefix=options.job_prefix
         self.runs=options.runs
-        self.runNumber = options.run_number;
+        self.runNumber = options.run_number
+        self.Energy = options.energy
 
         if len(args) < 1:
             print 'Specify the action: "sel",  "sim",  "rec"'
@@ -235,7 +237,7 @@ class OptionMaker:
                 line = re.sub("TEMPLATE_RUN_NUMBER",str(self.runNumber), line)
                 target_file.write(line)
             if option.energy != "":
-                target_file.write("JpsiKK.CENTER_MASS_ENERGY="+option.energy+";\n"
+                target_file.write("JpsiKK.CENTER_MASS_ENERGY="+self.Energy+";\n"
             source_file.close()
             target_file.close()
 
