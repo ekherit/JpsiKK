@@ -155,7 +155,7 @@ StatusCode JpsiKK::initialize(void)
   theCounter.clear();
 	if(cfg.CENTER_MASS_ENERGY == 0) cfg.CENTER_MASS_ENERGY = PSIP_MASS;
 	BEAM_CENTER_MASS_ENERGY = cfg.CENTER_MASS_ENERGY;
-  log << MSG::INFO << "JpsiKK.CENTER_MASS_ENERGY=" << BEAM_CENTER_MASS_ENERGY << endmsg;
+  std::cout << "JpsiKK.CENTER_MASS_ENERGY=" << BEAM_CENTER_MASS_ENERGY << std::endl;
   
 
 	try
