@@ -2,7 +2,7 @@ all : testMcbFit CombMcbFit libFit.so select
 
 LIBBOOST = -lboost_system -lboost_program_options -lboost_filesystem
 LIBROOT = `root-config --libs` -lMinuit   -lRooFit -lMinuit -lRooFitCore
-LIBS = $(LIBROOT) $(LIBBOOST)
+LIBS = $(LIBROOT) $(LIBBOOST) -lgsl  -lgslcblas
 
 ROOTFLAGS = `root-config --cflags`
 CXXFLAGS =   -std=c++1y -fPIC $(ROOTFLAGS)

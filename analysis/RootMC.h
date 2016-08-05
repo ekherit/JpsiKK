@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Dec 22 16:52:37 2015 by ROOT version 6.04/12
+// Wed Dec 30 11:51:45 2015 by ROOT version 6.04/12
 // from TTree mc/Monte Carlo truth information
 // found on file: sample.root
 //////////////////////////////////////////////////////////

@@ -111,7 +111,7 @@ int main(int argc,  char ** argv)
 
 
 	RooRealVar Nsig("Nsig", "Number of signal events", his->GetEntries(), 0, his->GetEntries()*100);
-	RooRealVar Nbg("Nbg", "Number of background events", 0, 0,  his->GetEntries()*100);
+	RooRealVar Nbg("Nbg", "Number of background events", 0, 0,  his->GetEntries());
 	//RooRealVar bkgd_yield("bkgd_yield", "yield of background", 0);
 	RooArgList shapes;
 	RooArgList yields;

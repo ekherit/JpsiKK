@@ -232,67 +232,123 @@ int main(int argc, char ** argv)
   double MIN_RECOIL_MASS=MJPSI_SHIFT-MRANGE*0.5;
 
   TFile file(output_file.c_str(),"RECREATE");
-  auto hMrecKK = new TH1F("hMrecKK","#pi^{+}#pi^{-} recoil mass for KK channel",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  auto hMrecUU = new TH1F("hMrecUU","#pi^{+}#pi^{-} recoil mass for uu channel",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  //auto hMrecKK = new TH1F("hMrecKK","#pi^{+}#pi^{-} recoil mass for KK channel",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  //auto hMrecUU = new TH1F("hMrecUU","#pi^{+}#pi^{-} recoil mass for uu channel",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
 
+
+  std::unordered_map<Index_t, TTree*, IndexHash_t > event_tree;
+  std::unordered_map<Index_t, TTree*, IndexHash_t > mctopo_tree;
+  std::unordered_map<Index_t, TTree*, IndexHash_t > mdc_tree;
 
   std::unordered_map<Index_t, TH1D*, IndexHash_t > hMrec;
 
+  int POSNEG=2;
   
-  hMrec[{KAON,0,4}] = new TH1D("hMrecKK","#pi^{+}#pi^{-} recoil mass for KK channel",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  hMrec[{MUON,0,4}] = new TH1D("hMrecUU","#pi^{+}#pi^{-} recoil mass for UU channel",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  hMrec[{KAON,-1,3}] = new TH1D("hMrecKm3","#pi^{+}#pi^{-} recoil mass for negative K channel with 3+4 tracks",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  hMrec[{MUON,-1,3}] = new TH1D("hMrecUm3","#pi^{+}#pi^{-} recoil mass for negative U channel with 3+4 tracks",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  auto make_tree = [&](TTree * parent_tree, string  name,  string  title)
+  {
+    TTree * tree  = parent_tree->CloneTree(0);
+    tree->SetName(name.c_str());
+    tree->SetTitle(title.c_str());
+    return tree;
+  };
 
-  hMrec[{KAON,1,3}] = new TH1D("hMrecKp3","#pi^{+}#pi^{-} recoil mass for positive K channel with 3+4 tracks",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  hMrec[{MUON,1,3}] = new TH1D("hMrecUp3","#pi^{+}#pi^{-} recoil mass for positive U channel with 3+4 tracks",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  auto make_hMrec = [&](string name, string  title) 
+  {
+    return new TH1D(name.c_str(),title.c_str(),NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  };
 
-  hMrec[{KAON,-1,4}] = new TH1D("hMrecKm4","#pi^{+}#pi^{-} recoil mass for negative K channel with 4 tracks",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  hMrec[{MUON,-1,4}] = new TH1D("hMrecUm4","#pi^{+}#pi^{-} recoil mass for negative U channel with 4 tracks",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  //hMrec[{KAON,0,4}] = new TH1D("hMrecKK","#pi^{+}#pi^{-} recoil mass for KK channel",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  //hMrec[{MUON,0,4}] = new TH1D("hMrecUU","#pi^{+}#pi^{-} recoil mass for UU channel",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  //hMrec[{KAON,-1,3}] = new TH1D("hMrecKm3","#pi^{+}#pi^{-} recoil mass for negative K channel with 3 tracks",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  //hMrec[{MUON,-1,3}] = new TH1D("hMrecUm3","#pi^{+}#pi^{-} recoil mass for negative U channel with 3 tracks",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  //hMrec[{KAON,1,3}] = new TH1D("hMrecKp3","#pi^{+}#pi^{-} recoil mass for positive K channel with 3 tracks",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  //hMrec[{MUON,1,3}] = new TH1D("hMrecUp3","#pi^{+}#pi^{-} recoil mass for positive U channel with 3 tracks",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  //hMrec[{KAON,-1,4}] = new TH1D("hMrecKm4","#pi^{+}#pi^{-} recoil mass for negative K channel with 4 tracks",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  //hMrec[{MUON,-1,4}] = new TH1D("hMrecUm4","#pi^{+}#pi^{-} recoil mass for negative U channel with 4 tracks",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  //hMrec[{KAON,1,4}] = new TH1D("hMrecKp4","#pi^{+}#pi^{-} recoil mass for positive K channel with 4 tracks",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  //hMrec[{MUON,1,4}] = new TH1D("hMrecUp4","#pi^{+}#pi^{-} recoil mass for positive U channel with 4 tracks",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
 
-  hMrec[{KAON,1,4}] = new TH1D("hMrecKp4","#pi^{+}#pi^{-} recoil mass for positive K channel with 4 tracks",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  hMrec[{MUON,1,4}] = new TH1D("hMrecUp4","#pi^{+}#pi^{-} recoil mass for positive U channel with 4 tracks",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  //main four track channel
+  hMrec[{KAON,0,4}] = make_hMrec("hMrecKK","#pi^{+}#pi^{-} recoil mass for KK channel");
+  hMrec[{MUON,0,4}] = make_hMrec("hMrecUU","#pi^{+}#pi^{-} recoil mass for UU channel");
+
+  hMrec[{KAON,-1,3}] = make_hMrec("hMrecKm3","#pi^{+}#pi^{-} recoil mass for negative K channel with 3 tracks");
+  hMrec[{MUON,-1,3}] = make_hMrec("hMrecUm3","#pi^{+}#pi^{-} recoil mass for negative U channel with 3 tracks");
+
+  hMrec[{KAON,1,3}] = make_hMrec("hMrecKp3","#pi^{+}#pi^{-} recoil mass for positive K channel with 3 tracks");
+  hMrec[{MUON,1,3}] = make_hMrec("hMrecUp3","#pi^{+}#pi^{-} recoil mass for positive U channel with 3 tracks");
+
+  hMrec[{KAON,-1,4}] = make_hMrec("hMrecKm4","#pi^{+}#pi^{-} recoil mass for negative K channel with 4 tracks");
+  hMrec[{MUON,-1,4}] = make_hMrec("hMrecUm4","#pi^{+}#pi^{-} recoil mass for negative U channel with 4 tracks");
+
+  hMrec[{KAON,1,4}] = make_hMrec("hMrecKp4","#pi^{+}#pi^{-} recoil mass for positive K channel with 4 tracks");
+  hMrec[{MUON,1,4}] = make_hMrec("hMrecUp4","#pi^{+}#pi^{-} recoil mass for positive U channel with 4 tracks");
+
+  hMrec[{KAON,POSNEG,3+4}] = make_hMrec("hMrecK34","#pi^{+}#pi^{-} recoil mass for negative K channel with 3 or 4 tracks");
+  hMrec[{KAON,POSNEG,4}]   = make_hMrec("hMrecK4", "#pi^{+}#pi^{-} recoil mass for negative K channel with 4 tracks");
+
+  hMrec[{MUON,POSNEG,3+4}] = make_hMrec("hMrecU34","#pi^{+}#pi^{-} recoil mass for Muon channel with 3 or 4 tracks");
+  hMrec[{MUON,POSNEG,4}]   = make_hMrec("hMrecU4","#pi^{+}#pi^{-} recoil mass for Muon channel with 4 tracks");
+
 
 
   std::cout << "Init event_treeKK" << std::endl;
 
 
-  auto event_treeKK = event.fChain->CloneTree(0);
-  event_treeKK->SetName("eventKK");
-  event_treeKK->SetTitle("KK events");
-
-  auto mctopo_treeKK = mctopo.fChain->CloneTree(0);
-  mctopo_treeKK->SetName("mctopoKK");
-  mctopo_treeKK->SetTitle("Monte Carlo topology for KK selection");
+  event_tree[{KAON,0,4}] = make_tree(event.fChain,"eventKK","KK events");
+  event_tree[{MUON,0,4}] = make_tree(event.fChain,"eventUU","UU events");
 
 
-  auto event_treeK = event.fChain->CloneTree(0);
-  event_treeK->SetName("eventK");
-  event_treeK->SetTitle("K events");
+  event_tree[{KAON,-1,4}] = make_tree(event.fChain,"eventKm4","negative K events with 4 tracks");
+  event_tree[{MUON,-1,4}] = make_tree(event.fChain,"eventUm4","negative U events with 4 tracks");
 
-  auto mctopo_treeK = mctopo.fChain->CloneTree(0);
-  mctopo_treeK->SetName("mctopoK");
-  mctopo_treeK->SetTitle("Monte Carlo topology for K events");
+  event_tree[{KAON,1,4}] = make_tree(event.fChain,"eventKp4","positive K events with 4 tracks");
+  event_tree[{MUON,1,4}] = make_tree(event.fChain,"eventUp4","positive U events with 4 tracks");
+
+  event_tree[{KAON,-1,3}] = make_tree(event.fChain,"eventKm3","negative K events with 3 tracks");
+  event_tree[{MUON,-1,3}] = make_tree(event.fChain,"eventUm3","negative U events with 3 tracks");
+
+  event_tree[{KAON,1,3}] = make_tree(event.fChain,"eventKp3","positive K events with 3 tracks");
+  event_tree[{MUON,1,3}] = make_tree(event.fChain,"eventUp3","positive U events with 3 tracks");
+
+
+  event_tree[{KAON,POSNEG,3+4}] = make_tree(event.fChain,"eventK","K events with 3 or 4 tracks");
+  event_tree[{MUON,POSNEG,3+4}] = make_tree(event.fChain,"eventU","U events with 3 or 4 tracks");
+
+  event_tree[{KAON,POSNEG,4}] = make_tree(event.fChain,"eventK","K events with 4 tracks");
+  event_tree[{MUON,POSNEG,4}] = make_tree(event.fChain,"eventU","U events with 4 tracks");
+
+
+  mctopo_tree[{KAON,0,4}] = make_tree(mctopo.fChain,"mctopoKK","KK mctopos");
+  mctopo_tree[{MUON,0,4}] = make_tree(mctopo.fChain,"mctopoUU","UU mctopos");
+
+
+  mctopo_tree[{KAON,-1,4}] = make_tree(mctopo.fChain,"mctopoKm4","negative K mctopos with 4 tracks");
+  mctopo_tree[{MUON,-1,4}] = make_tree(mctopo.fChain,"mctopoUm4","negative U mctopos with 4 tracks");
+
+  mctopo_tree[{KAON,1,4}] = make_tree(mctopo.fChain,"mctopoKp4","positive K mctopos with 4 tracks");
+  mctopo_tree[{MUON,1,4}] = make_tree(mctopo.fChain,"mctopoUp4","positive U mctopos with 4 tracks");
+
+  mctopo_tree[{KAON,-1,3}] = make_tree(mctopo.fChain,"mctopoKm3","negative K mctopos with 3 tracks");
+  mctopo_tree[{MUON,-1,3}] = make_tree(mctopo.fChain,"mctopoUm3","negative U mctopos with 3 tracks");
+
+  mctopo_tree[{KAON,1,3}] = make_tree(mctopo.fChain,"mctopoKp3","positive K mctopos with 3 tracks");
+  mctopo_tree[{MUON,1,3}] = make_tree(mctopo.fChain,"mctopoUp3","positive U mctopos with 3 tracks");
+
+
+  mctopo_tree[{KAON,POSNEG,3+4}] = make_tree(mctopo.fChain,"mctopoK","K mctopos with 3 or 4 tracks");
+  mctopo_tree[{MUON,POSNEG,3+4}] = make_tree(mctopo.fChain,"mctopoU","U mctopos with 3 or 4 tracks");
+
+  mctopo_tree[{KAON,POSNEG,4}] = make_tree(mctopo.fChain,"mctopoK","K mctopos with 4 tracks");
+  mctopo_tree[{MUON,POSNEG,4}] = make_tree(mctopo.fChain,"mctopoU","U mctopos with 4 tracks");
+
+
+
+
 
   auto mdc_treeK = mdc.fChain->CloneTree(0);
   mdc_treeK->SetName("mdcK");
   mdc_treeK->SetTitle("mdc info for K events");
-
-  auto event_treeUU = event.fChain->CloneTree(0);
-  event_treeUU->SetName("eventUU");
-  event_treeUU->SetTitle("UU events");
-
-  auto mctopo_treeUU = mctopo.fChain->CloneTree(0);
-  mctopo_treeUU->SetName("mctopoUU");
-  mctopo_treeUU->SetTitle("Monte Carlo topology for UU selection");
-
-  auto event_treeU = event.fChain->CloneTree(0);
-  event_treeU->SetName("eventU");
-  event_treeU->SetTitle("U events");
-
-  auto mctopo_treeU = mctopo.fChain->CloneTree(0);
-  mctopo_treeU->SetName("mctopoU");
-  mctopo_treeU->SetTitle("Monte Carlo topology for U selection");
 
   Long64_t nentries = event.fChain->GetEntriesFast();
   //std::cout << "Number of entries in tree (GetEntriesFast): " << nentries << std::endl;
@@ -351,55 +407,117 @@ int main(int argc, char ** argv)
       hash = mctopo_hash(&mctopo);
       mctopo.hash = hash;
     }
-    if(MIN_RECOIL_MASS <= event.Mrec && event.Mrec <= MAX_RECOIL_MASS)
-      if(event.pid_chi2 <= PID_CHI2)
-        if(event.kin_chi2 <= KIN_CHI2)
+
+    bool RecoilCut = MIN_RECOIL_MASS <= event.Mrec && event.Mrec <= MAX_RECOIL_MASS;
+    bool KinematicCut = event.kin_chi2 <= KIN_CHI2;
+    bool PidCut = event.pid_chi2 <= PID_CHI2;
+    bool ThetaCut =  fabs(cos(event.theta[2])) < 0.8 && fabs(cos(event.theta[3])) <0.8;
+    if(    
+           RecoilCut 
+        && KinematicCut 
+        && PidCut 
+        && ThetaCut
+      )
+    {
+      if(event.KK == 1 || event.uu ==1)
+      {
+        Index_t index = {event.channel, event.sign, event.ngtrack};
+        event_tree[index]->Fill();
+        if(event.run<0) mctopo_tree[index]->Fill();
+        hMrec[index]->Fill(mshift(event.Mrec));
+        theCounter[index]++;
+      }
+      if(event.K == 1 || event.u==1)
+      {
+        if(event.ngntrack==0  && event.kin_chi2<10)
         {
           Index_t index = {event.channel, event.sign, event.ngtrack};
-          if(event.KK==1) 
-          {
-            NKK++;
-            //hMrecKK->Fill(mshift(event.Mrec));
-            //hpid_chi2KK->Fill(pid_chi2);
-            //hkin_chi2KK->Fill(kin_chi2);
-            event_treeKK->Fill();
-            if(event.run<0) mctopo_treeKK->Fill();
-            hMrec[index]->Fill(mshift(event.Mrec));
-          }
-          if(event.uu==1) 
-          {
-            //hMrecUU->Fill(mshift(event.Mrec));
-            //hpid_chi2UU->Fill(pid_chi2);
-            //hkin_chi2UU->Fill(kin_chi2);
-            event_treeUU->Fill();
-            if(event.run<0) mctopo_treeUU->Fill();
-            Nuu++;
-            hMrec[index]->Fill(mshift(event.Mrec));
-          }
-          bool Kchan = event.K==1 &&  event.ngntrack==0 &&  event.kin_chi2<10;
-          if(Kchan)
-          {
-            if( fabs(cos(event.theta[2])) < 0.8 && fabs(cos(event.theta[3])) <0.8)
-            {
-              if(event.run<0) mctopo_treeK->Fill();
-              event_treeK->Fill();
-              mdc_treeK->Fill();
-              hMrec[index]->Fill(mshift(event.Mrec));
-            }
-          }
-          if(event.u==1)
-          {
-            event_treeU->Fill();
-            if(event.run<0) mctopo_treeU->Fill();
-            hMrec[index]->Fill(mshift(event.Mrec));
-          }
+          event_tree[index]->Fill();
+          if(event.run<0) mctopo_tree[index]->Fill();
+          hMrec[index]->Fill(mshift(event.Mrec));
           theCounter[index]++;
+
+          if(event.ngtrack == 3 || event.ngtrack == 4) 
+          {
+            index = {event.channel, POSNEG, 3+4};
+            event_tree[index]->Fill();
+            if(event.run<0) mctopo_tree[index]->Fill();
+            hMrec[index]->Fill(mshift(event.Mrec));
+            theCounter[index]++;
+          }
+          if(event.ngtrack == 4 )
+          {
+            index = {event.channel, POSNEG, 4};
+            event_tree[index]->Fill();
+            if(event.run<0) mctopo_tree[index]->Fill();
+            hMrec[index]->Fill(mshift(event.Mrec));
+            theCounter[index]++;
+          }
         }
+      }
+
+      //if(event.KK==1) 
+      //{
+      //  NKK++;
+      //  //hMrecKK->Fill(mshift(event.Mrec));
+      //  //hpid_chi2KK->Fill(pid_chi2);
+      //  //hkin_chi2KK->Fill(kin_chi2);
+      //  //event_tree[{KAON,0,4}]->Fill();
+      //  event_tree
+      //  //event_treeKK->Fill();
+      //  if(event.run<0) mctopo_treeKK[{KAON,0,4}]->Fill();
+      //  hMrec[index]->Fill(mshift(event.Mrec));
+      //}
+      //if(event.uu==1) 
+      //{
+      //  //hMrecUU->Fill(mshift(event.Mrec));
+      //  //hpid_chi2UU->Fill(pid_chi2);
+      //  //hkin_chi2UU->Fill(kin_chi2);
+      //  event_treeUU->Fill();
+      //  if(event.run<0) mctopo_treeUU->Fill();
+      //  Nuu++;
+      //  hMrec[index]->Fill(mshift(event.Mrec));
+      //}
+      //auto hMrecFill = [&](void)
+      //{
+      //  hMrec[index]->Fill(mshift(event.Mrec));
+      //  if(event.ngtrack == 3 || event.ngtrack == 4)
+      //  {
+      //    hMrec[{event.channel, POSNEG, 3+4}]->Fill(mshift(event.Mrec));
+      //  }
+      //  if(event.ngtrack==4)
+      //  {
+      //    hMrec[{event.channel, POSNEG, 4}]->Fill(mshift(event.Mrec));
+      //  }
+      //};
+      //bool Kchan = event.K==1 &&  event.ngntrack==0 &&  event.kin_chi2<10;
+      //bool Uchan = event.u==1 &&  event.ngntrack==0 &&  event.kin_chi2<10;
+      //if(Kchan)
+      //{
+      //  if( fabs(cos(event.theta[2])) < 0.8 && fabs(cos(event.theta[3])) <0.8)
+      //  {
+      //    if(event.run<0) mctopo_treeK->Fill();
+      //    event_treeK->Fill();
+      //    mdc_treeK->Fill();
+      //    hMrecFill();
+      //  }
+      //}
+      //if(Uchan)
+      //{
+      //  if( fabs(cos(event.theta[2])) < 0.8 && fabs(cos(event.theta[3])) <0.8)
+      //  {
+      //    if(event.run<0) mctopo_treeU->Fill();
+      //    event_treeU->Fill();
+      //    mdc_treeU->Fill();
+      //    hMrecFill();
+      //  }
+      //}
+    }
     static unsigned long every = 1;
     if(jentry > every*10 && every<MAX_EVERY) every*=10;
     if(jentry % every==0 || jentry==nentries-1)
     {
-      std::cout << setw(15) << jentry << setw(15) << event.run << setw(15) << NKK << setw(15) << Nuu;
+      std::cout << setw(15) << jentry << setw(15) << event.run << setw(15) << theCounter[{KAON,0,4}] << setw(15) << theCounter[{MUON,0,4}];
       if(event.run<0)
       {
         std::cout << "  hash = " << setw(10) << std::hex << hash << "    " << std::dec << mctopo_info(&mctopo);
@@ -407,24 +525,28 @@ int main(int argc, char ** argv)
       std::cout << std::endl;
     }
   }
-  //hMrecKK->Write();
-  //hMrecUU->Write();
   for(auto  his : hMrec)
   {
     his.second->Write();
   }
 
-  event_treeKK->Write();
-  mctopo_treeKK->Write();
+  //event_treeKK->Write();
+  //mctopo_treeKK->Write();
 
-  event_treeK->Write();
-  mctopo_treeK->Write();
-  mdc_treeK->Write();
+  //event_treeK->Write();
+  //mctopo_treeK->Write();
+  //mdc_treeK->Write();
 
-  event_treeUU->Write();
-  mctopo_treeUU->Write();
-  mctopo_treeU->Write();
-  event_treeU->Write();
+  //event_treeUU->Write();
+  //mctopo_treeUU->Write();
+  //mctopo_treeU->Write();
+  //event_treeU->Write();
+  //
+
+  for(auto & h : hMrec) h.second->Write();
+  for(auto & t : event_tree) t.second->Write();
+  for(auto & t : mctopo_tree) t.second->Write();
+  
 
 
 
