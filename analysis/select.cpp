@@ -24,6 +24,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/program_options.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/format.hpp>
 
 
 #include <TTree.h>
@@ -179,7 +180,7 @@ int main(int argc, char ** argv)
     ("help,h","Print this help")
     //("input", po::value<std::string>(&tree_file)->default_value("sample.root"), "Root file (.root) with the data")
     ("input", po::value<std::vector< std::string> >(&files), "Root file (.root) with the data")
-    ("output", po::value<std::string>(&output_file)->default_value("result.root"), "Output file")
+    ("output,o", po::value<std::string>(&output_file)->default_value("result.root"), "Output file")
     ("event_tree",  po::value<std::string>(&event_tree_name)->default_value("event"), "Event tree name")
     ("mctopo_tree", po::value<std::string>(&mctopo_tree_name)->default_value("mctopo"), "mctopo tree name")
     ("tree_suffix", po::value<std::string>(&tree_suffix)->default_value(""), "suffix for the tree")
@@ -257,17 +258,6 @@ int main(int argc, char ** argv)
     return new TH1D(name.c_str(),title.c_str(),NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
   };
 
-  //hMrec[{KAON,0,4}] = new TH1D("hMrecKK","#pi^{+}#pi^{-} recoil mass for KK channel",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  //hMrec[{MUON,0,4}] = new TH1D("hMrecUU","#pi^{+}#pi^{-} recoil mass for UU channel",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  //hMrec[{KAON,-1,3}] = new TH1D("hMrecKm3","#pi^{+}#pi^{-} recoil mass for negative K channel with 3 tracks",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  //hMrec[{MUON,-1,3}] = new TH1D("hMrecUm3","#pi^{+}#pi^{-} recoil mass for negative U channel with 3 tracks",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  //hMrec[{KAON,1,3}] = new TH1D("hMrecKp3","#pi^{+}#pi^{-} recoil mass for positive K channel with 3 tracks",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  //hMrec[{MUON,1,3}] = new TH1D("hMrecUp3","#pi^{+}#pi^{-} recoil mass for positive U channel with 3 tracks",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  //hMrec[{KAON,-1,4}] = new TH1D("hMrecKm4","#pi^{+}#pi^{-} recoil mass for negative K channel with 4 tracks",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  //hMrec[{MUON,-1,4}] = new TH1D("hMrecUm4","#pi^{+}#pi^{-} recoil mass for negative U channel with 4 tracks",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  //hMrec[{KAON,1,4}] = new TH1D("hMrecKp4","#pi^{+}#pi^{-} recoil mass for positive K channel with 4 tracks",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  //hMrec[{MUON,1,4}] = new TH1D("hMrecUp4","#pi^{+}#pi^{-} recoil mass for positive U channel with 4 tracks",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-
   //main four track channel
   hMrec[{KAON,0,4}] = make_hMrec("hMrecKK","#pi^{+}#pi^{-} recoil mass for KK channel");
   hMrec[{MUON,0,4}] = make_hMrec("hMrecUU","#pi^{+}#pi^{-} recoil mass for UU channel");
@@ -312,11 +302,11 @@ int main(int argc, char ** argv)
   event_tree[{MUON,1,3}] = make_tree(event.fChain,"eventUp3","positive U events with 3 tracks");
 
 
-  event_tree[{KAON,POSNEG,3+4}] = make_tree(event.fChain,"eventK","K events with 3 or 4 tracks");
-  event_tree[{MUON,POSNEG,3+4}] = make_tree(event.fChain,"eventU","U events with 3 or 4 tracks");
+  event_tree[{KAON,POSNEG,3+4}] = make_tree(event.fChain,"eventK34","K events with 3 or 4 tracks");
+  event_tree[{MUON,POSNEG,3+4}] = make_tree(event.fChain,"eventU34","U events with 3 or 4 tracks");
 
-  event_tree[{KAON,POSNEG,4}] = make_tree(event.fChain,"eventK","K events with 4 tracks");
-  event_tree[{MUON,POSNEG,4}] = make_tree(event.fChain,"eventU","U events with 4 tracks");
+  event_tree[{KAON,POSNEG,4}] = make_tree(event.fChain,"eventK4","K events with 4 tracks");
+  event_tree[{MUON,POSNEG,4}] = make_tree(event.fChain,"eventU4","U events with 4 tracks");
 
 
   mctopo_tree[{KAON,0,4}] = make_tree(mctopo.fChain,"mctopoKK","KK mctopos");
@@ -336,11 +326,11 @@ int main(int argc, char ** argv)
   mctopo_tree[{MUON,1,3}] = make_tree(mctopo.fChain,"mctopoUp3","positive U mctopos with 3 tracks");
 
 
-  mctopo_tree[{KAON,POSNEG,3+4}] = make_tree(mctopo.fChain,"mctopoK","K mctopos with 3 or 4 tracks");
-  mctopo_tree[{MUON,POSNEG,3+4}] = make_tree(mctopo.fChain,"mctopoU","U mctopos with 3 or 4 tracks");
+  mctopo_tree[{KAON,POSNEG,3+4}] = make_tree(mctopo.fChain,"mctopoK34","K mctopos with 3 or 4 tracks");
+  mctopo_tree[{MUON,POSNEG,3+4}] = make_tree(mctopo.fChain,"mctopoU34","U mctopos with 3 or 4 tracks");
 
-  mctopo_tree[{KAON,POSNEG,4}] = make_tree(mctopo.fChain,"mctopoK","K mctopos with 4 tracks");
-  mctopo_tree[{MUON,POSNEG,4}] = make_tree(mctopo.fChain,"mctopoU","U mctopos with 4 tracks");
+  mctopo_tree[{KAON,POSNEG,4}] = make_tree(mctopo.fChain,"mctopoK4","K mctopos with 4 tracks");
+  mctopo_tree[{MUON,POSNEG,4}] = make_tree(mctopo.fChain,"mctopoU4","U mctopos with 4 tracks");
 
 
 
@@ -384,6 +374,7 @@ int main(int argc, char ** argv)
       if (ientry < 0) 
       {
         cerr << "ERROR: mctopo.LoadTree() retururn " << ientry << endl;
+        continue;
       }
     }
     ientry = mdc.LoadTree(jentry);
@@ -455,69 +446,32 @@ int main(int argc, char ** argv)
           }
         }
       }
-
-      //if(event.KK==1) 
-      //{
-      //  NKK++;
-      //  //hMrecKK->Fill(mshift(event.Mrec));
-      //  //hpid_chi2KK->Fill(pid_chi2);
-      //  //hkin_chi2KK->Fill(kin_chi2);
-      //  //event_tree[{KAON,0,4}]->Fill();
-      //  event_tree
-      //  //event_treeKK->Fill();
-      //  if(event.run<0) mctopo_treeKK[{KAON,0,4}]->Fill();
-      //  hMrec[index]->Fill(mshift(event.Mrec));
-      //}
-      //if(event.uu==1) 
-      //{
-      //  //hMrecUU->Fill(mshift(event.Mrec));
-      //  //hpid_chi2UU->Fill(pid_chi2);
-      //  //hkin_chi2UU->Fill(kin_chi2);
-      //  event_treeUU->Fill();
-      //  if(event.run<0) mctopo_treeUU->Fill();
-      //  Nuu++;
-      //  hMrec[index]->Fill(mshift(event.Mrec));
-      //}
-      //auto hMrecFill = [&](void)
-      //{
-      //  hMrec[index]->Fill(mshift(event.Mrec));
-      //  if(event.ngtrack == 3 || event.ngtrack == 4)
-      //  {
-      //    hMrec[{event.channel, POSNEG, 3+4}]->Fill(mshift(event.Mrec));
-      //  }
-      //  if(event.ngtrack==4)
-      //  {
-      //    hMrec[{event.channel, POSNEG, 4}]->Fill(mshift(event.Mrec));
-      //  }
-      //};
-      //bool Kchan = event.K==1 &&  event.ngntrack==0 &&  event.kin_chi2<10;
-      //bool Uchan = event.u==1 &&  event.ngntrack==0 &&  event.kin_chi2<10;
-      //if(Kchan)
-      //{
-      //  if( fabs(cos(event.theta[2])) < 0.8 && fabs(cos(event.theta[3])) <0.8)
-      //  {
-      //    if(event.run<0) mctopo_treeK->Fill();
-      //    event_treeK->Fill();
-      //    mdc_treeK->Fill();
-      //    hMrecFill();
-      //  }
-      //}
-      //if(Uchan)
-      //{
-      //  if( fabs(cos(event.theta[2])) < 0.8 && fabs(cos(event.theta[3])) <0.8)
-      //  {
-      //    if(event.run<0) mctopo_treeU->Fill();
-      //    event_treeU->Fill();
-      //    mdc_treeU->Fill();
-      //    hMrecFill();
-      //  }
-      //}
     }
     static unsigned long every = 1;
+    static unsigned long head = 0;
     if(jentry > every*10 && every<MAX_EVERY) every*=10;
     if(jentry % every==0 || jentry==nentries-1)
     {
-      std::cout << setw(15) << jentry << setw(15) << event.run << setw(15) << theCounter[{KAON,0,4}] << setw(15) << theCounter[{MUON,0,4}];
+      if(head++%20 == 0)
+      {
+        std::cout << boost::format("#%14s %8s %10s %10s %10s %10s %10s %10s")
+          % "entry"
+          % "run"
+          % "NKK"
+          % "NK4"
+          % "NK3+4"
+          % "NUU"
+          % "NU4"
+          % "NU3+4";
+        std::cout << endl;
+      }
+      std::cout << boost::format("%15d %8d %10d %10d %10d %10d %10d %10d") % jentry % event.run 
+        %  theCounter[{KAON,0,4}] 
+        %  theCounter[{KAON,POSNEG,4}] 
+        %  theCounter[{KAON,POSNEG,3+4}] 
+        %  theCounter[{MUON,0,4}] 
+        %  theCounter[{MUON,POSNEG,4}] 
+        %  theCounter[{MUON,POSNEG,3+4}];
       if(event.run<0)
       {
         std::cout << "  hash = " << setw(10) << std::hex << hash << "    " << std::dec << mctopo_info(&mctopo);
@@ -530,18 +484,6 @@ int main(int argc, char ** argv)
     his.second->Write();
   }
 
-  //event_treeKK->Write();
-  //mctopo_treeKK->Write();
-
-  //event_treeK->Write();
-  //mctopo_treeK->Write();
-  //mdc_treeK->Write();
-
-  //event_treeUU->Write();
-  //mctopo_treeUU->Write();
-  //mctopo_treeU->Write();
-  //event_treeU->Write();
-  //
 
   for(auto & h : hMrec) h.second->Write();
   for(auto & t : event_tree) t.second->Write();

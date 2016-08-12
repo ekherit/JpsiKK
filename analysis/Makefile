@@ -1,4 +1,4 @@
-all : testMcbFit CombMcbFit libFit.so select
+all : testMcbFit CombMcbFit libFit.so select kkfit
 
 LIBBOOST = -lboost_system -lboost_program_options -lboost_filesystem
 LIBROOT = `root-config --libs` -lMinuit   -lRooFit -lMinuit -lRooFitCore
@@ -12,8 +12,11 @@ BINDIR=$(HOME)/work/bin
 testMcbFit : testMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o
 		$(CXX)  -o $@   $< RooMcbPdf.o  $(CXXFLAGS) $(LIBS) 
 
+kkfit : kkfit.cpp RooMcbPdf.h   RooMcbPdf.o
+		$(CXX)  -o $(BINDIR)/kkfit   $< RooMcbPdf.o  $(CXXFLAGS) $(LIBS) 
+
 CombMcbFit : CombMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o
-		$(CXX)  -o $@   $< RooMcbPdf.o  $(CXXFLAGS) $(LIBS)
+		$(CXX)  -o $(BINDIR)/combkkfit   $< RooMcbPdf.o  $(CXXFLAGS) $(LIBS)
 
 ROOT_ADAPTORS = RootEvent.o RootMC.o RootMdc.o RootEmc.o RootTof.o RootDedx.o RootMuc.o RootNeutral.o mctopo/RootMCTopo.o
 
