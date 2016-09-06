@@ -47,11 +47,91 @@ TROOT root("polarimeter","polarimeter", initfuncs);
 #include <RooPlot.h>
 #include <TAxis.h>
 #include <RooBukinPdf.h>
+#include <RooSimultaneous.h>
 
 #include "RooMcbPdf.h"
 
 using namespace RooFit;
 using namespace std;
+
+void combfit(TH1 * h1, TH1 *h2)
+{
+  double Mmin  = h1->GetXaxis()->GetXmin();
+  double Mmax  = h1->GetXaxis()->GetXmax();
+  assert(Mmin == h2->GetXaxis()->GetXmin() && Mmax == h2->GetXaxis()->GetXmax());
+  RooRealVar Mrec("Mrec","M_{rec}(#pi^{+}#pi^{-})", Mmin,Mmax, "MeV");
+  RooRealVar sigma("sigma","sigma",1.4,0,  10, "MeV") ;
+  RooRealVar staple1("staple1","staple1",  15,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple2("staple2","staple2",  3,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple3("staple3","staple3",  2,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple4("staple4","staple4",  0,   2, 2, "MeV") ;
+  RooRealVar staple5("staple5","staple5",  2,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple6("staple6","staple6",  4,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple7("staple7","staple7",  15,   Mmin,Mmax, "MeV") ;
+  RooRealVar n1("n1","n1", 3,  1,100) ;
+  RooRealVar n2("n2","n2", 2,  1,100) ;
+
+  RooMcbPdf * mcbPdf =  new RooMcbPdf("ModCB", "Simple Modified CrystalBall: gaus + power + exp",  Mrec,  sigma,  
+      staple1, 
+      staple2, 
+      staple4, 
+      staple6, 
+      staple7, 
+      n1, 
+      n2);
+  struct FitItem_t
+  {
+    TH1 * his;
+    RooDataHist * data;
+    RooRealVar Nsig;
+    RooRealVar Nbg;
+    RooRealVar bg_c1;
+    RooPolynomial * bgPdf;
+    RooAddPdf * addPdf;
+    FitItem_t(std::string name, TH1 * h, RooMcbPdf* mcbPdf, RooRealVar & Mrec)
+    {
+      his = h;
+      data = new RooDataHist(h->GetName(),  h->GetTitle(), Mrec, Import(*h));
+      Nsig = RooRealVar(
+          (std::string("Nsig")+h->GetName()).c_str(), 
+          (std::string("Number of signal events for  ") + h->GetTitle()).c_str(), 
+          h->GetEntries(), 
+          0, 
+          h->GetEntries()*100
+          );
+      Nbg = RooRealVar(
+          (std::string("Nbg")+h->GetName()).c_str(), 
+          (std::string("Number of substrate events for  ") + h->GetTitle()).c_str(), 
+          h->GetEntries()*0.001, 
+          0, 
+          h->GetEntries()*100
+          );
+      std::string bg_name = std::string("bg")+h->GetName();
+      std::string bg_title = std::string("Background Pdf for ") + h->GetName();
+      bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec, bg_c1);
+      addPdf = new RooAddPdf(name.c_str(),h->GetTitle(), RooArgList(*bgPdf,*mcbPdf), RooArgList(Nbg, Nsig));
+    }
+  };
+
+ 	RooCategory sample("sample","sample") ;
+  sample.defineType(h1->GetName()) ;
+  sample.defineType(h2->GetName()) ;
+
+
+  FitItem_t f1(h1->GetName(),h1, mcbPdf, Mrec);
+  FitItem_t f2(h2->GetName(),h2, mcbPdf, Mrec);
+
+  RooDataHist * data = new RooDataHist("data","combined h1 + h2",Mrec,Index(sample),Import(h1->GetName(),*h1),Import(h2->GetName(),*h2)) ;
+
+  RooSimultaneous simPdf("simPdf","simultaneous pdf",sample) ;
+
+  // Associate model with the physics state and model_ctl with the control state
+  simPdf.addPdf(*(f1.addPdf),f1.his->GetName()) ;
+  simPdf.addPdf(*(f2.addPdf),f2.his->GetName()) ;
+	simPdf.fitTo(*data, Extended(), Strategy(2), Minos());
+}
+
+
 int main(int argc,  char ** argv)
 {
   namespace po=boost::program_options;
@@ -76,6 +156,7 @@ int main(int argc,  char ** argv)
     ("Nbg",po::value<double>(&nbg),"Background events")
     ("suffix",po::value<std::string>(&suffix),"Suffix")
     ("mc", "Use MonteCarlo information mctopo")
+    ("trk","Tracking efficiency fit")
     ;
   po::positional_options_description pos;
   pos.add("input",-1);
@@ -182,6 +263,34 @@ int main(int argc,  char ** argv)
     std::cout << "New entries = " << his->GetEntries() << std::endl;
   }
   */
+
+
+  auto make_his = [&](std::string suf) -> TH1*
+  {
+    tree_name   = "event"+suffix;
+    his_name    = "hMrec"+suffix;
+    mctree_name = "mctopo"+suffix;
+    std::cout << tree_name << "  " << his_name << "  " << mctree_name << std::endl;
+    his = (TH1*)file.Get(his_name.c_str());
+    tree = (TTree*) file.Get(tree_name.c_str());
+    if(opt.count("mc"))
+    {
+      TTree *mctree = (TTree*) file.Get(mctree_name.c_str());
+      if(mctree) tree->AddFriend(mctree);
+    }
+    int Nbin = his->GetNbinsX();
+    double Mmin = his->GetXaxis()->GetXmin();
+    double Mmax  = his->GetXaxis()->GetXmax();
+    char varexp[1024];
+    sprintf(varexp,"(Mrec-3.097)*1000 >> hMrec(%d,%f,%f)", Nbin, Mmin, Mmax);
+    tree->Draw(varexp,hash_cut && cut.c_str(),"goff");
+    //his = (TH1F*) tree->GetHistogram();
+    return his;
+  }
+
+  if(opt.count("trk"))
+  {
+  }
 
   if(opt.count("suffix"))
   {
