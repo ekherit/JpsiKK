@@ -286,11 +286,11 @@ int main(int argc,  char ** argv)
     tree->Draw(varexp,hash_cut && cut.c_str(),"goff");
     //his = (TH1F*) tree->GetHistogram();
     return his;
-  }
+  };
 
-  if(opt.count("trk"))
-  {
-  }
+  //if(opt.count("trk"))
+  //{
+  //}
 
   if(opt.count("suffix"))
   {
