@@ -51,6 +51,8 @@ TROOT root("polarimeter","polarimeter", initfuncs);
 
 #include "RooMcbPdf.h"
 
+#include "hashlist.h"
+
 using namespace RooFit;
 using namespace std;
 
@@ -177,6 +179,9 @@ int main(int argc,  char ** argv)
     std::clog << opt_desc;
     return 0;
   }
+  std::string jpsi = "152f1c20,d714a2bd,167c1bc8,270c3648,6925d619,5721f99e,6cceb77a,8c471f87,a5957f06,ebbc9f57,e990b7b9,ecab451c,ad77a3ea,f5bb9d48,2555a9e3,7181a332,f3b62be6,c50c1717,f3b81e60,e36bbd16,19f87eb1,57600321,47b3a057,5d977b97,df0e32d9,6d47f0a5,9089b143,acaee554,d1310577,e4ebc641,84fce654,d4c719cb,ef28572f,79d29da3,4f68a152,d98afca4,1ef1d66d,cfe7a549,4d7eec07,59476175,8a4d7453,4d7eec07,cfe7a549,dbde283b,1397e7e7,8ac60398,aca004d7,cf7de4a7,daa0af44,3031ea55,cdffabb3,ecdbe915";
+
+  
   std::string bg_from_jpsi = "cfe7a549,4d7eec07,59476175,8a4d7453,4d7eec07,cfe7a549,1ef1d66d,79d29da3,4f68a152,d98afca4,d1310577,84fce654,5d977b97,df0e32d9,57600321,47b3a057,e4ebc641,acaee554,6d47f0a5,9089b143,2555a9e3,7181a332,f5bb9d48,e990b7b9,78a768c7,8fa386fb,5721f99e,6cceb77a,270c3648,6925d619,19f87eb1,167c1bc8";
 
   std::string nojpsi_bg = "183789a,d0c6c2a9,35c7a381,5f136e0a,708b1663,6df8df1e,59b99e9a,6f6bf2a3,2eb71455,859ea6c1,b1dfe745,a7ee33a3,7025be96,a8b93aa8,5fbdd494,bcdd2654,4200e40e,ccf8f4be,3bfc1a82,cfa021dd,e03859b4,d6d8305c,21dcde60,e6f0a031,e7aec6e2,861f5eda,f46414d5,110dcd9a,3e95b5f3,a5f18375,2ea2390e,54ca98db,7a564e5a,fac211ae,27940cb5,13d54d31,32d836e2,e39d8cd1,552c11f1,d7b558bf,3f291a5a,e01958bf,329ac69e,f922962d,16d4eedf,e8092c85,163b9509,c77e2f3a,4854d053,7c5b6e7b,99116a60";
@@ -185,10 +190,13 @@ int main(int argc,  char ** argv)
   std::string KK_str = "3031ea55,cdffabb3,ecdbe915";
   std::string pipi_str = "67c1bc8,19f87eb1,270c3648,6925d619,5f136e0a,708b1663,a8b93aa8,5fbdd494,cfa021dd,e03859b4,e6f0a031,f46414d5,f5bb9d48,110dcd9a,3e95b5f3,6d47f0a5,9089b143,e4ebc641,7a564e5a,fac211ae,d1310577,d98afca4,27940cb5,13d54d31,79d29da3,4f68a152,1ef1d66d,cfe7a549,4d7eec07,59476175,8a4d7453,4d7eec07,cfe7a549";
   std::string pipiKK_str = "183789a,d0c6c2a9,35c7a381,6df8df1e,59b99e9a,6f6bf2a3,2eb71455,859ea6c1,b1dfe745,bcdd2654,4200e40e,ccf8f4be,3bfc1a82,d6d8305c,21dcde60,a5f18375,5d977b97,df0e32d9,84fce654,32d836e2,e39d8cd1,552c11f1,d7b558bf,3f291a5a,e01958bf,329ac69e,f922962d,16d4eedf,e8092c85,163b9509,c77e2f3a,4854d053,7c5b6e7b,99116a60";
+
+  std::string jpsirho="cfe7a549,4d7eec07,59476175,8a4d7453,4d7eec07,cfe7a549,dbde283b";
   
   TCut hash_cut = "";
 
   //std::vector<std::string> hash_list_str;
+/*  
   std::list<std::string> hash_list;
   if(opt.count("hash"))
   {
@@ -209,6 +217,7 @@ int main(int argc,  char ** argv)
       if ( x == "KK" )  s = KK_str;
       if ( x == "pipi" )  s = pipi_str;
       if ( x == "pipiKK" )  s = pipiKK_str;
+      if ( x == "jpsirho")  s= jpsirho;
       std::list<std::string> v;
       boost::split(v, s, boost::is_any_of(", "));
       tmp_hash_list.merge(v);
@@ -229,7 +238,15 @@ int main(int argc,  char ** argv)
       hash_cut = !hash_cut;
     }
   }
+  hash_cut=make_cut(ChanNoJPsi);
+  */
+
+  if(opt.count("hash"))
+  {
+    hash_cut = make_cut (hash_list_str);
+  }
   std::cout << "hash cut =" << hash_cut << std::endl;
+
   //if(argc<2) return 1;
 	//TFile file(argv[2]);
   TFile file(file_name.c_str());
@@ -417,10 +434,10 @@ int main(int argc,  char ** argv)
   //  //new RooDataSet("dh","dh", Mrec, Import(*tree));
   //}
   
-  RooPlot* xframe3 = Mrec.frame(Title("Show my cb function")) ;
-	mcb.plotOn(xframe3);
-	TCanvas * c_mcb = new TCanvas;
-	xframe3->Draw();
+  //RooPlot* xframe3 = Mrec.frame(Title("Show my cb function")) ;
+	//mcb.plotOn(xframe3);
+	//TCanvas * c_mcb = new TCanvas;
+	//xframe3->Draw();
 
 	//theApp.Run();
 	//totalPdf.fitTo(*data,  Extended(), FitOptions("qmh"));
@@ -447,15 +464,6 @@ int main(int argc,  char ** argv)
 	//	n.Print();
 	//}
 
-  // Draw all frames on a canvas
-  TCanvas* c = new TCanvas("mcb","Test for Modified CrystalBall Fit") ;
-	//TH2F * h2=new TH2F("h2", "h2", 100, Mmin, Mmax, 100, -0.2*his->GetMaximum(), his->GetMaximum()*1.2);
-	//h2->Draw();
-	c->SetLogy();
-  c->cd(2) ; 
-	gPad->SetLeftMargin(0.15) ; 
-	xframe2->GetYaxis()->SetTitleOffset(1.6) ; 
-	xframe2->Draw() ;
 
 
 
@@ -496,7 +504,7 @@ int main(int argc,  char ** argv)
   RooPlot* frame_Nbg = Nbg.frame(Range(0, Nbg.getValV()*2), Title("Nbg -log(L)")) ;
   nll.plotOn(frame_Nbg,PrintEvalErrors(-1),ShiftToZero(), EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
 
-	TCanvas * cnll =new TCanvas;
+	TCanvas * cnll =new TCanvas("cnll", "- Log likelihood");
 	cnll->Divide(3, 3);
 	cnll->cd(1);
 	frame_sigma->Draw();
@@ -529,6 +537,16 @@ int main(int argc,  char ** argv)
 		//cout <<  i << " " << x << "  " << N <<   " " << Nth << endl;
 	}
   */
+
+  // Draw all frames on a canvas
+  TCanvas* c = new TCanvas("mcb","Test for Modified CrystalBall Fit") ;
+	//TH2F * h2=new TH2F("h2", "h2", 100, Mmin, Mmax, 100, -0.2*his->GetMaximum(), his->GetMaximum()*1.2);
+	//h2->Draw();
+	c->SetLogy();
+  c->cd(2) ; 
+	gPad->SetLeftMargin(0.15) ; 
+	xframe2->GetYaxis()->SetTitleOffset(1.6) ; 
+	xframe2->Draw() ;
 	
 	theApp.Run();
 }
