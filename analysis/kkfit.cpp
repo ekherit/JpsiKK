@@ -15,6 +15,7 @@
 // =====================================================================================
 #include <iostream>
 
+#include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -56,6 +57,66 @@ TROOT root("polarimeter","polarimeter", initfuncs);
 using namespace RooFit;
 using namespace std;
 
+struct RooFitItem_t
+{
+  TH1           * his;
+  RooDataHist   * data;
+  RooRealVar    * Nsig;
+  RooRealVar    * Nbg;
+  RooRealVar    * bg_c1;
+  RooPolynomial * bgPdf;
+  RooAddPdf     * addPdf;
+  RooPlot       * frame;
+  std::string fName;
+
+  RooFitItem_t(TH1 * h, RooMcbPdf* mcbPdf, RooRealVar & Mrec)
+  {
+    RooFitItem_t(h->GetName(), h, mcbPdf, Mrec);
+  }
+
+  RooFitItem_t(std::string name, TH1 * h, RooMcbPdf* mcbPdf, RooRealVar & Mrec)
+  {
+    fName = name;
+    his = h;
+    data = new RooDataHist(h->GetName(),  h->GetTitle(), Mrec, Import(*h));
+    Nsig = new RooRealVar(
+        (std::string("Nsig")+h->GetName()).c_str(), 
+        (std::string("Number of signal events for  ") + h->GetTitle()).c_str(), 
+        h->GetEntries(), 
+        0, 
+        h->GetEntries()*100
+        );
+    Nbg = new RooRealVar(
+        (std::string("Nbg")+h->GetName()).c_str(), 
+        (std::string("Number of substrate events for  ") + h->GetTitle()).c_str(), 
+        h->GetEntries()*0.001, 
+        0, 
+        h->GetEntries()*100
+        );
+    std::string bg_name = std::string("bg")+h->GetName();
+    bg_c1 = new RooRealVar((bg_name+"c1").c_str(),(std::string("Linear coefficient for background for ") + h->GetName()).c_str(),0, -10, 10);
+    std::string bg_title = std::string("Background Pdf for ") + h->GetName();
+    bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec, *bg_c1);
+    addPdf = new RooAddPdf(name.c_str(),h->GetTitle(), RooArgList(*bgPdf,*mcbPdf), RooArgList(*Nbg, *Nsig));
+    frame = Mrec.frame(Title(his->GetTitle())) ;
+  }
+
+  void plotData(RooDataHist * d)
+  {
+    d->plotOn(frame, MarkerSize(0.5),  Cut((std::string("sample==sample::")+his->GetName()).c_str())) ;
+  }
+
+  void plotPdf(RooDataHist *d, RooSimultaneous & simPdf,  RooCategory & sample)
+  {
+    simPdf.plotOn(frame, Slice(sample,his->GetName()),ProjWData(sample,*d), LineWidth(1)) ;
+    simPdf.plotOn(frame, Slice(sample,his->GetName()),ProjWData(sample,*d), Components(*bgPdf),LineStyle(kDashed),LineWidth(1)) ;
+  }
+  std::string name(void) const 
+  {
+    return fName;
+  }
+};
+
 void combfit(TH1 * h1, TH1 *h2)
 {
   double Mmin  = h1->GetXaxis()->GetXmin();
@@ -73,7 +134,9 @@ void combfit(TH1 * h1, TH1 *h2)
   RooRealVar n1("n1","n1", 3,  1,100) ;
   RooRealVar n2("n2","n2", 2,  1,100) ;
 
-  RooMcbPdf * mcbPdf =  new RooMcbPdf("ModCB", "Simple Modified CrystalBall: gaus + power + exp",  Mrec,  sigma,  
+  RooMcbPdf * mcbPdf =  new RooMcbPdf("ModCB", "Simple Modified CrystalBall: gaus + power + exp",  
+      Mrec,  
+      sigma,  
       staple1, 
       staple2, 
       staple4, 
@@ -81,56 +144,130 @@ void combfit(TH1 * h1, TH1 *h2)
       staple7, 
       n1, 
       n2);
-  struct FitItem_t
-  {
-    TH1 * his;
-    RooDataHist * data;
-    RooRealVar Nsig;
-    RooRealVar Nbg;
-    RooRealVar bg_c1;
-    RooPolynomial * bgPdf;
-    RooAddPdf * addPdf;
-    FitItem_t(std::string name, TH1 * h, RooMcbPdf* mcbPdf, RooRealVar & Mrec)
-    {
-      his = h;
-      data = new RooDataHist(h->GetName(),  h->GetTitle(), Mrec, Import(*h));
-      Nsig = RooRealVar(
-          (std::string("Nsig")+h->GetName()).c_str(), 
-          (std::string("Number of signal events for  ") + h->GetTitle()).c_str(), 
-          h->GetEntries(), 
-          0, 
-          h->GetEntries()*100
-          );
-      Nbg = RooRealVar(
-          (std::string("Nbg")+h->GetName()).c_str(), 
-          (std::string("Number of substrate events for  ") + h->GetTitle()).c_str(), 
-          h->GetEntries()*0.001, 
-          0, 
-          h->GetEntries()*100
-          );
-      std::string bg_name = std::string("bg")+h->GetName();
-      std::string bg_title = std::string("Background Pdf for ") + h->GetName();
-      bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec, bg_c1);
-      addPdf = new RooAddPdf(name.c_str(),h->GetTitle(), RooArgList(*bgPdf,*mcbPdf), RooArgList(Nbg, Nsig));
-    }
-  };
 
  	RooCategory sample("sample","sample") ;
   sample.defineType(h1->GetName()) ;
   sample.defineType(h2->GetName()) ;
 
 
-  FitItem_t f1(h1->GetName(),h1, mcbPdf, Mrec);
-  FitItem_t f2(h2->GetName(),h2, mcbPdf, Mrec);
+  std::clog << "Before FitItem_t f1" << std::endl;
+  RooFitItem_t f1(h1->GetName(),h1, mcbPdf, Mrec);
+  std::clog << "Before FitItem_t f2" << std::endl;
+  RooFitItem_t f2(h2->GetName(),h2, mcbPdf, Mrec);
 
+  std::clog << "Before RooDataHist" << std::endl;
   RooDataHist * data = new RooDataHist("data","combined h1 + h2",Mrec,Index(sample),Import(h1->GetName(),*h1),Import(h2->GetName(),*h2)) ;
 
+  std::clog << "Before simPdf" << std::endl;
   RooSimultaneous simPdf("simPdf","simultaneous pdf",sample) ;
 
   // Associate model with the physics state and model_ctl with the control state
+  std::clog << "Before simPdf.addPdf(f1)" << std::endl;
   simPdf.addPdf(*(f1.addPdf),f1.his->GetName()) ;
+  std::clog << "Before simPdf.addPdf(f2)" << std::endl;
   simPdf.addPdf(*(f2.addPdf),f2.his->GetName()) ;
+  std::clog << "Before fitTo"<< std::endl;
 	simPdf.fitTo(*data, Extended(), Strategy(2), Minos());
+
+  f1.plotData(data);
+  f2.plotData(data);
+  f1.plotPdf(data, simPdf,sample);
+  f2.plotPdf(data, simPdf,sample);
+
+
+  TCanvas * c = new TCanvas("combined_fit", (std::string("Combined fit of the ") + h1->GetTitle() + " and " + h2->GetTitle()).c_str()) ;
+  c->Divide(2,1);
+  c->cd(1);
+	gPad->SetLeftMargin(0.15) ; 
+	gPad->SetLogy();
+  f1.frame->Draw();
+  c->cd(2);
+	gPad->SetLeftMargin(0.15) ; 
+	gPad->SetLogy();
+  f2.frame->Draw();
+
+  new TCanvas;
+  f1.frame->Draw();
+  f2.frame->Draw("same");
+
+}
+
+
+void combfit( std::list<TH1*>  & his_list)
+{
+  //calculate the range
+
+  double Mmin  = (*std::max_element(std::begin(his_list), std::end(his_list), 
+      [](const TH1 * h1, const TH1 *h2) { return h1->GetXaxis()->GetXmin() < h2->GetXaxis()->GetXmin(); } ))->GetXaxis()->GetXmin();
+
+  double Mmax  = (*std::min_element(std::begin(his_list), std::end(his_list), 
+      [](const TH1 * h1, const TH1 *h2) { return h1->GetXaxis()->GetXmax() < h2->GetXaxis()->GetXmax(); } ))->GetXaxis()->GetXmax();
+
+  std::cout << "Mmin = " << Mmin << "  Mmax = " << Mmax << std::endl;
+
+  RooRealVar Mrec("Mrec","M_{rec}(#pi^{+}#pi^{-})", Mmin,Mmax, "MeV");
+
+  RooRealVar sigma("sigma","sigma",1.4,0,  10, "MeV") ;
+  RooRealVar staple1("staple1","staple1",  15,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple2("staple2","staple2",  3,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple3("staple3","staple3",  2,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple4("staple4","staple4",  0,   2, 2, "MeV") ;
+  RooRealVar staple5("staple5","staple5",  2,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple6("staple6","staple6",  4,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple7("staple7","staple7",  15,   Mmin,Mmax, "MeV") ;
+  RooRealVar n1("n1","n1", 3,  1,100) ;
+  RooRealVar n2("n2","n2", 2,  1,100) ;
+
+  //this function describes signal
+  RooMcbPdf * mcbPdf =  new RooMcbPdf("ModCB", "Simple Modified CrystalBall: gaus + power + exp",  
+      Mrec,  
+      sigma,  
+      staple1, 
+      staple2, 
+      staple4, 
+      staple6, 
+      staple7, 
+      n1, 
+      n2);
+  std::cout << "Before sample" << std::endl;
+  RooCategory sample("sample","sample");
+  std::vector< RooFitItem_t *> fi_lst;
+  std::map<std::string, RooDataHist*> dataMap;
+  std::cout << "Before his loop" << std::endl;
+  for(auto h : his_list)
+  {
+    std::cout << "Creating fitItem: " << h->GetName();
+    RooFitItem_t * f = new RooFitItem_t(h, mcbPdf, Mrec);
+    fi_lst.push_back(f);
+    auto name = f->name();
+    sample.defineType(name.c_str());
+    std::cout << name << std::endl;
+  }
+  std::cout << "Before simPdf" << std::endl;
+  RooSimultaneous simPdf("simPdf","simultaneous pdf",sample) ;
+  std::cout << "Before fi_lst loop" << std::endl;
+  for(auto f : fi_lst)
+  {
+    std::cout << "Inside fi_lst loop" << std::endl;
+    std::cout << f->his->GetName() << std::endl;
+    auto name = f->his->GetName();
+    std::cout << "Adding to simPdf: " << f->his->GetName();
+    simPdf.addPdf(*(f->addPdf),name) ;
+    dataMap[name] = f->data;
+  }
+  std::cout << "Before RooDataHist" << std::endl;
+  RooDataHist * data = new RooDataHist("data","Combined data", Mrec, sample, dataMap);
+  std::clog << "Before fitTo " << std::endl;
+	simPdf.fitTo(*data, Extended(), Strategy(2), Minos());
+  auto frame = Mrec.frame(Title("title"));
+  for(auto f : fi_lst )
+  {
+    data->plotOn(frame, MarkerSize(0.5),  Cut((std::string("sample==sample::")+f->his->GetName()).c_str())) ;
+    simPdf.plotOn(frame, Slice(sample,f->his->GetName()),ProjWData(sample,*data), LineWidth(1)) ;
+    simPdf.plotOn(frame, Slice(sample,f->his->GetName()),ProjWData(sample,*data), Components(*f->bgPdf),LineStyle(kDashed),LineWidth(1)) ;
+  }
+  new TCanvas;
+  frame->Draw();
 }
 
 
@@ -145,6 +282,7 @@ int main(int argc,  char ** argv)
   std::string cut;
   std::string hash_list_str;
   std::string suffix;
+  std::string combine_str;
   double nbg=0;
   opt_desc.add_options()
     ("help,h","Print this help")
@@ -156,12 +294,14 @@ int main(int argc,  char ** argv)
     ("hash",po::value<std::string>(&hash_list_str),"List of hashes to draw")
     ("skip","skip hashes")
     ("Nbg",po::value<double>(&nbg),"Background events")
-    ("suffix",po::value<std::string>(&suffix),"Suffix")
+    ("suffix,s",po::value<std::string>(&suffix),"Suffix")
     ("mc", "Use MonteCarlo information mctopo")
     ("trk","Tracking efficiency fit")
+    ("combine,c",po::value<std::string>(&combine_str), "combined fit")
     ;
   po::positional_options_description pos;
-  pos.add("input",-1);
+  pos.add("suffix", 1);
+  pos.add("input", 1);
   po::variables_map opt; //options container
   try
   {
@@ -179,178 +319,111 @@ int main(int argc,  char ** argv)
     std::clog << opt_desc;
     return 0;
   }
-  std::string jpsi = "152f1c20,d714a2bd,167c1bc8,270c3648,6925d619,5721f99e,6cceb77a,8c471f87,a5957f06,ebbc9f57,e990b7b9,ecab451c,ad77a3ea,f5bb9d48,2555a9e3,7181a332,f3b62be6,c50c1717,f3b81e60,e36bbd16,19f87eb1,57600321,47b3a057,5d977b97,df0e32d9,6d47f0a5,9089b143,acaee554,d1310577,e4ebc641,84fce654,d4c719cb,ef28572f,79d29da3,4f68a152,d98afca4,1ef1d66d,cfe7a549,4d7eec07,59476175,8a4d7453,4d7eec07,cfe7a549,dbde283b,1397e7e7,8ac60398,aca004d7,cf7de4a7,daa0af44,3031ea55,cdffabb3,ecdbe915";
 
-  
-  std::string bg_from_jpsi = "cfe7a549,4d7eec07,59476175,8a4d7453,4d7eec07,cfe7a549,1ef1d66d,79d29da3,4f68a152,d98afca4,d1310577,84fce654,5d977b97,df0e32d9,57600321,47b3a057,e4ebc641,acaee554,6d47f0a5,9089b143,2555a9e3,7181a332,f5bb9d48,e990b7b9,78a768c7,8fa386fb,5721f99e,6cceb77a,270c3648,6925d619,19f87eb1,167c1bc8";
-
-  std::string nojpsi_bg = "183789a,d0c6c2a9,35c7a381,5f136e0a,708b1663,6df8df1e,59b99e9a,6f6bf2a3,2eb71455,859ea6c1,b1dfe745,a7ee33a3,7025be96,a8b93aa8,5fbdd494,bcdd2654,4200e40e,ccf8f4be,3bfc1a82,cfa021dd,e03859b4,d6d8305c,21dcde60,e6f0a031,e7aec6e2,861f5eda,f46414d5,110dcd9a,3e95b5f3,a5f18375,2ea2390e,54ca98db,7a564e5a,fac211ae,27940cb5,13d54d31,32d836e2,e39d8cd1,552c11f1,d7b558bf,3f291a5a,e01958bf,329ac69e,f922962d,16d4eedf,e8092c85,163b9509,c77e2f3a,4854d053,7c5b6e7b,99116a60";
-    
-  std::string uu_str = "1397e7e7,8ac60398,aca004d7,cf7de4a7,daa0af44";
-  std::string KK_str = "3031ea55,cdffabb3,ecdbe915";
-  std::string pipi_str = "67c1bc8,19f87eb1,270c3648,6925d619,5f136e0a,708b1663,a8b93aa8,5fbdd494,cfa021dd,e03859b4,e6f0a031,f46414d5,f5bb9d48,110dcd9a,3e95b5f3,6d47f0a5,9089b143,e4ebc641,7a564e5a,fac211ae,d1310577,d98afca4,27940cb5,13d54d31,79d29da3,4f68a152,1ef1d66d,cfe7a549,4d7eec07,59476175,8a4d7453,4d7eec07,cfe7a549";
-  std::string pipiKK_str = "183789a,d0c6c2a9,35c7a381,6df8df1e,59b99e9a,6f6bf2a3,2eb71455,859ea6c1,b1dfe745,bcdd2654,4200e40e,ccf8f4be,3bfc1a82,d6d8305c,21dcde60,a5f18375,5d977b97,df0e32d9,84fce654,32d836e2,e39d8cd1,552c11f1,d7b558bf,3f291a5a,e01958bf,329ac69e,f922962d,16d4eedf,e8092c85,163b9509,c77e2f3a,4854d053,7c5b6e7b,99116a60";
-
-  std::string jpsirho="cfe7a549,4d7eec07,59476175,8a4d7453,4d7eec07,cfe7a549,dbde283b";
+  std::cout << " " << suffix << " " << file_name << std::endl;
+  //exit(1);
   
   TCut hash_cut = "";
-
-  //std::vector<std::string> hash_list_str;
-/*  
-  std::list<std::string> hash_list;
-  if(opt.count("hash"))
-  {
-    boost::split(hash_list,hash_list_str,boost::is_any_of(", "));
-    std::cout << " Initial hash_list: ";
-    for ( auto & x : hash_list)
-    {
-      std::cout << x << ",";
-    }
-    std::cout << std::endl;
-    std::list<std::string> tmp_hash_list;
-    for( auto & x : hash_list)
-    {
-      std::string s=x;
-      if ( x == "jpsi" )  s = bg_from_jpsi;
-      if ( x == "nojpsi" ) s = nojpsi_bg;
-      if ( x == "uu" )  s = uu_str;
-      if ( x == "KK" )  s = KK_str;
-      if ( x == "pipi" )  s = pipi_str;
-      if ( x == "pipiKK" )  s = pipiKK_str;
-      if ( x == "jpsirho")  s= jpsirho;
-      std::list<std::string> v;
-      boost::split(v, s, boost::is_any_of(", "));
-      tmp_hash_list.merge(v);
-    }
-    hash_list = tmp_hash_list;
-    std::cout << "New hash_list: ";
-    for ( auto & x : hash_list )
-    {
-      std::cout << x << ",";
-    }
-    std::cout << std::endl;
-    for(auto & x : hash_list)
-    {
-      hash_cut = hash_cut || TCut(("hash==0x"+x).c_str());
-    }
-    if(opt.count("skip"))
-    {
-      hash_cut = !hash_cut;
-    }
-  }
-  hash_cut=make_cut(ChanNoJPsi);
-  */
 
   if(opt.count("hash"))
   {
     hash_cut = make_cut (hash_list_str);
+    if(opt.count("skip"))
+    {
+      hash_cut = ! hash_cut;
+    }
+    std::cout << "Using hash cut =" << hash_cut << std::endl;
   }
-  std::cout << "hash cut =" << hash_cut << std::endl;
 
-  //if(argc<2) return 1;
-	//TFile file(argv[2]);
   TFile file(file_name.c_str());
-  TH1 * his=nullptr;
+  TH1    * his=nullptr;
   TTree * tree=nullptr;
+
 	TApplication theApp("root_app", &argc, argv);
+
+  auto create_histogram = [&](std::string suffix) -> TH1*
+  {
+    tree_name   = "event"+suffix;
+    his_name    = "hMrec"+suffix;
+    mctree_name = "mctopo"+suffix;
+    std::cout << tree_name << "  " << his_name << "  " << mctree_name << std::endl;
+    auto h = (TH1*)file.Get(his_name.c_str());
+    std::string title = h->GetTitle();
+    if( h == nullptr ) 
+    {
+      std::cerr << "ERROR: Unable to find histogram " << his_name << std::endl;
+      exit(1);
+    }
+    tree = (TTree*) file.Get(tree_name.c_str());
+    if ( tree == nullptr )
+    {
+      std::cerr << "ERROR: Unable to find histogram " << tree_name << std::endl;
+      exit(1);
+    }
+
+    TTree *mctree = (TTree*) file.Get(mctree_name.c_str());
+    if ( mctree == nullptr )
+    {
+      std::cerr << "ERROR: Unable to find histogram " << mctree_name << std::endl;
+      exit(1);
+    }
+    if(mctree->GetEntries() > 0)
+    {
+      std::cout << "MonteCarlo data for " << mctree_name << "  exists" << std::endl;
+      if(mctree->GetEntries() != tree->GetEntries())
+      {
+        std::cerr << "ERROR: number of events in " << mctree_name <<  " (" << mctree->GetEntries() << ") " << " doesnt fit to number of entries in main tree " << tree_name  << " (" << tree->GetEntries() << ")" << std::endl;
+      }
+      else 
+      {
+        if(mctree) tree->AddFriend(mctree);
+      }
+    }
+    int    Nbin = h->GetNbinsX();
+    double Mmin = h->GetXaxis()->GetXmin();
+    double Mmax = h->GetXaxis()->GetXmax();
+    auto varexp = boost::format("(Mrec-3.097)*1000 >> Mrec%s(%d,%f,%f)") % suffix % Nbin % Mmin % Mmax; 
+    tree->Draw(varexp.str().c_str(),hash_cut && cut.c_str(),"goff");
+    h = (TH1F*) tree->GetHistogram();
+    h->SetTitle(title.c_str());
+    return h;
+  };
+
+  if(opt.count("combine"))
+  {
+    std::vector<std::string> suffix_list;
+    boost::split(suffix_list,combine_str,boost::is_any_of(", "));
+    std::list<TH1*> his_lst;
+    for(auto str : suffix_list)
+    {
+      his_lst.push_back(create_histogram(str));
+    }
+    //auto h1 = create_histogram(suffix_list[0]);
+    //auto h2 = create_histogram(suffix_list[1]);
+    //combfit(h1,h2);
+    combfit(his_lst);
+    theApp.Run();
+  }
 
   if(opt.count("his"))
   {
     his = (TH1*)file.Get(his_name.c_str());
   }
 
-  /*
-  if(opt.count("tree"))
-  {
-    tree = (TTree*) file.Get(tree_name.c_str());
-    if(opt.count("mctree"))
-    {
-      TTree *mctree = (TTree*) file.Get(mctree_name.c_str());
-      if(mctree) tree->AddFriend(mctree);
-    }
+  const double Scale = 1;
+  const double M0 = 0;
 
-    int Nbin = his->GetNbinsX();
-    double Mmin = his->GetXaxis()->GetXmin();
-    double Mmax  = his->GetXaxis()->GetXmax();
-
-    char varexp[1024];
-    sprintf(varexp,"(Mrec-3.097)*1000 >> hMrec(%d,%f,%f)", Nbin, Mmin, Mmax);
-    tree->Draw(varexp,hash_cut && cut.c_str(),"goff");
-    his = (TH1F*) tree->GetHistogram();
-    std::cout << "New entries = " << his->GetEntries() << std::endl;
-  }
-  */
-
-
-  auto make_his = [&](std::string suf) -> TH1*
-  {
-    tree_name   = "event"+suffix;
-    his_name    = "hMrec"+suffix;
-    mctree_name = "mctopo"+suffix;
-    std::cout << tree_name << "  " << his_name << "  " << mctree_name << std::endl;
-    his = (TH1*)file.Get(his_name.c_str());
-    tree = (TTree*) file.Get(tree_name.c_str());
-    if(opt.count("mc"))
-    {
-      TTree *mctree = (TTree*) file.Get(mctree_name.c_str());
-      if(mctree) tree->AddFriend(mctree);
-    }
-    int Nbin = his->GetNbinsX();
-    double Mmin = his->GetXaxis()->GetXmin();
-    double Mmax  = his->GetXaxis()->GetXmax();
-    char varexp[1024];
-    sprintf(varexp,"(Mrec-3.097)*1000 >> hMrec(%d,%f,%f)", Nbin, Mmin, Mmax);
-    tree->Draw(varexp,hash_cut && cut.c_str(),"goff");
-    //his = (TH1F*) tree->GetHistogram();
-    return his;
-  };
-
-  //if(opt.count("trk"))
-  //{
-  //}
 
   if(opt.count("suffix"))
   {
-    tree_name   = "event"+suffix;
-    his_name    = "hMrec"+suffix;
-    mctree_name = "mctopo"+suffix;
-    std::cout << tree_name << "  " << his_name << "  " << mctree_name << std::endl;
-    his = (TH1*)file.Get(his_name.c_str());
-    tree = (TTree*) file.Get(tree_name.c_str());
-    if(opt.count("mc"))
-    {
-      TTree *mctree = (TTree*) file.Get(mctree_name.c_str());
-      if(mctree) tree->AddFriend(mctree);
-    }
-    int Nbin = his->GetNbinsX();
-    double Mmin = his->GetXaxis()->GetXmin();
-    double Mmax  = his->GetXaxis()->GetXmax();
-    char varexp[1024];
-    sprintf(varexp,"(Mrec-3.097)*1000 >> hMrec(%d,%f,%f)", Nbin, Mmin, Mmax);
-    tree->Draw(varexp,hash_cut && cut.c_str(),"goff");
-    his = (TH1F*) tree->GetHistogram();
+    his = create_histogram(suffix);
   }
 
   double Mmin  = his->GetXaxis()->GetXmin();
   double Mmax  = his->GetXaxis()->GetXmax();
   Long64_t nEntries=his->GetEntries();
   double SigmaInitial=1.4;
-  double Scale = 1;
-  double M0 = 0;
   
-  //if(his)
-  //{
-  //  nEntries = his->GetEntries();
-  //}
-  //if(tree)
-  //{
-  //  nEntries = tree->GetEntries();
-  //  Scale = 1000;
-  //  M0=3.097;
-  //  Mmin = M0 + Mmin/Scale;
-  //  Mmax = M0 + Mmax/Scale;
-  //  std::cout << nEntries << std::endl;
-  //}
   RooRealVar Mrec("Mrec","M_{rec}(#pi^{+}#pi^{-})", Mmin,Mmax, "MeV");
   RooRealVar sigma("sigma","sigma",1.4/Scale,0,10/Scale, "MeV") ;
   RooRealVar staple1("staple1","staple1",M0-15/Scale,   Mmin,Mmax, "MeV") ;
@@ -363,18 +436,6 @@ int main(int argc,  char ** argv)
   RooRealVar n1("n1","n1", 3,  1,100) ;
   RooRealVar n2("n2","n2", 2,  1,100) ;
 
-
-
-	//std::vector<RooRealVar> staple(7);
-	//for(int i=0;i<staple.size();i++)
-	//{
-	//	char buf[128];
-	//	sprintf(buf, "staple-%d",i );
-	//	staple[i] = RooRealVar(buf, buf, (i-3.5)*5,  -40, +40, "MeV");
-	//}
-	//std::vector<RooRealVar> N(2);
-	//N[0] = RooRealVar("nl", "Left power",  2,  0.1, 100);
-	//N[1] = RooRealVar("nr", "Right power", 2,  0.1, 100);
 
 	RooMcbPdf mcb("ModCB", "Modified CrystalBall",  Mrec,  sigma,  
 			staple1, 
@@ -420,31 +481,8 @@ int main(int argc,  char ** argv)
 
 
 	RooArgSet ntupleVarSet(Mrec);
-	//RooDataSet * data = new RooDataSet("tree", "tree",  tree,  ntupleVarSet);
-	//RooDataSet * data = new RooDataSet("dh", "dh", Mrec, Index(rooCategory),  Import("his",*his));
-  //RooAbsData * data;
   RooDataHist * data = new RooDataHist("dh", "dh", Mrec, Import(*his));
-  //if(opt.count("his"))
-  //{
-  //  data =   }
-  //if(opt.count("tree"))
-  //{
-  //  data = new RooDataSet("dh","dh", Mrec, Import(*tree), Cut(cut.c_str()));
-  //  //data = new RooDataSet("dh","dh", Mrec, Import(*tree));
-  //  //new RooDataSet("dh","dh", Mrec, Import(*tree));
-  //}
-  
-  //RooPlot* xframe3 = Mrec.frame(Title("Show my cb function")) ;
-	//mcb.plotOn(xframe3);
-	//TCanvas * c_mcb = new TCanvas;
-	//xframe3->Draw();
-
-	//theApp.Run();
-	//totalPdf.fitTo(*data,  Extended(), FitOptions("qmh"));
 	totalPdf.fitTo(*data,  Extended(), Strategy(2));
-
-	//RooChi2Var chi2Var("chi2", "chi2", totalPdf, *data);
-	//cout << "chi2/ndf = " << chi2Var.getVal() << endl;
 
   RooPlot* xframe2 = Mrec.frame(Title("Fit by Modified CrystalBall")) ;
   data->plotOn(xframe2, MarkerSize(0.5)) ;
@@ -455,16 +493,6 @@ int main(int argc,  char ** argv)
   sigma.Print() ;
 	Nsig.Print();
 	Nbg.Print();
-	//for(auto s : staple)
-	//{
-	//	s.Print();
-	//}
-	//for(auto n : N)
-	//{
-	//	n.Print();
-	//}
-
-
 
 
 	RooNLLVar nll("nll","nll",totalPdf,*data) ;
@@ -527,21 +555,8 @@ int main(int argc,  char ** argv)
 	cnll->cd(9);
 	frame_Nbg->Draw();
 
-  /*
-	for(int i=0;i<his->GetNbinsX();i++)
-	{
-		double x  = his->GetBinCenter(i);
-		double N  = his->GetBinContent(i);
-		double Nth;
-		//double Nth = mcb.evaluate(); 
-		//cout <<  i << " " << x << "  " << N <<   " " << Nth << endl;
-	}
-  */
-
   // Draw all frames on a canvas
   TCanvas* c = new TCanvas("mcb","Test for Modified CrystalBall Fit") ;
-	//TH2F * h2=new TH2F("h2", "h2", 100, Mmin, Mmax, 100, -0.2*his->GetMaximum(), his->GetMaximum()*1.2);
-	//h2->Draw();
 	c->SetLogy();
   c->cd(2) ; 
 	gPad->SetLeftMargin(0.15) ; 

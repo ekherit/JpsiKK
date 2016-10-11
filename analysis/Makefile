@@ -1,4 +1,4 @@
-all : testMcbFit CombMcbFit libFit.so kksel kkfit
+all : testMcbFit libFit.so kkfit
 
 LIBBOOST = -lboost_system -lboost_program_options -lboost_filesystem
 LIBROOT = `root-config --libs` -lMinuit   -lRooFit -lMinuit -lRooFitCore
