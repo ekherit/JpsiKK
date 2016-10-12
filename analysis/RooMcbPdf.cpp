@@ -271,16 +271,18 @@ RooBgPdf::RooBgPdf(const char *name, const char *title,
         double x2
 				) : RooAbsPdf(name,title), 
    			fX("x","x",this,_X),
-   			fB("","B",this,_B), 
-        X1(x1),
-        X2(x2)
+   			fB("B","B",this,_B), 
+        fXmin(x1),
+        fXmax(x2)
 {
 }
 
 RooBgPdf::RooBgPdf(const RooBgPdf& other, const char* name) :
   RooAbsPdf(other,name), 
    fX("x",this,other.fX), 
-	 fB("B",this,other.fB) 
+	 fB("B",this,other.fB),
+   fXmin(other.fXmin),
+   fXmax(other.fXmax)
 {
 }
 
@@ -296,7 +298,7 @@ Double_t RooBgPdf::analyticalIntegral(Int_t code, const char* rangeName) const
 {
 	double xmax = fX.max(rangeName);
 	double xmin = fX.min(rangeName);
-  return fabs( log ( (xmin - fB) / (xmax - fB) ) );
+  return fabs( log ( fabs(xmin - fB) / fabs(xmax - fB) ) );
 }
 
 Double_t RooBgPdf::evaluate() const 

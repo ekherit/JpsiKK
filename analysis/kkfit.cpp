@@ -14,6 +14,7 @@
 //
 // =====================================================================================
 #include <iostream>
+#include <limits>
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
@@ -33,6 +34,7 @@ TROOT root("polarimeter","polarimeter", initfuncs);
 #include <TH2F.h>
 #include <TTree.h>
 #include <TCut.h>
+#include <TLegend.h>
 
 #include <RooFitResult.h>
 #include <RooChi2Var.h>
@@ -64,19 +66,25 @@ struct RooFitItem_t
   RooRealVar    * Nsig;
   RooRealVar    * Nbg;
   RooRealVar    * bg_c1;
+  RooRealVar    * bgB;
   RooPolynomial * bgPdf;
+  //RooBgPdf * bgPdf;
   RooAddPdf     * addPdf;
   RooPlot       * frame;
   std::string fName;
+  double Mmin;
+  double Mmax;
 
-  RooFitItem_t(TH1 * h, RooAbsPdf* mcbPdf, RooRealVar & Mrec) 
-    : RooFitItem_t(h->GetName(), h, mcbPdf, Mrec)
+  RooFitItem_t(TH1 * h, RooAbsPdf* mcbPdf, RooRealVar & Mrec, double mmin, double mmax) 
+    : RooFitItem_t(h->GetName(), h, mcbPdf, Mrec, mmin, mmax)
   {
   }
 
-  RooFitItem_t(std::string name, TH1 * h, RooAbsPdf* mcbPdf, RooRealVar & Mrec)
+  RooFitItem_t(std::string name, TH1 * h, RooAbsPdf* mcbPdf, RooRealVar & Mrec, double mmin, double mmax)
   {
     fName = name;
+    Mmin = mmin;
+    Mmax = mmax;
     his = h;
     data = new RooDataHist(h->GetName(),  h->GetTitle(), Mrec, Import(*h));
     Nsig = new RooRealVar(
@@ -94,7 +102,33 @@ struct RooFitItem_t
         h->GetEntries()*100
         );
     std::string bg_name = std::string("bg")+h->GetName();
-    bg_c1 = new RooRealVar((bg_name+"c1").c_str(),(std::string("Linear coefficient for background for ") + h->GetName()).c_str(),0, -10, 10);
+    //double Mmin = his->GetXaxis()->GetXmin();
+    //double Mmax = his->GetXaxis()->GetXmax();
+    double bgc1min=-10; 
+    double bgc1max=+10;
+    if(Mmin < 0 && Mmax > 0) 
+    {
+      bgc1min = - 1.0/Mmax;  
+      bgc1max = - 1.0/Mmin;
+    }
+    if(Mmin > 0 && Mmax > 0)
+    {
+      bgc1min = - 1.0/Mmax;
+      bgc1max = std::numeric_limits<double>::max();
+    }
+    if(Mmin > 0 && Mmax < 0)
+    {
+      std::cerr << "ERROR: wrong fit range: Mmin (" << Mmin << ") > Mmax ("<<Mmax<<"): "  << std::endl;
+      exit(1);
+    }
+    if(Mmin < 0 && Mmax < 0)
+    {
+      bgc1min = -std::numeric_limits<double>::max();
+      bgc1max = - 1.0/Mmin;
+    }
+    
+    bg_c1 = new RooRealVar((bg_name+"c1").c_str(),(std::string("Linear coefficient for background for ") + h->GetName()).c_str(),0, bgc1min, bgc1max);
+    //bgB = new RooRealVar((bg_name+"B").c_str(),(std::string("Background shift") + h->GetName()).c_str(),0, -10000, 10000);
     std::string bg_title = std::string("Background Pdf for ") + h->GetName();
     //when proceed data with muond (U channel) not using slope of the background
     if(fName.find("U") == std::string::npos)
@@ -106,6 +140,7 @@ struct RooFitItem_t
       bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec, *bg_c1);
       //bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec);
     }
+    //bgPdf = new RooBgPdf(bg_name.c_str(), bg_title.c_str(), Mrec, *bgB, his->GetXaxis()->GetXmin(), his->GetXaxis()->GetXmax());
     addPdf = new RooAddPdf(name.c_str(),h->GetTitle(), RooArgList(*bgPdf,*mcbPdf), RooArgList(*Nbg, *Nsig));
     frame = Mrec.frame(Title(his->GetTitle())) ;
   }
@@ -160,9 +195,9 @@ void combfit(TH1 * h1, TH1 *h2)
 
 
   std::clog << "Before FitItem_t f1" << std::endl;
-  RooFitItem_t f1(h1->GetName(),h1, mcbPdf, Mrec);
+  RooFitItem_t f1(h1->GetName(),h1, mcbPdf, Mrec, Mmin,Mmax);
   std::clog << "Before FitItem_t f2" << std::endl;
-  RooFitItem_t f2(h2->GetName(),h2, mcbPdf, Mrec);
+  RooFitItem_t f2(h2->GetName(),h2, mcbPdf, Mrec, Mmin,Mmax);
 
   std::clog << "Before RooDataHist" << std::endl;
   RooDataHist * data = new RooDataHist("data","combined h1 + h2",Mrec,Index(sample),Import(h1->GetName(),*h1),Import(h2->GetName(),*h2)) ;
@@ -248,7 +283,7 @@ void combfit( std::list<TH1*>  & his_list)
   std::map<std::string, RooDataHist*> dataMap;
   for(auto h : his_list)
   {
-    RooFitItem_t * f = new RooFitItem_t(h, mcbPdf, Mrec);
+    RooFitItem_t * f = new RooFitItem_t(h, mcbPdf, Mrec,Mmin,Mmax);
     fi_lst.push_back(f);
     auto name = f->name();
     sample.defineType(name.c_str());
@@ -305,17 +340,17 @@ void combfit2( std::list<TH1*>  & his_list)
   RooRealVar  mean( "mean",  "mean",   0.5*(Mmin+Mmax), Mmin,  Mmax, "MeV") ;
   RooRealVar staple[] = 
   {
-    RooRealVar("staple1","staple1",  2,   0,  "MeV"),
-    RooRealVar("staple2","staple2",  1,   0,  0.25*(Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("staple3","staple3",  12,  0,  0.25*(Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("staple4","staple4",  10,  0,  0.25*(Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("staple5","staple5",  2,   0,  "MeV"),
-    RooRealVar("staple6","staple6",  1,   0,  0.25*(Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("staple7","staple7",  12,  0,  0.25*(Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("staple8","staple8",  10,  0,  0.25*(Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("L1",  "Left Gaus range" ,   2,   "MeV"),
+    RooRealVar("L2",  "Left Exp range"  ,   1,   0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("L3",  "Left Power range",  12,  0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("L4",  "Left Exp range 2",  10,  0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("R1", "Right Gaus range" ,  2,   "MeV"),
+    RooRealVar("R2", "Right Exp range"  ,  1,   0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("R3", "Right Power range",  12,  0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("R4","Right Exp range 2",  10,  0,  (Mmax-Mmin)*0.5, "MeV"),
   };
-  RooRealVar n1("n1", "n1", 3,  1, 100) ;
-  RooRealVar n2("n2", "n2", 2,  1, 100) ;
+  RooRealVar n1("Ln", "Left power", 2,  1, 100) ;
+  RooRealVar n2("Rn", "Right power", 2,  1, 100) ;
 
   //this function describes signal
   RooMcb2Pdf * mcbPdf =  new RooMcb2Pdf("ModCB", "Modified CrystalBall: gaus + exp + power + exp",  
@@ -339,7 +374,7 @@ void combfit2( std::list<TH1*>  & his_list)
   std::map<std::string, RooDataHist*> dataMap;
   for(auto h : his_list)
   {
-    RooFitItem_t * f = new RooFitItem_t(h, mcbPdf, Mrec);
+    RooFitItem_t * f = new RooFitItem_t(h, mcbPdf, Mrec,Mmin,Mmax);
     fi_lst.push_back(f);
     auto name = f->name();
     sample.defineType(name.c_str());
@@ -353,13 +388,13 @@ void combfit2( std::list<TH1*>  & his_list)
   }
   RooDataHist * data = new RooDataHist("data","Combined data", Mrec, sample, dataMap);
 	simPdf.fitTo(*data, Extended(), Strategy(2), Minos());
-  auto frame = Mrec.frame(Title("title"));
+  auto frame = Mrec.frame(Title("#pi^{+}#pi^{-} recoil invariant mass"));
   std::vector<int> colors ={kBlack, kBlue, kRed, kGreen};
-  //TLegend * legend = new TLegend(0.8,0.8,1.0,1.0);
+  TLegend * legend = new TLegend(0.8,0.8,1.0,1.0);
   for(int i =0;i< fi_lst.size(); i++)
   {
     auto f = fi_lst[i];
-    data->plotOn(frame, MarkerSize(0.5),  Cut((std::string("sample==sample::")+f->his->GetName()).c_str())) ;
+    data->plotOn(frame, MarkerSize(0.5),  Cut((std::string("sample==sample::")+f->his->GetName()).c_str()), LineColor(colors[i]), MarkerColor(colors[i])) ;
     simPdf.plotOn(frame, Slice(sample,f->his->GetName()),ProjWData(sample,*data), LineWidth(1),LineColor(colors[i])) ;
     simPdf.plotOn(frame, Slice(sample,f->his->GetName()),ProjWData(sample,*data), Components(*f->bgPdf),LineStyle(kDashed),LineWidth(1),LineColor(colors[i])) ;
   }
@@ -368,6 +403,7 @@ void combfit2( std::list<TH1*>  & his_list)
   c->SetLogy();
   frame->Draw();
   sigma.Print() ;
+  mean.Print();
   n1.Print();
   n2.Print();
   for(int i=0;i<7;i++) staple[i].Print();

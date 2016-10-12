@@ -117,7 +117,7 @@ public:
 protected:
   RooRealProxy fX;
   RooRealProxy fB;
-  double X1,X2;
+  double fXmax,fXmin;
 
   Double_t evaluate() const ;
 	
