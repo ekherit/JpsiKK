@@ -69,12 +69,12 @@ struct RooFitItem_t
   RooPlot       * frame;
   std::string fName;
 
-  RooFitItem_t(TH1 * h, RooMcbPdf* mcbPdf, RooRealVar & Mrec)
+  RooFitItem_t(TH1 * h, RooAbsPdf* mcbPdf, RooRealVar & Mrec) 
+    : RooFitItem_t(h->GetName(), h, mcbPdf, Mrec)
   {
-    RooFitItem_t(h->GetName(), h, mcbPdf, Mrec);
   }
 
-  RooFitItem_t(std::string name, TH1 * h, RooMcbPdf* mcbPdf, RooRealVar & Mrec)
+  RooFitItem_t(std::string name, TH1 * h, RooAbsPdf* mcbPdf, RooRealVar & Mrec)
   {
     fName = name;
     his = h;
@@ -96,7 +96,16 @@ struct RooFitItem_t
     std::string bg_name = std::string("bg")+h->GetName();
     bg_c1 = new RooRealVar((bg_name+"c1").c_str(),(std::string("Linear coefficient for background for ") + h->GetName()).c_str(),0, -10, 10);
     std::string bg_title = std::string("Background Pdf for ") + h->GetName();
-    bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec, *bg_c1);
+    //when proceed data with muond (U channel) not using slope of the background
+    if(fName.find("U") == std::string::npos)
+    {
+      bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec, *bg_c1);
+    }
+    else
+    {
+      bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec, *bg_c1);
+      //bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec);
+    }
     addPdf = new RooAddPdf(name.c_str(),h->GetTitle(), RooArgList(*bgPdf,*mcbPdf), RooArgList(*Nbg, *Nsig));
     frame = Mrec.frame(Title(his->GetTitle())) ;
   }
@@ -208,13 +217,16 @@ void combfit( std::list<TH1*>  & his_list)
   RooRealVar Mrec("Mrec","M_{rec}(#pi^{+}#pi^{-})", Mmin,Mmax, "MeV");
 
   RooRealVar sigma("sigma","sigma",1.4,0,  10, "MeV") ;
-  RooRealVar staple1("staple1","staple1",  15,   Mmin,Mmax, "MeV") ;
-  RooRealVar staple2("staple2","staple2",  3,   Mmin,Mmax, "MeV") ;
-  RooRealVar staple3("staple3","staple3",  2,   Mmin,Mmax, "MeV") ;
-  RooRealVar staple4("staple4","staple4",  0,   2, 2, "MeV") ;
-  RooRealVar staple5("staple5","staple5",  2,   Mmin,Mmax, "MeV") ;
-  RooRealVar staple6("staple6","staple6",  4,   Mmin,Mmax, "MeV") ;
-  RooRealVar staple7("staple7","staple7",  15,   Mmin,Mmax, "MeV") ;
+  RooRealVar staple[] = 
+  {
+    RooRealVar("staple1","staple1",  -15,   Mmin,Mmax, "MeV"),
+    RooRealVar("staple2","staple2",  -3,   Mmin,Mmax, "MeV") ,
+    RooRealVar("staple3","staple3",  -2,   Mmin,Mmax, "MeV") ,
+    RooRealVar("staple4","staple4",  0,    2, 2, "MeV")      ,
+    RooRealVar("staple5","staple5",  +2,   Mmin,Mmax, "MeV") ,
+    RooRealVar("staple6","staple6",  +4,   Mmin,Mmax, "MeV") ,
+    RooRealVar("staple7","staple7",  +15,   Mmin,Mmax, "MeV")
+  };
   RooRealVar n1("n1","n1", 3,  1,100) ;
   RooRealVar n2("n2","n2", 2,  1,100) ;
 
@@ -222,54 +234,149 @@ void combfit( std::list<TH1*>  & his_list)
   RooMcbPdf * mcbPdf =  new RooMcbPdf("ModCB", "Simple Modified CrystalBall: gaus + power + exp",  
       Mrec,  
       sigma,  
-      staple1, 
-      staple2, 
-      staple4, 
-      staple6, 
-      staple7, 
+      staple[0], 
+      staple[1], 
+      staple[2], 
+      staple[3], 
+      staple[4], 
+      staple[5], 
+      staple[6], 
       n1, 
       n2);
-  std::cout << "Before sample" << std::endl;
   RooCategory sample("sample","sample");
   std::vector< RooFitItem_t *> fi_lst;
   std::map<std::string, RooDataHist*> dataMap;
-  std::cout << "Before his loop" << std::endl;
   for(auto h : his_list)
   {
-    std::cout << "Creating fitItem: " << h->GetName();
     RooFitItem_t * f = new RooFitItem_t(h, mcbPdf, Mrec);
     fi_lst.push_back(f);
     auto name = f->name();
     sample.defineType(name.c_str());
-    std::cout << name << std::endl;
   }
-  std::cout << "Before simPdf" << std::endl;
   RooSimultaneous simPdf("simPdf","simultaneous pdf",sample) ;
-  std::cout << "Before fi_lst loop" << std::endl;
   for(auto f : fi_lst)
   {
-    std::cout << "Inside fi_lst loop" << std::endl;
-    std::cout << f->his->GetName() << std::endl;
     auto name = f->his->GetName();
-    std::cout << "Adding to simPdf: " << f->his->GetName();
     simPdf.addPdf(*(f->addPdf),name) ;
     dataMap[name] = f->data;
   }
-  std::cout << "Before RooDataHist" << std::endl;
   RooDataHist * data = new RooDataHist("data","Combined data", Mrec, sample, dataMap);
-  std::clog << "Before fitTo " << std::endl;
 	simPdf.fitTo(*data, Extended(), Strategy(2), Minos());
   auto frame = Mrec.frame(Title("title"));
-  for(auto f : fi_lst )
+  std::vector<int> colors ={kBlack, kBlue, kRed, kGreen};
+  //TLegend * legend = new TLegend(0.8,0.8,1.0,1.0);
+  for(int i =0;i< fi_lst.size(); i++)
   {
+    auto f = fi_lst[i];
     data->plotOn(frame, MarkerSize(0.5),  Cut((std::string("sample==sample::")+f->his->GetName()).c_str())) ;
-    simPdf.plotOn(frame, Slice(sample,f->his->GetName()),ProjWData(sample,*data), LineWidth(1)) ;
-    simPdf.plotOn(frame, Slice(sample,f->his->GetName()),ProjWData(sample,*data), Components(*f->bgPdf),LineStyle(kDashed),LineWidth(1)) ;
+    simPdf.plotOn(frame, Slice(sample,f->his->GetName()),ProjWData(sample,*data), LineWidth(1),LineColor(colors[i])) ;
+    simPdf.plotOn(frame, Slice(sample,f->his->GetName()),ProjWData(sample,*data), Components(*f->bgPdf),LineStyle(kDashed),LineWidth(1),LineColor(colors[i])) ;
   }
-  new TCanvas;
+	frame->SetMinimum(0.1);
+  TCanvas * c = new TCanvas;
+  c->SetLogy();
   frame->Draw();
+  sigma.Print() ;
+  n1.Print();
+  n2.Print();
+  for(int i=0;i<7;i++) staple[i].Print();
+  for(auto f: fi_lst)
+  {
+    f->Nsig->Print();
+    f->Nbg->Print();
+  } 
 }
 
+void combfit2( std::list<TH1*>  & his_list)
+{
+  //calculate the range
+
+  double Mmin  = (*std::max_element(std::begin(his_list), std::end(his_list), 
+      [](const TH1 * h1, const TH1 *h2) { return h1->GetXaxis()->GetXmin() < h2->GetXaxis()->GetXmin(); } ))->GetXaxis()->GetXmin();
+
+  double Mmax  = (*std::min_element(std::begin(his_list), std::end(his_list), 
+      [](const TH1 * h1, const TH1 *h2) { return h1->GetXaxis()->GetXmax() < h2->GetXaxis()->GetXmax(); } ))->GetXaxis()->GetXmax();
+
+  std::cout << "Mmin = " << Mmin << "  Mmax = " << Mmax << std::endl;
+
+  RooRealVar Mrec("Mrec","M_{rec}(#pi^{+}#pi^{-})", Mmin,Mmax, "MeV");
+
+  RooRealVar sigma("sigma", "sigma", 1.4,    0,    10, "MeV") ;
+  RooRealVar  mean( "mean",  "mean",   0.5*(Mmin+Mmax), Mmin,  Mmax, "MeV") ;
+  RooRealVar staple[] = 
+  {
+    RooRealVar("staple1","staple1",  2,   0,  "MeV"),
+    RooRealVar("staple2","staple2",  1,   0,  0.25*(Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("staple3","staple3",  12,  0,  0.25*(Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("staple4","staple4",  10,  0,  0.25*(Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("staple5","staple5",  2,   0,  "MeV"),
+    RooRealVar("staple6","staple6",  1,   0,  0.25*(Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("staple7","staple7",  12,  0,  0.25*(Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("staple8","staple8",  10,  0,  0.25*(Mmax-Mmin)*0.5, "MeV"),
+  };
+  RooRealVar n1("n1", "n1", 3,  1, 100) ;
+  RooRealVar n2("n2", "n2", 2,  1, 100) ;
+
+  //this function describes signal
+  RooMcb2Pdf * mcbPdf =  new RooMcb2Pdf("ModCB", "Modified CrystalBall: gaus + exp + power + exp",  
+      Mrec,  
+      mean,  
+      sigma,  
+      staple[0], 
+      staple[1], 
+      staple[2], 
+      staple[3], 
+      staple[4], 
+      staple[5], 
+      staple[6], 
+      staple[7], 
+      n1, 
+      n2,
+      Mmin,
+      Mmax);
+  RooCategory sample("sample","sample");
+  std::vector< RooFitItem_t *> fi_lst;
+  std::map<std::string, RooDataHist*> dataMap;
+  for(auto h : his_list)
+  {
+    RooFitItem_t * f = new RooFitItem_t(h, mcbPdf, Mrec);
+    fi_lst.push_back(f);
+    auto name = f->name();
+    sample.defineType(name.c_str());
+  }
+  RooSimultaneous simPdf("simPdf","simultaneous pdf",sample) ;
+  for(auto f : fi_lst)
+  {
+    auto name = f->his->GetName();
+    simPdf.addPdf(*(f->addPdf),name) ;
+    dataMap[name] = f->data;
+  }
+  RooDataHist * data = new RooDataHist("data","Combined data", Mrec, sample, dataMap);
+	simPdf.fitTo(*data, Extended(), Strategy(2), Minos());
+  auto frame = Mrec.frame(Title("title"));
+  std::vector<int> colors ={kBlack, kBlue, kRed, kGreen};
+  //TLegend * legend = new TLegend(0.8,0.8,1.0,1.0);
+  for(int i =0;i< fi_lst.size(); i++)
+  {
+    auto f = fi_lst[i];
+    data->plotOn(frame, MarkerSize(0.5),  Cut((std::string("sample==sample::")+f->his->GetName()).c_str())) ;
+    simPdf.plotOn(frame, Slice(sample,f->his->GetName()),ProjWData(sample,*data), LineWidth(1),LineColor(colors[i])) ;
+    simPdf.plotOn(frame, Slice(sample,f->his->GetName()),ProjWData(sample,*data), Components(*f->bgPdf),LineStyle(kDashed),LineWidth(1),LineColor(colors[i])) ;
+  }
+	frame->SetMinimum(0.1);
+  TCanvas * c = new TCanvas;
+  c->SetLogy();
+  frame->Draw();
+  sigma.Print() ;
+  n1.Print();
+  n2.Print();
+  for(int i=0;i<7;i++) staple[i].Print();
+  for(auto f: fi_lst)
+  {
+    f->Nsig->Print();
+    f->Nbg->Print();
+  } 
+}
 
 int main(int argc,  char ** argv)
 {
@@ -300,7 +407,7 @@ int main(int argc,  char ** argv)
     ("combine,c",po::value<std::string>(&combine_str), "combined fit")
     ;
   po::positional_options_description pos;
-  pos.add("suffix", 1);
+  //pos.add("suffix", 1);
   pos.add("input", 1);
   po::variables_map opt; //options container
   try
@@ -321,7 +428,6 @@ int main(int argc,  char ** argv)
   }
 
   std::cout << " " << suffix << " " << file_name << std::endl;
-  //exit(1);
   
   TCut hash_cut = "";
 
@@ -389,26 +495,23 @@ int main(int argc,  char ** argv)
     return h;
   };
 
-  if(opt.count("combine"))
+  if(opt.count("suffix"))
   {
     std::vector<std::string> suffix_list;
-    boost::split(suffix_list,combine_str,boost::is_any_of(", "));
+    boost::split(suffix_list,suffix,boost::is_any_of(", "));
     std::list<TH1*> his_lst;
     for(auto str : suffix_list)
     {
       his_lst.push_back(create_histogram(str));
     }
-    //auto h1 = create_histogram(suffix_list[0]);
-    //auto h2 = create_histogram(suffix_list[1]);
-    //combfit(h1,h2);
-    combfit(his_lst);
+    combfit2(his_lst);
     theApp.Run();
   }
 
-  if(opt.count("his"))
-  {
-    his = (TH1*)file.Get(his_name.c_str());
-  }
+  //if(opt.count("his"))
+  //{
+  //  his = (TH1*)file.Get(his_name.c_str());
+  //}
 
   const double Scale = 1;
   const double M0 = 0;
@@ -422,7 +525,7 @@ int main(int argc,  char ** argv)
   double Mmin  = his->GetXaxis()->GetXmin();
   double Mmax  = his->GetXaxis()->GetXmax();
   Long64_t nEntries=his->GetEntries();
-  double SigmaInitial=1.4;
+  //double SigmaInitial=1.4;
   
   RooRealVar Mrec("Mrec","M_{rec}(#pi^{+}#pi^{-})", Mmin,Mmax, "MeV");
   RooRealVar sigma("sigma","sigma",1.4/Scale,0,10/Scale, "MeV") ;

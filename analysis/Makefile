@@ -13,7 +13,8 @@ testMcbFit : testMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o
 		$(CXX)  -o $@   $< RooMcbPdf.o  $(CXXFLAGS) $(LIBS) 
 
 kkfit : kkfit.cpp RooMcbPdf.h   RooMcbPdf.o
-		$(CXX)  -o $(BINDIR)/kkfit   $< RooMcbPdf.o  $(CXXFLAGS) $(LIBS) 
+		$(CXX)  -o kkfit   $< RooMcbPdf.o  $(CXXFLAGS) $(LIBS) 
+		cp -f kkfit $(BINDIR)/kkfit
 
 CombMcbFit : CombMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o
 		$(CXX)  -o $(BINDIR)/combkkfit   $< RooMcbPdf.o  $(CXXFLAGS) $(LIBS)
@@ -40,4 +41,4 @@ libFitDict.cxx : libFit.h libFitLinkDef.h
 		g++ -c $< -o $@ $(CXXFLAGS) $(LIBS)
 
 clean :
-			rm -f *.o *.so *~ *.pcm testMcbFit CombMcbFit libFitDict.o libFitDict.cxx libFit.so  $(ROOT_ADAPTORS)
+			rm -f *.o *.so *~ *.pcm testMcbFit CombMcbFit libFitDict.o libFitDict.cxx libFit.so  $(ROOT_ADAPTORS) kkfit
