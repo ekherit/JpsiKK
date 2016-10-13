@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "RooAbsPdf.h"
+#include "RooRealVar.h"
 #include "RooRealProxy.h"
 #include "RooCategoryProxy.h"
 #include "RooAbsReal.h"
@@ -134,6 +135,17 @@ class RooMcb2Pdf : public RooAbsPdf
 {
 public:
   RooMcb2Pdf() {} ;
+  RooMcb2Pdf(const char *name, const char *title, 
+	      RooAbsReal & _X, //invariant mass 
+				RooAbsReal & _mean,    //position of the peack
+				RooAbsReal & _Sigma,   //Common sigma
+				std::vector<RooRealVar> & _staple, 
+				RooAbsReal & _n1, 
+				RooAbsReal & _n2, 
+        double xmin,
+        double xmax
+			);
+
   RooMcb2Pdf(const char *name, const char *title, 
 	      RooAbsReal & _X, //invariant mass 
 				RooAbsReal & _mean,    //position of the peack

@@ -1,4 +1,4 @@
-all : testMcbFit libFit.so kkfit
+all : testMcbFit libFit.so kkfit kksel
 
 LIBBOOST = -lboost_system -lboost_program_options -lboost_filesystem
 LIBROOT = `root-config --libs` -lMinuit   -lRooFit -lMinuit -lRooFitCore
@@ -29,7 +29,8 @@ RooMcbPdf.o : RooMcbPdf.cpp
 
 
 kksel : kksel.cpp $(ROOT_ADAPTORS) libFitDict.o RooMcbPdf.o
-		$(CXX) $< -o $(BINDIR)/kksel  $(CXXFLAGS) $(ROOT_ADAPTORS)      $(LIBS)
+		$(CXX) $< -o kksel  $(CXXFLAGS) $(ROOT_ADAPTORS)      $(LIBS)
+		cp -f kksel $(BINDIR)/kksel
 	
 libFitDict.o :  libFitDict.cxx
 		$(CXX) -o $@  $(CXXFLAGS) -c $^

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <math.h> 
 
+#include <boost/format.hpp>
+
 using namespace std;
 
 #include "Riostream.h" 
@@ -306,6 +308,7 @@ Double_t RooBgPdf::evaluate() const
   return pow ( fabs(fX - fB), -1);
 }
 
+
 RooMcb2Pdf::RooMcb2Pdf(const char *name, const char *title,
 	      RooAbsReal & _X, //invariant mass 
 				RooAbsReal & _Mean,   //mean
@@ -338,6 +341,20 @@ RooMcb2Pdf::RooMcb2Pdf(const char *name, const char *title,
    			fN2("nr","nr",this,_n2),
         fXmin(xmin),
         fXmax(xmax)
+{
+}
+
+RooMcb2Pdf::RooMcb2Pdf(const char *name, const char *title,
+	      RooAbsReal & _X, //invariant mass 
+				RooAbsReal & _Mean,   //mean
+				RooAbsReal & _Sigma,   //Common sigma
+				std::vector<RooRealVar> & _s,   //staple 
+				RooAbsReal & _n1,   
+				RooAbsReal & _n2,   
+        double xmin,
+        double xmax
+				) :  RooMcb2Pdf(name,title,
+          _X,_Mean, _Sigma, _s[0],_s[1],_s[2],_s[3],_s[4],_s[5],_s[6],_s[7], _n1, _n2, xmin, xmax)
 {
 }
 
@@ -411,6 +428,11 @@ void RooMcb2Pdf::initArgs(void) const
     b[i] = staple[i][1];
     c[i] = staple[i][2];
   }
+  /* 
+  std::cout << a[0] << " " << a[1] << std::endl;
+  std::cout << b[0] << " " << b[1] << std::endl;
+  std::cout << c[0] << " " << c[1] << std::endl;
+  */
 
 	for(int i=0;i<2;i++)
 	{
@@ -424,16 +446,14 @@ void RooMcb2Pdf::initArgs(void) const
 }
 
 
-//_____________________________________________________________________________
 Int_t RooMcb2Pdf::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* ) const
 {
+  //std::cout << "in getAnayticalIntegral" << std::endl;
   if (matchArgs(allVars,analVars,fX)) return 1 ;
   return 0;
 }
 
 
-
-//_____________________________________________________________________________
 Double_t RooMcb2Pdf::analyticalIntegral(Int_t code, const char* rangeName) const
 {
 	initArgs();
@@ -508,7 +528,11 @@ Double_t RooMcb2Pdf::analyticalIntegral(Int_t code, const char* rangeName) const
 			}
 			else
 			{
-				cout << "ERROR: wrong integral hit range" << endl;
+        if(fabs(c[i]-xrange[i]) > 1e-14)
+        {
+
+          std::cerr << "WARNING: wrong integral hit range: "<< boost::format("c[%d] (%20.15f) > xrange[%d](%20.15f)") % i % c[i] % i % xrange[i] << " c-xrange = " <<  c[i]-xrange[i] << std::endl;
+        }
 			}
 			//cout << "IG[" << i << "]=" << IG[i] << endl;
 			//cout << "IA[" << i << "]=" << IA[i] << endl;
@@ -517,6 +541,8 @@ Double_t RooMcb2Pdf::analyticalIntegral(Int_t code, const char* rangeName) const
 			I+=IG[i] + IA[i] + IB[i] + IC[i];
 		}
 	}
-	//cout << "Itotal = " << I << endl;
+  //std::clog << "rangeName = " << rangeName << "  code = " << code << std::endl;
+  //std::clog << " xmin = " << xmin*fSigma+fMean << " xmax = " << xmax*fSigma + fMean   << "  Itotal = " << I*fSigma << std::endl;
 	return I*fSigma;
 }
+

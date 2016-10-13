@@ -25,7 +25,7 @@
 #include <TSystem.h>
 extern void InitGui();
 VoidFuncPtr_t initfuncs[] = { InitGui, 0 };
-TROOT root("polarimeter","polarimeter", initfuncs);
+TROOT root("kkfit","kkfit", initfuncs);
 
 
 #include <TFile.h>
@@ -55,6 +55,8 @@ TROOT root("polarimeter","polarimeter", initfuncs);
 #include "RooMcbPdf.h"
 
 #include "hashlist.h"
+
+bool BG_NOSLOPE=false;
 
 using namespace RooFit;
 using namespace std;
@@ -102,8 +104,6 @@ struct RooFitItem_t
         h->GetEntries()*100
         );
     std::string bg_name = std::string("bg")+h->GetName();
-    //double Mmin = his->GetXaxis()->GetXmin();
-    //double Mmax = his->GetXaxis()->GetXmax();
     double bgc1min=-10; 
     double bgc1max=+10;
     if(Mmin < 0 && Mmax > 0) 
@@ -131,14 +131,21 @@ struct RooFitItem_t
     //bgB = new RooRealVar((bg_name+"B").c_str(),(std::string("Background shift") + h->GetName()).c_str(),0, -10000, 10000);
     std::string bg_title = std::string("Background Pdf for ") + h->GetName();
     //when proceed data with muond (U channel) not using slope of the background
-    if(fName.find("U") == std::string::npos)
+    if(BG_NOSLOPE)
     {
-      bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec, *bg_c1);
+      bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec);
     }
     else
     {
-      bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec, *bg_c1);
-      //bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec);
+      if(fName.find("U") == std::string::npos)
+      {
+        bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec, *bg_c1);
+      }
+      else
+      {
+        bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec, *bg_c1);
+        //bgPdf = new RooPolynomial(bg_name.c_str(),bg_title.c_str(), Mrec);
+      }
     }
     //bgPdf = new RooBgPdf(bg_name.c_str(), bg_title.c_str(), Mrec, *bgB, his->GetXaxis()->GetXmin(), his->GetXaxis()->GetXmax());
     addPdf = new RooAddPdf(name.c_str(),h->GetTitle(), RooArgList(*bgPdf,*mcbPdf), RooArgList(*Nbg, *Nsig));
@@ -234,6 +241,12 @@ void combfit(TH1 * h1, TH1 *h2)
   f1.frame->Draw();
   f2.frame->Draw("same");
 
+	RooNLLVar nll("nll","nll",simPdf,*data) ;
+  RooPlot* frame_sigma = sigma.frame(Range(0.2, 5.0), Title("-log(L) scan vs sigma")) ;
+  nll.plotOn(frame_sigma,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
+  new TCanvas;
+  frame_sigma->Draw();
+
 }
 
 
@@ -320,12 +333,17 @@ void combfit( std::list<TH1*>  & his_list)
     f->Nsig->Print();
     f->Nbg->Print();
   } 
+	RooNLLVar nll("nll","nll",simPdf,*data) ;
+  RooPlot* frame_sigma = sigma.frame(Range(0.2, 5.0), Title("-log(L) scan vs sigma")) ;
+  nll.plotOn(frame_sigma,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
+  new TCanvas;
+  frame_sigma->Draw();
+
 }
 
 void combfit2( std::list<TH1*>  & his_list)
 {
   //calculate the range
-
   double Mmin  = (*std::max_element(std::begin(his_list), std::end(his_list), 
       [](const TH1 * h1, const TH1 *h2) { return h1->GetXaxis()->GetXmin() < h2->GetXaxis()->GetXmin(); } ))->GetXaxis()->GetXmin();
 
@@ -336,18 +354,18 @@ void combfit2( std::list<TH1*>  & his_list)
 
   RooRealVar Mrec("Mrec","M_{rec}(#pi^{+}#pi^{-})", Mmin,Mmax, "MeV");
 
-  RooRealVar sigma("sigma", "sigma", 1.4,    0,    10, "MeV") ;
+  RooRealVar sigma("sigma", "sigma",              1.27,    0,    10, "MeV") ;
   RooRealVar  mean( "mean",  "mean",   0.5*(Mmin+Mmax), Mmin,  Mmax, "MeV") ;
-  RooRealVar staple[] = 
+  std::vector<RooRealVar> staple = 
   {
     RooRealVar("L1",  "Left Gaus range" ,   2,   "MeV"),
     RooRealVar("L2",  "Left Exp range"  ,   1,   0,  (Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("L3",  "Left Power range",  12,  0,  (Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("L4",  "Left Exp range 2",  10,  0,  (Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("R1", "Right Gaus range" ,  2,   "MeV"),
-    RooRealVar("R2", "Right Exp range"  ,  1,   0,  (Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("R3", "Right Power range",  12,  0,  (Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("R4","Right Exp range 2",  10,  0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("L3",  "Left Power range",  12,   0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("L4",  "Left Exp range 2",  10,   0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("R1",  "Right Gaus range" ,  2,   "MeV"),
+    RooRealVar("R2",  "Right Exp range"  ,  1,   0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("R3",  "Right Power range",  12,  0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("R4",  "Right Exp range 2",  10,  0,  (Mmax-Mmin)*0.5, "MeV"),
   };
   RooRealVar n1("Ln", "Left power", 2,  1, 100) ;
   RooRealVar n2("Rn", "Right power", 2,  1, 100) ;
@@ -357,14 +375,7 @@ void combfit2( std::list<TH1*>  & his_list)
       Mrec,  
       mean,  
       sigma,  
-      staple[0], 
-      staple[1], 
-      staple[2], 
-      staple[3], 
-      staple[4], 
-      staple[5], 
-      staple[6], 
-      staple[7], 
+      staple, 
       n1, 
       n2,
       Mmin,
@@ -387,7 +398,15 @@ void combfit2( std::list<TH1*>  & his_list)
     dataMap[name] = f->data;
   }
   RooDataHist * data = new RooDataHist("data","Combined data", Mrec, sample, dataMap);
+
 	simPdf.fitTo(*data, Extended(), Strategy(2), Minos());
+
+	RooChi2Var chi2Var("chi2", "chi2", simPdf, *data);
+	cout << "chi2 = " << chi2Var.getVal() << endl;
+
+	RooAbsReal* igx = mcbPdf->createIntegral(Mrec) ;
+	cout << "gx_Int[x] = " << igx->getVal() << endl;
+
   auto frame = Mrec.frame(Title("#pi^{+}#pi^{-} recoil invariant mass"));
   std::vector<int> colors ={kBlack, kBlue, kRed, kGreen};
   TLegend * legend = new TLegend(0.8,0.8,1.0,1.0);
@@ -406,16 +425,57 @@ void combfit2( std::list<TH1*>  & his_list)
   mean.Print();
   n1.Print();
   n2.Print();
-  for(int i=0;i<7;i++) staple[i].Print();
+  for(auto & s: staple) s.Print();
   for(auto f: fi_lst)
   {
     f->Nsig->Print();
     f->Nbg->Print();
   } 
+
+
+  for(auto f: fi_lst)
+  {
+    auto fm = fi_lst.back();
+    if(fm == f) continue;
+    double theRatio = f->Nsig->getValV()/fm->Nsig->getValV();
+    double theRelError = sqrt( pow(f->Nsig->getError()/f->Nsig->getValV(), 2)  +  pow(fm->Nsig->getError()/fm->Nsig->getValV(), 2) );
+    double theError = theRatio * theRelError;
+    boost::format fmt("%s/%s = (%6.3f ± %-4.3f) * 1e-3 ( ± %.2f%%)");
+    cout << fmt % f->Nsig->GetName() % fm->Nsig->GetName()% (theRatio*1000) %  (theError*1000) %  (theRelError*100)  <<  endl;
+  }
+
+	RooNLLVar nll("nll","nll",simPdf,*data) ;
+  RooPlot* frame_mean = mean.frame(Range(Mmin, Mmax), Title("-log(L) scan vs mean")) ;
+  nll.plotOn(frame_mean,PrintEvalErrors(100),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
+  //chi2Var.plotOn(frame_mean,ShiftToZero(),LineColor(kRed)) ;
+  //chi2Var.plotOn(frame_mean) ;
+	//frame_mean->SetMinimum(0);
+	//frame_mean->SetMaximum(1e6);
+
+  //RooPlot* frame_sigma = sigma.frame(Range(0.2, 5.0), Title("-log(L) scan vs sigma")) ;
+  //nll.plotOn(frame_sigma,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
+
+  RooPlot* frame_n1 = n1.frame(Title("n1 -log(L)"), Range(1, 5)) ;
+  nll.plotOn(frame_n1,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
+
+  //RooPlot* frame_n2 = n2.frame(Title("n2 -log(L)"), Range(1, 5)) ;
+  //nll.plotOn(frame_n2,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
+
+	TCanvas * cnll =new TCanvas("cnll", "- Log likelihood");
+  frame_mean->Draw();
+	//cnll->Divide(3, 3);
+	//cnll->cd(1);
+	//frame_mean->Draw();
+	//cnll->cd(2);
+	//frame_sigma->Draw();
+	//cnll->cd(3);
+	//frame_n1->Draw();
+	//frame_n2->Draw("same");
 }
 
 int main(int argc,  char ** argv)
 {
+  std::ios_base::sync_with_stdio(false);
   namespace po=boost::program_options;
   po::options_description opt_desc("Allowed options");
   std::string tree_name;
@@ -441,9 +501,9 @@ int main(int argc,  char ** argv)
     ("mc", "Use MonteCarlo information mctopo")
     ("trk","Tracking efficiency fit")
     ("combine,c",po::value<std::string>(&combine_str), "combined fit")
+    ("nobgslope","No bg slope")
     ;
   po::positional_options_description pos;
-  //pos.add("suffix", 1);
   pos.add("input", 1);
   po::variables_map opt; //options container
   try
@@ -462,6 +522,8 @@ int main(int argc,  char ** argv)
     std::clog << opt_desc;
     return 0;
   }
+
+  BG_NOSLOPE = opt.count("nobgslope");
 
   std::cout << " " << suffix << " " << file_name << std::endl;
   
@@ -541,13 +603,9 @@ int main(int argc,  char ** argv)
       his_lst.push_back(create_histogram(str));
     }
     combfit2(his_lst);
+    //combfit(his_lst.front(), his_lst.back());
     theApp.Run();
   }
-
-  //if(opt.count("his"))
-  //{
-  //  his = (TH1*)file.Get(his_name.c_str());
-  //}
 
   const double Scale = 1;
   const double M0 = 0;
