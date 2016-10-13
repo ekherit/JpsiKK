@@ -183,17 +183,21 @@ struct Result_t
   TTree * mctopo_tree;
   TH1D   * hMrec;
   Index_t index;
+  Long64_t count;
   Result_t(void)
   {
     event_tree = nullptr;
     mctopo_tree = nullptr;
     hMrec = nullptr;
     index = {0,0,0};
+    count =0;
   }
+
 
   Result_t(Index_t idx, TTree * event, TTree * mctopo)
   {
     index = idx;
+    count = 0;
     std::string chan;
     std::string sign;
     std::string ntrk;
@@ -247,7 +251,23 @@ struct Result_t
     hMrec = make_hMrec(his_name,"#pi^{+}#pi^{-} recoil mass for " + title);
     event_tree  = make_tree(event,tree_name,"events for " + title);
     mctopo_tree = make_tree(mctopo,mctopo_tree_name,"Monte Carlo events for " + title);
+    std::cout << suffix << std::endl;
   }
+  void Fill(double Mrec, int run =0)
+  {
+    event_tree->Fill();
+    if(run<0) mctopo_tree->Fill();
+    hMrec->Fill(mshift(Mrec));
+    count++;
+  };
+
+  void Write(void)
+  {
+    hMrec->Write();
+    event_tree->Write();
+    mctopo_tree->Write();
+  }
+
 };
 
 int main(int argc, char ** argv)
@@ -268,7 +288,6 @@ int main(int argc, char ** argv)
   double KIN_CHI2;
   opt_desc.add_options()
     ("help,h","Print this help")
-    //("input", po::value<std::string>(&tree_file)->default_value("sample.root"), "Root file (.root) with the data")
     ("input", po::value<std::vector< std::string> >(&files), "Root file (.root) with the data")
     ("output,o", po::value<std::string>(&output_file)->default_value("result.root"), "Output file")
     ("event_tree",  po::value<std::string>(&event_tree_name)->default_value("event"), "Event tree name")
@@ -315,26 +334,13 @@ int main(int argc, char ** argv)
 
   RootEvent  event(load_tree(event_tree_name+tree_suffix,file_list));
   RootMCTopo mctopo(load_tree(mctopo_tree_name+tree_suffix,file_list));
-  //RootMC     mc(load_tree("mc"+tree_suffix,file_list));
   RootMdc    mdc(load_tree("mdc"+tree_suffix,file_list));
 
-  //TApplication theApp("root_app", &argc, argv);
 
 
   TFile file(output_file.c_str(),"RECREATE");
-  //auto hMrecKK = new TH1F("hMrecKK","#pi^{+}#pi^{-} recoil mass for KK channel",NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-  //auto hMrecUU = new TH1F("hMrecUU","#pi^{+}#pi^{-} recoil mass for uu channel",NBINS_UU,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
-
-
-  std::unordered_map<Index_t, TTree*, IndexHash_t > event_tree;
-  std::unordered_map<Index_t, TTree*, IndexHash_t > mctopo_tree;
-  std::unordered_map<Index_t, TTree*, IndexHash_t > mdc_tree;
-
-  std::unordered_map<Index_t, TH1D*, IndexHash_t > hMrec;
 
   const int POSNEG=2;
-  
-
 
   std::unordered_map<Index_t, Result_t, IndexHash_t> R; //the result data map
 
@@ -344,131 +350,27 @@ int main(int argc, char ** argv)
     R[idx] = Result_t(idx,event.fChain,mctopo.fChain);
   };
 
-  for(int chan=0;chan<2; chan++)
+  for(auto  chan : {KAON,MUON})
   {
-    for(auto  chan : {KAON,MUON})
+    for(auto sign : {0,-1,1,2})
     {
-      for(auto sign : {0,-1,1,2})
+      for(auto ntrk : {3,4,3+4})
       {
-        for(auto ntrk : {3,4,3+4})
+        std::cout << "chan = " << setw(5) << chan << " sign = " << setw(5) << sign << " ntrk = " << setw(5) << ntrk;
+        if(sign == 0 && (ntrk ==3 || ntrk==(4+3))) 
         {
-          if(sign == 0 && (ntrk ==3 || ntrk==4)) continue;
-          InitResultItem({chan,sign,ntrk});
+          std::cout << " skip..." << std::endl;
+          continue;
         }
+        std::cout << "  init ";
+        InitResultItem({chan,sign,ntrk});
       }
     }
   }
 
-
-
-  //main four track channel
-  hMrec[{KAON,0,4}] = make_hMrec("hMrecKK","#pi^{+}#pi^{-} recoil mass for KK channel");
-  hMrec[{MUON,0,4}] = make_hMrec("hMrecUU","#pi^{+}#pi^{-} recoil mass for UU channel");
-
-  hMrec[{KAON,-1,3}] = make_hMrec("hMrecKm3","#pi^{+}#pi^{-} recoil mass for negative K channel with 3 tracks");
-  hMrec[{MUON,-1,3}] = make_hMrec("hMrecUm3","#pi^{+}#pi^{-} recoil mass for negative U channel with 3 tracks");
-
-  hMrec[{KAON,1,3}] = make_hMrec("hMrecKp3","#pi^{+}#pi^{-} recoil mass for positive K channel with 3 tracks");
-  hMrec[{MUON,1,3}] = make_hMrec("hMrecUp3","#pi^{+}#pi^{-} recoil mass for positive U channel with 3 tracks");
-
-  hMrec[{KAON,-1,4}] = make_hMrec("hMrecKm4","#pi^{+}#pi^{-} recoil mass for negative K channel with 4 tracks");
-  hMrec[{MUON,-1,4}] = make_hMrec("hMrecUm4","#pi^{+}#pi^{-} recoil mass for negative U channel with 4 tracks");
-
-  hMrec[{KAON,1,4}] = make_hMrec("hMrecKp4","#pi^{+}#pi^{-} recoil mass for positive K channel with 4 tracks");
-  hMrec[{MUON,1,4}] = make_hMrec("hMrecUp4","#pi^{+}#pi^{-} recoil mass for positive U channel with 4 tracks");
-
-
-  hMrec[{KAON,POSNEG,3+4}] = make_hMrec("hMrecK34","#pi^{+}#pi^{-} recoil mass for negative K channel with 3 or 4 tracks");
-  hMrec[{KAON,POSNEG,4}]   = make_hMrec("hMrecK4", "#pi^{+}#pi^{-} recoil mass for negative K channel with 4 tracks");
-  hMrec[{KAON,POSNEG,3}]   = make_hMrec("hMrecK3", "#pi^{+}#pi^{-} recoil mass for negative K channel with 3 tracks");
-
-  hMrec[{MUON,POSNEG,3+4}] = make_hMrec("hMrecU34","#pi^{+}#pi^{-} recoil mass for Muon channel with 3 or 4 tracks");
-  hMrec[{MUON,POSNEG,4}]   = make_hMrec("hMrecU4","#pi^{+}#pi^{-} recoil mass for Muon channel with 4 tracks");
-  hMrec[{MUON,POSNEG,3}]   = make_hMrec("hMrecU3","#pi^{+}#pi^{-} recoil mass for Muon channel with 3 tracks");
-
-
-
-  std::cout << "Init event_treeKK" << std::endl;
-
-
-  event_tree[{KAON,0,4}] = make_tree(event.fChain,"eventKK","KK events");
-  event_tree[{MUON,0,4}] = make_tree(event.fChain,"eventUU","UU events");
-
-
-  event_tree[{KAON,-1,4}] = make_tree(event.fChain,"eventKm4","negative K events with 4 tracks");
-  event_tree[{MUON,-1,4}] = make_tree(event.fChain,"eventUm4","negative U events with 4 tracks");
-
-  event_tree[{KAON,1,4}] = make_tree(event.fChain,"eventKp4","positive K events with 4 tracks");
-  event_tree[{MUON,1,4}] = make_tree(event.fChain,"eventUp4","positive U events with 4 tracks");
-
-  event_tree[{KAON,-1,3}] = make_tree(event.fChain,"eventKm3","negative K events with 3 tracks");
-  event_tree[{MUON,-1,3}] = make_tree(event.fChain,"eventUm3","negative U events with 3 tracks");
-
-  event_tree[{KAON,1,3}] = make_tree(event.fChain,"eventKp3","positive K events with 3 tracks");
-  event_tree[{MUON,1,3}] = make_tree(event.fChain,"eventUp3","positive U events with 3 tracks");
-
-
-  event_tree[{KAON,POSNEG,3+4}] = make_tree(event.fChain,"eventK34","K events with 3 or 4 tracks");
-  event_tree[{MUON,POSNEG,3+4}] = make_tree(event.fChain,"eventU34","U events with 3 or 4 tracks");
-
-  event_tree[{KAON,POSNEG,4}] = make_tree(event.fChain,"eventK4","K events with 4 tracks");
-  event_tree[{MUON,POSNEG,4}] = make_tree(event.fChain,"eventU4","U events with 4 tracks");
-
-  event_tree[{KAON,POSNEG,3}] = make_tree(event.fChain,"eventK3","K events with 3 tracks");
-  event_tree[{MUON,POSNEG,3}] = make_tree(event.fChain,"eventU3","U events with 3 tracks");
-
-
-  mctopo_tree[{KAON,0,4}] = make_tree(mctopo.fChain,"mctopoKK","KK mctopos");
-  mctopo_tree[{MUON,0,4}] = make_tree(mctopo.fChain,"mctopoUU","UU mctopos");
-
-
-  mctopo_tree[{KAON,-1,4}] = make_tree(mctopo.fChain,"mctopoKm4","negative K mctopos with 4 tracks");
-  mctopo_tree[{MUON,-1,4}] = make_tree(mctopo.fChain,"mctopoUm4","negative U mctopos with 4 tracks");
-
-  mctopo_tree[{KAON,1,4}] = make_tree(mctopo.fChain,"mctopoKp4","positive K mctopos with 4 tracks");
-  mctopo_tree[{MUON,1,4}] = make_tree(mctopo.fChain,"mctopoUp4","positive U mctopos with 4 tracks");
-
-  mctopo_tree[{KAON,-1,3}] = make_tree(mctopo.fChain,"mctopoKm3","negative K mctopos with 3 tracks");
-  mctopo_tree[{MUON,-1,3}] = make_tree(mctopo.fChain,"mctopoUm3","negative U mctopos with 3 tracks");
-
-  mctopo_tree[{KAON,1,3}] = make_tree(mctopo.fChain,"mctopoKp3","positive K mctopos with 3 tracks");
-  mctopo_tree[{MUON,1,3}] = make_tree(mctopo.fChain,"mctopoUp3","positive U mctopos with 3 tracks");
-
-
-  mctopo_tree[{KAON,POSNEG,3+4}] = make_tree(mctopo.fChain,"mctopoK34","K mctopos with 3 or 4 tracks");
-  mctopo_tree[{MUON,POSNEG,3+4}] = make_tree(mctopo.fChain,"mctopoU34","U mctopos with 3 or 4 tracks");
-
-  mctopo_tree[{KAON,POSNEG,4}] = make_tree(mctopo.fChain,"mctopoK4","K mctopos with 4 tracks");
-  mctopo_tree[{MUON,POSNEG,4}] = make_tree(mctopo.fChain,"mctopoU4","U mctopos with 4 tracks");
-
-  mctopo_tree[{KAON,POSNEG,3}] = make_tree(mctopo.fChain,"mctopoK3","K mctopos with 3 tracks");
-  mctopo_tree[{MUON,POSNEG,3}] = make_tree(mctopo.fChain,"mctopoU3","U mctopos with 3 tracks");
-
-
-
-  std::cout << "After init trees" << std::endl;
-
-  //auto mdc_treeK = mdc.fChain->CloneTree(0);
-  //mdc_treeK->SetName("mdcK");
-  //mdc_treeK->SetTitle("mdc info for K events");
-
   Long64_t nentries = event.fChain->GetEntriesFast();
-  //std::cout << "Number of entries in tree (GetEntriesFast): " << nentries << std::endl;
-  //std::cout << "Number of entries (GetEntries)" << event.fChain->GetEntries() << std::endl;
 
   Long64_t nbytes = 0, nb = 0;
-
-  Long64_t N0=0;
-  Long64_t NKK=0;
-  Long64_t Nuu=0;
-
-
-
-
-
-  std::unordered_map<Index_t, long int, IndexHash_t > theCounter;
-
-  //TTree::SetMaxTreeSize(100000000000LL);
   
   for (Long64_t jentry=0; jentry<nentries && jentry<NMAX;jentry++)
   {
@@ -477,11 +379,6 @@ int main(int argc, char ** argv)
     if (ientry < 0)  break;
     if(event.run < 0) 
     {
-      //ientry = mc.LoadTree(jentry);
-      //if (ientry < 0)
-      //{
-      //  cerr << "ERROR: mc.LoadTree() retururn " << ientry << endl;
-      //}
       ientry = mctopo.LoadTree(jentry);
       if (ientry < 0) 
       {
@@ -503,7 +400,6 @@ int main(int argc, char ** argv)
       nb = mctopo.fChain->GetEntry(jentry);
     }
     nb = mdc.fChain->GetEntry(jentry);
-    N0++; //count total number of events proceed
     unsigned long hash=0;
     if(event.run<0)  
     {
@@ -522,23 +418,9 @@ int main(int argc, char ** argv)
         && ThetaCut
       )
     {
-      auto fill_data = [&] (int s, int n)
+      auto fill_data = [&R,&event] (int s, int n)
       {
-        Index_t idx = {event.channel, s, n};
-        if(s == POSNEG && n==3)
-        {
-          std::cout << "Before fill POSNEG ntrk=3: " << idx.channel << "," << idx.charge << ","<< idx.tracks << std::endl;
-        }
-        event_tree[idx]->Fill();
-        if(event.run<0) mctopo_tree[idx]->Fill();
-        hMrec[idx]->Fill(mshift(event.Mrec));
-        theCounter[idx]++;
-        if(s == POSNEG && n==3)
-        {
-          std::cout << "Inside fill data: chan = " << event.channel << " sign=" << s << "  event.ngtrack=" << n;
-          std::cout << " theCounter = " << theCounter[idx];
-          std::cout << std::endl;
-        }
+        R[{event.channel, s, n}].Fill(event.Mrec, event.run);
       };
 
       if(event.KK == 1 || event.uu ==1) fill_data(event.sign, event.ngtrack);
@@ -577,14 +459,14 @@ int main(int argc, char ** argv)
         std::cout << endl;
       }
       std::cout << boost::format("%15d %8d %10d %10d %10d %10d %10d %10d %10d %10d") % jentry % event.run 
-        %  theCounter[{KAON,0,4}] 
-        %  theCounter[{KAON,POSNEG,4}] 
-        %  theCounter[{KAON,POSNEG,3}] 
-        %  theCounter[{KAON,POSNEG,3+4}] 
-        %  theCounter[{MUON,0,4}] 
-        %  theCounter[{MUON,POSNEG,4}] 
-        %  theCounter[{MUON,POSNEG,3}] 
-        %  theCounter[{MUON,POSNEG,3+4}];
+        %  R[{KAON,0,4}].count 
+        %  R[{KAON,POSNEG,4}].count 
+        %  R[{KAON,POSNEG,3}].count 
+        %  R[{KAON,POSNEG,3+4}].count 
+        %  R[{MUON,0,4}].count 
+        %  R[{MUON,POSNEG,4}].count 
+        %  R[{MUON,POSNEG,3}].count 
+        %  R[{MUON,POSNEG,3+4}].count;
       if(event.run<0)
       {
         std::cout << "  hash = " << setw(10) << std::hex << hash << "    " << std::dec << mctopo_info(&mctopo);
@@ -592,25 +474,12 @@ int main(int argc, char ** argv)
       std::cout << std::endl;
     }
   }
-  //for(auto  his : hMrec)
-  //{
-  //  his.second->Write();
-  //}
-
-
-  //for(auto & h : hMrec) h.second->Write();
-  //for(auto & t : event_tree) t.second->Write();
-  //for(auto & t : mctopo_tree) t.second->Write();
 
   for(auto & r : R)
   {
-    r.second.hMrec->Write();
-    r.second.event_tree->Write();
-    r.second.mctopo_tree->Write();
+    r.second.Write();
   }
   
-
-
 
   //make usefull cuts 
   TCut KK_cut("hash==0x3031ea55 || hash==0x846b22bf || hash==0xcdffabb3 || hash==0xecdbe915");
@@ -621,7 +490,6 @@ int main(int argc, char ** argv)
 
   TCut bg1_cut("hash==0xcfe7a549 || hash==0x34525dce || hash==0x4d7eec07 || hash==0x59476175 || hash==0x758ebb38 || hash==0x7d41c6b4 || hash==0x8a4d7453 || hash==0xcb9192a5 || hash==0x34525dce || hash==0xcfe7a549 || hash==0xdbde283b || hash==0xffd88ffa");
   bg1_cut.SetName("bg1_cut");
-  //bg1_cut.SetTitle("background: Ψ(2S) → π+π-(J/Ψ → π+(ρ(770)- → (π0 → ɣɣ)π-)) + rad + c.c.");
 
   bg1_cut.Write();
   KK_cut.Write();
@@ -629,6 +497,4 @@ int main(int argc, char ** argv)
 
   file.Close();
 
-  //std::cout << theCounter[{0,0,4}] << std::endl;
-  //theApp.Run();
 }
