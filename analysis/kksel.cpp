@@ -35,6 +35,13 @@
 #include <TH1F.h>
 #include <TH1D.h>
 
+#include <TROOT.h>
+#include <TApplication.h>
+#include <TSystem.h>
+extern void InitGui();
+VoidFuncPtr_t initfuncs[] = { InitGui, 0 };
+TROOT root("kksel","kksel", initfuncs);
+
 #include "libFit.h"
 
 #include "mctopo/mctopo.h"
@@ -117,10 +124,20 @@ TTree * load_tree(string tree_name, string file_name)
 
 const double MSCALE=1000;
 const double MJPSI_SHIFT=3.097;
+int NBINS_KK= 200;
+int NBINS_UU= 500;
+double MRANGE=0.09;
+double MAX_RECOIL_MASS=MJPSI_SHIFT+MRANGE*0.5;
+double MIN_RECOIL_MASS=MJPSI_SHIFT-MRANGE*0.5;
 double mshift(double m) 
 {
   return MSCALE*(m-MJPSI_SHIFT);
 }
+
+enum {KAON, MUON};
+
+enum {NEUTRAL=0, NEGATIVE=-1, POSITIVE=+1, POSITIVE_AND_NEGATIVE=2};
+const int POSNEG=2;
 struct Index_t
 {
   int channel;
@@ -150,19 +167,7 @@ struct IndexHash_t
   }
 };
 
-#include <TROOT.h>
-#include <TApplication.h>
-#include <TSystem.h>
-extern void InitGui();
-VoidFuncPtr_t initfuncs[] = { InitGui, 0 };
-TROOT root("select","select", initfuncs);
 
-enum {KAON, MUON};
-int NBINS_KK= 200;
-int NBINS_UU= 500;
-double MRANGE=0.09;
-double MAX_RECOIL_MASS=MJPSI_SHIFT+MRANGE*0.5;
-double MIN_RECOIL_MASS=MJPSI_SHIFT-MRANGE*0.5;
 
 TTree *  make_tree(TTree * parent_tree, string  name,  string  title)
 {
@@ -177,13 +182,22 @@ TH1D *  make_hMrec(string name, string  title)
   return new TH1D(name.c_str(),title.c_str(),NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
 };
 
+
+/*
+ * =====================================================================================
+ *        Class:  Result_t
+ *  Description:  Contain the result of the selection: histogram, data and monte carlo
+ *  event tree
+ * =====================================================================================
+ */
 struct Result_t
 {
-  TTree * event_tree;
-  TTree * mctopo_tree;
-  TH1D   * hMrec;
-  Index_t index;
-  Long64_t count;
+  TTree * event_tree;  //main event tree
+  TTree * mctopo_tree; //corresponding mc truth information
+  TH1D   * hMrec;      //histogram with pipi recoil mass
+  Index_t index;       //the navigation complex index (Id of the data)
+  Long64_t count;      //number of events
+
   Result_t(void)
   {
     event_tree = nullptr;
@@ -192,7 +206,6 @@ struct Result_t
     index = {0,0,0};
     count =0;
   }
-
 
   Result_t(Index_t idx, TTree * event, TTree * mctopo)
   {
@@ -251,7 +264,7 @@ struct Result_t
     hMrec = make_hMrec(his_name,"#pi^{+}#pi^{-} recoil mass for " + title);
     event_tree  = make_tree(event,tree_name,"events for " + title);
     mctopo_tree = make_tree(mctopo,mctopo_tree_name,"Monte Carlo events for " + title);
-    std::cout << suffix << std::endl;
+    std::cout << "Init result item: " << boost::format("(%2d,%2d,%2d) %4s") % index.channel % index.charge % index.tracks % suffix << std::endl;
   }
   void Fill(double Mrec, int run =0)
   {
@@ -270,12 +283,12 @@ struct Result_t
 
 };
 
+
 int main(int argc, char ** argv)
 {
   namespace po=boost::program_options;
   po::options_description opt_desc("Allowed options");
   std::string tree_name;
-  //std::string tree_file;
   std::vector< std::string> files = {"sample.root"};
   std::string output_file;
   std::string event_tree_name;
@@ -322,9 +335,11 @@ int main(int argc, char ** argv)
     return 0;
   }
 
+  // calculate the maximum and minimum recoil mass
   MAX_RECOIL_MASS=MJPSI_SHIFT+MRANGE*0.5;
   MIN_RECOIL_MASS=MJPSI_SHIFT-MRANGE*0.5;
 
+  //read input files
   std::list < std::string > file_list;
   for( auto dir : files)
   {
@@ -332,37 +347,36 @@ int main(int argc, char ** argv)
   };
 
 
+  //load the data
   RootEvent  event(load_tree(event_tree_name+tree_suffix,file_list));
   RootMCTopo mctopo(load_tree(mctopo_tree_name+tree_suffix,file_list));
   RootMdc    mdc(load_tree("mdc"+tree_suffix,file_list));
 
-
-
   TFile file(output_file.c_str(),"RECREATE");
 
-  const int POSNEG=2;
 
-  std::unordered_map<Index_t, Result_t, IndexHash_t> R; //the result data map
+  //here the result will be stored
+  std::unordered_map<Index_t, Result_t, IndexHash_t> R; 
 
-  //some helper function
+  //define helper function for initialization
   auto InitResultItem = [&R,&event, &mctopo](Index_t idx)
   {
     R[idx] = Result_t(idx,event.fChain,mctopo.fChain);
   };
 
-  for(auto  chan : {KAON,MUON})
+  //initialize the result data
+  for(auto  chan : {KAON,MUON}) //loop over channel
   {
-    for(auto sign : {0,-1,1,2})
+    for(auto sign : {0,-1,1,2}) //over charge
     {
-      for(auto ntrk : {3,4,3+4})
+      for(auto ntrk : {3,4,3+4}) //over tracks number
       {
-        std::cout << "chan = " << setw(5) << chan << " sign = " << setw(5) << sign << " ntrk = " << setw(5) << ntrk;
         if(sign == 0 && (ntrk ==3 || ntrk==(4+3))) 
         {
+          std::cout << "chan = " << setw(5) << chan << " sign = " << setw(5) << sign << " ntrk = " << setw(5) << ntrk;
           std::cout << " skip..." << std::endl;
           continue;
         }
-        std::cout << "  init ";
         InitResultItem({chan,sign,ntrk});
       }
     }
@@ -407,6 +421,7 @@ int main(int argc, char ** argv)
       mctopo.hash = hash;
     }
 
+    //selection options
     bool RecoilCut = MIN_RECOIL_MASS <= event.Mrec && event.Mrec <= MAX_RECOIL_MASS;
     bool KinematicCut = event.kin_chi2 <= KIN_CHI2;
     bool PidCut = event.pid_chi2 <= PID_CHI2;
