@@ -264,7 +264,7 @@ struct Result_t
     hMrec = make_hMrec(his_name,"#pi^{+}#pi^{-} recoil mass for " + title);
     event_tree  = make_tree(event,tree_name,"events for " + title);
     mctopo_tree = make_tree(mctopo,mctopo_tree_name,"Monte Carlo events for " + title);
-    std::cout << "Init result item: " << boost::format("(%2d,%2d,%2d) %4s") % index.channel % index.charge % index.tracks % suffix << std::endl;
+    std::cout << "Init result item: " << boost::format("(%-1d,%2d,%2d) %-4s") % index.channel % index.charge % index.tracks % suffix << std::endl;
   }
   void Fill(double Mrec, int run =0)
   {
@@ -286,6 +286,7 @@ struct Result_t
 
 int main(int argc, char ** argv)
 {
+  std::ios_base::sync_with_stdio(false);
   namespace po=boost::program_options;
   po::options_description opt_desc("Allowed options");
   std::string tree_name;
@@ -365,16 +366,20 @@ int main(int argc, char ** argv)
   };
 
   //initialize the result data
-  for(auto  chan : {KAON,MUON}) //loop over channel
+  std::cout << "Init result items map"<< std::endl;
+  for(int  chan : {KAON,MUON}) //loop over channel
   {
-    for(auto sign : {0,-1,1,2}) //over charge
+    for(int sign : {0,-1,1,2}) //over charge
     {
-      for(auto ntrk : {3,4,3+4}) //over tracks number
+      /* 
+       *  0    : is for 4C kenematic fit with totaly 4 tracks
+       *  1,-1 : 1C kinematic for 3 tracks, charge corresponds the sign of the system of two tracks
+       *  2    : 1C kinematic fit for 3 tracks, but here both charges of system put together
+       */ 
+      for(int ntrk : {3,4,3+4}) //over tracks number
       {
         if(sign == 0 && (ntrk ==3 || ntrk==(4+3))) 
         {
-          std::cout << "chan = " << setw(5) << chan << " sign = " << setw(5) << sign << " ntrk = " << setw(5) << ntrk;
-          std::cout << " skip..." << std::endl;
           continue;
         }
         InitResultItem({chan,sign,ntrk});
@@ -383,6 +388,8 @@ int main(int argc, char ** argv)
   }
 
   Long64_t nentries = event.fChain->GetEntriesFast();
+
+  std::cout << "Total number of events in the data files: " << nentries << std::endl;
 
   Long64_t nbytes = 0, nb = 0;
   
