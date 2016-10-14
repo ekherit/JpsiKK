@@ -35,6 +35,7 @@ TROOT root("kkfit","kkfit", initfuncs);
 #include <TTree.h>
 #include <TCut.h>
 #include <TLegend.h>
+#include <TMath.h>
 
 #include <RooFitResult.h>
 #include <RooChi2Var.h>
@@ -99,7 +100,7 @@ struct RooFitItem_t
     Nbg = new RooRealVar(
         (std::string("Nbg")+h->GetName()).c_str(), 
         (std::string("Number of substrate events for  ") + h->GetTitle()).c_str(), 
-        h->GetEntries()*0.001, 
+        0, 
         0, 
         h->GetEntries()*100
         );
@@ -399,25 +400,48 @@ void combfit2( std::list<TH1*>  & his_list)
   }
   RooDataHist * data = new RooDataHist("data","Combined data", Mrec, sample, dataMap);
 
+	//auto theFitResult = simPdf.fitTo(*data, Extended(), Strategy(2), Minos());
 	simPdf.fitTo(*data, Extended(), Strategy(2), Minos());
 
-	RooChi2Var chi2Var("chi2", "chi2", simPdf, *data);
-	cout << "chi2 = " << chi2Var.getVal() << endl;
+  //int nfp = theFitResult->floatParsFinal().getSize() ;
 
-	RooAbsReal* igx = mcbPdf->createIntegral(Mrec) ;
-	cout << "gx_Int[x] = " << igx->getVal() << endl;
+	RooChi2Var chi2Var("chi2", "chi2", simPdf, *data);
+  double chi2 = chi2Var.getVal();
+  //calculate number of degree of freadom
+  int ndf=0;
+  int nfree_param = 10; //mean,sigma, n1,n2, 6 staple intervals
+  for(auto h : his_list)
+  {
+    std::cout << h->GetName() << " " << h->GetNbinsX() << std::endl;
+    ndf+=h->GetNbinsX();
+    nfree_param += 3; //Nsig, Nbg, bg_slope
+  }
+  double chi2prob = TMath::Prob(chi2,ndf - nfree_param);
+  std::cout << boost::format("chi2/ndf = %f/(%d-%d) = %f,  prob = %f") % chi2 % ndf % nfree_param % (chi2/(ndf-nfree_param)) %  chi2prob<< std::endl;
+  //std::cout << "nfp = " << nfp << std::endl;
+  //RooRealVar myChi2("chi2/ndf", "chi2/ndf", chi2/(ndf-nfree_param));
 
   auto frame = Mrec.frame(Title("#pi^{+}#pi^{-} recoil invariant mass"));
   std::vector<int> colors ={kBlack, kBlue, kRed, kGreen};
   TLegend * legend = new TLegend(0.8,0.8,1.0,1.0);
+  RooArgSet viewArgSet;
+  ///viewArgSet.add(myChi2);
   for(int i =0;i< fi_lst.size(); i++)
   {
     auto f = fi_lst[i];
     data->plotOn(frame, MarkerSize(0.5),  Cut((std::string("sample==sample::")+f->his->GetName()).c_str()), LineColor(colors[i]), MarkerColor(colors[i])) ;
     simPdf.plotOn(frame, Slice(sample,f->his->GetName()),ProjWData(sample,*data), LineWidth(1),LineColor(colors[i])) ;
     simPdf.plotOn(frame, Slice(sample,f->his->GetName()),ProjWData(sample,*data), Components(*f->bgPdf),LineStyle(kDashed),LineWidth(1),LineColor(colors[i])) ;
+    viewArgSet.add(*(f->Nsig));
+    viewArgSet.add(*(f->Nbg));
   }
 	frame->SetMinimum(0.1);
+  chi2 = frame->chiSquare("simPdf","data",nfree_param);
+  double ndoff = frame->GetNbinsX();
+  chi2prob = TMath::Prob(chi2,ndoff);
+  std::cout << " chi2 = " << chi2 << " ndoff = " << ndoff  << "  chi2prob = " << chi2prob << std::endl;
+  simPdf.paramOn(frame, Parameters(viewArgSet));
+  //Mrec.plotOn(frame);
   TCanvas * c = new TCanvas;
   c->SetLogy();
   frame->Draw();
@@ -589,6 +613,7 @@ int main(int argc,  char ** argv)
     auto varexp = boost::format("(Mrec-3.097)*1000 >> Mrec%s(%d,%f,%f)") % suffix % Nbin % Mmin % Mmax; 
     tree->Draw(varexp.str().c_str(),hash_cut && cut.c_str(),"goff");
     h = (TH1F*) tree->GetHistogram();
+    h->SetName(suffix.c_str());
     h->SetTitle(title.c_str());
     return h;
   };
@@ -606,6 +631,7 @@ int main(int argc,  char ** argv)
     //combfit(his_lst.front(), his_lst.back());
     theApp.Run();
   }
+  /*  
 
   const double Scale = 1;
   const double M0 = 0;
@@ -759,6 +785,7 @@ int main(int argc,  char ** argv)
 	gPad->SetLeftMargin(0.15) ; 
 	xframe2->GetYaxis()->SetTitleOffset(1.6) ; 
 	xframe2->Draw() ;
+  */
 	
 	theApp.Run();
 }
