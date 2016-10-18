@@ -58,6 +58,7 @@ TROOT root("kkfit","kkfit", initfuncs);
 #include "hashlist.h"
 
 bool BG_NOSLOPE=false;
+bool BG_FIX_TO_ZERO=false;
 
 using namespace RooFit;
 using namespace std;
@@ -97,13 +98,23 @@ struct RooFitItem_t
         0, 
         h->GetEntries()*100
         );
-    Nbg = new RooRealVar(
-        (std::string("Nbg")+h->GetName()).c_str(), 
-        (std::string("Number of substrate events for  ") + h->GetTitle()).c_str(), 
-        0, 
-        0, 
-        h->GetEntries()*100
-        );
+    if(!BG_FIX_TO_ZERO)
+    {
+      Nbg = new RooRealVar(
+          (std::string("Nbg")+h->GetName()).c_str(), 
+          (std::string("Number of substrate events for  ") + h->GetTitle()).c_str(), 
+          0, 
+          0, 
+          h->GetEntries()*100
+          );
+    }
+    else
+    {
+      Nbg = new RooRealVar(
+          (std::string("Nbg")+h->GetName()).c_str(), 
+          (std::string("Number of substrate events for  ") + h->GetTitle()).c_str(), 
+          0);
+    }
     std::string bg_name = std::string("bg")+h->GetName();
     double bgc1min=-10; 
     double bgc1max=+10;
@@ -355,21 +366,22 @@ void combfit2( std::list<TH1*>  & his_list)
 
   RooRealVar Mrec("Mrec","M_{rec}(#pi^{+}#pi^{-})", Mmin,Mmax, "MeV");
 
-  RooRealVar sigma("sigma", "sigma",              1.27,    0,    10, "MeV") ;
-  RooRealVar  mean( "mean",  "mean",   0.5*(Mmin+Mmax), Mmin,  Mmax, "MeV") ;
+  RooRealVar sigma("sigma", "sigma",              1.39,    0,    10, "MeV") ;
+  //RooRealVar  mean( "mean",  "mean",   0.5*(Mmin+Mmax), Mmin,  Mmax, "MeV") ;
+  RooRealVar  mean( "mean",  "mean",   -0.1,  Mmin,  Mmax, "MeV") ;
   std::vector<RooRealVar> staple = 
   {
     RooRealVar("L1",  "Left Gaus range" ,   2,   "MeV"),
-    RooRealVar("L2",  "Left Exp range"  ,   1,   0,  (Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("L3",  "Left Power range",  12,   0,  (Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("L4",  "Left Exp range 2",  10,   0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("L2",  "Left Exp range"  ,   0.853,   0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("L3",  "Left Power range",  12.8861,   0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("L4",  "Left Exp range 2",  22.7831,   0,  (Mmax-Mmin)*0.5, "MeV"),
     RooRealVar("R1",  "Right Gaus range" ,  2,   "MeV"),
-    RooRealVar("R2",  "Right Exp range"  ,  1,   0,  (Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("R3",  "Right Power range",  12,  0,  (Mmax-Mmin)*0.5, "MeV"),
-    RooRealVar("R4",  "Right Exp range 2",  10,  0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("R2",  "Right Exp range"  ,  2.6e-7,   0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("R3",  "Right Power range",  31.9138,  0,  (Mmax-Mmin)*0.5, "MeV"),
+    RooRealVar("R4",  "Right Exp range 2",  0.125333,  0,  (Mmax-Mmin)*0.5, "MeV"),
   };
-  RooRealVar n1("Ln", "Left power", 2,  1, 100) ;
-  RooRealVar n2("Rn", "Right power", 2,  1, 100) ;
+  RooRealVar n1("Ln", "Left power",  1.326,  1, 100) ;
+  RooRealVar n2("Rn", "Right power", 1.507,  1, 100) ;
 
   //this function describes signal
   RooMcb2Pdf * mcbPdf =  new RooMcb2Pdf("ModCB", "Modified CrystalBall: gaus + exp + power + exp",  
@@ -381,12 +393,24 @@ void combfit2( std::list<TH1*>  & his_list)
       n2,
       Mmin,
       Mmax);
+
+  //this is needed for fit of the monte carlo UU
+  RooRealVar sigma2("sigma2", "sigma2",   5,    2,    20, "MeV") ;
+  RooRealVar  mean2( "mean2",  "mean2",   20,   (Mmax+Mmin)*0.5+10,  Mmax, "MeV") ;
+
+  RooGaussian rad_gausPdf("rad_gaus","Radiative gauss for MonteCarlo", Mrec, mean2, sigma2);
+  RooRealVar  rad_gaus_fraction("rgfrac","fraction of radiative gaus",0,0.,1.);
+  RooAddPdf mcbRadPdf("mcb_rad","Modified crystal ball + radiative Gaus",RooArgList(*mcbPdf, rad_gausPdf), rad_gaus_fraction); 
+
+
+  RooAbsPdf * modelPdf = &mcbRadPdf;
+
   RooCategory sample("sample","sample");
   std::vector< RooFitItem_t *> fi_lst;
   std::map<std::string, RooDataHist*> dataMap;
   for(auto h : his_list)
   {
-    RooFitItem_t * f = new RooFitItem_t(h, mcbPdf, Mrec,Mmin,Mmax);
+    RooFitItem_t * f = new RooFitItem_t(h, modelPdf, Mrec,Mmin,Mmax);
     fi_lst.push_back(f);
     auto name = f->name();
     sample.defineType(name.c_str());
@@ -521,6 +545,7 @@ int main(int argc,  char ** argv)
     ("hash",po::value<std::string>(&hash_list_str),"List of hashes to draw")
     ("skip","skip hashes")
     ("Nbg",po::value<double>(&nbg),"Background events")
+    ("nobg","No background events")
     ("suffix,s",po::value<std::string>(&suffix),"Suffix")
     ("mc", "Use MonteCarlo information mctopo")
     ("trk","Tracking efficiency fit")
@@ -548,6 +573,7 @@ int main(int argc,  char ** argv)
   }
 
   BG_NOSLOPE = opt.count("nobgslope");
+  BG_FIX_TO_ZERO = opt.count("nobg");
 
   std::cout << " " << suffix << " " << file_name << std::endl;
   
