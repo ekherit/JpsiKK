@@ -46,6 +46,8 @@ TROOT root("kksel","kksel", initfuncs);
 
 #include "mctopo/mctopo.h"
 
+#include "hashlist.h"
+
 using namespace std;
 
 list<string> get_file_list_in_dir(string dirname)
@@ -194,6 +196,7 @@ struct Result_t
 {
   TTree * event_tree;  //main event tree
   TTree * mctopo_tree; //corresponding mc truth information
+  TTree * mis_tree; // missed data
   TH1D   * hMrec;      //histogram with pipi recoil mass
   Index_t index;       //the navigation complex index (Id of the data)
   Long64_t count;      //number of events
@@ -202,12 +205,24 @@ struct Result_t
   {
     event_tree = nullptr;
     mctopo_tree = nullptr;
+    mis_tree = nullptr;
     hMrec = nullptr;
     index = {0,0,0};
     count =0;
   }
 
-  Result_t(Index_t idx, TTree * event, TTree * mctopo)
+  Result_t & operator=(const Result_t & r)
+  {
+    event_tree=r.event_tree;
+    mctopo_tree=r.mctopo_tree;
+    mis_tree=r.mis_tree;
+    hMrec = r.hMrec;
+    index = r.index;
+    count = r.count;
+    return *this;
+  }
+
+  Result_t(Index_t idx, TTree * event, TTree * mctopo, RootMdc * mdc)
   {
     index = idx;
     count = 0;
@@ -260,17 +275,21 @@ struct Result_t
     std::string his_name = "hMrec" + suffix;
     std::string tree_name = "event" + suffix;
     std::string mctopo_tree_name = "mctopo"+ suffix;
+    std::string mis_tree_name = "mis"+ suffix;
 
     hMrec = make_hMrec(his_name,"#pi^{+}#pi^{-} recoil mass for " + title);
     event_tree  = make_tree(event,tree_name,"events for " + title);
     mctopo_tree = make_tree(mctopo,mctopo_tree_name,"Monte Carlo events for " + title);
+    mis_tree = new TTree(mis_tree_name.c_str(),("Missing data" + title).c_str());
+    mis_tree->Branch("Eemc",&(mdc->E),"Eemc[4]/D");
     std::cout << "Init result item: " << boost::format("(%-1d,%2d,%2d) %-4s") % index.channel % index.charge % index.tracks % suffix << std::endl;
   }
-  void Fill(double Mrec, int run =0)
+  void Fill(double Mrec, int run =0,RootMdc * mdc=nullptr)
   {
     event_tree->Fill();
     if(run<0) mctopo_tree->Fill();
     hMrec->Fill(mshift(Mrec));
+    mis_tree->Fill();
     count++;
   };
 
@@ -279,6 +298,7 @@ struct Result_t
     hMrec->Write();
     event_tree->Write();
     mctopo_tree->Write();
+    mis_tree->Write();
   }
 
 };
@@ -300,6 +320,7 @@ int main(int argc, char ** argv)
   //selection parameters
   double PID_CHI2;
   double KIN_CHI2;
+  double KIN_CHI2_1C; //kin chi2 for 1C kinematic fit
   opt_desc.add_options()
     ("help,h","Print this help")
     ("input", po::value<std::vector< std::string> >(&files), "Root file (.root) with the data")
@@ -311,9 +332,8 @@ int main(int argc, char ** argv)
     ("N", po::value<unsigned long long>(&NMAX)->default_value(std::numeric_limits<unsigned long long>::max()), "Maximum event number to proceed")
     ("mrange", po::value<double>(&MRANGE)->default_value(0.09), "Pion recoil mass range")
     ("kin_chi2", po::value<double>(&KIN_CHI2)->default_value(40), "Kinematic chi square cut")
+    ("kin_chi2_1c", po::value<double>(&KIN_CHI2_1C)->default_value(10), "Kinematic chi square cut for 3 particles fit")
     ("pid_chi2", po::value<double>(&PID_CHI2)->default_value(20), "Particle id cut")
-    ("rad",  "Fit by rad gaus")
-    ("simple",  "Simple model gaus + power + exp")
     ;
   po::positional_options_description pos;
   pos.add("input",-1);
@@ -360,9 +380,9 @@ int main(int argc, char ** argv)
   std::unordered_map<Index_t, Result_t, IndexHash_t> R; 
 
   //define helper function for initialization
-  auto InitResultItem = [&R,&event, &mctopo](Index_t idx)
+  auto InitResultItem = [&R,&event, &mctopo, &mdc](Index_t idx)
   {
-    R[idx] = Result_t(idx,event.fChain,mctopo.fChain);
+    R[idx] = Result_t(idx,event.fChain,mctopo.fChain, &mdc);
   };
 
   //initialize the result data
@@ -409,6 +429,7 @@ int main(int argc, char ** argv)
     }
     ientry = mdc.LoadTree(jentry);
 
+
     nb = event.fChain->GetEntry(jentry);   nbytes += nb;
     if(nb < 0 )
     {
@@ -440,15 +461,15 @@ int main(int argc, char ** argv)
         && ThetaCut
       )
     {
-      auto fill_data = [&R,&event] (int s, int n)
+      auto fill_data = [&R,&event,&mdc] (int s, int n)
       {
-        R[{event.channel, s, n}].Fill(event.Mrec, event.run);
+        R[{event.channel, s, n}].Fill(event.Mrec, event.run, &mdc);
       };
 
       if(event.KK == 1 || event.uu ==1) fill_data(event.sign, event.ngtrack);
       if(event.K  == 1 || event.u==1)
       {
-        if(event.ngntrack==0  && event.kin_chi2<10)
+        if(event.ngntrack==0  && event.kin_chi2<KIN_CHI2_1C)
         {
           if(event.ngtrack == 3 || event.ngtrack == 4) 
           {
@@ -503,19 +524,22 @@ int main(int argc, char ** argv)
   }
   
 
-  //make usefull cuts 
-  TCut KK_cut("hash==0x3031ea55 || hash==0x846b22bf || hash==0xcdffabb3 || hash==0xecdbe915");
-  KK_cut.SetName("KK");
+  std::map<std::string, TCut> UsefulCuts;
+  auto do_cut = [&UsefulCuts](std::string name)
+  {
+    UsefulCuts[name] = make_cut({name});
+    UsefulCuts[name].SetName(name.c_str());
+  };
 
-  TCut UU_cut("hash==0x1397e7e7 || hash == 0x8ac60398 || hash == 0xaca004d7 || hash == 0xcf7de4a7 || hash == 0xdaa0af44");
-  UU_cut.SetName("uu");
+  do_cut("KK");
+  do_cut("UU");
+  do_cut("jpsi");
+  do_cut("nojpsi");
 
-  TCut bg1_cut("hash==0xcfe7a549 || hash==0x34525dce || hash==0x4d7eec07 || hash==0x59476175 || hash==0x758ebb38 || hash==0x7d41c6b4 || hash==0x8a4d7453 || hash==0xcb9192a5 || hash==0x34525dce || hash==0xcfe7a549 || hash==0xdbde283b || hash==0xffd88ffa");
-  bg1_cut.SetName("bg1_cut");
-
-  bg1_cut.Write();
-  KK_cut.Write();
-  UU_cut.Write();
+  for(auto & cut : UsefulCuts)
+  {
+    cut.second.Write();
+  }
 
   file.Close();
 
