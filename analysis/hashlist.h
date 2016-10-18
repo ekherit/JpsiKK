@@ -20,6 +20,8 @@
 #include <vector>
 #include <list>
 
+#include <boost/algorithm/string.hpp>
+
 #include <TCut.h>
 
 struct channel_view_t
