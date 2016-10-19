@@ -96,7 +96,12 @@ int main(int argc,  char ** argv)
 	double Mmin  = hisKK->GetXaxis()->GetXmin();
 	double Mmax  = hisKK->GetXaxis()->GetXmax();
   RooRealVar Mrec("Mrec","M_{rec}(#pi^{+}#pi^{-}) - 3097 ", Mmin,Mmax, "MeV");
+  RooRealVar  mean( "mean",  "mean",   -0.1 + 0.5*(Mmin+Mmax) ,  Mmin,  Mmax, "MeV") ;
   RooRealVar sigma("sigma","sigma",1.4,0,10, "MeV") ;
+  RooRealVar n1("n1","n1", 3,  1,100) ;
+  RooRealVar n2("n2","n2", 2,  1,100) ;
+	RooMcb2Pdf *mcbPdf=0;
+  /*
   RooRealVar staple1("staple1","staple1",-15,   Mmin,Mmax, "MeV") ;
   RooRealVar staple2("staple2","staple2", -3,   Mmin,Mmax, "MeV") ;
   RooRealVar staple3("staple3","staple3", -2,   Mmin,Mmax, "MeV") ;
@@ -104,10 +109,7 @@ int main(int argc,  char ** argv)
   RooRealVar staple5("staple5","staple5",  2,   Mmin,Mmax, "MeV") ;
   RooRealVar staple6("staple6","staple6",  4,   Mmin,Mmax, "MeV") ;
   RooRealVar staple7("staple7","staple7", 15,   Mmin,Mmax, "MeV") ;
-  RooRealVar n1("n1","n1", 3,  1,100) ;
-  RooRealVar n2("n2","n2", 2,  1,100) ;
 
-	RooMcbPdf *mcbPdf=0;
 	if(opt.count("simple"))
 	{
 		mcbPdf =  new RooMcbPdf("ModCB", "Simple Modified CrystalBall: gaus + power + exp",  Mrec,  sigma,  
@@ -132,6 +134,20 @@ int main(int argc,  char ** argv)
 			n1, 
 			n2);
 	}
+  */
+  RooRealVar staple1("L1" , "Left Gaus range"   , 2        , "MeV");
+  RooRealVar staple2("L2" , "Left Exp range"    , 0.853    , 0      , (Mmax-Mmin)*0.5 , "MeV");
+  RooRealVar staple3("L3" , "Left Power range"  , 12.8861  , 0      , (Mmax-Mmin)*0.5 , "MeV");
+  RooRealVar staple4("L4" , "Left Exp range 2"  , 22.7831  , 0      , (Mmax-Mmin)*0.5 , "MeV");
+  RooRealVar staple5("R1" , "Right Gaus range"  , 2        , "MeV");
+  RooRealVar staple6("R2" , "Right Exp range"   , 2.6e-7   , 0      , (Mmax-Mmin)*0.5 , "MeV"); 
+  RooRealVar staple7("R3" , "Right Power range" , 31.9138  , 0      , (Mmax-Mmin)*0.5 , "MeV"); 
+  RooRealVar staple8("R4" , "Right Exp range 2" , 0.125333 , 0      , (Mmax-Mmin)*0.5 , "MeV");
+
+  mcbPdf = new RooMcb2Pdf("mcb2","mcb2",Mrec,mean,sigma,
+      staple1,staple2,staple3,staple4,staple5,staple6,staple7,staple8,
+      n1,n2,Mmin,Mmax);
+
 
 
 	RooRealVar radMean("radMean", "rad mean",20,  1, 40, "MeV");
@@ -245,24 +261,27 @@ int main(int argc,  char ** argv)
 
   RooPlot* frame_sigma = sigma.frame(Range(0.2, 2.0), Title("-log(L) scan vs sigma")) ;
   nll.plotOn(frame_sigma,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
-  RooPlot* frame_staple4 = staple4.frame(Title("staple4 -log(L)")) ;
-  nll.plotOn(frame_staple4,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
 
-  RooPlot* frame_staple3 = staple3.frame(Title("staple3 -log(L)")) ;
-  nll.plotOn(frame_staple3,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
-  RooPlot* frame_staple5 = staple5.frame(Title("staple5 -log(L)")) ;
-  nll.plotOn(frame_staple5,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
+  RooPlot* frame_mean = mean.frame(Range(-2.0, 2.0), Title("-log(L) scan vs mean")) ;
+  nll.plotOn(frame_mean,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
 
-  RooPlot* frame_staple2 = staple2.frame(Title("staple2 -log(L)")) ;
+  RooPlot* frame_staple2 = staple2.frame(Range(0.,40.),Title("staple2 -log(L)")) ;
   nll.plotOn(frame_staple2,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
-  RooPlot* frame_staple6 = staple6.frame(Title("staple6 -log(L)")) ;
+
+  RooPlot* frame_staple6 = staple6.frame(Range(0.,40.),Title("staple6 -log(L)")) ;
   nll.plotOn(frame_staple6,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
 
-  RooPlot* frame_staple1 = staple1.frame(Title("staple1 -log(L)")) ;
-  nll.plotOn(frame_staple1,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
-  RooPlot* frame_staple7 = staple7.frame(Title("staple7 -log(L)")) ;
+  RooPlot* frame_staple3 = staple3.frame(Range(0.,40.),Title("staple3 -log(L)")) ;
+  nll.plotOn(frame_staple3,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
+
+  RooPlot* frame_staple7 = staple7.frame(Range(0.,40.),Title("staple7 -log(L)")) ;
   nll.plotOn(frame_staple7,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
 
+  RooPlot* frame_staple4 = staple4.frame(Range(0.,40.),Title("staple4 -log(L)")) ;
+  nll.plotOn(frame_staple4,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
+
+  RooPlot* frame_staple8 = staple8.frame(Range(0.,40.),Title("staple8 -log(L)")) ;
+  nll.plotOn(frame_staple8,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
 
   RooPlot* frame_n1 = n1.frame(Title("n1 -log(L)"), Range(1, 10)) ;
   nll.plotOn(frame_n1,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
@@ -281,24 +300,24 @@ int main(int argc,  char ** argv)
 	TCanvas * cnll =new TCanvas;
 	cnll->Divide(3, 3);
 	cnll->cd(1);
-	frame_sigma->Draw();
+	frame_mean->Draw();
 	cnll->cd(2);
-	frame_staple4->Draw();
+	frame_sigma->Draw();
 	cnll->cd(3);
-	frame_staple3->Draw();
-	frame_staple5->Draw("same");
-	cnll->cd(5);
 	frame_staple2->Draw();
 	frame_staple6->Draw("same");
-	cnll->cd(6);
-	frame_staple1->Draw();
+	cnll->cd(4);
+	frame_staple3->Draw();
 	frame_staple7->Draw("same");
-	cnll->cd(7);
+	cnll->cd(5);
+	frame_staple4->Draw();
+	frame_staple8->Draw("same");
+	cnll->cd(6);
 	frame_n1->Draw();
 	frame_n2->Draw("same");
-	cnll->cd(8);
+	cnll->cd(7);
 	frame_NKK->Draw();
-	cnll->cd(9);
+	cnll->cd(8);
 	frame_NbgKK->Draw();
 
 
