@@ -124,13 +124,17 @@ TTree * load_tree(string tree_name, string file_name)
   return tree;
 }
 
-const double MSCALE=1000;
-const double MJPSI_SHIFT=3.097;
-int NBINS_KK= 200;
-int NBINS_UU= 500;
-double MRANGE=0.09;
+//parameters for shift and scale the Mrec (recoil mass)
+const double MSCALE=1000; //will be MeV unis
+const double MJPSI_SHIFT=3.097; //shift for JPsi mass
+//number of bins in histogram
+const int NBINS_KK= 200; //for Kaon events
+const int NBINS_UU= 500; //for Muon events
+
+double MRANGE=0.09; //Cut range for the recoil mass
 double MAX_RECOIL_MASS=MJPSI_SHIFT+MRANGE*0.5;
 double MIN_RECOIL_MASS=MJPSI_SHIFT-MRANGE*0.5;
+
 double mshift(double m) 
 {
   return MSCALE*(m-MJPSI_SHIFT);
@@ -140,6 +144,7 @@ enum {KAON, MUON};
 
 enum {NEUTRAL=0, NEGATIVE=-1, POSITIVE=+1, POSITIVE_AND_NEGATIVE=2};
 const int POSNEG=2;
+
 struct Index_t
 {
   int channel;
@@ -230,13 +235,16 @@ struct Result_t
     std::string sign;
     std::string ntrk;
     std::string title;
+    int Nbins=0;
     switch(idx.channel)
     {
       case KAON:
         chan="K";
+        Nbins = NBINS_KK;
         break;
       case MUON:
         chan="U";
+        Nbins = NBINS_UU;
         break;
     }
     switch(idx.tracks)
@@ -277,7 +285,7 @@ struct Result_t
     std::string mctopo_tree_name = "mctopo"+ suffix;
     std::string mis_tree_name = "mis"+ suffix;
 
-    int Nbins = event->GetEntries() < 1e5 ? NBINS_KK : NBINS_UU;
+
     hMrec = make_hMrec(his_name,"#pi^{+}#pi^{-} recoil mass for " + title, Nbins);
     event_tree  = make_tree(event,tree_name,"events for " + title);
     mctopo_tree = make_tree(mctopo,mctopo_tree_name,"Monte Carlo events for " + title);
@@ -414,6 +422,7 @@ int main(int argc, char ** argv)
 
   Long64_t nbytes = 0, nb = 0;
   
+  //main loop over events
   for (Long64_t jentry=0; jentry<nentries && jentry<NMAX;jentry++)
   {
     Long64_t ientry;
@@ -455,33 +464,72 @@ int main(int argc, char ** argv)
     bool KinematicCut = event.kin_chi2 <= KIN_CHI2;
     bool PidCut = event.pid_chi2 <= PID_CHI2;
     bool ThetaCut =  fabs(cos(event.theta[2])) < 0.8 && fabs(cos(event.theta[3])) <0.8;
-    if(    
-           RecoilCut 
+    bool Common1CCut   = 
+         event.ngntrack == 0  
+      && (event.ngtrack == 3 || event.ngtrack == 4)
+      && event.kin_chi2 < KIN_CHI2_1C;
+
+    bool EpCut[4] = {false,false,false,false};
+    for(int i=2;i<4;i++)
+    {
+      double ep = mdc.E[i]/mdc.p[i];
+      EpCut[i] =  0.1 < ep && ep < 0.25;
+    };
+
+    bool Muon4TracksEpCut = EpCut[2] && EpCut[3]; 
+    bool Muon3TracksEpCut = (event.sign < 0 && EpCut[2]) || (event.sign > 0 && EpCut[3]);
+
+    auto fill_data = [&R,&event,&mdc] (int s, int n)
+    {
+      R[{event.channel, s, n}].Fill(event.Mrec, event.run, &mdc);
+    };
+
+    auto posneg_fill = [&](void) 
+    {
+      fill_data(event.sign, event.ngtrack);
+      fill_data(POSNEG,3+4);
+      fill_data(POSNEG,event.ngtrack);
+    };
+
+    if(    RecoilCut 
         && KinematicCut 
         && PidCut 
         && ThetaCut
       )
     {
-      auto fill_data = [&R,&event,&mdc] (int s, int n)
-      {
-        R[{event.channel, s, n}].Fill(event.Mrec, event.run, &mdc);
-      };
 
-      if(event.KK == 1 || event.uu ==1) fill_data(event.sign, event.ngtrack);
-      if(event.K  == 1 || event.u==1)
+      //Case of Muon channel with 4 tracks with 4C kinematic fit.
+      //Additional cut for the muons will be applied
+      //see EpCut above    0.1  < E/p < 0.25
+      //this will suppress half of the pions
+      if(event.uu == 1 && Muon4TracksEpCut)
       {
-        if(event.ngntrack==0  && event.kin_chi2<KIN_CHI2_1C)
+        fill_data(event.sign, event.ngtrack);
+      }
+
+      //Kaon 4C kinematic case with 4 tracks
+      if(event.KK == 1) 
+      {
+        fill_data(event.sign, event.ngtrack);
+      }
+
+      //1C kinematic fit (using 3tracks only) but in real has 3 or 4 tracks 
+      if(Common1CCut)
+      {
+        if (event.u == 1 && Muon3TracksEpCut)
         {
-          if(event.ngtrack == 3 || event.ngtrack == 4) 
-          {
-            fill_data(event.sign, event.ngtrack);
-            fill_data(POSNEG,3+4);
-            fill_data(POSNEG,event.ngtrack);
-          }
+          posneg_fill();
+        }
+        if(event.K == 1)
+        {
+          posneg_fill();
         }
       }
     }
 
+    //print progress
+    //logarifmicaly suppress output
+    //at first print every, then every 10, then every 100... until every 10000
     static unsigned long every = 1;
     static unsigned long head = 0;
     if(jentry > every*10 && every<MAX_EVERY) every*=10;
@@ -519,12 +567,14 @@ int main(int argc, char ** argv)
     }
   }
 
+  //save result into root file
   for(auto & r : R)
   {
     r.second.Write();
   }
   
 
+  //prepare usefull cuts 
   std::map<std::string, TCut> UsefulCuts;
   auto do_cut = [&UsefulCuts](std::string name)
   {
@@ -537,11 +587,13 @@ int main(int argc, char ** argv)
   do_cut("jpsi");
   do_cut("nojpsi");
 
+  //save those useful cuts into root file
   for(auto & cut : UsefulCuts)
   {
     cut.second.Write();
   }
 
+  //close file
   file.Close();
 
 }
