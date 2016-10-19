@@ -353,8 +353,38 @@ RooMcb2Pdf::RooMcb2Pdf(const char *name, const char *title,
 				RooAbsReal & _n2,   
         double xmin,
         double xmax
-				) :  RooMcb2Pdf(name,title,
-          _X,_Mean, _Sigma, _s[0],_s[1],_s[2],_s[3],_s[4],_s[5],_s[6],_s[7], _n1, _n2, xmin, xmax)
+				) :  
+  // 			fX("x","x",this,_X),
+  // 			fMean("mean","mean",this,_Mean), 
+  // 			fSigma("sigma","sigma",this,_Sigma), 
+  // 			fStaple1("staple1","staple1",this,_s[0]), 
+  // 			fStaple2("staple2","staple2",this,_s[1]), 
+  // 			fStaple3("staple3","staple3",this,_s[2]), 
+  // 			fStaple4("staple4","staple4",this,_s[3]), 
+  // 			fStaple5("staple5","staple5",this,_s[4]), 
+  // 			fStaple6("staple6","staple6",this,_s[5]), 
+  // 			fStaple7("staple7","staple7",this,_s[6]), 
+  // 			fStaple8("staple8","staple8",this,_s[7]), 
+  // 			fN1("nl","nl",this,_n1), 
+  // 			fN2("nr","nr",this,_n2),
+  //      fXmin(xmin),
+  //      fXmax(xmax)
+  RooMcb2Pdf(name,title,
+          _X,
+          _Mean, 
+          _Sigma, 
+          _s[0],
+          _s[1],
+          _s[2],
+          _s[3],
+          _s[4],
+          _s[5],
+          _s[6],
+          _s[7], 
+          _n1, 
+          _n2, 
+          xmin, 
+          xmax)
 {
 }
 
@@ -541,8 +571,8 @@ Double_t RooMcb2Pdf::analyticalIntegral(Int_t code, const char* rangeName) const
 			I+=IG[i] + IA[i] + IB[i] + IC[i];
 		}
 	}
-  //std::clog << "rangeName = " << rangeName << "  code = " << code << std::endl;
-  //std::clog << " xmin = " << xmin*fSigma+fMean << " xmax = " << xmax*fSigma + fMean   << "  Itotal = " << I*fSigma << std::endl;
+  std::clog << "rangeName = " << rangeName << "  code = " << code << std::endl;
+  std::clog << " xmin = " << xmin*fSigma+fMean << " xmax = " << xmax*fSigma + fMean   << "  Itotal = " << I*fSigma << std::endl;
 	return I*fSigma;
 }
 
