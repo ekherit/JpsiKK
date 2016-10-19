@@ -179,9 +179,9 @@ TTree *  make_tree(TTree * parent_tree, string  name,  string  title)
   return tree;
 };
 
-TH1D *  make_hMrec(string name, string  title) 
+TH1D *  make_hMrec(string name, string  title, int Nbins) 
 {
-  return new TH1D(name.c_str(),title.c_str(),NBINS_KK,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
+  return new TH1D(name.c_str(),title.c_str(),Nbins,mshift(MIN_RECOIL_MASS),mshift(MAX_RECOIL_MASS));
 };
 
 
@@ -277,7 +277,8 @@ struct Result_t
     std::string mctopo_tree_name = "mctopo"+ suffix;
     std::string mis_tree_name = "mis"+ suffix;
 
-    hMrec = make_hMrec(his_name,"#pi^{+}#pi^{-} recoil mass for " + title);
+    int Nbins = event->GetEntries() < 1e5 ? NBINS_KK : NBINS_UU;
+    hMrec = make_hMrec(his_name,"#pi^{+}#pi^{-} recoil mass for " + title, Nbins);
     event_tree  = make_tree(event,tree_name,"events for " + title);
     mctopo_tree = make_tree(mctopo,mctopo_tree_name,"Monte Carlo events for " + title);
     mis_tree = new TTree(mis_tree_name.c_str(),("Missing data" + title).c_str());
