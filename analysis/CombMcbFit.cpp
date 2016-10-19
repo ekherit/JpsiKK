@@ -16,7 +16,6 @@
 #include <iostream>
 
 
-#include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
 #include <TROOT.h>
@@ -28,8 +27,6 @@ TROOT root("polarimeter","polarimeter", initfuncs);
 
 
 #include <TFile.h>
-#include <TH1F.h>
-#include <TH2F.h>
 
 #include "fit.h"
 
@@ -72,6 +69,10 @@ int main(int argc,  char ** argv)
 	//TTree * treeKK = (TTree*)file.Get("eventKK");
 	//TTree * treeUU = (TTree*)file.Get("eventUU");
 	TApplication theApp("root_app", &argc, argv);
-  fit(hisKK,hisUU);
+  std::list<TH1*> hlst;
+  hlst.push_back(hisKK);
+  hlst.push_back(hisUU);
+  //fit(hisKK,hisUU);
+  fit(hlst);
 	theApp.Run();
 }

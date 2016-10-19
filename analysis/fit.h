@@ -16,27 +16,19 @@
  * =====================================================================================
  */
 
+#ifndef IBN_JPSIKK_FIT_H
+#define IBN_JPSIKK_FIT_H
 
-#include <RooSimultaneous.h>
-#include <RooFitResult.h>
-#include <RooChi2Var.h>
-#include <RooNLLVar.h>
-#include <RooRealVar.h>
-#include <RooPolynomial.h>
-#include <RooDataSet.h>
-#include <RooDataHist.h>
-#include <RooGaussian.h>
-#include <RooCategory.h>
-#include <RooAddPdf.h>
-#include <TCanvas.h>
-#include <RooPlot.h>
-#include <TAxis.h>
-#include <RooBukinPdf.h>
+#include <list>
 
-#include "RooMcbPdf.h"
-
-using namespace RooFit;
 using namespace std;
 
+class TH1;
+
 #include "RooMcbPdf.h"
+
 extern void fit(TH1 * hisKK, TH1 * hisUU);
+extern void fit(std::list<TH1*> & );
+
+
+#endif

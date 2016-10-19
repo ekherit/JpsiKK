@@ -73,7 +73,6 @@ struct RooFitItem_t
   RooRealVar    * bg_c1;
   RooRealVar    * bgB;
   RooPolynomial * bgPdf;
-  //RooBgPdf * bgPdf;
   RooAddPdf     * addPdf;
   RooPlot       * frame;
   std::string fName;

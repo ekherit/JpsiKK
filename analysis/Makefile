@@ -12,22 +12,24 @@ BINDIR=$(HOME)/work/bin
 testMcbFit : testMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o
 		$(CXX)  -o $@   $< RooMcbPdf.o  $(CXXFLAGS) $(LIBS) 
 
-kkfit : kkfit.cpp RooMcbPdf.h   RooMcbPdf.o
+kkfit : kkfit.cpp RooMcbPdf.h   RooMcbPdf.o fit.o
 		$(CXX)  -o kkfit   $< RooMcbPdf.o  $(CXXFLAGS) $(LIBS) 
 		cp -f kkfit $(BINDIR)/kkfit
 
-combkkfit : CombMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o
-		$(CXX)  -o combkkfit    $< RooMcbPdf.o  $(CXXFLAGS) $(LIBS)
+combkkfit : CombMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o fit.o
+		$(CXX)  -o combkkfit    $< RooMcbPdf.o fit.o $(CXXFLAGS) $(LIBS)
 		cp -f combkkfit $(BINDIR)/combkkfit
 
 ROOT_ADAPTORS = RootEvent.o RootMC.o RootMdc.o RootEmc.o RootTof.o RootDedx.o RootMuc.o RootNeutral.o mctopo/RootMCTopo.o
 
-libFit.so : RooMcbPdf.o libFitDict.o  $(ROOT_ADAPTORS)
+libFit.so : RooMcbPdf.o libFitDict.o  fit.o $(ROOT_ADAPTORS)
 		$(CXX) $^  -shared -o $@ -fPIC   $(LIBS)
 
 RooMcbPdf.o : RooMcbPdf.cpp
 		$(CXX) -fPIC -o RooMcbPdf.o $(CXXFLAGS) -c RooMcbPdf.cpp $(LIBS)
 
+fit.o : fit.cpp fit.h
+		$(CXX) -fPIC -o fit.o $(CXXFLAGS) -c fit.cpp $(LIBS)
 
 kksel : kksel.cpp $(ROOT_ADAPTORS) libFitDict.o RooMcbPdf.o
 		$(CXX) $< -o kksel  $(CXXFLAGS) $(ROOT_ADAPTORS)      $(LIBS)
