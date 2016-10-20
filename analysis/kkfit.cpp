@@ -57,6 +57,8 @@ TROOT root("kkfit","kkfit", initfuncs);
 
 #include "hashlist.h"
 
+#include "fit.h"
+
 bool BG_NOSLOPE=false;
 bool BG_FIX_TO_ZERO=false;
 bool GAUS_RAD=false;
@@ -371,17 +373,6 @@ void combfit2( std::list<TH1*>  & his_list)
 
   RooRealVar sigma("sigma", "sigma",              1.39,    0.5,    10, "MeV") ;
   RooRealVar  mean( "mean",  "mean",   -0.1 + 0.5*(Mmin+Mmax) ,  Mmin,  Mmax, "MeV") ;
-  //std::vector<RooRealVar> staple = 
-  //{
-  //  RooRealVar("L1" , "Left Gaus range"   , 2        , "MeV") ,
-  //  RooRealVar("L2" , "Left Exp range"    , 0.853    , 0      , (Mmax-Mmin)*0.5 , "MeV") ,
-  //  RooRealVar("L3" , "Left Power range"  , 12.8861  , 0      , (Mmax-Mmin)*0.5 , "MeV") ,
-  //  RooRealVar("L4" , "Left Exp range 2"  , 22.7831  , 0      , (Mmax-Mmin)*0.5 , "MeV") ,
-  //  RooRealVar("R1" , "Right Gaus range"  , 2        , "MeV") ,
-  //  RooRealVar("R2" , "Right Exp range"   , 2.6e-7   , 0      , (Mmax-Mmin)*0.5 , "MeV") ,
-  //  RooRealVar("R3" , "Right Power range" , 31.9138  , 0      , (Mmax-Mmin)*0.5 , "MeV") ,
-  //  RooRealVar("R4" , "Right Exp range 2" , 0.125333 , 0      , (Mmax-Mmin)*0.5 , "MeV") ,
-  //};
     RooRealVar staple1("L1" , "Left Gaus range"   , 2        , "MeV");
     RooRealVar staple2("L2" , "Left Exp range"    , 0.853    , 0      , (Mmax-Mmin)*0.5 , "MeV");
     RooRealVar staple3("L3" , "Left Power range"  , 12.8861  , 0      , (Mmax-Mmin)*0.5 , "MeV");
@@ -396,16 +387,6 @@ void combfit2( std::list<TH1*>  & his_list)
   RooRealVar n1("Ln", "Left power",  1.326,  1, 100) ;
   RooRealVar n2("Rn", "Right power", 1.507,  1, 100) ;
 
-  //this function describes signal
-  //RooMcb2Pdf * mcbPdf =  new RooMcb2Pdf("ModCB", "Modified CrystalBall: gaus + exp + power + exp",  
-  //    Mrec,  
-  //    mean,  
-  //    sigma,  
-  //    staple, 
-  //    n1, 
-  //    n2,
-  //    Mmin,
-  //    Mmax);
   RooMcb2Pdf * mcbPdf =  new RooMcb2Pdf("ModCB", "Modified CrystalBall: gaus + exp + power + exp",  
       Mrec,  
       mean,  
@@ -540,34 +521,12 @@ void combfit2( std::list<TH1*>  & his_list)
 	RooNLLVar nll("nll","nll",simPdf,*data) ;
   std::cout << "nllvar = " << nll.getValV() << std::endl;
   RooPlot* frame_mean = mean.frame(Range(Mmin, Mmax), Title("-log(L) scan vs mean")) ;
-  //RooPlot* frame_mean = staple2.frame(Range(0, 0.5*(Mmax+Mmin)), Title("-log(L) scan vs mean")) ;
-  //nll.plotOn(frame_mean,PrintEvalErrors(100),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
   nll.plotOn(frame_mean,LineColor(kRed)) ;
-  //nll.plotOn(frame_mean,PrintEvalErrors(100),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
-  //chi2Var.plotOn(frame_mean,ShiftToZero(),LineColor(kRed)) ;
-  //chi2Var.plotOn(frame_mean) ;
-	//frame_mean->SetMinimum(0);
-	//frame_mean->SetMaximum(1e6);
-
-  //RooPlot* frame_sigma = sigma.frame(Range(0.2, 5.0), Title("-log(L) scan vs sigma")) ;
-  //nll.plotOn(frame_sigma,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
-
   RooPlot* frame_n1 = n1.frame(Title("n1 -log(L)"), Range(1, 5)) ;
   nll.plotOn(frame_n1,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
 
-  //RooPlot* frame_n2 = n2.frame(Title("n2 -log(L)"), Range(1, 5)) ;
-  //nll.plotOn(frame_n2,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
-
 	TCanvas * cnll =new TCanvas("cnll", "- Log likelihood");
   frame_mean->Draw();
-	//cnll->Divide(3, 3);
-	//cnll->cd(1);
-	//frame_mean->Draw();
-	//cnll->cd(2);
-	//frame_sigma->Draw();
-	//cnll->cd(3);
-	//frame_n1->Draw();
-	//frame_n2->Draw("same");
 }
 
 int main(int argc,  char ** argv)
@@ -594,12 +553,13 @@ int main(int argc,  char ** argv)
     ("hash",po::value<std::string>(&hash_list_str),"List of hashes to draw")
     ("skip","skip hashes")
     ("Nbg",po::value<double>(&nbg),"Background events")
-    ("nobg","No background events")
     ("suffix,s",po::value<std::string>(&suffix),"Suffix")
     ("mc", "Use MonteCarlo information mctopo")
     ("trk","Tracking efficiency fit")
     ("combine,c",po::value<std::string>(&combine_str), "combined fit")
     ("nobgslope","No bg slope")
+    ("nobg","No background events")
+    ("nograd","No radiative gaus")
     ("gaus_rad","Gaus rad")
     ;
   po::positional_options_description pos;
@@ -621,6 +581,11 @@ int main(int argc,  char ** argv)
     std::clog << opt_desc;
     return 0;
   }
+
+  OPT_NOBGSLOPE=opt.count("nobgslope");
+  OPT_NOBG = opt.count("nobg");
+  OPT_NOGAUSRAD = opt.count("nograd");
+
 
   BG_NOSLOPE = opt.count("nobgslope");
   BG_FIX_TO_ZERO = opt.count("nobg");
@@ -704,165 +669,10 @@ int main(int argc,  char ** argv)
     {
       his_lst.push_back(create_histogram(str));
     }
-    combfit2(his_lst);
+    //combfit2(his_lst);
     //combfit(his_lst.front(), his_lst.back());
+    fit(his_lst);
     theApp.Run();
   }
-  /*  
-
-  const double Scale = 1;
-  const double M0 = 0;
-
-
-  if(opt.count("suffix"))
-  {
-    his = create_histogram(suffix);
-  }
-
-  double Mmin  = his->GetXaxis()->GetXmin();
-  double Mmax  = his->GetXaxis()->GetXmax();
-  Long64_t nEntries=his->GetEntries();
-  //double SigmaInitial=1.4;
-  
-  RooRealVar Mrec("Mrec","M_{rec}(#pi^{+}#pi^{-})", Mmin,Mmax, "MeV");
-  RooRealVar sigma("sigma","sigma",1.4/Scale,0,10/Scale, "MeV") ;
-  RooRealVar staple1("staple1","staple1",M0-15/Scale,   Mmin,Mmax, "MeV") ;
-  RooRealVar staple2("staple2","staple2",M0-3/Scale,   Mmin,Mmax, "MeV") ;
-  RooRealVar staple3("staple3","staple3",M0 -2/Scale,   Mmin,Mmax, "MeV") ;
-  RooRealVar staple4("staple4","staple4",M0+0,   M0-2/Scale,M0+2/Scale, "MeV") ;
-  RooRealVar staple5("staple5","staple5",M0+2/Scale,   Mmin,Mmax, "MeV") ;
-  RooRealVar staple6("staple6","staple6",M0+4/Scale,   Mmin,Mmax, "MeV") ;
-  RooRealVar staple7("staple7","staple7",M0+15/Scale,   Mmin,Mmax, "MeV") ;
-  RooRealVar n1("n1","n1", 3,  1,100) ;
-  RooRealVar n2("n2","n2", 2,  1,100) ;
-
-
-	RooMcbPdf mcb("ModCB", "Modified CrystalBall",  Mrec,  sigma,  
-			staple1, 
-			staple2, 
-			staple3, 
-			staple4, 
-			staple5, 
-			staple6, 
-			staple7, 
-			n1, 
-			n2);
-
-	RooRealVar mean2("mean2", "mean2",0,  -5, 5, "MeV");
-	RooRealVar sigma2("sigma2", "sigma2", 0.5,  0, 3, "MeV");
-	RooGaussian small_gaus("smals_gauss", "small_gauss",  Mrec,  mean2,  sigma2);
-
-
-	RooRealVar mcb_yield("mcb_yield", "MCB yield", nEntries, 0, nEntries);
-	RooRealVar sg_yield("sg_yield", "small gauss yield", 0, 0, nEntries);
-	RooArgList sig_shapes;
-	RooArgList sig_yields;
-	sig_shapes.add(small_gaus);      sig_yields.add(sg_yield);
-	sig_shapes.add(mcb);             sig_yields.add(mcb_yield);
-	RooAddPdf complexSignal("complexSignal", "signal with small gaus",  sig_shapes,  sig_yields);
-
-	RooRealVar poly_c1("poly_c1","coefficient of x^1 term",0, -10, 10);
-	//RooRealVar poly_c1("poly_c1","coefficient of x^1 term",0);
-	RooPolynomial bkgd_poly("bkgd_poly", "linear function for background", Mrec, RooArgList(poly_c1));	
-
-
-	RooRealVar Nsig("Nsig", "Number of signal events", nEntries, 0, nEntries*100);
-  RooRealVar Nbg("Nbg", "Number of background events", nbg, 0,  nEntries);
-	//RooRealVar bkgd_yield("bkgd_yield", "yield of background", 0);
-	RooArgList shapes;
-	RooArgList yields;
-	shapes.add(bkgd_poly);      yields.add(Nbg);
-	shapes.add(mcb);  					yields.add(Nsig);
-	RooAddPdf  totalPdf("totalPdf", "sum of signal and background PDF's", shapes, yields);
-
-
-	RooAbsReal* igx = mcb.createIntegral(Mrec) ;
-	cout << "gx_Int[x] = " << igx->getVal() << endl;
-
-
-	RooArgSet ntupleVarSet(Mrec);
-  RooDataHist * data = new RooDataHist("dh", "dh", Mrec, Import(*his));
-	totalPdf.fitTo(*data,  Extended(), Strategy(2));
-
-  RooPlot* xframe2 = Mrec.frame(Title("Fit by Modified CrystalBall")) ;
-  data->plotOn(xframe2, MarkerSize(0.5)) ;
-  totalPdf.plotOn(xframe2,  LineWidth(1)) ;
-	totalPdf.plotOn(xframe2,Components(bkgd_poly),LineStyle(kDashed),  LineWidth(1)) ;
-  
-
-  sigma.Print() ;
-	Nsig.Print();
-	Nbg.Print();
-
-
-	RooNLLVar nll("nll","nll",totalPdf,*data) ;
-
-  RooPlot* frame_sigma = sigma.frame(Range(0.2/Scale, 5.0/Scale), Title("-log(L) scan vs sigma")) ;
-  nll.plotOn(frame_sigma,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
-  RooPlot* frame_staple4 = staple4.frame(Title("staple4 -log(L)")) ;
-  nll.plotOn(frame_staple4,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
-
-  RooPlot* frame_staple3 = staple3.frame(Title("staple3 -log(L)")) ;
-  nll.plotOn(frame_staple3,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
-  RooPlot* frame_staple5 = staple5.frame(Title("staple5 -log(L)")) ;
-  nll.plotOn(frame_staple5,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
-
-  RooPlot* frame_staple2 = staple2.frame(Title("staple2 -log(L)")) ;
-  nll.plotOn(frame_staple2,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
-  RooPlot* frame_staple6 = staple6.frame(Title("staple6 -log(L)")) ;
-  nll.plotOn(frame_staple6,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
-
-  RooPlot* frame_staple1 = staple1.frame(Title("staple1 -log(L)")) ;
-  nll.plotOn(frame_staple1,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
-  RooPlot* frame_staple7 = staple7.frame(Title("staple7 -log(L)")) ;
-  nll.plotOn(frame_staple7,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
-
-
-  RooPlot* frame_n1 = n1.frame(Title("n1 -log(L)"), Range(1, 5)) ;
-  nll.plotOn(frame_n1,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kBlue)) ;
-
-  RooPlot* frame_n2 = n2.frame(Title("n2 -log(L)"), Range(1, 5)) ;
-  nll.plotOn(frame_n2,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
-
-  RooPlot* frame_Nsig = Nsig.frame(Range(0, nEntries*1.2), Title("Nsig -log(L)")) ;
-  nll.plotOn(frame_Nsig,PrintEvalErrors(-1),ShiftToZero(), EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
-	frame_Nsig->SetMinimum(0);
-	frame_Nsig->SetMaximum(40);
-
-  RooPlot* frame_Nbg = Nbg.frame(Range(0, Nbg.getValV()*2), Title("Nbg -log(L)")) ;
-  nll.plotOn(frame_Nbg,PrintEvalErrors(-1),ShiftToZero(), EvalErrorValue(nll.getVal()+10),LineColor(kRed)) ;
-
-	TCanvas * cnll =new TCanvas("cnll", "- Log likelihood");
-	cnll->Divide(3, 3);
-	cnll->cd(1);
-	frame_sigma->Draw();
-	cnll->cd(2);
-	frame_staple4->Draw();
-	cnll->cd(3);
-	frame_staple3->Draw();
-	frame_staple5->Draw("same");
-	cnll->cd(5);
-	frame_staple2->Draw();
-	frame_staple6->Draw("same");
-	cnll->cd(6);
-	frame_staple1->Draw();
-	frame_staple7->Draw("same");
-	cnll->cd(7);
-	frame_n1->Draw();
-	frame_n2->Draw("same");
-	cnll->cd(8);
-	frame_Nsig->Draw();
-	cnll->cd(9);
-	frame_Nbg->Draw();
-
-  // Draw all frames on a canvas
-  TCanvas* c = new TCanvas("mcb","Test for Modified CrystalBall Fit") ;
-	c->SetLogy();
-  c->cd(2) ; 
-	gPad->SetLeftMargin(0.15) ; 
-	xframe2->GetYaxis()->SetTitleOffset(1.6) ; 
-	xframe2->Draw() ;
-  */
-	
 	theApp.Run();
 }

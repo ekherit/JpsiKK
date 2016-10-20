@@ -13,7 +13,7 @@ testMcbFit : testMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o
 		$(CXX)  -o $@   $< RooMcbPdf.o  $(CXXFLAGS) $(LIBS) 
 
 kkfit : kkfit.cpp RooMcbPdf.h   RooMcbPdf.o fit.o
-		$(CXX)  -o kkfit   $< RooMcbPdf.o  $(CXXFLAGS) $(LIBS) 
+		$(CXX)  -o kkfit   $< RooMcbPdf.o fit.o $(CXXFLAGS) $(LIBS) 
 		cp -f kkfit $(BINDIR)/kkfit
 
 combkkfit : CombMcbFit.cpp RooMcbPdf.h   RooMcbPdf.o fit.o
