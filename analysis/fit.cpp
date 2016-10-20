@@ -301,45 +301,51 @@ void fit(std::list<TH1*> & hlst)
 
   std::map<std::string, RooDataHist*> dataMap;
 
-  std::map<std::string, RooRealVar> Nsig;
-  std::map<std::string, RooRealVar> Nbg;
-  std::map<std::string, RooRealVar> bg_c1;
-  std::map<std::string, RooPolynomial> bgPdf;
-  std::map<std::string, RooAddPdf> samplePdf;
+  std::map<std::string, RooRealVar*> Nsig;
+  std::map<std::string, RooRealVar*> Nbg;
+  std::map<std::string, RooRealVar*> bg_c1;
+  std::map<std::string, RooPolynomial*> bgPdf;
+  std::map<std::string, RooAddPdf*> samplePdf;
   std::map<std::string, RooPlot*> frame;
 
  	RooCategory sample("sample","sample") ;
 
+  std::cout <<"Before init Nsig Nbg etc..." <<std::endl;
   for(auto & his : hlst)
   {
     std::string name = his->GetName();
     dataMap[name]= new RooDataHist(name.c_str(), name.c_str(), Mrec, Import(*his));
 
-    bg_c1[name] = RooRealVar(("bg"+name+"_c1").c_str(),("background slope for " + name).c_str(),
+    bg_c1[name] = new RooRealVar(("bg"+name+"_c1").c_str(),("background slope for " + name).c_str(),
         0, -10,10);
-    bgPdf[name] = RooPolynomial(("bg"+name).c_str(),("background Pdf for " + name).c_str(),Mrec);
+    bgPdf[name] = new RooPolynomial(("bg"+name).c_str(),("background Pdf for " + name).c_str(),Mrec);
 
-    Nsig[name] = RooRealVar( ("Nsig"+name).c_str(), ("Number of signal events for " + name).c_str(), his->GetEntries(), 0, his->GetEntries()*100);
+    Nsig[name] = new RooRealVar( ("Nsig"+name).c_str(), ("Number of signal events for " + name).c_str(), his->GetEntries(), 0, his->GetEntries()*100);
 
-    Nbg[name] = RooRealVar( ("Nsig"+name).c_str(), ("Number of background events for " + name).c_str(), 0, 0, his->GetEntries()*100);
+    Nbg[name] = new RooRealVar( ("Nbg"+name).c_str(), ("Number of background events for " + name).c_str(), 0, 0, his->GetEntries()*100);
 
-    samplePdf[name] = RooAddPdf(name.c_str(), ("Pdf for " + name).c_str(), 
-        RooArgList(bgPdf[name], *signalPdf), RooArgList(Nbg[name],  Nsig[name]));
+    samplePdf[name] = new RooAddPdf(name.c_str(), ("Pdf for " + name).c_str(), 
+        RooArgList(*bgPdf[name], *signalPdf), RooArgList(*Nbg[name],  *Nsig[name]));
 
     sample.defineType(name.c_str());
     frame[name] = Mrec.frame(Title("#pi^{+}#pi^{-} recoil mass"));
   }
+  std::cout <<"After init Nsig Nbg etc..." <<std::endl;
 
   RooDataHist data("combData","Combined data", Mrec, sample, dataMap);
 
+  std::cout << "Before RooSimultaneous"<<std::endl;
   RooSimultaneous simPdf("simPdf","simultaneous pdf",sample) ;
 
+  std::cout << "Before Adding sample pdf"<<std::endl;
   for(auto & p : samplePdf)
   {
-    simPdf.addPdf(p.second, p.first.c_str());
+    simPdf.addPdf(*p.second, p.first.c_str());
   }
   
+  std::cout << "Before fit" <<std::endl;
 	simPdf.fitTo(data, Extended(), Strategy(2), Minos());
+  std::cout << "After fit" <<std::endl;
 
 	RooChi2Var chi2Var("chi2", "chi2", simPdf, data);
 	cout << "chi2 = " << chi2Var.getVal() << endl;
@@ -352,7 +358,7 @@ void fit(std::list<TH1*> & hlst)
     std::string name = his->GetName();
     data.plotOn(frame[name], MarkerSize(0.5),  Cut(("sample==sample::"+name).c_str()));
     simPdf.plotOn(frame[name], Slice(sample,name.c_str()),ProjWData(sample,data), LineWidth(1));
-    simPdf.plotOn(frame[name], Slice(sample,name.c_str()),ProjWData(sample,data), Components(bgPdf[name]),LineStyle(kDashed),LineWidth(1));
+    simPdf.plotOn(frame[name], Slice(sample,name.c_str()),ProjWData(sample,data), Components(*bgPdf[name]),LineStyle(kDashed),LineWidth(1));
     frame[name]->SetMinimum(0.1);
   }
 
@@ -361,8 +367,8 @@ void fit(std::list<TH1*> & hlst)
   for(auto & his : hlst)
   {
     std::string name = his->GetName();
-    Nsig[name].Print();
-    Nbg[name].Print();
+    Nsig[name]->Print();
+    Nbg[name]->Print();
   }
 
   TCanvas* c = new TCanvas("mcb","Test for Modified CrystalBall Fit") ;
@@ -376,6 +382,7 @@ void fit(std::list<TH1*> & hlst)
     gPad->SetLogy();
     frame[name]->GetYaxis()->SetTitleOffset(1.6) ; 
     frame[name]->Draw() ;
+    i++;
   }
   
 
