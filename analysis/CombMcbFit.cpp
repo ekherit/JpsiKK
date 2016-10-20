@@ -72,7 +72,7 @@ int main(int argc,  char ** argv)
   std::list<TH1*> hlst;
   hlst.push_back(hisKK);
   hlst.push_back(hisUU);
-  //fit(hisKK,hisUU);
-  fit(hlst);
+  fit(hisKK,hisUU);
+  //fit(hlst);
 	theApp.Run();
 }

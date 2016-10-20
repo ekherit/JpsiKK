@@ -27,8 +27,8 @@ class TH1;
 
 #include "RooMcbPdf.h"
 
+extern void fit(TH1 * his);
 extern void fit(TH1 * hisKK, TH1 * hisUU);
 extern void fit(std::list<TH1*> & );
-
 
 #endif
