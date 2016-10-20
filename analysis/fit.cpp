@@ -105,7 +105,7 @@ void fit(std::list<TH1*> & hlst)
     {
       std::string istr = to_string(i);
       meanRad[i] = new RooRealVar(("mean_rad" + istr).c_str(), ("mean_rad" + istr).c_str(), 20,
-          (Mmax+Mmin)*0.5 + 10, Mmax, "MeV");
+          (Mmax+Mmin)*0.5+5, Mmax, "MeV");
       sigmaRad[i] = new RooRealVar(("sigma_rad" + istr).c_str(), ("sigma_rad" + istr).c_str(), 10,
           2, 100, "MeV");
       radPdf[i] = new RooGaussian(("gaus_radPdf" + istr).c_str(),
@@ -124,7 +124,7 @@ void fit(std::list<TH1*> & hlst)
   std::map<std::string, RooPolynomial*> bgPdf;
   std::map<std::string, RooRealVar*> bg_c1;
   std::map<std::string, long> Nhis;
-  std::map<std::string, RooDataHist*> dataMap;
+  //std::map<std::string, RooDataHist*> dataMap;
   std::map<std::string,TH1*> hisMap;
 
   std::map<std::string, RooPlot*> frame;
@@ -156,12 +156,13 @@ void fit(std::list<TH1*> & hlst)
     {
       SamplePdf[name] = new RooAddPdf((name+"Pdf").c_str(), (name+" signal + background p.d.f.").c_str(), RooArgList(*signalPdf), RooArgList(*Nsig[name]));
     }
-    dataMap[name]=new RooDataHist(name.c_str(), name.c_str(), Mrec, Import(*hisMap[name]));
+    //dataMap[name]=new RooDataHist(name.c_str(), name.c_str(), Mrec, Import(*hisMap[name]));
     sample.defineType(name.c_str());
     frame[name] = Mrec.frame(Title("#pi^{+}#pi^{-} recoil mass"));
   }
 
-  RooDataHist * data = new RooDataHist("combData","Combined data", Mrec, sample, dataMap);
+  //RooDataHist * data = new RooDataHist("combData","Combined data", Mrec, sample, dataMap);
+  RooDataHist * data = new RooDataHist("combData","Combined data", Mrec, sample, hisMap);
   RooSimultaneous simPdf("simPdf","simultaneous pdf",SamplePdf,sample) ;
 
   auto p = simPdf.getParameters(Mrec);
@@ -307,5 +308,4 @@ void fit(std::list<TH1*> & hlst)
     cout << fmt % N->GetName() % N0->GetName() % (theRatio*1000) %  (theError*1000) %  (theRelError*100)  <<  endl;
   }
 }
-
 
