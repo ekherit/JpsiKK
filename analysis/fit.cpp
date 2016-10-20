@@ -45,6 +45,7 @@ using namespace RooFit;
 bool OPT_NOBGSLOPE=false; //no slope for the background
 bool OPT_NOBG=false; //no background
 bool OPT_NOGAUSRAD=false; //no gaus rad
+std::string OPT_PARAM_CONFIG_FILE=""; 
 
 void fit(TH1 * his)
 {
@@ -109,7 +110,7 @@ void fit(std::list<TH1*> & hlst)
           2, 100, "MeV");
       radPdf[i] = new RooGaussian(("gaus_radPdf" + istr).c_str(),
           ("Radiative gauss " + istr).c_str(), Mrec, *meanRad[i], *sigmaRad[i]);
-      radFrac[i] = new RooRealVar(("frad"+istr).c_str(),("fraction " + istr + " radiative gauss").c_str(), 0, 1.0);
+      radFrac[i] = new RooRealVar(("gfrac"+istr).c_str(),("fraction " + istr + " radiative gauss").c_str(), 0, 1.0);
       PdfList.add(*radPdf[i]);
       RadFracList.add(*radFrac[i]);
     }
@@ -163,9 +164,15 @@ void fit(std::list<TH1*> & hlst)
   RooDataHist * data = new RooDataHist("combData","Combined data", Mrec, sample, dataMap);
   RooSimultaneous simPdf("simPdf","simultaneous pdf",SamplePdf,sample) ;
 
+  auto p = simPdf.getParameters(Mrec);
+  if(OPT_PARAM_CONFIG_FILE!="")
+  {
+    p->readFromFile(OPT_PARAM_CONFIG_FILE.c_str());
+    p->Print("v");
+  }
+
 	auto theFitResult = simPdf.fitTo(*data, Extended(), Strategy(2), Minos(), Save());
 
-  auto p = simPdf.getParameters(Mrec);
   p->writeToFile("tmp_fit_result.txt");
 
 	RooChi2Var chi2Var("chi2", "chi2", simPdf, *data);

@@ -20,6 +20,7 @@
 #define IBN_JPSIKK_FIT_H
 
 #include <list>
+#include <string>
 
 using namespace std;
 
@@ -34,5 +35,6 @@ extern void fit(std::list<TH1*> & );
 extern bool OPT_NOBGSLOPE; //no slope for the background
 extern bool OPT_NOBG; //no background
 extern bool OPT_NOGAUSRAD; //no gaus rad
+extern std::string OPT_PARAM_CONFIG_FILE; 
 
 #endif

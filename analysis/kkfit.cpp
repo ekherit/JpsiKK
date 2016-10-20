@@ -71,6 +71,7 @@ int main(int argc,  char ** argv)
     ("nobg","No background events")
     ("nograd","No radiative gaus")
     ("gaus_rad","Gaus rad")
+    ("par",po::value<std::string>(&OPT_PARAM_CONFIG_FILE), "Parameters configuration file")
     ;
   po::positional_options_description pos;
   pos.add("input", 1);
