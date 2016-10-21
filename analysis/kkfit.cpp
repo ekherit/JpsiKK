@@ -52,6 +52,8 @@ int main(int argc,  char ** argv)
   std::string hash_list_str;
   std::string suffix;
   std::string combine_str;
+  std::string nbin_str;
+  std::map<std::string,int> Nbin;
   double nbg=0;
   opt_desc.add_options()
     ("help,h","Print this help")
@@ -72,6 +74,8 @@ int main(int argc,  char ** argv)
     ("nograd","No radiative gaus")
     ("gaus_rad","Gaus rad")
     ("par",po::value<std::string>(&OPT_PARAM_CONFIG_FILE), "Parameters configuration file")
+ //   ("Nbin",po::value<int>(&Nbin),"Override number of  bins")
+    ("nbin",po::value<std::string>(&nbin_str),"Comma separated number of bins")
     ;
   po::positional_options_description pos;
   pos.add("input", 1);
@@ -155,10 +159,15 @@ int main(int argc,  char ** argv)
         if(mctree) tree->AddFriend(mctree);
       }
     }
-    int    Nbin = h->GetNbinsX();
+    
+    int N  = h->GetNbinsX();
+    auto it = Nbin.find(suffix);
+    if( it != Nbin.end()) N = it->second;
+
     double Mmin = h->GetXaxis()->GetXmin();
     double Mmax = h->GetXaxis()->GetXmax();
-    auto varexp = boost::format("(Mrec-3.097)*1000 >> Mrec%s(%d,%f,%f)") % suffix % Nbin % Mmin % Mmax; 
+    auto varexp = boost::format("(Mrec-3.097)*1000 >> Mrec%s(%d,%f,%f)") % suffix % N % Mmin % Mmax; 
+    std::cout << "varexp = " << varexp << std::endl;
     tree->Draw(varexp.str().c_str(),hash_cut && cut.c_str(),"goff");
     h = (TH1F*) tree->GetHistogram();
     h->SetName(suffix.c_str());
@@ -166,13 +175,26 @@ int main(int argc,  char ** argv)
     return h;
   };
 
+  std::list<std::string> strBinsLst;
+  if(opt.count("nbin"))
+  {
+    boost::split(strBinsLst,nbin_str,boost::is_any_of(", "));
+  }
+
   if(opt.count("suffix"))
   {
     std::vector<std::string> suffix_list;
     boost::split(suffix_list,suffix,boost::is_any_of(", "));
     std::list<TH1*> his_lst;
+    auto nbin = strBinsLst.begin();
     for(auto str : suffix_list)
     {
+      if(nbin!=strBinsLst.end())
+      {
+        std::cout << *nbin << std::endl;
+        Nbin[str] = stoi(*nbin);
+        nbin++;
+      }
       his_lst.push_back(create_histogram(str));
     }
     fit(his_lst);

@@ -571,8 +571,8 @@ Double_t RooMcb2Pdf::analyticalIntegral(Int_t code, const char* rangeName) const
 			I+=IG[i] + IA[i] + IB[i] + IC[i];
 		}
 	}
-  std::clog << "rangeName = " << rangeName << "  code = " << code << std::endl;
-  std::clog << " xmin = " << xmin*fSigma+fMean << " xmax = " << xmax*fSigma + fMean   << "  Itotal = " << I*fSigma << std::endl;
+//  std::clog << "rangeName = " << rangeName << "  code = " << code << std::endl;
+//  std::clog << " xmin = " << xmin*fSigma+fMean << " xmax = " << xmax*fSigma + fMean   << "  Itotal = " << I*fSigma << std::endl;
 	return I*fSigma;
 }
 
