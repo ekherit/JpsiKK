@@ -197,7 +197,7 @@ int main(int argc,  char ** argv)
       }
       his_lst.push_back(create_histogram(str));
     }
-    fit(his_lst);
+    fit2(his_lst);
     theApp.Run();
   }
 	theApp.Run();

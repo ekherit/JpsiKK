@@ -141,9 +141,10 @@ public:
 				RooAbsReal & _Sigma,   //Common sigma
 				std::vector<RooRealVar> & _staple, 
 				RooAbsReal & _n1, 
-				RooAbsReal & _n2, 
-        double xmin,
-        double xmax
+				RooAbsReal & _n2
+        //, 
+        //double xmin,
+        //double xmax
 			);
 
   RooMcb2Pdf(const char *name, const char *title, 
@@ -159,9 +160,9 @@ public:
 				RooAbsReal & _staple7, 
 				RooAbsReal & _staple8, 
 				RooAbsReal & _n1, 
-				RooAbsReal & _n2, 
-        double xmin,
-        double xmax
+				RooAbsReal & _n2
+        //, double xmin,
+        //double xmax
 			);
 
   RooMcb2Pdf(const RooMcb2Pdf& other,const char* name=0) ;

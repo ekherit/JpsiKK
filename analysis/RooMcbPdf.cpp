@@ -322,9 +322,7 @@ RooMcb2Pdf::RooMcb2Pdf(const char *name, const char *title,
 				RooAbsReal & _s7,   //staple 
 				RooAbsReal & _s8,   //staple 
 				RooAbsReal & _n1,   //staple 
-				RooAbsReal & _n2,   //staple 
-        double xmin,
-        double xmax
+				RooAbsReal & _n2   //staple 
 				) : RooAbsPdf(name,title), 
    			fX("x","x",this,_X),
    			fMean("mean","mean",this,_Mean), 
@@ -339,9 +337,10 @@ RooMcb2Pdf::RooMcb2Pdf(const char *name, const char *title,
    			fStaple8("staple8","staple8",this,_s8), 
    			fN1("nl","nl",this,_n1), 
    			fN2("nr","nr",this,_n2),
-        fXmin(xmin),
-        fXmax(xmax)
+        fXmin(((RooRealVar&)_X).getMin()),
+        fXmax(((RooRealVar&)_X).getMax())
 {
+  std::cout << "fXmin = " << fXmin << "  fXmax = " << fXmax << std::endl;
 }
 
 RooMcb2Pdf::RooMcb2Pdf(const char *name, const char *title,
@@ -350,25 +349,11 @@ RooMcb2Pdf::RooMcb2Pdf(const char *name, const char *title,
 				RooAbsReal & _Sigma,   //Common sigma
 				std::vector<RooRealVar> & _s,   //staple 
 				RooAbsReal & _n1,   
-				RooAbsReal & _n2,   
-        double xmin,
-        double xmax
+				RooAbsReal & _n2
+        //,   
+        //double xmin,
+        //double xmax
 				) :  
-  // 			fX("x","x",this,_X),
-  // 			fMean("mean","mean",this,_Mean), 
-  // 			fSigma("sigma","sigma",this,_Sigma), 
-  // 			fStaple1("staple1","staple1",this,_s[0]), 
-  // 			fStaple2("staple2","staple2",this,_s[1]), 
-  // 			fStaple3("staple3","staple3",this,_s[2]), 
-  // 			fStaple4("staple4","staple4",this,_s[3]), 
-  // 			fStaple5("staple5","staple5",this,_s[4]), 
-  // 			fStaple6("staple6","staple6",this,_s[5]), 
-  // 			fStaple7("staple7","staple7",this,_s[6]), 
-  // 			fStaple8("staple8","staple8",this,_s[7]), 
-  // 			fN1("nl","nl",this,_n1), 
-  // 			fN2("nr","nr",this,_n2),
-  //      fXmin(xmin),
-  //      fXmax(xmax)
   RooMcb2Pdf(name,title,
           _X,
           _Mean, 
@@ -382,9 +367,11 @@ RooMcb2Pdf::RooMcb2Pdf(const char *name, const char *title,
           _s[6],
           _s[7], 
           _n1, 
-          _n2, 
-          xmin, 
-          xmax)
+          _n2
+          //, 
+          //xmin, 
+          //xmax
+          )
 {
 }
 
