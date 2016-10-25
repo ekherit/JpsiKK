@@ -66,6 +66,7 @@ int main(int argc,  char ** argv)
     ("skip","skip hashes")
     ("Nbg",po::value<double>(&nbg),"Background events")
     ("suffix,s",po::value<std::string>(&suffix),"Suffix")
+    ("channel",po::value<std::string>(&suffix),"comma separated list of channel to fit: KK,UU,K3,K4,K34,U3,U4,U34")
     ("mc", "Use MonteCarlo information mctopo")
     ("trk","Tracking efficiency fit")
     ("combine,c",po::value<std::string>(&combine_str), "combined fit")
@@ -76,6 +77,8 @@ int main(int argc,  char ** argv)
     ("par",po::value<std::string>(&OPT_PARAM_CONFIG_FILE), "Parameters configuration file")
  //   ("Nbin",po::value<int>(&Nbin),"Override number of  bins")
     ("nbin",po::value<std::string>(&nbin_str),"Comma separated number of bins")
+    ("separate","Separate Mrec for each channel")
+    ("fit",po::value<std::string>(&OPT_FIT_METHOD),"Method is used to fit: --fit=lh likelihood (default), --fit=chi2, --fit=lh2 (my likelihood")
     ;
   po::positional_options_description pos;
   pos.add("input", 1);
@@ -100,6 +103,7 @@ int main(int argc,  char ** argv)
   OPT_NOBGSLOPE=opt.count("nobgslope");
   OPT_NOBG = opt.count("nobg");
   OPT_NOGAUSRAD = opt.count("nograd");
+  OPT_SEPARATE_MREC  = opt.count("separate");
 
   std::cout << " " << suffix << " " << file_name << std::endl;
   
@@ -166,12 +170,15 @@ int main(int argc,  char ** argv)
 
     double Mmin = h->GetXaxis()->GetXmin();
     double Mmax = h->GetXaxis()->GetXmax();
-    auto varexp = boost::format("(Mrec-3.097)*1000 >> Mrec%s(%d,%f,%f)") % suffix % N % Mmin % Mmax; 
+    std::string Obs="M"+suffix;
+    tree->SetAlias(Obs.c_str(),"(Mrec-3.097)*1000");
+    auto varexp = boost::format("%s >> Mrec%s(%d,%f,%f)") % Obs % suffix % N % Mmin % Mmax; 
     std::cout << "varexp = " << varexp << std::endl;
     tree->Draw(varexp.str().c_str(),hash_cut && cut.c_str(),"goff");
     h = (TH1F*) tree->GetHistogram();
     h->SetName(suffix.c_str());
     h->SetTitle(title.c_str());
+    tree->SetName(suffix.c_str());
     return h;
   };
 
@@ -186,6 +193,7 @@ int main(int argc,  char ** argv)
     std::vector<std::string> suffix_list;
     boost::split(suffix_list,suffix,boost::is_any_of(", "));
     std::list<TH1*> his_lst;
+    std::list<TTree*> tree_lst;
     auto nbin = strBinsLst.begin();
     for(auto str : suffix_list)
     {
@@ -196,8 +204,9 @@ int main(int argc,  char ** argv)
         nbin++;
       }
       his_lst.push_back(create_histogram(str));
+      tree_lst.push_back(tree);
     }
-    fit2(his_lst);
+    fit(his_lst,tree_lst,true);
     theApp.Run();
   }
 	theApp.Run();

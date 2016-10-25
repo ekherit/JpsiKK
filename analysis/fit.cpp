@@ -16,11 +16,14 @@
  * =====================================================================================
  */
 
+#include <TSystem.h>
+
 #include <TH1F.h>
 #include <TH2F.h>
 #include <TCanvas.h>
 #include <TAxis.h>
 #include <TMath.h>
+#include <TTree.h>
 
 #include <boost/format.hpp>
 
@@ -39,6 +42,9 @@
 #include <RooPlot.h>
 #include <RooBukinPdf.h>
 #include <RooMinuit.h>
+
+#include <RooHist.h>
+#include <RooCurve.h>
 using namespace RooFit;
 
 #include "RooMcbPdf.h"
@@ -48,11 +54,14 @@ bool OPT_NOBGSLOPE=false; //no slope for the background
 bool OPT_NOBG=false; //no background
 bool OPT_NOGAUSRAD=false; //no gaus rad
 std::string OPT_PARAM_CONFIG_FILE=""; 
+bool OPT_SEPARATE_MREC=false; //separate Mrec for each channel
+std::string OPT_FIT_METHOD="lh";
 
 void fit(TH1 * his)
 {
   std::list<TH1*> hlst = {his};
-  fit(hlst);
+  std::list<TTree*> tlst;
+  fit(hlst,tlst);
 }
 
 void fit(TH1 * hisKK, TH1 * hisUU)
@@ -60,11 +69,12 @@ void fit(TH1 * hisKK, TH1 * hisUU)
   hisKK->SetName("KK");
   hisUU->SetName("UU");
   std::list<TH1*> hlst = {hisKK,hisUU};
-  fit(hlst);
+  std::list<TTree*> tlst;
+  fit(hlst,tlst);
 }
 
 
-RooArgSet * createMcbVars(RooRealVar & Mrec, double Mmin, double Mmax)
+RooArgSet * createMcbVars(double Mmin, double Mmax)
 {
   RooArgSet * args = new RooArgSet;
   args->add( * new RooRealVar("mean",  "mean",   -0.1 + 0.5*(Mmin+Mmax) ,  Mmin,  Mmax, "MeV"));
@@ -83,88 +93,101 @@ RooArgSet * createMcbVars(RooRealVar & Mrec, double Mmin, double Mmax)
   for(int i=0;i<2;i++)
   {
     std::string istr = to_string(i);
-    args->add(* new RooRealVar(("rad_mean" + istr).c_str(), ("Radiative gauss mean " + istr).c_str(), 20, (Mmax+Mmin)*0.5+5, Mmax, "MeV"));
-    args->add(* new RooRealVar(("rad_sigma" + istr).c_str(), ("Radiative gaus sigma" + istr).c_str(), 10, 2, 100, "MeV"));
-    args->add( *new RooRealVar(("rad_frac"+istr).c_str(),("fraction " + istr + "of radiative gauss").c_str(), 0, 1.0) );
+    auto mean = new RooRealVar(("rad_mean" + istr).c_str(), ("Radiative gauss mean " + istr).c_str(), 20, (Mmax+Mmin)*0.5+5, Mmax, "MeV"); 
+    auto sigma = new RooRealVar(("rad_sigma" + istr).c_str(), ("Radiative gaus sigma" + istr).c_str(), 10, 2, 100, "MeV");
+    auto frac = new RooRealVar(("rad_frac"+istr).c_str(),("fraction " + istr + "of radiative gauss").c_str(), 0, 1.0);
+    if(OPT_NOGAUSRAD)
+    {
+      mean->setConstant();
+      sigma->setConstant();
+      frac->setConstant();
+    }
+    args->add(*mean);
+    args->add(*sigma);
+    args->add(*frac);
   }
   return args;
 }
 
-RooAbsPdf * createMcbPdf(std::string name, RooRealVar & Mrec)
+RooAbsPdf * createMcbPdf(std::string name, RooRealVar & Mrec, RooArgSet & pars)
 {
-  
-  return nullptr;
-  /*  
-  return new RooMcb2Pdf(("Mcb2Pdf_"+name).c_str(), ("My modified Crystal Bal function for " + name).c_str(), Mrec , *mean,*sigma,*staple, *n1, *n2);
-  */
+  std::string mcb_name = "Mcb2Pdf_"+name;
+  std::string mcb_title = "My modified Crystal Bal function for " + name;
+  return new RooMcb2Pdf(mcb_name.c_str(), mcb_title.c_str(), 
+      Mrec , 
+      (RooRealVar&)pars["mean"],
+      (RooRealVar&)pars["sigma"],
+      (RooRealVar&)pars["L1"],
+      (RooRealVar&)pars["L2"],
+      (RooRealVar&)pars["L3"],
+      (RooRealVar&)pars["L4"],
+      (RooRealVar&)pars["R1"],
+      (RooRealVar&)pars["R2"],
+      (RooRealVar&)pars["R3"],
+      (RooRealVar&)pars["R4"],
+      (RooRealVar&)pars["n1"],
+      (RooRealVar&)pars["n2"]
+      );
 }
 
 
-RooAbsPdf * addRad(RooAbsPdf * mcbPdf, RooRealVar & Mrec)
+RooAbsPdf * addRad(RooAbsPdf * mcbPdf, RooRealVar & Mrec, RooArgSet & pars)
 {
+  std::vector<RooGaussian*> radPdf(2);
   double Mmin = Mrec.getMin();
   double Mmax = Mrec.getMax();
   std::string name = mcbPdf->GetName();
-
-  std::vector<RooRealVar*> meanRad;
-  if(!OPT_NOGAUSRAD) meanRad.resize(2);
-  std::vector<RooRealVar*> sigmaRad(meanRad.size());
-  std::vector<RooGaussian*> radPdf(meanRad.size());
-  std::vector<RooRealVar*> radFrac(meanRad.size());
-  for(int i=0;i<meanRad.size();i++)
-  {
-    std::string istr = to_string(i);
-    meanRad[i] = new RooRealVar(("mean_rad" + istr).c_str(), ("mean_rad" + istr).c_str(), 20,
-        (Mmax+Mmin)*0.5+5, Mmax, "MeV");
-    sigmaRad[i] = new RooRealVar(("sigma_rad" + istr).c_str(), ("sigma_rad" + istr).c_str(), 10,
-        2, 100, "MeV");
-    radFrac[i] = new RooRealVar(("frad"+istr).c_str(),("fraction " + istr + " radiative gauss").c_str(), 0, 1.0);
-  }
-
   //name create the SignalPdfs for each channel
   RooArgList PdfList;
   RooArgList RadFracList;
-  for(int i=0;i<meanRad.size();i++)
+  for(int i=0;i<radPdf.size();i++)
   {
     std::string istr = to_string(i);
-    radPdf[i] = new RooGaussian(("gaus_radPdf" + name + istr).c_str(),
-        ("Radiative gauss " + istr + " for " + name).c_str(), Mrec, *meanRad[i], *sigmaRad[i]);
+    radPdf[i] = new RooGaussian(
+        ("gaus_radPdf" + name + istr).c_str(),
+        ("Radiative gauss " + istr + " for " + name).c_str(), 
+       Mrec, 
+       (RooRealVar&)pars[("rad_mean"+istr).c_str()],
+       (RooRealVar&)pars[("rad_sigma"+istr).c_str()]
+       );
     PdfList.add(*radPdf[i]);
-    RadFracList.add(*radFrac[i]);
+    RadFracList.add((RooRealVar&)pars[("rad_frac"+istr).c_str()]);
   }
   PdfList.add(*mcbPdf);
-
   return  new RooAddPdf(("signal"+name).c_str(),("Signal model for "+name).c_str(), PdfList, RadFracList);
 }
 
-RooAbsPdf *addBg(std::string name, RooAbsPdf * signalPdf, RooAbsPdf * bgPdf, RooRealVar & Mrec, RooRealVar * Nsig, RooRealVar * Nbg)
+RooAbsPdf *addBg(std::string name, RooAbsPdf * signalPdf, RooAbsPdf * bgPdf, RooRealVar & Mrec, RooArgSet & pars)
 {
   double Mmin = Mrec.getMin();
   double Mmax = Mrec.getMax();
   RooRealVar * bg_c1 = new RooRealVar(("bg"+name+"_c1").c_str(),("background slope for "+name).c_str(),0,- 1.0/Mmax, - 1.0/Mmin);
   if(OPT_NOBGSLOPE) bg_c1->setConstant();
+  pars.add(*bg_c1);
   bgPdf = new RooPolynomial(("bg"+name).c_str(), ( name + " background pdf").c_str(), Mrec, *bg_c1);	
-    Nsig = new RooRealVar(("Nsig"+name).c_str(), ("Number of " + name +" events").c_str(), 0,0, 1e8);
-    Nbg  = new RooRealVar(("Nbg"+name).c_str(), ("Number of background events for " + name + " channel").c_str(), 0, 0, 1e8);
-    if(OPT_NOBG)
-    {
-      Nbg->setConstant();
-      bg_c1->setConstant();
-    }
-    return new RooAddPdf
-      (
-        (name+"Pdf").c_str(), 
-        (name+" signal + background p.d.f.").c_str(), 
-        RooArgList(*bgPdf, *signalPdf), 
-        RooArgList(*Nbg,  *Nsig)
-        );
+  RooRealVar * Nsig = new RooRealVar(("Nsig"+name).c_str(), ("Number of " + name +" events").c_str(), 0,0, 1e8);
+  RooRealVar * Nbg  = new RooRealVar(("Nbg"+name).c_str(), ("Number of background events for " + name + " channel").c_str(), 0, 0, 1e8);
+  pars.add(*Nsig);
+  pars.add(*Nbg);
+  if(OPT_NOBG)
+  {
+    Nbg->setConstant();
+    bg_c1->setConstant();
+  }
+  return new RooAddPdf
+    (
+     (name+"Pdf").c_str(), 
+     (name+" signal + background p.d.f.").c_str(), 
+     RooArgList(*bgPdf, *signalPdf), 
+     RooArgList(*Nbg,  *Nsig)
+    );
 }
 
 
 
 
 
-void fit(std::list<TH1*> & hlst)
+void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
 {
   //define maximum and minimum recoil mass
   double Mmin  = (*std::max_element(std::begin(hlst), std::end(hlst), 
@@ -173,38 +196,70 @@ void fit(std::list<TH1*> & hlst)
   double Mmax  = (*std::min_element(std::begin(hlst), std::end(hlst), 
       [](const TH1 * h1, const TH1 *h2) { return h1->GetXaxis()->GetXmax() < h2->GetXaxis()->GetXmax(); } ))->GetXaxis()->GetXmax();
 
+
   std::list < std::string > name_lst;
   std::map<std::string,TH1*> hisMap;
   std::map<std::string, Long64_t> Nhis;
+  std::map<std::string, TTree*> treeMap;
   for(auto h : hlst) 
   {
     name_lst.push_back(h->GetName());
     hisMap[h->GetName()] = h;
     Nhis[h->GetName()] = h->GetEntries();
   }
+  if(use_tree)
+  {
+    name_lst.clear();
+    for(auto t : tree_list)
+    {
+      if(t==nullptr) continue;
+      name_lst.push_back(t->GetName());
+      treeMap[t->GetName()] = t;
+      Nhis[t->GetName()] = t->GetEntries();
+    }
+  }
   //i decided to make own variable for mmrec
-  std::map<std::string, RooRealVar*> MMrec;
+  std::map<std::string, RooAbsReal*> MMrec;
 
   boost::format mrec_title_fmt("M_{rec}^{%s}(#pi^{+}#pi^{-}) - 3097 MeV");
-  RooRealVar  Mrec("Mrec",(mrec_title_fmt % "").str().c_str(), Mmin,Mmax, "MeV");
+  RooRealVar  MrecInTree("Mrec","Mrec in tree",3.097-0.045, 3.097+0.045, "GeV");
+  RooRealVar  Mrec("M",(mrec_title_fmt % "").str().c_str(), Mmin,Mmax, "MeV");
+  RooFormulaVar DM ("DM","(Mrec-3.097)*1000",MrecInTree);
+  std::cout << "Before Mrec asignment" << std::endl;
   for(auto name : name_lst)
   {
+    std::cout << "MrecAsign 1" << std::endl;
     MMrec[name]=&Mrec; //default observable
-    //MMrec[name] = new RooRealVar(
-    //    ("Mrec"+name).c_str(), 
-    //     (mrec_title_fmt % name).str().c_str(), 
-    //     hisMap[name]->GetXaxis()->GetXmin(),
-    //    hisMap[name]->GetXaxis()->GetXmax(), "MeV"
-    //    );
-    MMrec[name]->setBins(hisMap[name]->GetNbinsX());
+    std::cout << "MrecAsign 2" << std::endl;
+    if(use_tree) MMrec[name]=&DM;
+    std::cout << "MrecAsign 3" << std::endl;
+    if(OPT_SEPARATE_MREC)
+    {
+      if(!use_tree)
+      {
+        MMrec[name] = new RooRealVar(
+            ("M"+name).c_str(), 
+            (mrec_title_fmt % name).str().c_str(), 
+            hisMap[name]->GetXaxis()->GetXmin(),
+            hisMap[name]->GetXaxis()->GetXmax(), 
+            "MeV"
+            );
+      }
+      else
+      {
+        MMrec[name] = new RooFormulaVar(("DM"+name).c_str(),"(Mrec-3.097)*1000", MrecInTree);
+      }
+    }
+    //MMrec[name]->setBins(hisMap[name]->GetNbinsX());
     //Mrec.setBins(hisMap[name]->GetNbinsX(),name.c_str());
     //Mrec.setBins(10000);
   }
+  std::cout << "After MrecAsign" << std::endl;
 
 
 
   RooRealVar  mean( "mean",  "mean",   -0.1 + 0.5*(Mmin+Mmax) ,  Mmin,  Mmax, "MeV") ;
-  RooRealVar sigma("sigma","sigma",1.4,0,10, "MeV") ;
+  RooRealVar sigma("sigma","sigma",1.4,0.5,10, "MeV") ;
   RooRealVar n1("n1","n1", 3,  1,100) ;
   RooRealVar n2("n2","n2", 2,  1,100) ;
 
@@ -214,7 +269,7 @@ void fit(std::list<TH1*> & hlst)
     RooRealVar("L2", "Left Exp range"    , 1        , 0      , (Mmax-Mmin)*0.5 , "MeV"),
     RooRealVar("L3", "Left Power range"  , 10       , 0      , (Mmax-Mmin)*0.5 , "MeV"),
     RooRealVar("L4", "Left Exp range 2"  , 20       , 0      , (Mmax-Mmin)*0.5 , "MeV"),
-    RooRealVar("R1", "Right Gaus range"  , 2        , "MeV"),
+    RooRealVar("R1", "Right Gaus range"  , 2        , "MeV"), 
     RooRealVar("R2", "Right Exp range"   , 1        , 0      , (Mmax-Mmin)*0.5 , "MeV"), 
     RooRealVar("R3", "Right Power range" , 30       , 0      , (Mmax-Mmin)*0.5 , "MeV"), 
     RooRealVar("R4", "Right Exp range 2" , 1        , 0      , (Mmax-Mmin)*0.5 , "MeV")
@@ -222,17 +277,23 @@ void fit(std::list<TH1*> & hlst)
 
   std::map<std::string, RooAbsPdf*> McbPdfMap;
   std::map<std::string, RooAbsPdf*> SignalPdfMap;
+  std::cout << "Before mcb pdf construction" << std::endl;
   for(auto name : name_lst)
   {
+    std::cout << "MMrec[name]->GetName() = " << MMrec[name]->GetName() << std::endl;
+    //std::cout << "min = " << ((RooRealVar*)MMrec[name])->getMin() << " max = " << ((RooRealVar*)MMrec[name])->getMax() << std::endl;
+    std::cout << "In mcb pdf construction " << name <<  std::endl;
     McbPdfMap[name]=new RooMcb2Pdf(("Mcb2Pdf_"+name).c_str(), ("My modified Crystal Bal function for " + name).c_str(),
         *MMrec[name], mean,sigma,staple, n1, n2);
+    ((RooMcb2Pdf*)McbPdfMap[name])->setRange(Mmin,Mmax);
   }
+  std::cout << "After mcb construction" << std::endl;
 	//RooMcb2Pdf *mcbPdf=0;
   //mcbPdf = new RooMcb2Pdf("mcb2","mcb2",Mrec,mean,sigma, staple, n1,n2,Mmin,Mmax);
 
 
   std::vector<RooRealVar*> meanRad;
-  if(!OPT_NOGAUSRAD) meanRad.resize(2);
+  if(!OPT_NOGAUSRAD) meanRad.resize(4);
   std::vector<RooRealVar*> sigmaRad(meanRad.size());
   std::vector<RooGaussian*> radPdf(meanRad.size());
   std::vector<RooRealVar*> radFrac(meanRad.size());
@@ -243,11 +304,24 @@ void fit(std::list<TH1*> & hlst)
   for(int i=0;i<meanRad.size();i++)
   {
     std::string istr = to_string(i);
-    meanRad[i] = new RooRealVar(("mean_rad" + istr).c_str(), ("mean_rad" + istr).c_str(), 20,
-        (Mmax+Mmin)*0.5+5, Mmax, "MeV");
-    sigmaRad[i] = new RooRealVar(("sigma_rad" + istr).c_str(), ("sigma_rad" + istr).c_str(), 10,
-        2, 100, "MeV");
-    radFrac[i] = new RooRealVar(("frad"+istr).c_str(),("fraction " + istr + " radiative gauss").c_str(), 0, 1.0);
+    double Mean, Min,Max;
+    if(i<2)
+    {
+      Mean = 20;
+      Min = (Mmax+Mmin)*0.5+5;
+      Max = Mmax;
+    }
+    else
+    {
+      Mean = -20;
+      Min = Mmin;
+      Max = (Mmax+Mmin)*0.5-5;
+    }
+    Min = Mmin;
+    Max = Mmax;
+    meanRad[i]  = new RooRealVar(("rad_mean" + istr).c_str(),   ("mean_rad" + istr).c_str(), Mean, Min, Max, "MeV");
+    sigmaRad[i] = new RooRealVar(("rad_sigma" + istr).c_str(), ("sigma_rad" + istr).c_str(), 10, 2, 100, "MeV");
+    radFrac[i] = new RooRealVar(("rad_frac"+istr).c_str(),("fraction " + istr + " radiative gauss").c_str(), 0, 0.2);
   }
 
   //name create the SignalPdfs for each channel
@@ -260,7 +334,7 @@ void fit(std::list<TH1*> & hlst)
     for(int i=0;i<meanRad.size();i++)
     {
       std::string istr = to_string(i);
-      auto pdf = new RooGaussian(("gaus_radPdf" + name + istr).c_str(),
+      auto pdf = new RooGaussian(("radPdf" + name + istr).c_str(),
           ("Radiative gauss " + istr + " for " + name).c_str(), *MMrec[name], *meanRad[i], *sigmaRad[i]);
       radPdfMap[name][i] = pdf;
       PdfList.add(*pdf);
@@ -284,7 +358,10 @@ void fit(std::list<TH1*> & hlst)
  	RooCategory sample("sample","sample");
   RooArgList MrecArgList;
   std::map<std::string, RooDataHist *> dataMap;
+  std::map<std::string, RooDataSet *> dataSetMap;
+  RooPlot * Frame = Mrec.frame(Title("#pi^{+}#pi^{-} recoil mass" ));
 
+  std::cout << "Before data initialization: " << std::endl;
   for ( auto name : name_lst)
   {
     bg_c1[name] = new RooRealVar(("bg"+name+"_c1").c_str(),("background slope for "+name).c_str(),0,- 1.0/Mmax, - 1.0/Mmin);
@@ -302,15 +379,31 @@ void fit(std::list<TH1*> & hlst)
         RooArgList(*bgPdf[name], *SignalPdfMap[name]), 
         RooArgList(*Nbg[name],  *Nsig[name]));
 
-    dataMap[name]=new RooDataHist(name.c_str(), name.c_str(), *MMrec[name], Import(*hisMap[name]));
+    if(!use_tree)
+    {
+      dataMap[name] = new RooDataHist(name.c_str(), name.c_str(), *MMrec[name], Import(*hisMap[name]));
+    }
+    else
+    {
+      dataMap[name] = new RooDataHist(name.c_str(), name.c_str(), Mrec, Import(*hisMap[name]));
+      std::cout << "Initializing RooDataSet: name = " << name << " Mrec name = " << MMrec[name]->GetName() << std::endl;
+      dataSetMap[name] = new RooDataSet(name.c_str(), name.c_str(), MrecInTree, Import(*treeMap[name]));
+    }
     sample.defineType(name.c_str());
     MrecArgList.add(*MMrec[name]);
-    frame[name] = MMrec[name]->frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
+    if(OPT_SEPARATE_MREC) frame[name] = MrecInTree.frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
+    else frame[name] = Frame;
   }
+  std::cout << "After data initialization" << std::endl;
 
-  RooDataHist * data = new RooDataHist("combData","Combined data", MrecArgList, sample, dataMap);
+  RooAbsData * data = nullptr;
+  if(!use_tree) data = new RooDataHist("combData","Combined data", MrecArgList, sample, dataMap);
+  else data = new RooDataSet("comb","Combined data", MrecInTree, Index(sample), Import(dataSetMap));
+  std::cout << "After combined data set " << std::endl;
+
   RooSimultaneous simPdf("simPdf","simultaneous pdf",SamplePdf,sample) ;
 
+  std::cout << "Before chi2 nll initialization" << std::endl;
   std::map<std::string, RooNLLVar*> nllMap;
   std::map<std::string, RooChi2Var*> chi2Map;
   RooArgSet  nll_arg_set;
@@ -319,16 +412,17 @@ void fit(std::list<TH1*> & hlst)
   {
     nllMap[name] = new RooNLLVar(("nll"+name).c_str(),("Nll for " + name).c_str(),*SamplePdf[name],*dataMap[name]);
     nll_arg_set.add(*nllMap[name]);
-    chi2Map[name] = new RooChi2Var(("chi2"+name).c_str(),("chi2 for " + name).c_str(),*SamplePdf[name],*dataMap[name]);
+    chi2Map[name] = new RooChi2Var(("chi2"+name).c_str(),("chi2 for " + name).c_str(),*SamplePdf[name],*dataMap[name],
+        DataError(RooAbsData::Expected));
     chi2_arg_set.add(*chi2Map[name]);
   }
 
   RooAddition nll("nll","nll", nll_arg_set);
 	RooAddition chi2Var("chi2", "chi2", chi2_arg_set);
-	//RooChi2Var chi2Var("chi2", "chi2", simPdf, *data);
 	//RooNLLVar nll("nll","nll",simPdf,*data) ;
 
   //RooDataHist * data = new RooDataHist("combData","Combined data", MrecArgList, sample, hisMap);
+  std::cout << "After chi2 nll initialization" << std::endl;
 
   auto p = simPdf.getParameters(*MMrec[name_lst.front()]);
   if(OPT_PARAM_CONFIG_FILE!="")
@@ -337,14 +431,50 @@ void fit(std::list<TH1*> & hlst)
     p->Print("v");
   }
 
+  
+  if(false)
+  {
+    for(auto name : name_lst)
+    {
+      new TCanvas;
+      RooPlot * f;
+      if(use_tree) f = MrecInTree.frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
+      else f = ((RooRealVar*)MMrec[name])->frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
+      data->plotOn(f, XErrorSize(0), MarkerSize(0.5),  Cut(("sample==sample::"+name).c_str()), AutoBinning());
+      simPdf.plotOn(f, Slice(sample,name.c_str()),ProjWData(sample,*data), LineWidth(2),LineColor(kRed));
+      f->SetMinimum(0.1);
+      f->GetYaxis()->SetTitleOffset(1.6) ; 
+      f->Draw();
+    }
+    while(true)
+    {
+      gSystem->ProcessEvents();
+      usleep(100000); 
+    }
+  }
 
-  //RooMinuit minuit(chi2Var);
-  //minuit.migrad();
-  //minuit.hesse();
-  //minuit.minos();
-  //auto theFitResult = minuit.save();
-
-	auto theFitResult = simPdf.fitTo(*data, Extended(), Strategy(2), Minos(), Save());
+  RooFitResult * theFitResult=nullptr;
+  if(OPT_FIT_METHOD == "lh")
+  {
+    //standart fit method it is used to mach calculation for simpultaneuse fit on separate Mrec
+    theFitResult = simPdf.fitTo(*data, Extended(), Strategy(2), Minos(), Save());
+  }
+  if(OPT_FIT_METHOD == "chi2")
+  {
+    RooMinuit minuit(chi2Var);
+    minuit.migrad();
+    minuit.hesse();
+    minuit.minos();
+    theFitResult = minuit.save();
+  }
+  if(OPT_FIT_METHOD == "lh2")
+  {
+    RooMinuit minuit(nll);
+    minuit.migrad();
+    minuit.hesse();
+    minuit.minos();
+    theFitResult = minuit.save();
+  }
 
   p->writeToFile("tmp_fit_result.txt");
 
@@ -352,12 +482,12 @@ void fit(std::list<TH1*> & hlst)
   int nfp = theFitResult->floatParsFinal().getSize() ;
   //chi square
 	double chi2 =  chi2Var.getVal();
+  int Ndata_entries=0;
+  for(auto his : hisMap) Ndata_entries+=his.second->GetNbinsX();
   //number of degree of freedom
-  int ndf = -nfp;
-  for(auto his : hisMap) ndf+=his.second->GetNbinsX();
+  int ndf = Ndata_entries - nfp;
   //normalized chi2
   double chi2ndf = chi2/ndf;
-  //probability for this hypotisis to get chi2 higher then for this data
   double chi2prob = TMath::Prob(chi2,ndf);
 
 
@@ -426,13 +556,14 @@ void fit(std::list<TH1*> & hlst)
   int i=0;
   for(auto name : name_lst)
   {
-    data->plotOn(frame[name], XErrorSize(0), MarkerSize(0.5),  Cut(("sample==sample::"+name).c_str()),LineColor(colors[i]), MarkerColor(colors[i]));
+    data->plotOn(frame[name], XErrorSize(0), MarkerSize(0.5),  Cut(("sample==sample::"+name).c_str()),LineColor(colors[i]), MarkerColor(colors[i]), AutoBinning());
     simPdf.plotOn(frame[name], Slice(sample,name.c_str()),ProjWData(sample,*data), LineWidth(1),LineColor(colors[i]));
     simPdf.plotOn(frame[name], Slice(sample,name.c_str()),ProjWData(sample,*data), Components(*bgPdf[name]),LineStyle(kDashed),LineWidth(1),LineColor(colors[i]));
     frame[name]->SetMinimum(0.1);
     frame[name]->GetYaxis()->SetTitleOffset(1.6) ; 
     viewArgSet.add(*Nsig[name]);
     viewArgSet.add(*Nbg[name]);
+    std::cout << "chi^2 from frame  = " << frame[name]->chiSquare() << endl ;
     i++;
   }
 	//Frame->SetMinimum(0.1);
@@ -460,11 +591,14 @@ void fit(std::list<TH1*> & hlst)
   //now draw this frame first
   frame[most_entries_his_name]->Draw();
   //other should be draw with the option "same"
-  for(auto name :name_lst)
+  if(OPT_SEPARATE_MREC)
   {
-    if(name != most_entries_his_name)
+    for(auto name :name_lst)
     {
-      frame[name]->Draw("same");
+      if(name != most_entries_his_name)
+      {
+        frame[name]->Draw("same");
+      }
     }
   }
 
@@ -481,7 +615,29 @@ void fit(std::list<TH1*> & hlst)
     Nsig[name]->Print();
     Nbg[name]->Print();
   }
-  std::cout << boost::format("chi2/ndf = %.15f/(%d-%d) = %f,  prob = %f") % chi2 % ndf % nfp % chi2ndf %  chi2prob<< std::endl;
+  std::cout << boost::format("chi2/ndf = %.15f/(%d-%d) = %f,  prob = %f") % chi2 % Ndata_entries % nfp % chi2ndf %  chi2prob<< std::endl;
+
+
+  //my own chi2 calculation
+  /*
+  double my_sum_chi2=0;
+  for(auto name : name_lst)
+  {
+    //RooHist* histo = (RooHist*) frame[name]->findObject(name.c_str()) ;
+    //RooCurve* func = (RooCurve*) frame[name]->findObject((name+"Pdf").c_str()) ;
+    RooHist* histo = (RooHist*) frame[name]->getHist() ;
+    RooCurve* func = (RooCurve*) frame[name]->getCurve() ;
+    for (Int_t i=0 ; i<histo->GetN() ; i++) 
+    {
+      Double_t xdata,ydata ;
+      histo->GetPoint(i,xdata,ydata) ;
+      Double_t yfunc = func->interpolate(xdata) ;
+      std::cout << "n=" << ydata << " n_obs  - n_exp" << (ydata-yfunc) << "  (n_obs-n_exp)^2/n_obs =" << (ydata-yfunc)*(ydata-yfunc)/ydata << std::endl;
+      my_sum_chi2 += (ydata-yfunc)*(ydata-yfunc)/ydata;
+    }
+  }
+  std::cout << "mysum_chi2 = " << my_sum_chi2 <<std::endl;
+  */
 
   //No print the ration of signal event to number of signal event for last data
   //sample
@@ -534,6 +690,7 @@ void fit2(std::list<TH1*> & hlst)
   std::map<std::string, RooAbsPdf * > bgPdf; //number of background events
   std::map<std::string, RooPlot*> frame;
 
+  RooArgSet & pars = *createMcbVars(Mmin,Mmax);
  	RooCategory sample("sample","sample");
   for(auto name : name_lst)
   {
@@ -547,10 +704,16 @@ void fit2(std::list<TH1*> & hlst)
     MMrec[name]->setBins(hisMap[name]->GetNbinsX());
     //Mrec.setBins(hisMap[name]->GetNbinsX(),name.c_str());
     //Mrec.setBins(10000);
-    auto mcb = createMcbPdf(name, *MMrec[name]);
-    auto mcb_rad = addRad(mcb, *MMrec[name]);
-    SamplePdf[name] = addBg(name, mcb_rad, bgPdf[name],*MMrec[name],Nsig[name], Nbg[name]);
+    auto mcb = createMcbPdf(name, *MMrec[name], pars);
+    auto mcb_rad = addRad(mcb, *MMrec[name], pars);
+    RooAbsPdf * bgpdf;
+    SamplePdf[name] = addBg(name, mcb_rad ,bgpdf ,*MMrec[name],pars);
+    bgPdf[name] = bgpdf;
     sample.defineType(name.c_str());
+
+    Nsig[name]= &((RooRealVar&)pars[("Nsig"+name).c_str()]);
+    Nbg[name]= &((RooRealVar&)pars[("Nbg"+name).c_str()]);
+    Nsig[name]->setVal(hisMap[name]->GetEntries());
   }
 
 
@@ -576,13 +739,13 @@ void fit2(std::list<TH1*> & hlst)
   {
     nllMap[name] = new RooNLLVar(("nll"+name).c_str(),("Nll for " + name).c_str(),*SamplePdf[name],*dataMap[name]);
     nll_arg_set.add(*nllMap[name]);
-    chi2Map[name] = new RooChi2Var(("chi2"+name).c_str(),("chi2 for " + name).c_str(),*SamplePdf[name],*dataMap[name]);
+    chi2Map[name] = new RooChi2Var(("chi2"+name).c_str(),("chi2 for " + name).c_str(),*SamplePdf[name],*dataMap[name], DataError(RooAbsData::Expected));
     chi2_arg_set.add(*chi2Map[name]);
   }
 
   RooAddition nll("nll","nll", nll_arg_set);
-	RooAddition chi2Var("chi2", "chi2", chi2_arg_set);
-	//RooChi2Var chi2Var("chi2", "chi2", simPdf, *data);
+	//RooAddition chi2Var("chi2", "chi2", chi2_arg_set);
+	RooChi2Var chi2Var("chi2", "chi2", simPdf, *data, DataError(RooAbsData::Expected));
 	//RooNLLVar nll("nll","nll",simPdf,*data) ;
 
   //RooDataHist * data = new RooDataHist("combData","Combined data", MrecArgList, sample, hisMap);
@@ -602,6 +765,7 @@ void fit2(std::list<TH1*> & hlst)
   //auto theFitResult = minuit.save();
 
 	auto theFitResult = simPdf.fitTo(*data, Extended(), Strategy(2), Minos(), Save());
+  theFitResult->Print();
 
   p->writeToFile("tmp_fit_result.txt");
 
@@ -610,10 +774,12 @@ void fit2(std::list<TH1*> & hlst)
   //chi square
 	double chi2 =  chi2Var.getVal();
   //number of degree of freedom
-  int ndf = -nfp;
-  for(auto his : hisMap) ndf+=his.second->GetNbinsX();
+  int Ndata_entries=0;
+  for(auto his : hisMap) Ndata_entries+=his.second->GetNbinsX();
+  //number of degree of freedom
+  int ndf = Ndata_entries - nfp;
   //normalized chi2
-  double chi2ndf = chi2/ndf;
+  double chi2ndf = (Ndata_entries-nfp)/ndf;
   //probability for this hypotisis to get chi2 higher then for this data
   double chi2prob = TMath::Prob(chi2,ndf);
 
@@ -622,8 +788,12 @@ void fit2(std::list<TH1*> & hlst)
   std::vector<int> line_styles = {kSolid, kSolid, kDashed, kDotted, kSolid, kSolid, kDashed, kDotted};
   for(auto name : name_lst)
   {
+    std::cout << "plotting data" << name << std::endl;
     data->plotOn(frame[name], XErrorSize(0), MarkerSize(0.5),  Cut(("sample==sample::"+name).c_str()),LineColor(colors[i]), MarkerColor(colors[i]));
+    std::cout << "plotting simPdf " << name << std::endl;
     simPdf.plotOn(frame[name], Slice(sample,name.c_str()),ProjWData(sample,*data), LineWidth(1),LineColor(colors[i]));
+    std::cout << "plotting simPdf with bgcomptonents " << name << std::endl;
+    /*  
     simPdf.plotOn(frame[name], 
         Slice(sample,name.c_str()),
         ProjWData(sample,*data), 
@@ -631,7 +801,10 @@ void fit2(std::list<TH1*> & hlst)
         LineStyle(kDashed),
         LineWidth(1),
         LineColor(colors[i]));
+        */
+    std::cout << "frame sete minimum " << name << std::endl;
     frame[name]->SetMinimum(0.1);
+    std::cout << "frame set title " << name << std::endl;
     frame[name]->GetYaxis()->SetTitleOffset(1.6) ; 
     i++;
   }

@@ -25,17 +25,20 @@
 using namespace std;
 
 class TH1;
+class TTree;
 
 #include "RooMcbPdf.h"
 
 extern void fit(TH1 * his);
 extern void fit(TH1 * hisKK, TH1 * hisUU);
-extern void fit(std::list<TH1*> & );
+extern void fit(std::list<TH1*> & , std::list<TTree*> & , bool = false);
 extern void fit2(std::list<TH1*> & );
 
 extern bool OPT_NOBGSLOPE; //no slope for the background
 extern bool OPT_NOBG; //no background
 extern bool OPT_NOGAUSRAD; //no gaus rad
 extern std::string OPT_PARAM_CONFIG_FILE; 
+extern bool OPT_SEPARATE_MREC; //separate Mrec for each channel
+extern std::string OPT_FIT_METHOD;
 
 #endif

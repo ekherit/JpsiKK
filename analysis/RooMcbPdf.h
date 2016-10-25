@@ -174,6 +174,8 @@ public:
   Int_t getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* rangeName=0) const ;
   Double_t analyticalIntegral(Int_t code, const char* rangeName=0) const ;
 
+  void setRange(double xmin, double xmax) { fXmin = xmin; fXmax = xmax; }
+
 protected:
   RooRealProxy fX;
   RooRealProxy fMean;

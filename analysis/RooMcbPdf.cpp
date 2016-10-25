@@ -337,8 +337,8 @@ RooMcb2Pdf::RooMcb2Pdf(const char *name, const char *title,
    			fStaple8("staple8","staple8",this,_s8), 
    			fN1("nl","nl",this,_n1), 
    			fN2("nr","nr",this,_n2),
-        fXmin(((RooRealVar&)_X).getMin()),
-        fXmax(((RooRealVar&)_X).getMax())
+        fXmin(-45),
+        fXmax(+45)
 {
   std::cout << "fXmin = " << fXmin << "  fXmax = " << fXmax << std::endl;
 }
@@ -350,9 +350,6 @@ RooMcb2Pdf::RooMcb2Pdf(const char *name, const char *title,
 				std::vector<RooRealVar> & _s,   //staple 
 				RooAbsReal & _n1,   
 				RooAbsReal & _n2
-        //,   
-        //double xmin,
-        //double xmax
 				) :  
   RooMcb2Pdf(name,title,
           _X,
@@ -368,9 +365,6 @@ RooMcb2Pdf::RooMcb2Pdf(const char *name, const char *title,
           _s[7], 
           _n1, 
           _n2
-          //, 
-          //xmin, 
-          //xmax
           )
 {
 }
