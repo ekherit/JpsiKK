@@ -175,14 +175,14 @@ RooAbsPdf * addRad(RooAbsPdf * mcbPdf, RooRealVar & Mrec, RooArgSet & pars)
   return  new RooAddPdf(("signal"+name).c_str(),("Signal model for "+name).c_str(), PdfList, RadFracList);
 }
 
-RooAbsPdf *addBg(std::string name, RooAbsPdf * signalPdf, RooAbsPdf * bgPdf, RooRealVar & Mrec, RooArgSet & pars)
+RooAbsPdf *addBg(std::string name, RooAbsPdf * signalPdf, RooAbsPdf ** bgPdf, RooRealVar & Mrec, RooArgSet & pars)
 {
   double Mmin = Mrec.getMin();
   double Mmax = Mrec.getMax();
   RooRealVar * bg_c1 = new RooRealVar(("bg"+name+"_c1").c_str(),("background slope for "+name).c_str(),0,- 1.0/Mmax, - 1.0/Mmin);
   if(OPT_NOBGSLOPE) bg_c1->setConstant();
   pars.add(*bg_c1);
-  bgPdf = new RooPolynomial(("bg"+name).c_str(), ( name + " background pdf").c_str(), Mrec, *bg_c1);	
+  *bgPdf = new RooPolynomial(("bg"+name).c_str(), ( name + " background pdf").c_str(), Mrec, *bg_c1);	
   RooRealVar * Nsig = new RooRealVar(("Nsig"+name).c_str(), ("Number of " + name +" events").c_str(), 0,0, 1e8);
   RooRealVar * Nbg  = new RooRealVar(("Nbg"+name).c_str(), ("Number of background events for " + name + " channel").c_str(), 0, 0, 1e8);
   pars.add(*Nsig);
@@ -196,7 +196,7 @@ RooAbsPdf *addBg(std::string name, RooAbsPdf * signalPdf, RooAbsPdf * bgPdf, Roo
     (
      (name+"Pdf").c_str(), 
      (name+" signal + background p.d.f.").c_str(), 
-     RooArgList(*bgPdf, *signalPdf), 
+     RooArgList(**bgPdf, *signalPdf), 
      RooArgList(*Nbg,  *Nsig)
     );
 }
@@ -369,7 +369,7 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
   std::map<std::string, RooAbsPdf*> SamplePdf; //here will be Pdf with signal and background mixed
   std::map<std::string, RooRealVar * > Nsig; //number of signal events
   std::map<std::string, RooRealVar * > Nbg; //number of background events
-  std::map<std::string, RooPolynomial*> bgPdf; //background pdf function
+  std::map<std::string, RooAbsPdf*> bgPdf; //background pdf function
   std::map<std::string, RooPlot*> frame;
 
   for(auto name: name_lst)
@@ -377,55 +377,13 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
     RooRealVar & Mobs = *(RooRealVar*)MMrec[name];
     McbPdfMap[name] = createMcbPdf(name, Mobs, args,Mmin,Mmax);
     SignalPdfMap[name] = OPT_NOGAUSRAD ? McbPdfMap[name] : addRad(McbPdfMap[name], Mobs, args);
-    bgPdf[name]=nullptr;
-    SamplePdf[name] = addBg(name, SignalPdfMap[name], bgPdf[name], Mobs, args);
+    SamplePdf[name] = addBg(name, SignalPdfMap[name], &(bgPdf[name]), Mobs, args);
     //reinit args
     args = *SamplePdf[name]->getParameters(Mobs);
     Nsig[name] = (RooRealVar*)&args[("Nsig"+name).c_str()];
     Nbg[name] = (RooRealVar*)&args[("Nbg"+name).c_str()];
-    bgPdf[name]->getParameters(Mobs)->Print("v");
   }
 
-  //Mixing with the background
-
-
-  /*  
-  std::map<std::string, RooRealVar*> bg_c1; //slope of the background
-  std::cout << "Before data initialization: " << std::endl;
-  for ( auto name : name_lst)
-  {
-    bg_c1[name] = new RooRealVar(("bg"+name+"_c1").c_str(),("background slope for "+name).c_str(),0,- 1.0/Mmax, - 1.0/Mmin);
-    if(OPT_NOBGSLOPE) bg_c1[name]->setConstant();
-    bgPdf[name] = new RooPolynomial(("bg"+name).c_str(), ( name + " background pdf").c_str(), *MMrec[name], *bg_c1[name]);	
-    Nsig[name] = new RooRealVar(("Nsig"+name).c_str(), ("Number of " + name +" events").c_str(), Nhis[name],0, Nhis[name]*100);
-    Nbg[name] = new RooRealVar(("Nbg"+name).c_str(), ("Number of background events for " + name + " channel").c_str(), 0, 0, Nhis[name]*100);
-    if(OPT_NOBG)
-    {
-      Nbg[name]->setConstant();
-      bg_c1[name]->setConstant();
-    }
-    SamplePdf[name] = new RooAddPdf((name+"Pdf").c_str(), (name+" signal + background p.d.f.").c_str(), 
-        //RooArgList(*bgPdf[name], *signalPdf), 
-        RooArgList(*bgPdf[name], *SignalPdfMap[name]), 
-        RooArgList(*Nbg[name],  *Nsig[name]));
-
-    //if(!use_tree)
-    //{
-    //  dataMap[name] = new RooDataHist(name.c_str(), name.c_str(), *MMrec[name], Import(*hisMap[name]));
-    //}
-    //else
-    //{
-    //  dataMap[name] = new RooDataHist(name.c_str(), name.c_str(), Mrec, Import(*hisMap[name]));
-    //  std::cout << "Initializing RooDataSet: name = " << name << " Mrec name = " << MMrec[name]->GetName() << std::endl;
-    //  dataSetMap[name] = new RooDataSet(name.c_str(), name.c_str(), MrecInTree, Import(*treeMap[name]));
-    //  dataSetMap[name]->addColumn(*MMrec[name]);
-    //}
-    //sample.defineType(name.c_str());
-    //MrecArgList.add(*MMrec[name]);
-    //if(OPT_SEPARATE_MREC) frame[name] = MrecInTree.frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
-    //else frame[name] = Frame;
-  }
-  */
 
  	RooCategory sample("sample","sample");
   RooArgList MrecArgList;
@@ -493,26 +451,26 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
   }
 
   
-  if(false)
-  {
-    for(auto name : name_lst)
-    {
-      new TCanvas;
-      RooPlot * f;
-      if(use_tree) f = MrecInTree.frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
-      else f = ((RooRealVar*)MMrec[name])->frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
-      data->plotOn(f, XErrorSize(0), MarkerSize(0.5),  Cut(("sample==sample::"+name).c_str()), AutoBinning());
-      simPdf.plotOn(f, Slice(sample,name.c_str()),ProjWData(sample,*data), LineWidth(2),LineColor(kRed));
-      f->SetMinimum(0.1);
-      f->GetYaxis()->SetTitleOffset(1.6) ; 
-      f->Draw();
-    }
-    while(true)
-    {
-      gSystem->ProcessEvents();
-      usleep(100000); 
-    }
-  }
+  //if(false)
+  //{
+  //  for(auto name : name_lst)
+  //  {
+  //    new TCanvas;
+  //    RooPlot * f;
+  //    if(use_tree) f = MrecInTree.frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
+  //    else f = ((RooRealVar*)MMrec[name])->frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
+  //    data->plotOn(f, XErrorSize(0), MarkerSize(0.5),  Cut(("sample==sample::"+name).c_str()), AutoBinning());
+  //    simPdf.plotOn(f, Slice(sample,name.c_str()),ProjWData(sample,*data), LineWidth(2),LineColor(kRed));
+  //    f->SetMinimum(0.1);
+  //    f->GetYaxis()->SetTitleOffset(1.6) ; 
+  //    f->Draw();
+  //  }
+  //  while(true)
+  //  {
+  //    gSystem->ProcessEvents();
+  //    usleep(100000); 
+  //  }
+  //}
 
   RooFitResult * theFitResult=nullptr;
   if(OPT_FIT_METHOD == "lh")
@@ -662,6 +620,8 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
   std::cout << "mysum_chi2 = " << my_sum_chi2 <<std::endl;
   */
 
+  theFitResult->Print();
+
   //No print the ration of signal event to number of signal event for last data
   //sample
   for(auto name : name_lst)
@@ -679,189 +639,6 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
     double theError = theRatio * theRelError;
     boost::format fmt("%s/%s = (%6.3f ± %-4.3f) * 1e-3 ( ± %.2f%%)");
     cout << fmt % N->GetName() % N0->GetName() % (theRatio*1000) %  (theError*1000) %  (theRelError*100)  <<  endl;
-  }
-}
-
-void fit2(std::list<TH1*> & hlst)
-{
-  //define maximum and minimum recoil mass
-  double Mmin  = (*std::max_element(std::begin(hlst), std::end(hlst), 
-      [](const TH1 * h1, const TH1 *h2) { return h1->GetXaxis()->GetXmin() < h2->GetXaxis()->GetXmin(); } ))->GetXaxis()->GetXmin();
-
-  double Mmax  = (*std::min_element(std::begin(hlst), std::end(hlst), 
-      [](const TH1 * h1, const TH1 *h2) { return h1->GetXaxis()->GetXmax() < h2->GetXaxis()->GetXmax(); } ))->GetXaxis()->GetXmax();
-
-  std::list < std::string > name_lst;
-  std::map<std::string,TH1*> hisMap;
-  std::map<std::string, Long64_t> Nhis;
-  for(auto h : hlst) 
-  {
-    name_lst.push_back(h->GetName());
-    hisMap[h->GetName()] = h;
-    Nhis[h->GetName()] = h->GetEntries();
-  }
-  //i decided to make own variable for mmrec
-  std::map<std::string, RooRealVar*> MMrec;
-
-  boost::format mrec_title_fmt("M_{rec}^{%s}(#pi^{+}#pi^{-}) - 3097 MeV");
-  RooRealVar  Mrec("Mrec",(mrec_title_fmt % "").str().c_str(), Mmin,Mmax, "MeV");
-
-  std::map<std::string, RooAbsPdf * > SamplePdf; //here will be Pdf with signal and background mixed
-
-  std::map<std::string, RooRealVar * > Nsig; //number of signal events
-  std::map<std::string, RooRealVar * > Nbg; //number of background events
-  std::map<std::string, RooAbsPdf * > bgPdf; //number of background events
-  std::map<std::string, RooPlot*> frame;
-
-  RooArgSet & pars = *createMcbVars(Mmin,Mmax);
- 	RooCategory sample("sample","sample");
-  for(auto name : name_lst)
-  {
-    MMrec[name]=&Mrec; //default observable
-    //MMrec[name] = new RooRealVar(
-    //    ("Mrec"+name).c_str(), 
-    //     (mrec_title_fmt % name).str().c_str(), 
-    //     hisMap[name]->GetXaxis()->GetXmin(),
-    //    hisMap[name]->GetXaxis()->GetXmax(), "MeV"
-    //    );
-    MMrec[name]->setBins(hisMap[name]->GetNbinsX());
-    //Mrec.setBins(hisMap[name]->GetNbinsX(),name.c_str());
-    //Mrec.setBins(10000);
-    auto mcb = createMcbPdf(name, *MMrec[name], pars, Mmin,Mmax);
-    auto mcb_rad = addRad(mcb, *MMrec[name], pars);
-    RooAbsPdf * bgpdf;
-    SamplePdf[name] = addBg(name, mcb_rad ,bgpdf ,*MMrec[name],pars);
-    bgPdf[name] = bgpdf;
-    sample.defineType(name.c_str());
-
-    Nsig[name]= &((RooRealVar&)pars[("Nsig"+name).c_str()]);
-    Nbg[name]= &((RooRealVar&)pars[("Nbg"+name).c_str()]);
-    Nsig[name]->setVal(hisMap[name]->GetEntries());
-  }
-
-
-
-  //data
-  std::map<std::string, RooDataHist *> dataMap;
-  RooArgList MrecArgList;
-  for ( auto name : name_lst)
-  {
-    dataMap[name]=new RooDataHist(name.c_str(), name.c_str(), *MMrec[name], Import(*hisMap[name]));
-    MrecArgList.add(*MMrec[name]);
-    frame[name] = MMrec[name]->frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
-  }
-
-  RooDataHist * data = new RooDataHist("combData","Combined data", MrecArgList, sample, dataMap);
-  RooSimultaneous simPdf("simPdf","simultaneous pdf",SamplePdf,sample) ;
-
-  std::map<std::string, RooNLLVar*> nllMap;
-  std::map<std::string, RooChi2Var*> chi2Map;
-  RooArgSet  nll_arg_set;
-  RooArgSet  chi2_arg_set;
-  for(auto name : name_lst)
-  {
-    nllMap[name] = new RooNLLVar(("nll"+name).c_str(),("Nll for " + name).c_str(),*SamplePdf[name],*dataMap[name]);
-    nll_arg_set.add(*nllMap[name]);
-    chi2Map[name] = new RooChi2Var(("chi2"+name).c_str(),("chi2 for " + name).c_str(),*SamplePdf[name],*dataMap[name], DataError(RooAbsData::Expected));
-    chi2_arg_set.add(*chi2Map[name]);
-  }
-
-  RooAddition nll("nll","nll", nll_arg_set);
-	//RooAddition chi2Var("chi2", "chi2", chi2_arg_set);
-	RooChi2Var chi2Var("chi2", "chi2", simPdf, *data, DataError(RooAbsData::Expected));
-	//RooNLLVar nll("nll","nll",simPdf,*data) ;
-
-  //RooDataHist * data = new RooDataHist("combData","Combined data", MrecArgList, sample, hisMap);
-
-  auto p = simPdf.getParameters(*MMrec[name_lst.front()]);
-  if(OPT_PARAM_CONFIG_FILE!="")
-  {
-    p->readFromFile(OPT_PARAM_CONFIG_FILE.c_str());
-    p->Print("v");
-  }
-
-
-  //RooMinuit minuit(chi2Var);
-  //minuit.migrad();
-  //minuit.hesse();
-  //minuit.minos();
-  //auto theFitResult = minuit.save();
-
-	auto theFitResult = simPdf.fitTo(*data, Extended(), Strategy(2), Minos(), Save());
-  theFitResult->Print();
-
-  p->writeToFile("tmp_fit_result.txt");
-
-  //number of free parameters
-  int nfp = theFitResult->floatParsFinal().getSize() ;
-  //chi square
-	double chi2 =  chi2Var.getVal();
-  //number of degree of freedom
-  int Ndata_entries=0;
-  for(auto his : hisMap) Ndata_entries+=his.second->GetNbinsX();
-  //number of degree of freedom
-  int ndf = Ndata_entries - nfp;
-  //normalized chi2
-  double chi2ndf = (Ndata_entries-nfp)/ndf;
-  //probability for this hypotisis to get chi2 higher then for this data
-  double chi2prob = TMath::Prob(chi2,ndf);
-
-  int i=0;
-  std::vector<int> colors = {kBlack, kBlue,kCyan+2,kGreen+2, kGreen, kRed, kMagenta, kRed+2}; 
-  std::vector<int> line_styles = {kSolid, kSolid, kDashed, kDotted, kSolid, kSolid, kDashed, kDotted};
-  for(auto name : name_lst)
-  {
-    std::cout << "plotting data" << name << std::endl;
-    data->plotOn(frame[name], XErrorSize(0), MarkerSize(0.5),  Cut(("sample==sample::"+name).c_str()),LineColor(colors[i]), MarkerColor(colors[i]));
-    std::cout << "plotting simPdf " << name << std::endl;
-    simPdf.plotOn(frame[name], Slice(sample,name.c_str()),ProjWData(sample,*data), LineWidth(1),LineColor(colors[i]));
-    std::cout << "plotting simPdf with bgcomptonents " << name << std::endl;
-    /*  
-    simPdf.plotOn(frame[name], 
-        Slice(sample,name.c_str()),
-        ProjWData(sample,*data), 
-        Components(* bgPdf[name]),
-        LineStyle(kDashed),
-        LineWidth(1),
-        LineColor(colors[i]));
-        */
-    std::cout << "frame sete minimum " << name << std::endl;
-    frame[name]->SetMinimum(0.1);
-    std::cout << "frame set title " << name << std::endl;
-    frame[name]->GetYaxis()->SetTitleOffset(1.6) ; 
-    i++;
-  }
-	//Frame->SetMinimum(0.1);
-
-
-  TCanvas* c = new TCanvas("mcb","fit") ;
-  gPad->SetLeftMargin(0.15) ; 
-  gPad->SetLogy();
-  //now find frame with maximum number of events
-  std::string most_entries_his_name;
-  long long tmpN = 0;
-  for(auto name : name_lst)
-  {
-    if(Nhis[name]>tmpN)
-    {
-      tmpN=Nhis[name];
-      most_entries_his_name = name;
-    }
-  }
-
-  auto chi_fmt = boost::format("#chi^{2}/ndf = %.1f/%d = %.2f") % chi2 % ndf % chi2ndf;
-  auto prob_fmt = boost::format("prob = %.1f%%") % chi2prob;
-  //simPdf.paramOn(frame[most_entries_his_name], Label(chi_fmt.str().c_str()), Parameters(viewArgSet));
-
-  //now draw this frame first
-  frame[most_entries_his_name]->Draw();
-  //other should be draw with the option "same"
-  for(auto name :name_lst)
-  {
-    if(name != most_entries_his_name)
-    {
-      frame[name]->Draw("same");
-    }
   }
 }
 

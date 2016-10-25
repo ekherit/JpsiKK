@@ -32,7 +32,6 @@ class TTree;
 extern void fit(TH1 * his);
 extern void fit(TH1 * hisKK, TH1 * hisUU);
 extern void fit(std::list<TH1*> & , std::list<TTree*> & , bool = false);
-extern void fit2(std::list<TH1*> & );
 
 extern bool OPT_NOBGSLOPE; //no slope for the background
 extern bool OPT_NOBG; //no background
