@@ -364,72 +364,8 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
 
   RooArgSet & args = * createMcbVars(Mmin,Mmax);
 
-  /*
-  RooRealVar  mean( "mean",  "mean",   -0.1 + 0.5*(Mmin+Mmax) ,  Mmin,  Mmax, "MeV") ;
-  RooRealVar sigma("sigma","sigma",1.4,0.5,10, "MeV") ;
-  RooRealVar n1("n1","n1", 3,  1,100) ;
-  RooRealVar n2("n2","n2", 2,  1,100) ;
-
-  std::vector<RooRealVar> staple =
-  {
-    RooRealVar("L1", "Left Gaus range"   , 2        , "MeV"),
-    RooRealVar("L2", "Left Exp range"    , 1        , 0      , (Mmax-Mmin)*0.5 , "MeV"),
-    RooRealVar("L3", "Left Power range"  , 10       , 0      , (Mmax-Mmin)*0.5 , "MeV"),
-    RooRealVar("L4", "Left Exp range 2"  , 20       , 0      , (Mmax-Mmin)*0.5 , "MeV"),
-    RooRealVar("R1", "Right Gaus range"  , 2        , "MeV"), 
-    RooRealVar("R2", "Right Exp range"   , 1        , 0      , (Mmax-Mmin)*0.5 , "MeV"), 
-    RooRealVar("R3", "Right Power range" , 30       , 0      , (Mmax-Mmin)*0.5 , "MeV"), 
-    RooRealVar("R4", "Right Exp range 2" , 1        , 0      , (Mmax-Mmin)*0.5 , "MeV")
-  };
-  */
-
-  /*  
-  RooRealVar & mean  = (RooRealVar&)args["mean"];
-  RooRealVar & sigma = (RooRealVar&)args["sigma"];
-  RooRealVar & n1 =    (RooRealVar&)args["n1"];
-  RooRealVar & n2 =    (RooRealVar&)args["n2"];
-  std::vector<RooRealVar*> staple =
-  {
-    (RooRealVar*)&args["L1"],
-    (RooRealVar*)&args["L2"],
-    (RooRealVar*)&args["L3"],
-    (RooRealVar*)&args["L4"],
-    (RooRealVar*)&args["R1"],
-    (RooRealVar*)&args["R2"],
-    (RooRealVar*)&args["R3"],
-    (RooRealVar*)&args["R4"],
-  };
-  */
-
   std::map<std::string, RooAbsPdf*> McbPdfMap;
   std::map<std::string, RooAbsPdf*> SignalPdfMap;
-  /*  
-  std::cout << "Before mcb pdf construction" << std::endl;
-  for(auto name : name_lst)
-  {
-    std::cout << "MMrec[name]->GetName() = " << MMrec[name]->GetName() << std::endl;
-    //std::cout << "min = " << ((RooRealVar*)MMrec[name])->getMin() << " max = " << ((RooRealVar*)MMrec[name])->getMax() << std::endl;
-    std::cout << "In mcb pdf construction " << name <<  std::endl;
-    //McbPdfMap[name]=new RooMcb2Pdf(("Mcb2Pdf_"+name).c_str(), ("My modified Crystal Bal function for " + name).c_str(),
-    //    *MMrec[name], mean,sigma,staple, n1, n2);
-    McbPdfMap[name]=new RooMcb2Pdf(("Mcb2Pdf_"+name).c_str(), ("My modified Crystal Bal function for " + name).c_str(),
-        *MMrec[name], mean,sigma,
-        *staple[0], 
-        *staple[1], 
-        *staple[2], 
-        *staple[3], 
-        *staple[4], 
-        *staple[5], 
-        *staple[6], 
-        *staple[7], 
-        n1, n2);
-    ((RooMcb2Pdf*)McbPdfMap[name])->setRange(Mmin,Mmax);
-  }
-  std::cout << "After mcb construction" << std::endl;
-  */
-	//RooMcb2Pdf *mcbPdf=0;
-  //mcbPdf = new RooMcb2Pdf("mcb2","mcb2",Mrec,mean,sigma, staple, n1,n2,Mmin,Mmax);
-
 
   for(auto name: name_lst)
   {
@@ -437,73 +373,6 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
     McbPdfMap[name] = createMcbPdf(name, Mobs, args,Mmin,Mmax);
     SignalPdfMap[name] = OPT_NOGAUSRAD ? McbPdfMap[name] : addRad(McbPdfMap[name], Mobs, args);
   }
-
-
-  //std::vector<RooRealVar*> meanRad;
-  //if(!OPT_NOGAUSRAD) meanRad.resize(4);
-  //std::vector<RooRealVar*> sigmaRad(meanRad.size());
-  //std::vector<RooGaussian*> radPdf(meanRad.size());
-  //std::vector<RooRealVar*> radFrac(meanRad.size());
-
-  //std::map<std::string, std::vector<RooGaussian*>> radPdfMap;
-
-  //create parameters for radiative gaussian (mean and sigma)
-  /*
-  for(int i=0;i<meanRad.size();i++)
-  {
-    std::string istr = to_string(i);
-    double Mean, Min,Max;
-    if(i<2)
-    {
-      Mean = 20;
-      Min = (Mmax+Mmin)*0.5+5;
-      Max = Mmax;
-    }
-    else
-    {
-      Mean = -20;
-      Min = Mmin;
-      Max = (Mmax+Mmin)*0.5-5;
-    }
-    Min = Mmin;
-    Max = Mmax;
-    meanRad[i]  = new RooRealVar(("rad_mean" + istr).c_str(),   ("mean_rad" + istr).c_str(), Mean, Min, Max, "MeV");
-    sigmaRad[i] = new RooRealVar(("rad_sigma" + istr).c_str(), ("sigma_rad" + istr).c_str(), 10, 2, 100, "MeV");
-    radFrac[i] = new RooRealVar(("rad_frac"+istr).c_str(),("fraction " + istr + " radiative gauss").c_str(), 0, 0.2);
-  }
-  */
-
-  //for(int i=0;i<meanRad.size();i++)
-  //{
-  //  std::string istr = to_string(i);
-  //  meanRad[i] = (RooRealVar*)(&args[("rad_mean"+istr).c_str()]);
-  //  sigmaRad[i] = (RooRealVar*)(&args[("rad_sigma"+istr).c_str()]);
-  //  radFrac[i] = (RooRealVar*)(&args[("rad_frac"+istr).c_str()]);
-  //}
-
-  ////name create the SignalPdfs for each channel
-  //for(auto name : name_lst)
-  //{
-  //  RooArgList PdfList;
-  //  RooArgList RadFracList;
-  //  radPdfMap[name].resize(meanRad.size());
-
-  //  for(int i=0;i<meanRad.size();i++)
-  //  {
-  //    std::string istr = to_string(i);
-  //    auto pdf = new RooGaussian(("radPdf" + name + istr).c_str(),
-  //        ("Radiative gauss " + istr + " for " + name).c_str(), *MMrec[name], *meanRad[i], *sigmaRad[i]);
-  //    radPdfMap[name][i] = pdf;
-  //    PdfList.add(*pdf);
-  //    RadFracList.add(*radFrac[i]);
-  //  }
-  //  //PdfList.add(*mcbPdf);
-  //  PdfList.add(*McbPdfMap[name]);
-  //  //RooAbsPdf * signalPdf =  new RooAddPdf("signalPdf","Signal model", PdfList, RadFracList);
-  //  SignalPdfMap[name] = new RooAddPdf(("signalPdf"+name).c_str(),("Signal model for "+name).c_str(), PdfList, RadFracList);
-  //}
-
-
 
   //Mixing with the background
   std::map<std::string, RooAbsPdf * > SamplePdf; //here will be Pdf with signal and background mixed
