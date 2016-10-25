@@ -366,31 +366,31 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
 
   std::map<std::string, RooAbsPdf*> McbPdfMap;
   std::map<std::string, RooAbsPdf*> SignalPdfMap;
+  std::map<std::string, RooAbsPdf*> SamplePdf; //here will be Pdf with signal and background mixed
+  std::map<std::string, RooRealVar * > Nsig; //number of signal events
+  std::map<std::string, RooRealVar * > Nbg; //number of background events
+  std::map<std::string, RooPolynomial*> bgPdf; //background pdf function
+  std::map<std::string, RooPlot*> frame;
 
   for(auto name: name_lst)
   {
     RooRealVar & Mobs = *(RooRealVar*)MMrec[name];
     McbPdfMap[name] = createMcbPdf(name, Mobs, args,Mmin,Mmax);
     SignalPdfMap[name] = OPT_NOGAUSRAD ? McbPdfMap[name] : addRad(McbPdfMap[name], Mobs, args);
+    bgPdf[name]=nullptr;
+    SamplePdf[name] = addBg(name, SignalPdfMap[name], bgPdf[name], Mobs, args);
+    //reinit args
+    args = *SamplePdf[name]->getParameters(Mobs);
+    Nsig[name] = (RooRealVar*)&args[("Nsig"+name).c_str()];
+    Nbg[name] = (RooRealVar*)&args[("Nbg"+name).c_str()];
+    bgPdf[name]->getParameters(Mobs)->Print("v");
   }
 
   //Mixing with the background
-  std::map<std::string, RooAbsPdf * > SamplePdf; //here will be Pdf with signal and background mixed
 
-  std::map<std::string, RooRealVar * > Nsig; //number of signal events
-  std::map<std::string, RooRealVar * > Nbg; //number of background events
-  std::map<std::string, RooPolynomial*> bgPdf; //background pdf function
+
+  /*  
   std::map<std::string, RooRealVar*> bg_c1; //slope of the background
-  std::map<std::string, RooPlot*> frame;
-
- 	RooCategory sample("sample","sample");
-  RooArgList MrecArgList;
-  std::map<std::string, RooDataHist *> dataMap;
-  std::map<std::string, RooDataSet *> dataSetMap;
-  RooPlot * Frame=nullptr;
-  if(!use_tree) Frame= Mrec.frame(Title("#pi^{+}#pi^{-} recoil mass" ));
-  else Frame= MrecInTree.frame(Title("#pi^{+}#pi^{-} recoil mass" ));
-
   std::cout << "Before data initialization: " << std::endl;
   for ( auto name : name_lst)
   {
@@ -409,6 +409,33 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
         RooArgList(*bgPdf[name], *SignalPdfMap[name]), 
         RooArgList(*Nbg[name],  *Nsig[name]));
 
+    //if(!use_tree)
+    //{
+    //  dataMap[name] = new RooDataHist(name.c_str(), name.c_str(), *MMrec[name], Import(*hisMap[name]));
+    //}
+    //else
+    //{
+    //  dataMap[name] = new RooDataHist(name.c_str(), name.c_str(), Mrec, Import(*hisMap[name]));
+    //  std::cout << "Initializing RooDataSet: name = " << name << " Mrec name = " << MMrec[name]->GetName() << std::endl;
+    //  dataSetMap[name] = new RooDataSet(name.c_str(), name.c_str(), MrecInTree, Import(*treeMap[name]));
+    //  dataSetMap[name]->addColumn(*MMrec[name]);
+    //}
+    //sample.defineType(name.c_str());
+    //MrecArgList.add(*MMrec[name]);
+    //if(OPT_SEPARATE_MREC) frame[name] = MrecInTree.frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
+    //else frame[name] = Frame;
+  }
+  */
+
+ 	RooCategory sample("sample","sample");
+  RooArgList MrecArgList;
+  std::map<std::string, RooDataHist *> dataMap;
+  std::map<std::string, RooDataSet *> dataSetMap;
+  RooPlot * Frame=nullptr;
+  if(!use_tree) Frame= Mrec.frame(Title("#pi^{+}#pi^{-} recoil mass" ));
+  else Frame= MrecInTree.frame(Title("#pi^{+}#pi^{-} recoil mass" ));
+  for ( auto name : name_lst)
+  {
     if(!use_tree)
     {
       dataMap[name] = new RooDataHist(name.c_str(), name.c_str(), *MMrec[name], Import(*hisMap[name]));
@@ -425,6 +452,9 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
     if(OPT_SEPARATE_MREC) frame[name] = MrecInTree.frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
     else frame[name] = Frame;
   }
+
+
+
   std::cout << "After data initialization" << std::endl;
 
   RooAbsData * data = nullptr;
