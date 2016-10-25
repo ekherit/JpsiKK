@@ -40,5 +40,6 @@ extern bool OPT_NOGAUSRAD; //no gaus rad
 extern std::string OPT_PARAM_CONFIG_FILE; 
 extern bool OPT_SEPARATE_MREC; //separate Mrec for each channel
 extern std::string OPT_FIT_METHOD;
+extern std::string OPT_FIT_RESULT_FILE_NAME;
 
 #endif

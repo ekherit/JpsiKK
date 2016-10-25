@@ -58,6 +58,7 @@ int main(int argc,  char ** argv)
   opt_desc.add_options()
     ("help,h","Print this help")
     ("input", po::value<std::string>(&file_name), "Root file (.root) with the data")
+    ("output,o",po::value<std::string>(&OPT_FIT_RESULT_FILE_NAME),"Output with the fit result")
     ("his", po::value<std::string>(&his_name), "Histogram name")
     ("tree", po::value<std::string>(&tree_name), "Tree name ")
     ("mctree", po::value<std::string>(&mctree_name), "MonteCarlo Tree name")
@@ -79,6 +80,7 @@ int main(int argc,  char ** argv)
     ("nbin",po::value<std::string>(&nbin_str),"Comma separated number of bins")
     ("separate","Separate Mrec for each channel")
     ("fit",po::value<std::string>(&OPT_FIT_METHOD),"Method is used to fit: --fit=lh likelihood (default), --fit=chi2, --fit=lh2 (my likelihood")
+    ("unbinned","Use unbinned fit")
     ;
   po::positional_options_description pos;
   pos.add("input", 1);
@@ -206,7 +208,7 @@ int main(int argc,  char ** argv)
       his_lst.push_back(create_histogram(str));
       tree_lst.push_back(tree);
     }
-    fit(his_lst,tree_lst,true);
+    fit(his_lst,tree_lst,opt.count("unbinned"));
     theApp.Run();
   }
 	theApp.Run();
