@@ -81,6 +81,9 @@ int main(int argc,  char ** argv)
     ("separate","Separate Mrec for each channel")
     ("fit",po::value<std::string>(&OPT_FIT_METHOD),"Method is used to fit: --fit=lh likelihood (default), --fit=chi2, --fit=lh2 (my likelihood")
     ("unbinned","Use unbinned fit")
+    ("ngrad",po::value<int>(&OPT_NGRAD)->default_value(4),"Number of radiative gauss is used")
+    ("show", "Show fit result --par")
+    ("integrate", "Integrate pdf function over bin")
     ;
   po::positional_options_description pos;
   pos.add("input", 1);
@@ -102,10 +105,12 @@ int main(int argc,  char ** argv)
     return 0;
   }
 
-  OPT_NOBGSLOPE=opt.count("nobgslope");
-  OPT_NOBG = opt.count("nobg");
-  OPT_NOGAUSRAD = opt.count("nograd");
-  OPT_SEPARATE_MREC  = opt.count("separate");
+  OPT_NOBGSLOPE       = opt.count("nobgslope");
+  OPT_NOBG            = opt.count("nobg");
+  OPT_NOGAUSRAD       = opt.count("nograd");
+  OPT_SEPARATE_MREC   = opt.count("separate");
+  OPT_SHOW_FIT_RESULT = opt.count("show");
+  OPT_FIT_INTEGRATE   = opt.count("integrate");
 
   std::cout << " " << suffix << " " << file_name << std::endl;
   

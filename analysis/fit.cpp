@@ -57,6 +57,9 @@ std::string OPT_PARAM_CONFIG_FILE="";
 bool OPT_SEPARATE_MREC=false; //separate Mrec for each channel
 std::string OPT_FIT_METHOD="lh";
 std::string OPT_FIT_RESULT_FILE_NAME="fit_result.txt";
+int OPT_NGRAD=4; //number of gauses used for radiative effects
+bool OPT_SHOW_FIT_RESULT; 
+bool OPT_FIT_INTEGRATE;
 
 void fit(TH1 * his)
 {
@@ -82,36 +85,39 @@ RooArgSet * createMcbVars(double Mmin, double Mmax)
   args->add( * new RooRealVar("sigma", "sigma",1.4, 0, 10, "MeV") ) ;
   args->add( * new RooRealVar("n1","n1", 3,  1,100));
   args->add( * new RooRealVar("n2","n2", 2,  1,100));
-  args->add( * new  RooRealVar("L1", "Left Gaus range"   , 2        , "MeV"));
-  args->add( * new  RooRealVar("L2", "Left Exp range"    , 1        , 0      , (Mmax-Mmin)*0.5 , "MeV"));
-  args->add( * new  RooRealVar("L3", "Left Power range"  , 10       , 0      , (Mmax-Mmin)*0.5 , "MeV"));
-  args->add( * new  RooRealVar("L4", "Left Exp range 2"  , 20       , 0      , (Mmax-Mmin)*0.5 , "MeV"));
-  args->add( * new  RooRealVar("R1", "Right Gaus range"  , 2        , "MeV") );
-  args->add( * new  RooRealVar("R2", "Right Exp range"   , 1        , 0      , (Mmax-Mmin)*0.5 , "MeV")); 
-  args->add( * new  RooRealVar("R3", "Right Power range" , 30       , 0      , (Mmax-Mmin)*0.5 , "MeV")); 
-  args->add( * new  RooRealVar("R4", "Right Exp range 2" , 1        , 0      , (Mmax-Mmin)*0.5 , "MeV"));
+  args->add( * new RooRealVar("L1", "Left Gaus range"   , 2        , "MeV"));
+  args->add( * new RooRealVar("L2", "Left Exp range"    , 1        , 0      , (Mmax-Mmin)*0.5 , "MeV"));
+  args->add( * new RooRealVar("L3", "Left Power range"  , 10       , 0      , (Mmax-Mmin)*0.5 , "MeV"));
+  args->add( * new RooRealVar("L4", "Left Exp range 2"  , 20       , 0      , (Mmax-Mmin)*0.5 , "MeV"));
+  args->add( * new RooRealVar("R1", "Right Gaus range"  , 2        , "MeV") );
+  args->add( * new RooRealVar("R2", "Right Exp range"   , 1        , 0      , (Mmax-Mmin)*0.5 , "MeV")); 
+  args->add( * new RooRealVar("R3", "Right Power range" , 30       , 0      , (Mmax-Mmin)*0.5 , "MeV")); 
+  args->add( * new RooRealVar("R4", "Right Exp range 2" , 1        , 0      , (Mmax-Mmin)*0.5 , "MeV"));
 
-  for(int i=0;i<4;i++)
+  for(int i=0;i<OPT_NGRAD;i++)
   {
     std::string istr = to_string(i);
-    double Mean, Min,Max;
-    if(i<2)
-    {
-      Mean = 20;
-      Min = (Mmax+Mmin)*0.5+5;
-      Max = Mmax;
-    }
-    else
-    {
-      Mean = -20;
-      Min = Mmin;
-      Max = (Mmax+Mmin)*0.5-5;
-    }
-    Min = Mmin;
-    Max = Mmax;
+    //equidistant initial value. Begin from right side
+    double Mean = Mmax - (i+1)*(Mmax-Mmin)/(OPT_NGRAD+1);
+    double Min  = Mmin;
+    double Max  = Mmax;
+    //if(i<2)
+    //{
+    //  Mean = 20;
+    //  Min = (Mmax+Mmin)*0.5+5;
+    //  Max = Mmax;
+    //}
+    //else
+    //{
+    //  Mean = -20;
+    //  Min = Mmin;
+    //  Max = (Mmax+Mmin)*0.5-5;
+    //  Min = Mmin;
+    //  Max = Mmax;
+    //}
     auto mean = new RooRealVar(("rad_mean" + istr).c_str(), ("Radiative gauss mean " + istr).c_str(), Mean, Min, Max, "MeV"); 
     auto sigma = new RooRealVar(("rad_sigma" + istr).c_str(), ("Radiative gaus sigma" + istr).c_str(), 10, 2, 100, "MeV");
-    auto frac = new RooRealVar(("rad_frac"+istr).c_str(),("fraction " + istr + "of radiative gauss").c_str(), 0, 0.2);
+    auto frac = new RooRealVar(("rad_frac"+istr).c_str(),("fraction " + istr + "of radiative gauss").c_str(), 0, 0.3);
     if(OPT_NOGAUSRAD)
     {
       mean->setConstant();
@@ -151,9 +157,7 @@ RooAbsPdf * createMcbPdf(std::string name, RooRealVar & Mrec, RooArgSet & pars, 
 
 RooAbsPdf * addRad(RooAbsPdf * mcbPdf, RooRealVar & Mrec, RooArgSet & pars)
 {
-  std::vector<RooGaussian*> radPdf(2);
-  double Mmin = Mrec.getMin();
-  double Mmax = Mrec.getMax();
+  std::vector<RooGaussian*> radPdf(OPT_NGRAD);
   std::string name = mcbPdf->GetName();
   //name create the SignalPdfs for each channel
   RooArgList PdfList;
@@ -161,6 +165,7 @@ RooAbsPdf * addRad(RooAbsPdf * mcbPdf, RooRealVar & Mrec, RooArgSet & pars)
   for(int i=0;i<radPdf.size();i++)
   {
     std::string istr = to_string(i);
+    std::cout << "In the rad init" <<  istr << std::endl;
     radPdf[i] = new RooGaussian(
         ("gaus_radPdf" + name + istr).c_str(),
         ("Radiative gauss " + istr + " for " + name).c_str(), 
@@ -175,10 +180,10 @@ RooAbsPdf * addRad(RooAbsPdf * mcbPdf, RooRealVar & Mrec, RooArgSet & pars)
   return  new RooAddPdf(("signal"+name).c_str(),("Signal model for "+name).c_str(), PdfList, RadFracList);
 }
 
-RooAbsPdf *addBg(std::string name, RooAbsPdf * signalPdf, RooAbsPdf ** bgPdf, RooRealVar & Mrec, RooArgSet & pars)
+RooAbsPdf *addBg(std::string name, RooAbsPdf * signalPdf, RooAbsPdf ** bgPdf, RooRealVar & Mrec, RooArgSet & pars, double Mmin, double Mmax)
 {
-  double Mmin = Mrec.getMin();
-  double Mmax = Mrec.getMax();
+  //double Mmin = Mrec.getMin();
+  //double Mmax = Mrec.getMax();
   RooRealVar * bg_c1 = new RooRealVar(("bg"+name+"_c1").c_str(),("background slope for "+name).c_str(),0,- 1.0/Mmax, - 1.0/Mmin);
   if(OPT_NOBGSLOPE) bg_c1->setConstant();
   pars.add(*bg_c1);
@@ -233,10 +238,10 @@ void draw_nll_scan(RooAbsReal * nll, RooArgSet & args, std::list<std::string> & 
 
 
   RooPlot* frame_sigma = sigma.frame(Range(0.8, 5.0)) ;
-  nll->plotOn(frame_sigma,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll->getVal()+10),LineColor(kRed)) ;
+  nll->plotOn(frame_sigma,PrintLevel(-1),PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll->getVal()+10),LineColor(kRed)) ;
 
   RooPlot* frame_mean = mean.frame(Range(-2.0, 2.0)) ;
-  nll->plotOn(frame_mean,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll->getVal()+10),LineColor(kRed)) ;
+  nll->plotOn(frame_mean,PrintLevel(-1),PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll->getVal()+10),LineColor(kRed)) ;
 
   std::vector<RooPlot*> frame_staple(staple.size());
   std::vector<int> colors = {kBlack, kBlue,kCyan+2,kGreen+2, kGreen, kRed, kMagenta, kRed+2}; 
@@ -245,16 +250,16 @@ void draw_nll_scan(RooAbsReal * nll, RooArgSet & args, std::list<std::string> & 
   {
     frame_staple[i] = staple[i]->frame();
     frame_staple[i+4] = staple[i+4]->frame();
-    nll->plotOn(frame_staple[i],PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll->getVal()+10),LineColor(colors[i]), LineStyle(line_styles[i])) ;
-    nll->plotOn(frame_staple[i+4],PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll->getVal()+10),LineColor(colors[i+4]),LineStyle(line_styles[i+4])) ;
+    nll->plotOn(frame_staple[i],PrintLevel(-1),PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll->getVal()+10),LineColor(colors[i]), LineStyle(line_styles[i])) ;
+    nll->plotOn(frame_staple[i+4],PrintLevel(-1),PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll->getVal()+10),LineColor(colors[i+4]),LineStyle(line_styles[i+4])) ;
   }
 
 
   RooPlot* frame_n1 = n1.frame(Range(1,10)) ;
-  nll->plotOn(frame_n1,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll->getVal()+10),LineColor(kBlue)) ;
+  nll->plotOn(frame_n1,PrintLevel(-1), PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll->getVal()+10),LineColor(kBlue)) ;
 
   RooPlot* frame_n2 = n2.frame(Range(1, 10)) ;
-  nll->plotOn(frame_n2,PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll->getVal()+10),LineColor(kRed));
+  nll->plotOn(frame_n2,PrintLevel(-1),PrintEvalErrors(-1),ShiftToZero(),EvalErrorValue(nll->getVal()+10),LineColor(kRed));
 
 
 	TCanvas * cnll =new TCanvas;
@@ -285,7 +290,7 @@ void draw_nll_scan(RooAbsReal * nll, RooArgSet & args, std::list<std::string> & 
   }
   for(int i=0;i<Nframe.size();i++)
   {
-    nll->plotOn(Nframe[i],PrintEvalErrors(-1),ShiftToZero(), EvalErrorValue(nll->getVal()+10),LineColor(kRed)) ;
+    nll->plotOn(Nframe[i],PrintLevel(-1),PrintEvalErrors(-1),ShiftToZero(), EvalErrorValue(nll->getVal()+10),LineColor(kRed)) ;
     Ncanvas->cd(i+1);
     Nframe[i]->Draw();
   }
@@ -367,18 +372,20 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
   std::map<std::string, RooAbsPdf*> McbPdfMap;
   std::map<std::string, RooAbsPdf*> SignalPdfMap;
   std::map<std::string, RooAbsPdf*> SamplePdf; //here will be Pdf with signal and background mixed
-  std::map<std::string, RooRealVar * > Nsig; //number of signal events
-  std::map<std::string, RooRealVar * > Nbg; //number of background events
+  std::map<std::string, RooRealVar*> Nsig; //number of signal events
+  std::map<std::string, RooRealVar*> Nbg; //number of background events
   std::map<std::string, RooAbsPdf*> bgPdf; //background pdf function
   std::map<std::string, RooPlot*> frame;
 
   for(auto name: name_lst)
   {
     RooRealVar & Mobs = *(RooRealVar*)MMrec[name];
+    std::cout << "Init McbPdf "<< name << std::endl;
     McbPdfMap[name] = createMcbPdf(name, Mobs, args,Mmin,Mmax);
+    std::cout << "Init SignalPdf "<< name << std::endl;
     SignalPdfMap[name] = OPT_NOGAUSRAD ? McbPdfMap[name] : addRad(McbPdfMap[name], Mobs, args);
-    SamplePdf[name] = addBg(name, SignalPdfMap[name], &(bgPdf[name]), Mobs, args);
-    //reinit args
+    std::cout << "Init SamlpePdf "<< name << std::endl;
+    SamplePdf[name] = addBg(name, SignalPdfMap[name], &(bgPdf[name]), Mobs, args, Mmin, Mmax);
     args = *SamplePdf[name]->getParameters(Mobs);
     Nsig[name] = (RooRealVar*)&args[("Nsig"+name).c_str()];
     Nbg[name] = (RooRealVar*)&args[("Nbg"+name).c_str()];
@@ -397,6 +404,8 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
     if(!use_tree)
     {
       dataMap[name] = new RooDataHist(name.c_str(), name.c_str(), *MMrec[name], Import(*hisMap[name]));
+      Nsig[name]->setVal(hisMap[name]->GetEntries());
+      ((RooRealVar*)MMrec[name])->setBins(hisMap[name]->GetNbinsX());
     }
     else
     {
@@ -404,6 +413,7 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
       std::cout << "Initializing RooDataSet: name = " << name << " Mrec name = " << MMrec[name]->GetName() << std::endl;
       dataSetMap[name] = new RooDataSet(name.c_str(), name.c_str(), MrecInTree, Import(*treeMap[name]));
       dataSetMap[name]->addColumn(*MMrec[name]);
+      Nsig[name]->setVal(treeMap[name]->GetEntries());
     }
     sample.defineType(name.c_str());
     MrecArgList.add(*MMrec[name]);
@@ -431,8 +441,7 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
   {
     nllMap[name] = new RooNLLVar(("nll"+name).c_str(),("Nll for " + name).c_str(),*SamplePdf[name],*dataMap[name]);
     nll_arg_set.add(*nllMap[name]);
-    chi2Map[name] = new RooChi2Var(("chi2"+name).c_str(),("chi2 for " + name).c_str(),*SamplePdf[name],*dataMap[name],
-        DataError(RooAbsData::Expected));
+    chi2Map[name] = new RooChi2Var(("chi2"+name).c_str(),("chi2 for " + name).c_str(),*SamplePdf[name],*dataMap[name], DataError(RooAbsData::Expected));
     chi2_arg_set.add(*chi2Map[name]);
   }
 
@@ -450,34 +459,13 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
     p->Print("v");
   }
 
-  
-  //if(false)
-  //{
-  //  for(auto name : name_lst)
-  //  {
-  //    new TCanvas;
-  //    RooPlot * f;
-  //    if(use_tree) f = MrecInTree.frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
-  //    else f = ((RooRealVar*)MMrec[name])->frame(Title(("#pi^{+}#pi^{-} recoil mass for " + name).c_str()));
-  //    data->plotOn(f, XErrorSize(0), MarkerSize(0.5),  Cut(("sample==sample::"+name).c_str()), AutoBinning());
-  //    simPdf.plotOn(f, Slice(sample,name.c_str()),ProjWData(sample,*data), LineWidth(2),LineColor(kRed));
-  //    f->SetMinimum(0.1);
-  //    f->GetYaxis()->SetTitleOffset(1.6) ; 
-  //    f->Draw();
-  //  }
-  //  while(true)
-  //  {
-  //    gSystem->ProcessEvents();
-  //    usleep(100000); 
-  //  }
-  //}
 
   RooFitResult * theFitResult=nullptr;
   if(OPT_FIT_METHOD == "lh")
   {
     std::cout << "Starting standart likelihood fit" << std::endl;
     //standart fit method it is used to mach calculation for simpultaneuse fit on separate Mrec
-    theFitResult = simPdf.fitTo(*data, Extended(), Strategy(2), Minos(), Save());
+    theFitResult = simPdf.fitTo(*data, Integrate(OPT_FIT_INTEGRATE),PrintEvalErrors(-1),Extended(), Strategy(2), Minos(), Save(),Warnings(false),PrintLevel(-1));
     std::cout << "Fit done" << std::endl;
   }
   if(OPT_FIT_METHOD == "chi2")
@@ -501,13 +489,14 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
     std::cout << "Fit done" << std::endl;
   }
 
+
   std::cout << "Writing result of the fit into file: " << OPT_FIT_RESULT_FILE_NAME << std::endl;
   p->writeToFile(OPT_FIT_RESULT_FILE_NAME.c_str());
   std::cout << "Writing done" << std::endl;
 
   std::cout << "Calculating chi2 and number of degree of freedom" << std::endl;
   //number of free parameters
-  int nfp = theFitResult->floatParsFinal().getSize() ;
+  int nfp = theFitResult ? theFitResult->floatParsFinal().getSize() : 19 ;
   //chi square
 	double chi2 =  chi2Var.getVal();
   int Ndata_entries=0;
@@ -524,18 +513,21 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
 
 
   std::cout << "Plotting data and pdf" << std::endl;
-  //RooPlot * Frame = Mrec.frame(Title("#pi^{+}#pi^{-} recoil mass"));
-  std::vector<int> colors = {kBlack, kBlue,kCyan+2,kGreen+2, kGreen, kRed, kMagenta, kRed+2}; 
+  std::vector<int> data_colors = {kBlack, kBlue, kCyan+1,  kGreen+1}; 
+  std::vector<int> pdf_colors =  {kRed, kMagenta, kRed+2, kOrange+7}; 
   std::vector<int> line_styles = {kSolid, kSolid, kDashed, kDotted, kSolid, kSolid, kDashed, kDotted};
   RooArgSet viewArgSet;
   int i=0;
+  int col=0;
   for(auto name : name_lst)
   {
     std::cout << "     plotting " << name  << std::endl;
-    data->plotOn(frame[name], XErrorSize(0), MarkerSize(0.5),  Cut(("sample==sample::"+name).c_str()),LineColor(colors[i]), MarkerColor(colors[i]), AutoBinning());
+    int dcol = data_colors[i%name_lst.size()];
+    int pcol = pdf_colors[i%name_lst.size()];
+    data->plotOn(frame[name], Binning(100), XErrorSize(0), MarkerSize(0.5),  Cut(("sample==sample::"+name).c_str()),LineColor(dcol), MarkerColor(dcol));
     std::cout << "     plotting Pdf for" << name  << std::endl;
-    simPdf.plotOn(frame[name], Slice(sample,name.c_str()),ProjWData(sample,*data), LineWidth(1),LineColor(colors[i]));
-    simPdf.plotOn(frame[name], Slice(sample,name.c_str()),ProjWData(sample,*data), Components(*bgPdf[name]),LineStyle(kDashed),LineWidth(1),LineColor(colors[i]));
+    simPdf.plotOn(frame[name],PrintLevel(-1), Slice(sample,name.c_str()),ProjWData(sample,*data), LineWidth(1),LineColor(pcol));
+    simPdf.plotOn(frame[name],PrintLevel(-1), Slice(sample,name.c_str()),ProjWData(sample,*data), Components(*bgPdf[name]),LineStyle(kDashed),LineWidth(1),LineColor(pcol));
     frame[name]->SetMinimum(0.1);
     frame[name]->GetYaxis()->SetTitleOffset(1.6) ; 
     viewArgSet.add(*Nsig[name]);
@@ -544,8 +536,6 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
     i++;
   }
   std::cout << "Done" << std::endl;
-	//Frame->SetMinimum(0.1);
-
 
   TCanvas* c = new TCanvas("mcb","fit") ;
   gPad->SetLeftMargin(0.15) ; 
@@ -580,13 +570,7 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
     }
   }
 
-
-  //Frame->GetYaxis()->SetTitleOffset(1.6) ; 
-  //
-  //Frame->Draw() ;
-
-
-  args.Print();
+  args.Print("v");
   /*  
   mean.Print();
   sigma.Print();
@@ -620,7 +604,13 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
   std::cout << "mysum_chi2 = " << my_sum_chi2 <<std::endl;
   */
 
-  theFitResult->Print();
+  if(theFitResult) theFitResult->Print("v");
+
+
+  args["mean"].Print();
+  args["sigma"].Print();
+  for(auto name :name_lst) Nbg[name]->Print();
+  for(auto name :name_lst) Nsig[name]->Print();
 
   //No print the ration of signal event to number of signal event for last data
   //sample
@@ -642,4 +632,9 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
   }
 }
 
+
+void draw(TTree * tree)
+{
+
+}
 

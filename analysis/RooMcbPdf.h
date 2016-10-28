@@ -195,10 +195,10 @@ protected:
 
   Double_t evaluate() const ;
 	
-	virtual Bool_t selfNormalized() const
-	{
-		return kFALSE;
-	}
+	//virtual Bool_t selfNormalized() const
+	//{
+	//	return kFALSE;
+	//}
 
 private:
 	void initArgs(void) const;

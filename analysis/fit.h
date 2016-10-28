@@ -32,6 +32,7 @@ class TTree;
 extern void fit(TH1 * his);
 extern void fit(TH1 * hisKK, TH1 * hisUU);
 extern void fit(std::list<TH1*> & , std::list<TTree*> & , bool = false);
+extern void draw(TTree *);
 
 extern bool OPT_NOBGSLOPE; //no slope for the background
 extern bool OPT_NOBG; //no background
@@ -40,5 +41,9 @@ extern std::string OPT_PARAM_CONFIG_FILE;
 extern bool OPT_SEPARATE_MREC; //separate Mrec for each channel
 extern std::string OPT_FIT_METHOD;
 extern std::string OPT_FIT_RESULT_FILE_NAME;
+extern int OPT_NGRAD; //number of gauses used for radiative effects
+extern bool OPT_SHOW_FIT_RESULT; 
+extern bool OPT_FIT_INTEGRATE;
+
 
 #endif
