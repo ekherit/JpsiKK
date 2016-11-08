@@ -524,15 +524,17 @@ void fit(std::list<TH1*> & hlst, std::list<TTree*> & tree_list, bool use_tree)
     std::cout << "     plotting " << name  << std::endl;
     int dcol = data_colors[i%name_lst.size()];
     int pcol = pdf_colors[i%name_lst.size()];
-    data->plotOn(frame[name], Binning(100), XErrorSize(0), MarkerSize(0.5),  Cut(("sample==sample::"+name).c_str()),LineColor(dcol), MarkerColor(dcol));
+    std::string data_name = ("data"+name).c_str();
+    std::string curve_name = ("curve"+name).c_str();
+    data->plotOn(frame[name],Name(data_name.c_str()), Binning(100), XErrorSize(0), MarkerSize(0.5),  Cut(("sample==sample::"+name).c_str()),LineColor(dcol), MarkerColor(dcol));
     std::cout << "     plotting Pdf for" << name  << std::endl;
-    simPdf.plotOn(frame[name],PrintLevel(-1), Slice(sample,name.c_str()),ProjWData(sample,*data), LineWidth(1),LineColor(pcol));
+    simPdf.plotOn(frame[name], Name(curve_name.c_str()), PrintLevel(-1), Slice(sample,name.c_str()),ProjWData(sample,*data), LineWidth(1),LineColor(pcol));
     simPdf.plotOn(frame[name],PrintLevel(-1), Slice(sample,name.c_str()),ProjWData(sample,*data), Components(*bgPdf[name]),LineStyle(kDashed),LineWidth(1),LineColor(pcol));
     frame[name]->SetMinimum(0.1);
     frame[name]->GetYaxis()->SetTitleOffset(1.6) ; 
     viewArgSet.add(*Nsig[name]);
     viewArgSet.add(*Nbg[name]);
-    std::cout << "chi^2 from frame  = " << frame[name]->chiSquare() << endl ;
+    std::cout << "chi^2 from frame  = " << frame[name]->chiSquare(curve_name.c_str(), data_name.c_str(), nfp) << endl ;
     i++;
   }
   std::cout << "Done" << std::endl;
